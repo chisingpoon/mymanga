@@ -1,74 +1,72 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My Sheet Data</title>
+  <meta charset="UTF-8">
+  <title>Product List</title>
   <style>
-    body { font-family: Arial; }
+    body {
+      font-family: Arial;
+      padding: 30px;
+      background: #f5f5f5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
     .card {
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 6px;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .price {
+      color: green;
+      font-weight: bold;
+    }
+
+    .out {
+      color: red;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
 
-<h2>Team Members</h2>
-<select id="roleFilter">
-  <option value="">All Role</option>
-  <option value="Engineer">Engineer</option>
-  <option value="Designer">Designer</option>
-  <option value="Manager">Manager</option>
-</select>
-
-<button onclick="applyFilters()">Filter</button>
-  
-<div id="output">Loading...</div>
+<h1>Our Products</h1>
+<div class="grid" id="products">Loading...</div>
 
 <script>
-const SHEET_URL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/Sandbox";
+const SHEET_URL = "https://opensheet.elk.sh/SPREADSHEET_ID/Sheet1";
 
-let sheetData = [];
-  
-// Fetch once
 fetch(SHEET_URL)
   .then(res => res.json())
   .then(data => {
-    sheetData = data;
-    applyFilters(); // initial display
+
+    const html = data.map(row => `
+      <div class="card">
+        <h3>${row.Product}</h3>
+        <div class="price">$${row.Price}</div>
+        <div>Category: ${row.Category}</div>
+        ${
+          row.InStock?.toLowerCase() === "yes"
+          ? ""
+          : "<div class='out'>Out of Stock</div>"
+        }
+      </div>
+    `).join("");
+
+    document.getElementById("products").innerHTML = html;
+
   })
-  .catch(err => {
-    document.getElementById("output").innerHTML = "Failed to load data.";
-    console.error(err);
+  .catch(error => {
+    document.getElementById("products").innerHTML =
+      "Failed to load products.";
+    console.error(error);
   });
-
-function applyFilters() {
-
-  const selectedRole = document.getElementById("roleFilter").value.toLowerCase();
-
-  const filtered = sheetData.filter(row => {
-
-    const roleMatch =
-      selectedRole === "" ||
-      row.Role?.toLowerCase() === selectedRole;
-
-    const showMatch =
-      row.Show?.toLowerCase() === "yes";
-    
-    return roleMatch && showMatch;
-  });
-
-  const html = filtered.map(row => `
-    <div class="card">
-      <strong>${row.Name}</strong><br>
-      ${row.Role}
-    </div>
-  `).join("");
-
-  document.getElementById("output").innerHTML =
-    filtered.length ? html : "No matching results found.";
-}
 </script>
 
 </body>

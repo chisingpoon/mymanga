@@ -31,7 +31,7 @@ fetch(SHEET_URL)
     const html = filtered.map(row => `
       <div class="card">
         <strong>${row.Name}</strong><br>
-        ${row.Role}
+        ${row.Email}
       </div>
     `).join("");
 

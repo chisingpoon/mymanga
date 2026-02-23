@@ -46,7 +46,6 @@ fetch(SHEET_URL)
 function applyFilters() {
 
   const selectedRole = document.getElementById("roleFilter").value.toLowerCase();
-  const selectedShow = document.getElementById("showFilter").value.toLowerCase();
 
   const filtered = sheetData.filter(row => {
 
@@ -55,9 +54,8 @@ function applyFilters() {
       row.Role?.toLowerCase() === selectedRole;
 
     const showMatch =
-      selectedShow === "" ||
-      row.Show?.toLowerCase() === selectedShow;
-
+      selectedShow === "YES";
+    
     return roleMatch && showMatch;
   });
 

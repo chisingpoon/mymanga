@@ -39,7 +39,7 @@ const SHEET_URL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF
 
 fetch(SHEET_URL)
   .then(res => res.json())
-  .then(data => {{
+  .then(data => {
     sheetData = data;
     applyFilters();
   });

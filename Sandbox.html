@@ -16,23 +16,7 @@
 
 <h2>Team Members</h2>
 
-<select id="showFilter">
-  <option value="">Show All</option>
-  <option value="YES">Yes</option>
-  <option value="NO">No</option>
-</select>
-
-<select id="roleFilter">
-  <option value="">All Role</option>
-  <option value="Engineer">Engineer</option>
-  <option value="Designer">Designer</option>
-  <option value="Manager">Manager</option>
-</select>
-
-<button onclick="applyFilters()">Filter</button>
 <div id="output">Loading...</div>
-
-
 
 <script>
 const SHEET_URL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/Sandbox";
@@ -40,7 +24,6 @@ const SHEET_URL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF
 fetch(SHEET_URL)
   .then(res => res.json())
   .then(data => {
-
 
     // Filter rows where Show = YES
     const filtered = data.filter(row => {

@@ -34,48 +34,29 @@
 
 <script>
 const SHEET_URL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/Sandbox";
-let sheetData = [];
 
 fetch(SHEET_URL)
   .then(res => res.json())
   .then(data => {
-    sheetData = data;
-    applyFilters();
-  });
 
-function applyFilters() {
-  const role = document.getElementById("roleFilter").value.toLowerCase();
-  
     // Filter rows where Show = YES
-    const filtered = sheetData.filter(row => {
+    const filtered = data.filter(row => {
           return (
             row.Show?.toLowerCase() === "yes" &&
-            (role ==="" || row.Role?.toLowerCase() === role)                         
+            row.Role?.toLowerCase() === "manager"                            
                                         
          );                               
     });
-	
-	let output = "";
-	
-	filtered.forEach(row => {
-    output += `
-      <div class="card">
-        <strong>${row.Name}</strong><br>
-        ${row.Email}<br>
-        ${row.Role} 
-      </div>
-    `;
-  });
 
     // Build HTML
-    /*const html = filtered.map(row => `
+    const html = filtered.map(row => `
       <div class="card">
         <strong>${row.Name}</strong><br>
         ${row.Role}
       </div>
     `).join("");
-    */
-    document.getElementById("data").innerHTML = filtered.length ? output : "<p>No matching records found.</p>";
+
+    document.getElementById("output").innerHTML = html;
 
   })
   .catch(err => {

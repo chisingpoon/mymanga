@@ -20,27 +20,32 @@
 <script>
 const SHEET_URL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/Sandbox";
 
-fetch(SHEET_URL)
-  .then(res => res.json())
+fetch(sheetURL)
+  .then(response => response.json())
   .then(data => {
 
-    // Filter rows where Show = YES
-    const filtered = data.filter(row => row.Show === "YES");
+    const filtered = data.filter(row => {
+      return (
+        row.Show?.toLowerCase() === "yes" &&
+        row.Category?.toLowerCase() === "sales" &&
+        row.Status?.toLowerCase() === "active"
+      );
+    });
 
-    // Build HTML
-    const html = filtered.map(row => `
-      <div class="card">
-        <strong>${row.Name}</strong><br>
-        ${row.Email}
-      </div>
-    `).join("");
+    let output = "";
 
-    document.getElementById("output").innerHTML = html;
+    filtered.forEach(row => {
+      output += `
+        <div class="card">
+          <strong>${row.Name}</strong><br>
+          ${row.Email}<br>
+          ${row.Category} - ${row.Status}
+        </div>
+      `;
+    });
 
-  })
-  .catch(err => {
-    document.getElementById("output").innerHTML = "Failed to load data.";
-    console.error(err);
+    document.getElementById("data").innerHTML =
+      filtered.length ? output : "<p>No matching records found.</p>";
   });
 </script>
 

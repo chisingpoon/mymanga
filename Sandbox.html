@@ -22,12 +22,6 @@
   <option value="Manager">Manager</option>
 </select>
 
-<select id="showFilter">
-  <option value="">Show YES and NO</option>
-  <option value="YES">Yes</option>
-  <option value="NO">No</option>
-</select>
-
 <button onclick="applyFilters()">Filter</button>
   
 <div id="output">Loading...</div>
@@ -35,34 +29,48 @@
 <script>
 const SHEET_URL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/Sandbox";
 
+let sheetData = [];
+  
+// Fetch once
 fetch(SHEET_URL)
   .then(res => res.json())
   .then(data => {
-
-    // Filter rows where Show = YES
-    const filtered = data.filter(row => {
-          return (
-            row.Show?.toLowerCase() === "yes" &&
-            row.Role?.toLowerCase() === "manager"                            
-                                        
-         );                               
-    });
-
-    // Build HTML
-    const html = filtered.map(row => `
-      <div class="card">
-        <strong>${row.Name}</strong><br>
-        ${row.Role}
-      </div>
-    `).join("");
-
-    document.getElementById("output").innerHTML = html;
-
+    sheetData = data;
+    applyFilters(); // initial display
   })
   .catch(err => {
     document.getElementById("output").innerHTML = "Failed to load data.";
     console.error(err);
   });
+
+function applyFilters() {
+
+  const selectedRole = document.getElementById("roleFilter").value.toLowerCase();
+  const selectedShow = document.getElementById("showFilter").value.toLowerCase();
+
+  const filtered = sheetData.filter(row => {
+
+    const roleMatch =
+      selectedRole === "" ||
+      row.Role?.toLowerCase() === selectedRole;
+
+    const showMatch =
+      selectedShow === "" ||
+      row.Show?.toLowerCase() === selectedShow;
+
+    return roleMatch && showMatch;
+  });
+
+  const html = filtered.map(row => `
+    <div class="card">
+      <strong>${row.Name}</strong><br>
+      ${row.Role}
+    </div>
+  `).join("");
+
+  document.getElementById("output").innerHTML =
+    filtered.length ? html : "No matching results found.";
+}
 </script>
 
 </body>

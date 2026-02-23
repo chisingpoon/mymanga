@@ -54,7 +54,7 @@ function applyFilters() {
       row.Role?.toLowerCase() === selectedRole;
 
     const showMatch =
-      selectedShow === "YES";
+      row.Show?.toLowerCase() === "yes";
     
     return roleMatch && showMatch;
   });

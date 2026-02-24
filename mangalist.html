@@ -52,20 +52,20 @@ input, select {
 
 <body>
 
-<h1>My Manga List</h1>
+<h1>My Manga</h1>
 
 <div class="controls">
-  <input type="text" id="searchInput" placeholder="Search manga..." oninput="applyFilters()">
+  <input type="text" id="searchInput" placeholder="Search title..." oninput="applyFilters()">
 
-  <select id="categoryFilter" onchange="applyFilters()">
-    <option value="">All Mangas</option>
+  <select id="publisherFilter" onchange="applyFilters()">
+    <option value="">All Publishers</option>
   </select>
 <!--
-    <select id="sortPrice" onchange="applyFilters()">
+  <select id="sortPrice" onchange="applyFilters()">
     <option value="">Sort by Price</option>
     <option value="low">Low → High</option>
-    <option value="high">High → Low</option> -->
-  </select>
+    <option value="high">High → Low</option>
+  </select> -->
 </div>
 
 <div class="grid" id="mangalist">Loading...</div>
@@ -83,75 +83,64 @@ fetch(SHEET_URL)
       row.Active?.toLowerCase() === "yes"
     );
 
-<!--     populateCategories();
-     applyFilters(); -->
+    populatePublishers();
+    applyFilters();
   })
   .catch(error => {
     document.getElementById("mangalist").innerHTML = "Failed to load data.";
     console.error(error);
   });
 
-function populateCategories() {
-  const categorySelect = document.getElementById("categoryFilter");
+function populatePublishers() {
+  const publisherSelect = document.getElementById("publisherFilter");
 
-  const categories = [...new Set(sheetData.map(row => row.Category))];
+  const publishers = [...new Set(sheetData.map(row => row.Publisher))];
 
-  categories.forEach(cat => {
+  publishers.forEach(pub => {
     const option = document.createElement("option");
-    option.value = cat;
-    option.textContent = cat;
-    categorySelect.appendChild(option);
+    option.value = pub;
+    option.textContent = pub;
+    publisherSelect.appendChild(option);
   });
 }
 
 function applyFilters() {
 
   const search = document.getElementById("searchInput").value.toLowerCase();
-  const category = document.getElementById("categoryFilter").value;
-  const sort = document.getElementById("sortPrice").value;
+  const publisher = document.getElementById("publisherFilter").value;
+//  const sort = document.getElementById("sortPrice").value; 
 
   let filtered = sheetData.filter(row => {
 
     const searchMatch =
-      row.mangalist?.toLowerCase().includes(search);
+      row.Title?.toLowerCase().includes(search);
 
-    const categoryMatch =
-      category === "" || row.Category === category;
+    const publisherMatch =
+      publisher === "" || row.Publisher === publisher;
 
-    return searchMatch && categoryMatch;
+    return searchMatch && publisherMatch;
   });
 
   // Sort price
-  if (sort === "low") {
-    filtered.sort((a,b) => Number(a.Price) - Number(b.Price));
-  }
+  //if (sort === "low") {
+  //  filtered.sort((a,b) => Number(a.Price) - Number(b.Price));
+  //}
 
-  if (sort === "high") {
-    filtered.sort((a,b) => Number(b.Price) - Number(a.Price));
-  }
+  //if (sort === "high") {
+  //  filtered.sort((a,b) => Number(b.Price) - Number(a.Price));
+  //}
 
   const html = filtered.map(row => `
     <div class="card">
-      <img src="${row.Image}" alt="${row.mangalist}">
+      <img src="${row.Image}" alt="${row.Title}">
       <h3>${row.Title}</h3>
-      <div>${row.Volume}</div>
-      <div>${row.Subtitle}</div>
-      <div>${row.Author}</div>
-      <div>${row.Publisher}</div>
-      <div>${row.Page}</div>
-      <div class="date">${row.IssueDate}</div>
       <div class="price">$${row.Price}</div>
-      <div>${row.Size}</div>
-      <div>${row.ISBN}</div>
-      <div>${row.OriginalTitle}</div>
-      <div>${row.OriginalSubtitle}</div>
-      
-      
+      <div>${row.Volume}</div>
     </div>
   `).join("");
 
   document.getElementById("mangalist").innerHTML =
-    filtered.length ? html : "No manga found.";
+    filtered.length ? html : "No Manga found.";
 }
 </script>
 

@@ -60,6 +60,9 @@ input, select {
   <select id="publisherFilter" onchange="applyFilters()">
     <option value="">All Publishers</option>
   </select>
+  <select id="titleFilter" onchange="applyFilters()">
+    <option value="">All Titles</option>
+  </select>
 <!--
   <select id="sortPrice" onchange="applyFilters()">
     <option value="">Sort by Price</option>
@@ -84,6 +87,7 @@ fetch(SHEET_URL)
     );
 
     populatePublishers();
+    populateTitles();
     applyFilters();
   })
   .catch(error => {
@@ -104,10 +108,24 @@ function populatePublishers() {
   });
 }
 
+function populateTitles() {
+  const titleSelect = document.getElementById("titleFilter");
+
+  const titles = [...new Set(sheetData.map(row => row.Title ))];
+
+  titles.forEach(pub => {
+    const option = document.createElement("option");
+    option.value = pub;
+    option.textContent = pub;
+    titleSelect.appendChild(option);
+  });
+}
+
 function applyFilters() {
 
   const search = document.getElementById("searchInput").value.toLowerCase();
   const publisher = document.getElementById("publisherFilter").value;
+  const title = document.getElementById("titleFilter").value;
 //  const sort = document.getElementById("sortPrice").value; 
 
   let filtered = sheetData.filter(row => {
@@ -118,7 +136,10 @@ function applyFilters() {
     const publisherMatch =
       publisher === "" || row.Publisher === publisher;
 
-    return searchMatch && publisherMatch;
+    const titleMatch =
+      title === "" || row.Title === title;
+    
+    return searchMatch && publisherMatch && titleMatch;
   });
 
   // Sort price

@@ -130,8 +130,12 @@ function applyFilters() {
 
   let filtered = sheetData.filter(row => {
 
-    const searchMatch =
-      row.Title?.toLowerCase().includes(search);
+//    const searchMatch =
+//      row.Title?.toLowerCase().includes(search);
+    const searchMatch = Object.values(row)
+      .join(" ")
+      .toLowerCase()
+      .includes(search);
 
     const publisherMatch =
       publisher === "" || row.Publisher === publisher;

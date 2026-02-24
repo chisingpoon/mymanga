@@ -66,18 +66,21 @@ input, select {
   <select id="authorFilter" onchange="applyFilters()">
     <option value="">所有作者</option>
   </select>
-
-  <select id="sortPrice" onchange="applyFilters()">
-    <option value="">Sort by Price</option>
-    <option value="low">Low → High</option>
-    <option value="high">High → Low</option>
+  <select id="originCountryFilter" onchange="applyFilters()">
+    <option value="">所有出版地</option>
   </select>
 <!--
   <select id="sortPrice" onchange="applyFilters()">
     <option value="">Sort by Price</option>
     <option value="low">Low → High</option>
     <option value="high">High → Low</option>
-  </select> -->
+  </select>
+-->
+  <select id="sortPrice" onchange="applyFilters()">
+    <option value="">按售價</option>
+    <option value="low">從低到高排序</option>
+    <option value="high">從高到低排序</option>
+  </select> 
 </div>
 
 <div class="grid" id="mangalist">Loading...</div>
@@ -98,6 +101,7 @@ fetch(SHEET_URL)
     populatePublishers();
     populateTitles();
     populateAuthors();
+    populateOriginCountries();
     applyFilters();
   })
   .catch(error => {
@@ -143,12 +147,27 @@ function populateAuthors() {
     authorSelect.appendChild(option);
   });
 }
+
+function populateOriginCountries() {
+  const originCountrySelect = document.getElementById("originCountryFilter");
+
+  const originCountries = [...new Set(sheetData.map(row => row.OriginCountry ))];
+
+  originCountries.forEach(auth => {
+    const option = document.createElement("option");
+    option.value = origCountry;
+    option.textContent = origCountry;
+    originCountrySelect.appendChild(option);
+  });
+}
+  
 function applyFilters() {
 
   const search = document.getElementById("searchInput").value.toLowerCase();
   const publisher = document.getElementById("publisherFilter").value;
   const title = document.getElementById("titleFilter").value;
   const author = document.getElementById("authorFilter").value;
+  const originCountry = document.getElementById("originCountryFilter").value;
   const sort = document.getElementById("sortPrice").value; 
 
   let filtered = sheetData.filter(row => {
@@ -166,8 +185,11 @@ function applyFilters() {
     const titleMatch =
       title === "" || row.Title === title;
 
-      const authorMatch =
+    const authorMatch =
       author === "" || row.Author === author;
+
+    const originCountryMatch =
+      originCountry === "" || row.OriginCountry === originCountry;
     
     return searchMatch && publisherMatch && titleMatch && authorMatch;
   });
@@ -190,7 +212,7 @@ function applyFilters() {
       <div>出版社: ${row.Publisher}</div>
       <div>尺碼: ${row.Size}</div>
       <div class="date">出版日期: ${row.IssueDate}</div>
-      <div class="price">價格: $${row.Price}</div>
+      <div class="price">售價: $${row.Price}</div>
       <div>頁數: ${row.Page}</div>
       <div>ISBN: ${row.ISBN}</div>
       <div>出版地: ${row.OriginCountry}</div>

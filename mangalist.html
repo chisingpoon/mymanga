@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>My Manga List</title>
+
+<style>
+body {
+  font-family: Arial;
+  padding: 30px;
+  background: #f5f5f5;
+}
+
+.controls {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+input, select {
+  padding: 6px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 15px;
+}
+
+.card {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.price {
+  color: green;
+  font-weight: bold;
+  margin-top: 5px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>My Manga List</h1>
+
+<div class="controls">
+  <input type="text" id="searchInput" placeholder="Search manga..." oninput="applyFilters()">
+
+  <select id="categoryFilter" onchange="applyFilters()">
+    <option value="">All Categories</option>
+  </select>
+
+/*  <select id="sortPrice" onchange="applyFilters()">
+    <option value="">Sort by Price</option>
+    <option value="low">Low → High</option>
+    <option value="high">High → Low</option> */
+  </select>
+</div>
+
+<div class="grid" id="mangalist">Loading...</div>
+
+<script>
+const SHEET_URL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/MangaList";
+let sheetData = [];
+
+fetch(SHEET_URL)
+  .then(res => res.json())
+  .then(data => {
+
+    // Only keep Active = Yes
+    sheetData = data.filter(row =>
+      row.Active?.toLowerCase() === "yes"
+    );
+
+ //   populateCategories();
+ //   applyFilters();
+  })
+  .catch(error => {
+    document.getElementById("mangalist").innerHTML = "Failed to load data.";
+    console.error(error);
+  });
+
+function populateCategories() {
+  const categorySelect = document.getElementById("categoryFilter");
+
+  const categories = [...new Set(sheetData.map(row => row.Category))];
+
+  categories.forEach(cat => {
+    const option = document.createElement("option");
+    option.value = cat;
+    option.textContent = cat;
+    categorySelect.appendChild(option);
+  });
+}
+
+function applyFilters() {
+
+  const search = document.getElementById("searchInput").value.toLowerCase();
+  const category = document.getElementById("categoryFilter").value;
+  const sort = document.getElementById("sortPrice").value;
+
+  let filtered = sheetData.filter(row => {
+
+    const searchMatch =
+      row.mangalist?.toLowerCase().includes(search);
+
+    const categoryMatch =
+      category === "" || row.Category === category;
+
+    return searchMatch && categoryMatch;
+  });
+
+  // Sort price
+  if (sort === "low") {
+    filtered.sort((a,b) => Number(a.Price) - Number(b.Price));
+  }
+
+  if (sort === "high") {
+    filtered.sort((a,b) => Number(b.Price) - Number(a.Price));
+  }
+
+  const html = filtered.map(row => `
+    <div class="card">
+      <img src="${row.Image}" alt="${row.mangalist}">
+      <h3>${row.Title}</h3>
+      <div>${row.Volume}</div>
+      <div>${row.Subtitle}</div>
+      <div>${row.Author}</div>
+      <div>${row.Publisher}</div>
+      <div>${row.Page}</div>
+      <div class="date">${row.IssueDate}</div>
+      <div class="price">$${row.Price}</div>
+      <div>${row.Size}</div>
+      <div>${row.ISBN}</div>
+      <div>${row.OriginalTitle}</div>
+      <div>${row.OriginalSubtitle}</div>
+      
+      
+    </div>
+  `).join("");
+
+  document.getElementById("mangalist").innerHTML =
+    filtered.length ? html : "No manga found.";
+}
+</script>
+
+</body>
+</html>

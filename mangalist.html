@@ -58,7 +58,7 @@ input, select {
   <input type="text" id="searchInput" placeholder="Search manga..." oninput="applyFilters()">
 
   <select id="categoryFilter" onchange="applyFilters()">
-    <option value="">All Categories</option>
+    <option value="">All Mangas</option>
   </select>
 <!--
     <select id="sortPrice" onchange="applyFilters()">
@@ -83,8 +83,8 @@ fetch(SHEET_URL)
       row.Active?.toLowerCase() === "yes"
     );
 
- //   populateCategories();
- //   applyFilters();
+<!--     populateCategories();
+     applyFilters(); -->
   })
   .catch(error => {
     document.getElementById("mangalist").innerHTML = "Failed to load data.";

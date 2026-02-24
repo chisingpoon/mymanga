@@ -69,13 +69,11 @@ input, select {
   <select id="originCountryFilter" onchange="applyFilters()">
     <option value="">所有出版地</option>
   </select>
-<!--
-  <select id="sortPrice" onchange="applyFilters()">
-    <option value="">Sort by Price</option>
-    <option value="low">Low → High</option>
-    <option value="high">High → Low</option>
+  <select id="sortIssueDate" onchange="applyFilters()">
+    <option value="">Sort by Date</option>
+    <option value="newest">Newest First</option>
+    <option value="oldest">Oldest First</option>
   </select>
--->
   <select id="sortPrice" onchange="applyFilters()">
     <option value="">按售價</option>
     <option value="low">從低到高排序</option>
@@ -168,8 +166,9 @@ function applyFilters() {
   const title = document.getElementById("titleFilter").value;
   const author = document.getElementById("authorFilter").value;
   const originCountry = document.getElementById("originCountryFilter").value;
-  const sort = document.getElementById("sortPrice").value; 
-
+  const sortPrice = document.getElementById("sortPrice").value; 
+  const sortIssueDate = document.getElementById("sortIssueDate").value;
+  
   let filtered = sheetData.filter(row => {
 
 //    const searchMatch =
@@ -195,14 +194,23 @@ function applyFilters() {
   });
 
   // Sort price
-  if (sort === "low") {
+  if (sortPrice === "low") {
     filtered.sort((a,b) => Number(a.Price) - Number(b.Price));
   }
 
-  if (sort === "high") {
+  if (sortPrice === "high") {
     filtered.sort((a,b) => Number(b.Price) - Number(a.Price));
   }
 
+  // Sort Issue Date
+  if (sortIssueDate === "newest") {
+    filtered.sort((a, b) => Date(b.IssueDate) - Date(a.IssueDate) );
+  }
+
+  if (sortIssueDate === "oldest") {
+    filtered.sort((a, b) =>  Date(a.IssueDate) - Date(b.IssueDate)  );
+  }
+  
   const html = filtered.map(row => `
     <div class="card">
       <img src="${row.Image}" alt="${row.Title}">

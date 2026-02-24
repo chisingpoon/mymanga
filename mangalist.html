@@ -133,16 +133,17 @@ function applyFilters() {
   const html = filtered.map(row => `
     <div class="card">
       <img src="${row.Image}" alt="${row.Title}">
-      <h3>${row.Title} #${row.Volume}</h3>
+      <h3>書名: ${row.Title} #${row.Volume}</h3>
       <h4>${row.Subtitle}</h4>
-      <div>${row.Author}</div>
-      <div>${row.Publisher}</div>
-      <div>${row.Size}</div>
-      <div class="date">${row.IssueDate}</div>
-      <div class="price">$${row.Price}</div>
-      <div>${row.Page}</div>
-      <div>${row.ISBN}</div>
-      <div>${row.OriginalTitle}</div>
+      <div>作者: ${row.Author}</div>
+      <div>出版社: ${row.Publisher}</div>
+      <div>尺碼: ${row.Size}</div>
+      <div class="date">出版日期: ${row.IssueDate}</div>
+      <div class="price">價格: $${row.Price}</div>
+      <div>頁數: ${row.Page}</div>
+      <div>ISBN: ${row.ISBN}</div>
+      <div>日文書名: ${row.OriginalTitle} #${row.Volume}</div>
+      <div>日文副題: ${row.OriginalSubtitle}</div>
     </div>
   `).join("");
 

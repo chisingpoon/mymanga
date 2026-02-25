@@ -49,8 +49,8 @@ input, select {
 
 .detail-container {
   display: flex;
-  flex: 1;               /* 👈 IMPORTANT */
   gap: 20px;
+  align-items: stretch;  /* important */
 }
 
 .detail-left {
@@ -59,13 +59,13 @@ input, select {
 
 .detail-left img {
   width: 100%;
-  height: 100%;          /* 👈 THIS is what makes it full height */
+  height: 100%;
   object-fit: contain;   /* show full image */
+  display: block;
 }
 
 .detail-right {
   width: 65%;
-  overflow-y: auto;      /* scroll text if long */
 }
 
 .detail-row {
@@ -90,7 +90,6 @@ input, select {
   background: white;
   width: 90%;
   max-width: 900px;
-  height: 90vh;                 /* 👈 IMPORTANT */
   margin: 5% auto;
   padding: 20px;
   border-radius: 8px;
@@ -99,8 +98,7 @@ input, select {
 }
 
 #detailContent {
-  flex: 1;
-  display: flex;
+  width: 100%;
 }
 </style>
 </head>

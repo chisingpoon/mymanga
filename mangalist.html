@@ -49,28 +49,23 @@ input, select {
 
 .detail-container {
   display: flex;
+  flex: 1;               /* 👈 IMPORTANT */
   gap: 20px;
-  align-items: stretch; /* makes left column full height */
 }
 
 .detail-left {
-  flex: 0 0 35%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 35%;
 }
 
 .detail-left img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  border-radius: 8px;
+  width: 100%;
+  height: 100%;          /* 👈 THIS is what makes it full height */
+  object-fit: contain;   /* show full image */
 }
 
 .detail-right {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  width: 65%;
+  overflow-y: auto;      /* scroll text if long */
 }
 
 .detail-row {
@@ -90,7 +85,23 @@ input, select {
   display: flex;
   flex-direction: column;
 }
-  
+
+.modal-box {
+  background: white;
+  width: 90%;
+  max-width: 900px;
+  height: 90vh;                 /* 👈 IMPORTANT */
+  margin: 5% auto;
+  padding: 20px;
+  border-radius: 8px;
+  position: relative;
+  display: flex;
+}
+
+#detailContent {
+  flex: 1;
+  display: flex;
+}
 </style>
 </head>
 
@@ -219,10 +230,10 @@ function openDetail(id) {
     </div>
 
     <div class="detail-right">
-      <h2>${detail.Title || ""} ${detail.Volume || ""}</h2>
+      <h3>${detail.Title || ""} ${detail.Volume || ""}</h3>
       <h3>${detail.Subtitle || ""}</h3>
-      <h4>日文書名: ${detail.OriginalTitle || ""} ${detail.Volume || ""}</h4>
-      <h4>日文副題: ${detail.OriginalSubtitle || ""}</h4>      
+      <div class="detail-row"><strong>>日文書名: </strong>${detail.OriginalTitle || ""} ${detail.Volume || ""}</div>
+      <div class="detail-row"><strong>日文副題: </strong>${detail.OriginalSubtitle || ""}</div>     
       <div class="detail-row"><strong>作者: </strong>${detail.Author || ""}</div>
       <div class="detail-row"><strong>出版社: </strong> ${detail.Publisher || ""}</div>
       <div class="detail-row"><strong>尺碼: </strong> ${detail.Size || ""}</div>
@@ -321,7 +332,7 @@ function applyFilters() {
 }
 </script>
 <div id="detailModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);">
-  <div style="background:white; max-width:600px; margin:5% auto; padding:20px; border-radius:8px; position:relative;">
+  <div class="modal-box">
     <button onclick="closeModal()" style="position:absolute; right:10px; top:10px;">X</button>
     <div id="detailContent"></div>
   </div>

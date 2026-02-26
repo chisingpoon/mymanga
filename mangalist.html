@@ -364,6 +364,11 @@ function applyFilters() {
       e.preventDefault();
     }
   });
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "F12") {
+      e.preventDefault();
+    }
+  });
 </script>
 <div id="detailModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);">
   <div class="modal-box">

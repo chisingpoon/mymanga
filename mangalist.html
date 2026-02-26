@@ -16,12 +16,32 @@ body {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
-input, select {
-  padding: 6px;
+.controls input,
+.controls select {
+  padding: 8px 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
 }
 
+@media (max-width: 768px) {
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .controls input,
+  .controls select {
+    width: 100%;
+    font-size: 16px;   /* better for touch */
+  }
+
+}
+  
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -97,6 +117,64 @@ input, select {
   display: flex;
 }
 
+#pagination button {
+  margin: 0 4px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+#pagination button:hover:not(:disabled) {
+  background: #f0f0f0;
+}
+
+#pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.active-page {
+  background: #333 !important;
+  color: white;
+  font-weight: bold;
+}
+
+#pagination {
+  margin-top: 20px;
+  text-align: center;
+}
+
+#pagination button {
+  margin: 0 4px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+#pagination button:hover:not(:disabled) {
+  background: #f0f0f0;
+}
+
+#pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.active-page {
+  background: #333 !important;
+  color: white;
+  font-weight: bold;
+}
+
+.ellipsis {
+  margin: 0 6px;
+  color: #888;
+}
+
 #detailContent {
   width: 100%;
 }
@@ -135,7 +213,7 @@ input, select {
 </div>
 <div id="pagination" style="margin-top:20px; text-align:center;"></div>
 <div class="grid" id="mangalist">Loading...</div>
-<div id="pagination" style="margin-top:20px; text-align:center;"></div>
+
 <script>
 const SHEET_URL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/MangaList";
 let sheetData = [];
@@ -388,27 +466,89 @@ function renderPage() {
 function renderPaginationControls() {
 
   const totalPages = Math.ceil(currentList.length / itemsPerPage);
-  let paginationHTML = "";
 
   if (totalPages <= 1) {
     document.getElementById("pagination").innerHTML = "";
     return;
   }
 
-  paginationHTML += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? "disabled" : ""}>Prev</button>`;
+  let html = "";
 
-  for (let i = 1; i <= totalPages; i++) {
-    paginationHTML += `
-      <button onclick="changePage(${i})" 
-        ${i === currentPage ? "style='font-weight:bold;'" : ""}>
+  // ----- Page Info -----
+  html += `<div style="margin-bottom:10px;">
+             Page ${currentPage} of ${totalPages}
+           </div>`;
+
+  // ----- First -----
+  html += `
+    <button onclick="changePage(1)" ${currentPage === 1 ? "disabled" : ""}>
+      &laquo; First
+    </button>
+  `;
+
+  // ----- Prev -----
+  html += `
+    <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? "disabled" : ""}>
+      &lsaquo; Prev
+    </button>
+  `;
+
+  // ----- Page Numbers Logic -----
+
+  const maxVisible = 5;
+  let startPage = Math.max(1, currentPage - 2);
+  let endPage = Math.min(totalPages, currentPage + 2);
+
+  // Adjust window if near edges
+  if (currentPage <= 3) {
+    endPage = Math.min(totalPages, maxVisible);
+  }
+
+  if (currentPage >= totalPages - 2) {
+    startPage = Math.max(1, totalPages - (maxVisible - 1));
+  }
+
+  // Always show page 1
+  if (startPage > 1) {
+    html += `<button onclick="changePage(1)">1</button>`;
+    if (startPage > 2) {
+      html += `<span class="ellipsis">...</span>`;
+    }
+  }
+
+  // Middle Pages
+  for (let i = startPage; i <= endPage; i++) {
+    html += `
+      <button onclick="changePage(${i})"
+        ${i === currentPage ? "class='active-page'" : ""}>
         ${i}
       </button>
     `;
   }
 
-  paginationHTML += `<button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? "disabled" : ""}>Next</button>`;
+  // Always show last page
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) {
+      html += `<span class="ellipsis">...</span>`;
+    }
+    html += `<button onclick="changePage(${totalPages})">${totalPages}</button>`;
+  }
 
-  document.getElementById("pagination").innerHTML = paginationHTML;
+  // ----- Next -----
+  html += `
+    <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? "disabled" : ""}>
+      Next &rsaquo;
+    </button>
+  `;
+
+  // ----- Last -----
+  html += `
+    <button onclick="changePage(${totalPages})" ${currentPage === totalPages ? "disabled" : ""}>
+      Last &raquo;
+    </button>
+  `;
+
+  document.getElementById("pagination").innerHTML = html;
 }
 
 function changePage(page) {

@@ -413,23 +413,16 @@ function applyFilters() {
   if (sortIssueDate === "oldest") {
     filtered.sort((a, b) => new Date(a.IssueDate) - new Date(b.IssueDate)  );
   }
-  
+<!--  
   const html = filtered.map(row => `
     <div class="card" onclick="openDetail('${row.ISBN}')">
       <img src="${row.Image}" alt="${row.Title}">
       <h3>書名: ${row.Title} ${row.Volume}</h3>
       <h4>${row.Subtitle}</h4>
-<!--      <h4>日文書名: ${row.OriginalTitle} ${row.Volume}</h4> -->
-<!--       <h4>日文副題: ${row.OriginalSubtitle}</h4> -->
       <div>作者: ${row.Author}</div>
       <div>出版社: ${row.Publisher}</div>
-<!--       <div>尺碼: ${row.Size}</div> -->
       <div class="date">出版日期: ${row.IssueDate}</div>
-<!--       <div class="price">售價: $${row.Price}</div> -->
-<!--       <div>頁數: ${row.Page}</div> -->
-<!--       <div>ISBN: ${row.ISBN}</div> -->
-<!--       <div>出版地區: ${row.OriginCountry}</div> -->
-
+-->
     </div>
   `).join("");
 

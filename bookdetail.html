@@ -118,8 +118,8 @@ Promise.all([
 // 7️⃣ Render page
 function render(manga, storyRows) {
 
-  // Build table rows from joined detail sheet
-  const tableRows = detailRows.map(d => `
+  // Build table rows from Stories Map sheet
+  const tableRows = storyRows.map(d => `
     <tr>
       <th>${d.Title || ""}</th>
       <td>${d.日本原名 || ""}</td>

@@ -63,6 +63,27 @@ body {
 .details-table tr:nth-child(even) {
   background: #fafafa;
 }
+
+.details-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.details-table th,
+.details-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+}
+
+.details-table thead {
+  background: #f2f2f2;
+  font-weight: bold;
+}
+
+.details-table tr:nth-child(even) {
+  background: #fafafa;
+}
+  
 </style>
 </head>
 <body>
@@ -121,12 +142,26 @@ function render(manga, storyRows) {
   // Build table rows from Stories Map sheet
   const tableRows = storyRows.map(d => `
     <tr>
-      <th>${d.Title || ""}</th>
       <td>${d.日本原名 || ""}</td>
       <td>${d.初刊 || ""}</td>
       <td>${d.香港譯名 || ""}</td>
     </tr>
   `).join("");
+
+  const tableHTML = `
+  <table class="details-table">
+    <thead>
+      <tr>
+        <th>日本原名</th>
+        <th>初刊</th>
+        <th>香港譯名</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${tableRows}
+    </tbody>
+  </table>
+`;
   
   document.getElementById("content").innerHTML = `
 

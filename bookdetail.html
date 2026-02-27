@@ -34,6 +34,10 @@ body {
   background: #f5f5f5;
   border-radius: 8px;
 }
+
+.detail-row {
+  margin-bottom: 8px;
+}
 </style>
 </head>
 <body>
@@ -90,9 +94,12 @@ Promise.all([
 function render(manga, storyRows) {
 
   const detailHTML = storyRows.map(d => `
-    <div class="detail-block">
-      <h3>${d.Title}</h3>
+<!--    <div class="detail-block"> -->
+    <div>
+<!--      <h3>${d.Title}</h3>  -->
       <div>${d.日本原名}</div>
+      <div>${d.初刊}</div>
+      <div>${d.香港譯名}</div>
     </div>
   `).join("");
 
@@ -100,15 +107,23 @@ function render(manga, storyRows) {
     <div class="container">
 
       <div class="left">
-        <img src="${manga.Image || ""}">
+        <img src="${manga.Image || ""}" 
+      alt="${manga.Title} ${manga.Volume}">
       </div>
 
       <div class="right">
-        <h1>${manga.Title} ${manga.Volume || ""}</h1>
-        <div><strong>Author:</strong> ${manga.Author}</div>
-        <div><strong>Publisher:</strong> ${manga.Publisher}</div>
-        <div><strong>Price:</strong> $${manga.Price}</div>
-        <div><strong>Issue Date:</strong> ${manga.IssueDate}</div>
+     
+        <h1>${manga.Title || ""} ${manga.Volume || ""}</h1>
+        <h2>${manga.Subtitle || ""}</h2>
+        <div class="detail-row"><strong>日文書名: </strong>${manga.OriginalTitle || ""} ${manga.Volume || ""}  ${manga.OriginalSubtitle || ""}</div>  
+        <div class="detail-row"><strong>作者: </strong>${manga.Author || ""}</div>
+        <div class="detail-row"><strong>出版社: </strong> ${manga.Publisher || ""}</div>
+        <div class="detail-row"><strong>尺碼: </strong> ${manga.Size || ""}</div>
+        <div class="detail-row date"><strong>出版日期: </strong> ${manga.IssueDate || ""}</div>
+        <div class="detail-row price"><strong>售價: </strong> $${manga.Price || ""}</div>
+        <div class="detail-row"><strong>頁數: </strong> ${manga.Page || ""}</div>
+        <div class="detail-row"><strong>出版地區: </strong> ${manga.OriginCountry || ""}</div>      
+        <div class="detail-row"><strong>ISBN:</strong> ${manga.ISBN || ""}</div>
 
         ${detailHTML}
       </div>

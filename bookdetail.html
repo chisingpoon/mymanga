@@ -83,7 +83,49 @@ body {
 .details-table tr:nth-child(even) {
   background: #fafafa;
 }
-  
+
+/* ===== Image Modal ===== */
+.image-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.image-modal img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.image-close {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 40px;
+  color: white;
+  cursor: pointer;
+}
+
+.clickable-image {
+  cursor: zoom-in;
+  transition: transform 0.2s;
+}
+
+.image-modal {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.image-modal.show {
+  display: flex;
+  opacity: 1;
+}
+
 </style>
 </head>
 <body>
@@ -101,6 +143,7 @@ const MANGALIST_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0U
 const STORYMAP_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/StoriesMangaMapping";
 const STORY_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/Stories";
 
+ 
 // 3️⃣ Load everything
 Promise.all([
   fetch(MANGALIST_SHEET).then(r => r.json()),
@@ -171,7 +214,8 @@ document.getElementById("content").innerHTML = `
   <div class="top-section">
 
     <div class="book-image">
-      <img src="${manga.Image || ""}" alt="${manga.Title} ${manga.Volume}">
+      <img src="${manga.Image || ""}" alt="${manga.Title} ${manga.Volume}" class="clickable-image"
+     onclick="openImageModal('${manga.Image || ""}')">
     </div>
 
     <div class="book-info">
@@ -215,6 +259,58 @@ document.getElementById("content").innerHTML = `
 `;
 }
 
+window.addEventListener("DOMContentLoaded", function() {
+
+  document.querySelector(".image-close")
+    ?.addEventListener("click", closeImageModal);
+
+  document.getElementById("imageModal")
+    ?.addEventListener("click", function(e) {
+      if (e.target === this) {
+        closeImageModal();
+      }
+    });
+
+});
+  
+function openImageModal(src) {
+  const modal = document.getElementById("imageModal");
+  const modalImg = document.getElementById("modalImage");
+
+  modalImg.src = src;
+  modal.style.display = "flex";
+}
+
+function closeImageModal() {
+  document.getElementById("imageModal").style.display = "none";
+}
+
+// Close button
+document.querySelector(".image-close")
+  .addEventListener("click", closeImageModal);
+
+// Click outside image closes modal
+document.getElementById("imageModal")
+  .addEventListener("click", function(e) {
+    if (e.target === this) {
+      closeImageModal();
+    }
+  });
+// Optional ESC key
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") {
+    closeImageModal();
+  }
+});
+
+modal.classList.add("show");
+modal.classList.remove("show");
+  
 </script>
+  <!-- Image Modal -->
+  <div id="imageModal" class="image-modal">
+  <span class="image-close">&times;</span>
+  <img id="modalImage">
+</div>
 </body>
 </html>

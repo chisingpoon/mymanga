@@ -295,11 +295,14 @@ document.addEventListener("keydown", function(e) {
   }
 });
 
-modal.classList.add("show");
-modal.classList.remove("show");
+// Disable right-click everywhere
+window.addEventListener("contextmenu", function (e) {
+  e.preventDefault();
+  return false;
+}, true);
 
-// Disable right-click on entire page
-document.addEventListener("contextmenu", function(e) {
+// Disable dragging
+window.addEventListener("dragstart", function(e) {
   e.preventDefault();
 });
 

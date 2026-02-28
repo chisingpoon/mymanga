@@ -95,6 +95,10 @@ body {
   z-index: 9999;
 }
 
+.image-modal.show {
+  display: flex;
+}
+
 .image-modal img {
   max-width: 90%;
   max-height: 90%;
@@ -113,17 +117,6 @@ body {
 
 .clickable-image {
   cursor: zoom-in;
-  transition: transform 0.2s;
-}
-
-.image-modal {
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.image-modal.show {
-  display: flex;
-  opacity: 1;
 }
 
 </style>
@@ -259,44 +252,36 @@ document.getElementById("content").innerHTML = `
 `;
 }
 
-window.addEventListener("DOMContentLoaded", function() {
-
-  document.querySelector(".image-close")
-    ?.addEventListener("click", closeImageModal);
-
-  document.getElementById("imageModal")
-    ?.addEventListener("click", function(e) {
-      if (e.target === this) {
-        closeImageModal();
-      }
-    });
-
-});
-  
 function openImageModal(src) {
   const modal = document.getElementById("imageModal");
   const modalImg = document.getElementById("modalImage");
 
   modalImg.src = src;
-  modal.style.display = "flex";
+  modal.classList.add("show");
 }
 
 function closeImageModal() {
-  document.getElementById("imageModal").style.display = "none";
+  const modal = document.getElementById("imageModal");
+  modal.classList.remove("show");
 }
 
-// Close button
-document.querySelector(".image-close")
-  .addEventListener("click", closeImageModal);
+// Wait until page fully loads
+window.addEventListener("load", function () {
 
-// Click outside image closes modal
-document.getElementById("imageModal")
-  .addEventListener("click", function(e) {
-    if (e.target === this) {
+  const modal = document.getElementById("imageModal");
+  const closeBtn = document.querySelector(".image-close");
+
+  closeBtn.addEventListener("click", closeImageModal);
+
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal) {
       closeImageModal();
     }
   });
-// Optional ESC key
+
+});
+
+// ESC key close
 document.addEventListener("keydown", function(e) {
   if (e.key === "Escape") {
     closeImageModal();

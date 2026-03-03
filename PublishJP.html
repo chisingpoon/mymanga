@@ -443,7 +443,7 @@ function populateTitles() {
   const container = document.getElementById("titleFilter");
   if (!container) return;
 
-  const titles = [...new Set(sheetData.map(row => row.著))];
+  const titles = [...new Set(sheetData.map(row => row.標題))];
 
   titles.forEach(title => {
     const label = document.createElement("label");
@@ -477,7 +477,7 @@ function populateSeries() {
 
 function populateAuthors() {
   const container = document.getElementById("authorFilter");
-  const authors = [...new Set(sheetData.map(row => row.巻))];
+  const authors = [...new Set(sheetData.map(row => row.著))];
 
   authors.forEach(author => {
     const label = document.createElement("label");

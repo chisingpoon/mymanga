@@ -92,22 +92,20 @@ body {
 
 /* ===== Details Table ===== */
 .details-table {
-  width: auto;                 /* ❗ do NOT force 100% */
+  width: 100%;              /* Fill browser width */
   border-collapse: collapse;
-  table-layout: auto;          /* allow natural sizing */
+  table-layout: auto;       /* Natural sizing */
 }
 
 .details-table th,
 .details-table td {
   border: 1px solid #ccc;
   padding: 6px 10px;
-  white-space: nowrap;         /* ❗ prevents wrapping */
-  width: 1%;                   /* forces shrink-to-fit */
+  word-break: break-word;   /* Prevent overflow */
 }
 
 .details-table th {
-  background: #f5f5f5;
-  width: 20%;
+  background: #f2f2f2;
   text-align: left;
 }
 

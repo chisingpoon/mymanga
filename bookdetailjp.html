@@ -213,7 +213,7 @@ Promise.all([
   fetch(STORYMAP_SHEET).then(r => r.json()),
   fetch(STORY_SHEET).then(r => r.json())
 ])
-.then(([mangas, storymaps, stories, jpinfos]) => {
+.then(([mangas, storymaps, stories]) => {
 
   // 4️⃣ Find manga
   const manga = mangas.find(b => b.ISBN?.trim() === isbn?.trim());
@@ -233,7 +233,7 @@ Promise.all([
     stories.find(d => d.作品番?.trim() === j.作品番?.trim())
   ).filter(Boolean);
 
-  render(manga, storyRows);
+  render(manga, storyRows, mangamaps);
 
 })
 .catch(err => {
@@ -250,9 +250,9 @@ function render(manga, storyRows, mangamaps) {
     const map = mangamaps[i]; // get the corresponding row from story map
     return `
     <tr>
-      <td>${map.番 || ""}</td>
-      <td>${map.巻 || ""}</td>
-      <td>${map.話 || ""}</td>
+      <td>${map?.番 || ""}</td>
+      <td>${map?.巻 || ""}</td>
+      <td>${map?.話 || ""}</td>
       <td>${d.頁 || ""}</td>
       <td>${d.初出副題 || ""}</td>
       <td>${d.全集副題 || ""}</td>

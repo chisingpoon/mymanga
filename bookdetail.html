@@ -237,9 +237,9 @@ function render(manga, storyRows, jpinfo) {
   // Build table rows from Stories Map sheet
   const tableRows = storyRows.map(d => `
     <tr>
+      <td>${d.香港譯名 || ""}</td>
       <td>${d.日本原名 || ""}</td>
       <td>${d.初刊 || ""}</td>
-      <td>${d.香港譯名 || ""}</td>
     </tr>
   `).join("");
 
@@ -336,20 +336,6 @@ document.getElementById("content").innerHTML = `
 
   <!-- ===== Bottom Details Table (OUTSIDE top-section) ===== -->
   ${tableSection}
-<!--  <h2>收錄故事</h2>
-  <table class="details-table">
-    <thead>
-      <tr>
-        <th>日本原名</th>
-        <th>初刊</th>
-        <th>香港譯名</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${tableRows}
-    </tbody>
-  </table>
--->
 `;
 }
 

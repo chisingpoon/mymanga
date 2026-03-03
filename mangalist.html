@@ -442,7 +442,8 @@ function applyFilters() {
   const search = document.getElementById("searchInput").value.toLowerCase();
   const publisher = [...document.querySelectorAll('#publisherFilter input:checked')]
   .map(cb => cb.value);
-  const title = document.getElementById("titleFilter").value;
+  const titleElement = document.getElementById("titleFilter");
+  const title = titleElement ? titleElement.value : "";
   const author = [...document.querySelectorAll('#authorFilter input:checked')]
   .map(cb => cb.value);
   const originCountry = [...document.querySelectorAll('#originCountryFilter input:checked')]
@@ -491,16 +492,7 @@ function applyFilters() {
   if (sortIssueDate === "oldest") {
     filtered.sort((a, b) => new Date(a.IssueDate) - new Date(b.IssueDate)  );
   }
-<!--  
-  const html = filtered.map(row => `
-    <div class="card" onclick="openDetail('${row.ISBN}')">
-      <img src="${row.Image}" alt="${row.Title}">
-      <h3>書名: ${row.Title} ${row.Volume}</h3>
-      <h4>${row.Subtitle}</h4>
-      <div>作者: ${row.Author}</div>
-      <div>出版社: ${row.Publisher}</div>
-      <div class="date">出版日期: ${row.IssueDate}</div>
--->
+
     </div>
   `).join("");
 

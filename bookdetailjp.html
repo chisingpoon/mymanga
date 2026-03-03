@@ -30,6 +30,15 @@ body {
   gap: 20px;
 }
 
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #eee;
+}
+
 .book-image {
   aspect-ratio: 3 / 4;
   display: flex;
@@ -194,6 +203,12 @@ img {
 </head>
 <body>
 
+<header class="page-header">
+  <div>
+    <h1 class="site-title">日本版資料</h1>
+  </div>
+</header>
+  
 <div id="content">Loading...</div>
 
 <script>

@@ -23,7 +23,6 @@ body {
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.08);
   height: fit-content;
-  font-size: 13px;
 }
 
 .sidebar h3 {
@@ -35,25 +34,28 @@ body {
 .sidebar input,
 .sidebar select {
   width: 100%;
-  padding: 6px 8px;
+  padding: 8px;
   margin-bottom: 10px;
   border-radius: 6px;
   border: 1px solid #ccc;
+}
+
+.sidebar {
   font-size: 13px;
 }
 
 .sidebar label {
-  display: flex;          /* checkbox and label on same line */
+  display: flex;
   align-items: center;
-  gap: 4px;               /* tiny space between checkbox and text */
-  margin-bottom: 2px;     /* reduce vertical spacing between items */
+  gap: 6px;
+  margin-bottom: 4px;
   font-size: 13px;
   cursor: pointer;
-  padding: 0;             /* remove extra left/right padding */
 }
 
 .sidebar input[type="checkbox"] {
-  margin: 0;              /* remove default margin */
+  width: auto;
+  margin: 0;
 }
 
 .filter-group {

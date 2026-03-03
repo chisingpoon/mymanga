@@ -94,6 +94,7 @@ body {
 .details-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: auto;   /* ✅ important */
 }
 
 .details-table th,
@@ -113,15 +114,22 @@ body {
   background: #fafafa;
 }
 
-.details-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
 .details-table th,
 .details-table td {
   border: 1px solid #ccc;
   padding: 8px;
+}
+
+.details-table th:nth-child(1),
+.details-table th:nth-child(2),
+.details-table th:nth-child(3),
+.details-table th:nth-child(4),
+.details-table td:nth-child(1),
+.details-table td:nth-child(2),
+.details-table td:nth-child(3),
+.details-table td:nth-child(4) {
+  white-space: nowrap;
+  width: 1%;
 }
 
 .details-table thead {

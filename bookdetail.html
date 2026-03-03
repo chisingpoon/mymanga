@@ -141,9 +141,6 @@ img {
 // 1️⃣ Get ISBN from URL
 const params = new URLSearchParams(window.location.search);
 const isbn = params.get("isbn");
-const jpinfo = jpinfos.find(j => 
-  j.ISBN_JP?.trim() === manga.ISBN_JP?.trim()
-);
 
 // 2️⃣ Sheet URLs
 const MANGALIST_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
@@ -159,7 +156,7 @@ Promise.all([
   fetch(STORY_SHEET).then(r => r.json()),
   fetch(JPINFO_SHEET).then(r => r.json()) 
 ])
-.then(([mangas, storymaps, stories]) => {
+.then(([mangas, storymaps, stories, jpinfos]) => {
 
   // 4️⃣ Find manga
   const manga = mangas.find(b => b.ISBN?.trim() === isbn?.trim());
@@ -178,6 +175,10 @@ Promise.all([
   const storyRows = mangamaps.map(j =>
     stories.find(d => d.StoryId?.trim() === j.StoryId?.trim())
   ).filter(Boolean);
+
+  const jpinfo = jpinfos.find(j =>
+    j.ISBN_JP?.trim() === manga.ISBN_JP?.trim()
+  );
 
   render(manga, storyRows);
 

@@ -248,11 +248,11 @@ function render(manga, storyRows) {
   // Build table rows from Stories Map sheet
   const tableRows = storyRows.map(d => `
     <tr>
-      <td>${d.番 || ""}</td>
-      <td>${d.巻 || ""}</td>
-      <td>${d.話 || ""}</td>
+      <td>${manga..番 || ""}</td>
+      <td>${manga..巻 || ""}</td>
+      <td>${manga..話 || ""}</td>
       <td>${d.頁 || ""}</td>
-      <td>${d.副題 || ""}</td>
+      <td>${manga.副題 || ""}</td>
       <td>${d.初出掲載誌 || ""}</td>
       <td>${d.初出掲載号 || ""}</td>
       <td>${d.単行本 || ""}</td>

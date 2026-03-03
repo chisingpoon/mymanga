@@ -260,7 +260,10 @@ body {
     <input type="text" id="searchInput"
            placeholder="任何文字搜尋..."
            oninput="applyFilters()">
-
+    
+    <h3>書名</h3>
+    <div id="titleFilter"></div>
+    
     <h3>出版社</h3>
     <div id="publisherFilter"></div>
 
@@ -308,7 +311,7 @@ fetch(SHEET_URL)
     sheetData = data.filter(row =>
       row.Active?.toLowerCase() === "yes"
     );
-
+    populateTitles(); 
     populatePublishers();
     populateAuthors();
     populateOriginCountries();
@@ -318,6 +321,24 @@ fetch(SHEET_URL)
     document.getElementById("mangalist").innerHTML = "Failed to load data.";
     console.error(error);
   });
+
+function populateTitles() {
+  const container = document.getElementById("titleFilter");
+  if (!container) return;
+
+  const titles = [...new Set(sheetData.map(row => row.Title))];
+
+  titles.forEach(title => {
+    const label = document.createElement("label");
+
+    label.innerHTML = `
+      <input type="checkbox" value="${title}"
+             onchange="applyFilters()"> ${title}
+    `;
+
+    container.appendChild(label);
+  });
+}
 
 function populatePublishers() {
   const container = document.getElementById("publisherFilter");
@@ -443,8 +464,8 @@ function applyFilters() {
   const search = document.getElementById("searchInput").value.toLowerCase();
   const publisher = [...document.querySelectorAll('#publisherFilter input:checked')]
   .map(cb => cb.value);
-  const titleElement = document.getElementById("titleFilter");
-  const title = titleElement ? titleElement.value : "";
+  const title = [...document.querySelectorAll('#titleFilter input:checked')]
+  .map(cb => cb.value);
   const author = [...document.querySelectorAll('#authorFilter input:checked')]
   .map(cb => cb.value);
   const originCountry = [...document.querySelectorAll('#originCountryFilter input:checked')]
@@ -465,7 +486,7 @@ function applyFilters() {
       publisher.length === 0 || publisher.includes(row.Publisher);
 
     const titleMatch =
-      title === "" || row.Title === title;
+      title.length === 0 || title.includes(row.Title);
 
     const authorMatch =
       author.length === 0 || author.includes(row.Author);

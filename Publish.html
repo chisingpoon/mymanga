@@ -41,7 +41,34 @@ body {
   }
 
 }
-  
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #eee;
+}
+
+.site-title {
+  margin: 0;
+  font-size: 24px;
+}
+
+.header-link {
+  text-decoration: none;
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: #f5f5f5;
+  color: #333;
+  transition: 0.2s ease;
+}
+
+.header-link:hover {
+  background: #333;
+  color: white;
+}
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));

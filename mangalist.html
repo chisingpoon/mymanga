@@ -290,6 +290,19 @@ body {
 
   <!-- LEFT SIDEBAR -->
   <aside class="sidebar">
+  
+    <h3>排序</h3>
+    <select id="sortIssueDate" onchange="applyFilters()">
+      <option value="">按出版日期</option>
+      <option value="newest">從新到舊</option>
+      <option value="oldest">從舊到新</option>
+    </select>
+
+    <select id="sortPrice" onchange="applyFilters()">
+      <option value="">按售價</option>
+      <option value="low">從低到高</option>
+      <option value="high">從高到低</option>
+    </select>
 
     <h3>搜尋</h3>
     <input type="text" id="searchInput"
@@ -316,18 +329,6 @@ body {
       <div id="originCountryFilter" class="filter-group"></div>
     </details>
 
-    <h3>排序</h3>
-    <select id="sortIssueDate" onchange="applyFilters()">
-      <option value="">按出版日期</option>
-      <option value="newest">從新到舊</option>
-      <option value="oldest">從舊到新</option>
-    </select>
-
-    <select id="sortPrice" onchange="applyFilters()">
-      <option value="">按售價</option>
-      <option value="low">從低到高</option>
-      <option value="high">從高到低</option>
-    </select>
 
   </aside>
 

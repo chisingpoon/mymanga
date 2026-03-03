@@ -177,7 +177,7 @@ Promise.all([
   ).filter(Boolean);
 
   const jpinfo = jpinfos.find(j =>
-    j.ISBN_JP?.trim() === manga.ISBN_JP?.trim()
+    j.ISBN?.trim() === manga.ISBN_JP?.trim()
   );
 
   render(manga, storyRows, jpinfo);

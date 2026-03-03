@@ -252,7 +252,8 @@ function render(manga, storyRows) {
       <td>${manga.巻 || ""}</td>
       <td>${manga.話 || ""}</td>
       <td>${d.頁 || ""}</td>
-      <td>${manga.副題 || ""}</td>
+      <td>${d.初出副題 || ""}</td>
+      <td>${d.全集副題 || ""}</td>
       <td>${d.初出掲載誌 || ""}</td>
       <td>${d.初出掲載号 || ""}</td>
       <td>${d.単行本 || ""}</td>
@@ -274,7 +275,8 @@ function render(manga, storyRows) {
           <th>巻</th>
           <th>話</th>
           <th>頁</th>
-          <th>副題</th>
+          <th>初出副題</th>
+          <th>全集副題</th>          
           <th>初出掲載誌</th>
           <th>初出掲載号</th>
           <th>単行本</th>

@@ -279,7 +279,7 @@ document.getElementById("content").innerHTML = `
 
       <!-- Column 2: Main Info -->
       <div class="column-box">
-        <h3>${manga.OriginCountry ||}版資料</h3>
+        <h3>${manga.OriginCountry || ""}版資料</h3>
         <h1>${manga.Title || ""} ${manga.Volume || ""}</h1>
         <h2>${manga.Subtitle || ""}</h2>
     <!--

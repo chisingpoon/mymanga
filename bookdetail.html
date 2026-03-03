@@ -10,16 +10,23 @@ body {
   padding: 40px;
 }
 
-/* ===== Top Section ===== */
 .top-section {
-  display: flex;
-  gap: 40px;
+  display: grid;
+  grid-template-columns: 25% 35% 20% 20%;
+  gap: 30px;
   align-items: flex-start;
   margin-bottom: 40px;
 }
 
-.book-image {
-  width: 30%;
+.book-image img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.column-box {
+  font-size: 14px;
 }
 
 .book-image img {
@@ -134,18 +141,23 @@ img {
 // 1️⃣ Get ISBN from URL
 const params = new URLSearchParams(window.location.search);
 const isbn = params.get("isbn");
+const jpinfo = jpinfos.find(j => 
+  j.ISBN_JP?.trim() === manga.ISBN_JP?.trim()
+);
 
 // 2️⃣ Sheet URLs
 const MANGALIST_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
 const STORYMAP_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/StoriesMangaMapping";
 const STORY_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/Stories";
+const JPINFO_SHEET = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP";
 
  
 // 3️⃣ Load everything
 Promise.all([
   fetch(MANGALIST_SHEET).then(r => r.json()),
   fetch(STORYMAP_SHEET).then(r => r.json()),
-  fetch(STORY_SHEET).then(r => r.json())
+  fetch(STORY_SHEET).then(r => r.json()),
+  fetch(JPINFO_SHEET).then(r => r.json()) 
 ])
 .then(([mangas, storymaps, stories]) => {
 
@@ -177,7 +189,7 @@ Promise.all([
 
 
 // 7️⃣ Render page
-function render(manga, storyRows) {
+function render(manga, storyRows, jpinfo) {
 
   // Build table rows from Stories Map sheet
   const tableRows = storyRows.map(d => `
@@ -208,34 +220,58 @@ function render(manga, storyRows) {
 document.getElementById("content").innerHTML = `
 
   <!-- ===== Top Section ===== -->
-  <div class="top-section">
+<div class="top-section">
 
-    <div class="book-image">
-      <img src="${manga.Image || ""}" alt="${manga.Title} ${manga.Volume}" class="clickable-image"
-     onclick="openImageModal('${manga.Image || ""}')">
-    </div>
-
-    <div class="book-info">
-      <h1>${manga.Title || ""} ${manga.Volume || ""}</h1>
-      <h2>${manga.Subtitle || ""}</h2>
-
-      <div><strong>日文書名: </strong>
-        ${manga.OriginalTitle || ""} 
-        ${manga.Volume || ""}  
-        ${manga.OriginalSubtitle || ""}
-      </div>
-
-      <div><strong>作者: </strong>${manga.Author || ""}</div>
-      <div><strong>出版社: </strong>${manga.Publisher || ""}</div>
-      <div><strong>尺碼: </strong>${manga.Size || ""}</div>
-      <div><strong>出版日期: </strong>${manga.IssueDate || ""}</div>
-      <div><strong>售價: </strong>$${manga.Price || ""}</div>
-      <div><strong>頁數: </strong>${manga.Page || ""}</div>
-      <div><strong>出版地區: </strong>${manga.OriginCountry || ""}</div>
-      <div><strong>ISBN: </strong>${manga.ISBN || ""}</div>
-    </div>
-
+  <!-- Column 1: Image -->
+  <div class="book-image">
+    <img src="${manga.Image || ""}" 
+         alt="${manga.Title} ${manga.Volume}" 
+         class="clickable-image"
+         onclick="openImageModal('${manga.Image || ""}')">
   </div>
+
+  <!-- Column 2: Main Info -->
+  <div class="column-box">
+    <h1>${manga.Title || ""} ${manga.Volume || ""}</h1>
+    <h2>${manga.Subtitle || ""}</h2>
+
+    <div><strong>日文書名:</strong>
+      ${manga.OriginalTitle || ""} 
+      ${manga.Volume || ""}  
+      ${manga.OriginalSubtitle || ""}
+    </div>
+
+    <div><strong>作者:</strong> ${manga.Author || ""}</div>
+    <div><strong>出版社:</strong> ${manga.Publisher || ""}</div>
+    <div><strong>尺碼:</strong> ${manga.Size || ""}</div>
+    <div><strong>出版日期:</strong> ${manga.IssueDate || ""}</div>
+    <div><strong>售價:</strong> $${manga.Price || ""}</div>
+    <div><strong>頁數:</strong> ${manga.Page || ""}</div>
+    <div><strong>出版地區:</strong> ${manga.OriginCountry || ""}</div>
+    <div><strong>ISBN:</strong> ${manga.ISBN || ""}</div>
+  </div>
+
+  <!-- Column 3: JP Image -->
+  <div class="book-image">
+    <img src="${jpinfo?.Image || ""}" 
+         alt="${jpinfo?.標題} ${jpinfo?.巻}" 
+         class="clickable-image"
+         onclick="openImageModal('${jpinfo?.Image || ""}')">
+  </div>
+  
+  <!-- Column 4: JP Data -->
+  <div class="column-box">
+    <h3>日本資料</h3>
+    <div><strong>系列:</strong> ${jpinfo?.系列 || ""}</div>
+    <div><strong>標題:</strong> ${jpinfo?.標題 || ""}</div>
+    <div><strong>巻:</strong> ${jpinfo?.巻 || ""}</div>
+    <div><strong>副標題:</strong> ${jpinfo?.副標題 || ""}</div>
+    <div><strong>初版発行日:</strong> ${jpinfo?.初版発行日 || ""}</div>
+    <div><strong>ISBN:</strong> ${jpinfo?.ISBN || ""}</div>
+    <div><strong>判型:</strong> ${jpinfo?.判型 || ""}</div>
+  </div>
+
+</div>
 
   <!-- ===== Bottom Details Table (OUTSIDE top-section) ===== -->
   ${tableSection}

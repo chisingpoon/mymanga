@@ -43,11 +43,17 @@ body {
 }
 
 .sidebar label {
-  display: flex;
+  display: flex;          /* checkbox and label on same line */
   align-items: center;
-  gap: 6px;
-  margin-bottom: 4px;
+  gap: 4px;               /* tiny space between checkbox and text */
+  margin-bottom: 2px;     /* reduce vertical spacing between items */
+  font-size: 13px;
   cursor: pointer;
+  padding: 0;             /* remove extra left/right padding */
+}
+
+.sidebar input[type="checkbox"] {
+  margin: 0;              /* remove default margin */
 }
 
 .filter-group {

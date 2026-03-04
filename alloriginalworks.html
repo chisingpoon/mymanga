@@ -520,7 +520,7 @@ function populateMagazine() {
     const container = document.getElementById("magazineFilter");
     if (!container) return;
     container.innerHTML = ""; // clear previous content
-    const magazines = [...new Set(sheetData.map(row => row.初出掲載誌))].sort();
+    const magazines = [...new Set(sheetData.map(row => row.初出掲載誌).filter(Boolean))].sort();
     magazines.forEach(mag => {
         const id = `mag-${mag.replace(/\s+/g,'')}`;
         const label = document.createElement("label");
@@ -533,7 +533,7 @@ function populateTankobon() {
     const container = document.getElementById("tankobonFilter");
     if (!container) return;
     container.innerHTML = ""; // clear previous content
-    const tankobons = [...new Set(sheetData.map(row => row.単行本))].sort();
+    const tankobons = [...new Set(sheetData.map(row => row.単行本).filter(Boolean))].sort();
     tankobons.forEach(tkb => {
         const id = `tkb-${tkb.replace(/\s+/g,'')}`;
         const label = document.createElement("label");
@@ -546,7 +546,7 @@ function populateOtherTankobon() {
     const container = document.getElementById("othertankobonFilter");
     if (!container) return;
     container.innerHTML = ""; // clear previous content
-    const othertankobons = [...new Set(sheetData.map(row => row.その他単行本))].sort();
+    const othertankobons = [...new Set(sheetData.map(row => row.その他単行本).filter(Boolean))].sort();
     othertankobons.forEach(otkb => {
         const id = `otkb-${otkb.replace(/\s+/g,'')}`;
         const label = document.createElement("label");
@@ -559,7 +559,7 @@ function populateBunkobon() {
     const container = document.getElementById("bunkobonFilter");
     if (!container) return;
     container.innerHTML = ""; // clear previous content
-    const bunkobons = [...new Set(sheetData.map(row => row.文庫))].sort();
+    const bunkobons = [...new Set(sheetData.map(row => row.文庫).filter(Boolean))].sort();
     bunkobons.forEach(bkb => {
         const id = `bkb-${bkb.replace(/\s+/g,'')}`;
         const label = document.createElement("label");
@@ -572,7 +572,7 @@ function populatePikkapika() {
     const container = document.getElementById("pikkapikaFilter");
     if (!container) return;
     container.innerHTML = ""; // clear previous content
-    const pikkapikas = [...new Set(sheetData.map(row => row.ぴっかぴかコミックススペシャル))].sort();
+    const pikkapikas = [...new Set(sheetData.map(row => row.ぴっかぴかコミックススペシャル).filter(Boolean))].sort();
     pikkapikas.forEach(bkb => {
         const id = `pkpk-${pkpk.replace(/\s+/g,'')}`;
         const label = document.createElement("label");
@@ -585,7 +585,7 @@ function populateCompleteCollection() {
     const container = document.getElementById("completeCollectionFilter");
     if (!container) return;
     container.innerHTML = ""; // clear previous content
-    const completeCollections = [...new Set(sheetData.map(row => row.大全集))].sort();
+    const completeCollections = [...new Set(sheetData.map(row => row.大全集).filter(Boolean))].sort();
     completeCollections.forEach(cc => {
         const id = `cc-${cc.replace(/\s+/g,'')}`;
         const label = document.createElement("label");

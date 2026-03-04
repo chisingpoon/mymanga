@@ -368,6 +368,17 @@ body.dark #pagination button:hover:not(:disabled) {
 body.dark .resizer:hover {
   background: rgba(255,255,255,0.3);
 }
+
+.checkbox-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 12px;
+}
+.checkbox-list label {
+  margin-bottom: 4px;
+}
 </style>
 </head>
 
@@ -409,46 +420,46 @@ body.dark .resizer:hover {
   <!-- ROW 2 : All Dropdown Filters -->
   <div class="filter-row filter-row-bottom">
 
-    <div class="filter-dropdown">
+    <div class="filter-dropdown" id="magazineFilterContainer">
       <label>初出掲載誌</label>
-      <select id="magazineFilter" onchange="applyFilters()">
-        <option value="">全部</option>
-      </select>
+        <div class="checkbox-list" id="magazineFilter">
+          <!-- checkboxes will be inserted here dynamically -->
+        </div>
     </div>
 
-    <div class="filter-dropdown">
+    <div class="filter-dropdown" id="tankobonFilterContainer">
       <label>単行本系列</label>
-      <select id="tankobonFilter" onchange="applyFilters()">
-        <option value="">全部</option>
-      </select>
+        <div class="checkbox-list" id="tankobonFilter">
+          <!-- checkboxes will be inserted here dynamically -->
+        </div>
     </div>
 
-    <div class="filter-dropdown">
+    <div class="filter-dropdown" id="othertankobonFilterContainer">
       <label>その他単行本</label>
-      <select id="othertankobonFilter" onchange="applyFilters()">
-        <option value="">全部</option>
-      </select>
+        <div class="checkbox-list" id="othertankobonFilter">
+          <!-- checkboxes will be inserted here dynamically -->
+        </div>
     </div>
 
-    <div class="filter-dropdown">
+    <div class="filter-dropdown" id="bunkobonFilterContainer">
       <label>文庫系列</label>
-      <select id="bunkobonFilter" onchange="applyFilters()">
-        <option value="">全部</option>
-      </select>
+        <div class="checkbox-list" id="bunkobonFilter">
+          <!-- checkboxes will be inserted here dynamically -->
+        </div>
     </div>
-
-    <div class="filter-dropdown">
+     
+    <div class="filter-dropdown" id="pikkapikaFilterContainer">
       <label>ぴっかぴかコミックススペシャル</label>
-      <select id="pikkapikaFilter" onchange="applyFilters()">
-        <option value="">全部</option>
-      </select>
+        <div class="checkbox-list" id="pikkapikaFilter">
+          <!-- checkboxes will be inserted here dynamically -->
+        </div>
     </div>
 
-    <div class="filter-dropdown">
+    <div class="filter-dropdown" id="completeCollectionFilterContainer">
       <label>大全集</label>
-      <select id="completeCollectionFilter" onchange="applyFilters()">
-        <option value="">全部</option>
-      </select>
+        <div class="checkbox-list" id="completeCollectionFilter">
+          <!-- checkboxes will be inserted here dynamically -->
+        </div>
     </div>
 
   </div>
@@ -506,123 +517,83 @@ fetch(SHEET_URL)
   });
 
 function populateMagazine() {
-  const container = document.getElementById("magazineFilter");
-  if (!container) return;
-
-  const magazines = [...new Set(sheetData.map(row => row.初出掲載誌))];
-
-  magazines.forEach(mag => {
-    const option = document.createElement("option");
-    option.value = mag;
-    option.textContent = mag;
-    container.appendChild(option);
-  });
+    const container = document.getElementById("magazineFilter");
+    if (!container) return;
+    container.innerHTML = ""; // clear previous content
+    const magazines = [...new Set(sheetData.map(row => row.初出掲載誌))].sort();
+    magazines.forEach(mag => {
+        const id = `mag-${mag.replace(/\s+/g,'')}`;
+        const label = document.createElement("label");
+        label.innerHTML = `<input type="checkbox" value="${mag}" onchange="applyFilters()"> ${mag}`;
+        container.appendChild(label);
+    });
 }
 
 function populateTankobon() {
-  const container = document.getElementById("tankobonFilter");
-  if (!container) return;
+    const container = document.getElementById("tankobonFilter");
+    if (!container) return;
+    container.innerHTML = ""; // clear previous content
+    const tankobons = [...new Set(sheetData.map(row => row.単行本))].sort();
+    tankobons.forEach(tkb => {
+        const id = `tkb-${tkb.replace(/\s+/g,'')}`;
+        const label = document.createElement("label");
+        label.innerHTML = `<input type="checkbox" value="${tkb}" onchange="applyFilters()"> ${tkb}`;
+        container.appendChild(label);
+    });
+}
 
-  const tankobons = [...new Set(sheetData.map(row => row.単行本))];
-
-  tankobons.forEach(tkb => {
-    const option = document.createElement("option");
-    option.value = tkb;
-    option.textContent = tkb;
-    container.appendChild(option);
-  });
+function populateOtherTankobon() {
+    const container = document.getElementById("othertankobonFilter");
+    if (!container) return;
+    container.innerHTML = ""; // clear previous content
+    const othertankobons = [...new Set(sheetData.map(row => row.その他単行本))].sort();
+    othertankobons.forEach(otkb => {
+        const id = `otkb-${otkb.replace(/\s+/g,'')}`;
+        const label = document.createElement("label");
+        label.innerHTML = `<input type="checkbox" value="${otkb}" onchange="applyFilters()"> ${otkb}`;
+        container.appendChild(label);
+    });
 }
   
-function populateOtherTankobon() {
-  const container = document.getElementById("othertankobonFilter");
-  const othertankobons = [...new Set(sheetData.map(row => row.その他単行本))];
-
-  othertankobons.forEach(otkb => {
-    const option = document.createElement("option");
-    option.value = otkb;
-    option.textContent = otkb;
-    container.appendChild(option);
-  });
-}
-
 function populateBunkobon() {
-  const container = document.getElementById("bunkobonFilter");
-  const bunkobons = [...new Set(sheetData.map(row => row.文庫))];
-
-  bunkobons.forEach(bkb => {
-    const option = document.createElement("option");
-    option.value = bkb;
-    option.textContent = bkb;
-    container.appendChild(option);
-  });
+    const container = document.getElementById("bunkobonFilter");
+    if (!container) return;
+    container.innerHTML = ""; // clear previous content
+    const bunkobons = [...new Set(sheetData.map(row => row.文庫))].sort();
+    bunkobons.forEach(bkb => {
+        const id = `bkb-${bkb.replace(/\s+/g,'')}`;
+        const label = document.createElement("label");
+        label.innerHTML = `<input type="checkbox" value="${bkb}" onchange="applyFilters()"> ${bkb}`;
+        container.appendChild(label);
+    });
 }
-
-
 
 function populatePikkapika() {
-  const container = document.getElementById("pikkapikaFilter");
-  const pikkapikas = [...new Set(sheetData.map(row => row.ぴっかぴかコミックススペシャル))];
-
-  pikkapikas.forEach(pkpk => {
-    const option = document.createElement("option");
-    option.value = pkpk;
-    option.textContent = pkpk;
-    container.appendChild(option);
-  });
+    const container = document.getElementById("pikkapikaFilter");
+    if (!container) return;
+    container.innerHTML = ""; // clear previous content
+    const pikkapikas = [...new Set(sheetData.map(row => row.ぴっかぴかコミックススペシャル))].sort();
+    pikkapikas.forEach(bkb => {
+        const id = `pkpk-${pkpk.replace(/\s+/g,'')}`;
+        const label = document.createElement("label");
+        label.innerHTML = `<input type="checkbox" value="${pkpk}" onchange="applyFilters()"> ${pkpk}`;
+        container.appendChild(label);
+    });
 }
 
 function populateCompleteCollection() {
-  const container = document.getElementById("completeCollectionFilter");
-  const completeCollections = [...new Set(sheetData.map(row => row.大全集))];
-
-  completeCollections.forEach(cc => {
-    const option = document.createElement("option");
-    option.value = cc;
-    option.textContent = cc;
-    container.appendChild(option);
-  });
+    const container = document.getElementById("completeCollectionFilter");
+    if (!container) return;
+    container.innerHTML = ""; // clear previous content
+    const completeCollections = [...new Set(sheetData.map(row => row.大全集))].sort();
+    completeCollections.forEach(cc => {
+        const id = `cc-${cc.replace(/\s+/g,'')}`;
+        const label = document.createElement("label");
+        label.innerHTML = `<input type="checkbox" value="${cc}" onchange="applyFilters()"> ${cc}`;
+        container.appendChild(label);
+    });
 }
 
-function openDetail(id) {
-
-  currentIndex = currentList.findIndex(d => d.ISBN === id);
-  const detail = currentList[currentIndex];
-
-  if (!detail) {
-    document.getElementById("detailContent").innerHTML =
-      "No detail found.";
-  } else {
-    document.getElementById("detailContent").innerHTML = `
-  <div class="detail-container">
-
-    <div class="detail-left">
-      <img src="${detail.Image || ""}" 
-      alt="${detail.標題} ${detail.巻}"      
-      onclick="openLightbox('${detail.Image}')"
-      style="cursor: zoom-in;">
-    </div>
-
-    <div class="detail-right">
-      <h1>${detail.標題 || ""} ${detail.巻 || ""}</h1>
-      <h2>${detail.副標題 || ""}</h2>
-      <div class="detail-row"><strong>系列: </strong>${detail.系列 || ""}</div>  
-      <div class="detail-row"><strong>著: </strong>${detail.著 || ""}</div>
-      <div class="detail-row"><strong>話: </strong> ${detail.話 || ""}</div>
-      <div class="detail-row"><strong>判型: </strong> ${detail.判型 || ""}</div>
-      <div class="detail-row date"><strong>初版発行日: </strong> ${detail.初版発行日 || ""}</div>
-      <div class="detail-row price"><strong>定価: </strong> ¥${detail.定価 || ""}</div>
-      <div class="detail-row"><strong>頁: </strong> ${detail.頁 || ""}</div>   
-      <div class="detail-row"><strong>ISBN:</strong> ${detail.ISBN || ""}</div>
-    </div>
-
-  </div>
-  <button onclick="prevItem()" style="position:absolute; left:10px; top:50%;">◀</button>
-  <button onclick="nextItem()" style="position:absolute; right:10px; top:50%;">▶</button>
-    `;
-  }
-
-  document.getElementById("detailModal").style.display = "block";
-}
 
 function handleSearchInput() {
   const input = document.getElementById("searchInput");
@@ -722,37 +693,37 @@ function prevItem() {
 }
   
 function applyFilters() {
+    const search = document.getElementById("searchInput").value.toLowerCase();
 
-  const search = document.getElementById("searchInput").value.toLowerCase();
-  const magazine = document.getElementById('magazineFilter').value;
-  const tankobon = document.getElementById('tankobonFilter').value;
-  const othertankobo = document.getElementById('othertankobonFilter').value;
-  const bunkobon = document.getElementById('bunkobonFilter').value;
-  const pikkapika = document.getElementById('pikkapikaFilter').value;
-  const completeCollection = document.getElementById('completeCollectionFilter').value;
+    const getCheckedValues = (containerId) => {
+        return Array.from(document.getElementById(containerId).querySelectorAll("input[type=checkbox]:checked"))
+                    .map(cb => cb.value);
+    }
 
-  let filtered = sheetData.filter(row => {
+    const magazineChecked = getCheckedValues("magazineFilter");
+    const tankobonChecked = getCheckedValues("tankobonFilter");
+    const othertankoboChecked = getCheckedValues("othertankobonFilter");
+    const bunkobonChecked = getCheckedValues("bunkobonFilter");
+    const pikkapikaChecked = getCheckedValues("pikkapikaFilter");
+    const completeCollectionChecked = getCheckedValues("completeCollectionFilter");
 
-    const searchMatch = Object.values(row)
-      .join(" ")
-      .toLowerCase()
-      .includes(search);
+    let filtered = sheetData.filter(row => {
+        const searchMatch = Object.values(row).join(" ").toLowerCase().includes(search);
 
-    const magazineMatch = !magazine || row.初出掲載誌 === magazine;
-    const tankobonMatch = !tankobon || row.単行本 === tankobon;
-    const bunkobonMatch = !bunkobon || row.文庫 === bunkobon;
-    const othertankoboMatch = !othertankobo || row.その他単行本 === othertankobo;
-    const pikkapikaMatch = !pikkapika || row.ぴっかぴかコミックススペシャル === pikkapika;
-    const completeCollectionMatch = !completeCollection || row.大全集 === completeCollection;
+        const magazineMatch = !magazineChecked.length || magazineChecked.includes(row.初出掲載誌);
+        const tankobonMatch = !tankobonChecked.length || tankobonChecked.includes(row.単行本);
+        const bunkobonMatch = !bunkobonChecked.length || bunkobonChecked.includes(row.文庫);
+        const othertankoboMatch = !othertankoboChecked.length || othertankoboChecked.includes(row.その他単行本);
+        const pikkapikaMatch = !pikkapikaChecked.length || pikkapikaChecked.includes(row.ぴっかぴかコミックススペシャル);
+        const completeCollectionMatch = !completeCollectionChecked.length || completeCollectionChecked.includes(row.大全集);
 
-    return searchMatch && magazineMatch && tankobonMatch && bunkobonMatch && othertankoboMatch && pikkapikaMatch && completeCollectionMatch;
-  });
+        return searchMatch && magazineMatch && tankobonMatch && bunkobonMatch && othertankoboMatch && pikkapikaMatch && completeCollectionMatch;
+    });
 
-  currentList = filtered;
-  currentPage = 1; // reset to first page when filtering
-
-  document.getElementById("resultCount").textContent = `共 ${filtered.length} 本作品`;
-  renderPage();
+    currentList = filtered;
+    currentPage = 1;
+    document.getElementById("resultCount").textContent = `共 ${filtered.length} 本作品`;
+    renderPage();
 }
 
 function renderPage() {

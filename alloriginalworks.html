@@ -421,7 +421,83 @@ body {
   overflow-x: auto;
 }
 
+.top-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 15px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.top-filters button {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.top-filters .search-wrapper {
+  position: relative;
+  flex: 1 1 200px; /* search input expands */
+  min-width: 150px;
+}
+
+.top-filters input[type="text"] {
+  width: 100%;
+  padding: 6px 28px 6px 8px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.top-filters .clear-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  cursor: pointer;
+  color: #888;
+  display: none;
+}
+
+.top-filters details {
+  max-width: 180px;
+}
+
+.top-filters summary {
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.top-filters summary::after {
+  content: "▾";
+  float: right;
+  transition: transform 0.2s ease;
+}
+
+.top-filters details[open] summary::after {
+  transform: rotate(180deg);
+}
+
+/* Responsive for mobile */
+@media (max-width: 900px) {
+  .top-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
   
+  .top-filters details {
+    width: 100%;
+  }
+}  
 </style>
 </head>
 
@@ -440,62 +516,55 @@ body {
   </div>
 </header>
 
-<div class="layout">
+<!-- TOP FILTERS -->
+<div class="top-filters">
+  <button id="clearFiltersBtn" onclick="clearAllFilters()">清除所有篩選</button>
 
-  <!-- LEFT SIDEBAR -->
-  <aside class="sidebar">
-    <button id="clearFiltersBtn" onclick="clearAllFilters()" style="margin-bottom:10px; width:100%; padding:6px 0; font-size:13px; border-radius:6px; border:1px solid #ccc; cursor:pointer;">
-      清除所有篩選
-    </button>
+  <!-- Search -->
+  <div class="search-wrapper">
+    <input type="text" id="searchInput" placeholder="任何文字搜尋..." oninput="handleSearchInput()">
+    <span class="clear-btn" onclick="clearSearch()">×</span>
+  </div>
 
-    <h3>搜尋</h3>
-    <div class="search-wrapper">
-      <input type="text"
-             id="searchInput"
-             placeholder="任何文字搜尋..."
-             oninput="handleSearchInput()">
-      <span class="clear-btn" onclick="clearSearch()">×</span>
-    </div>
-    <div id="resultCount" class="result-count"></div>
-    
-    <details>
-      <summary>初出掲載誌</summary>
-      <div id="magazineFilter" class="filter-group"></div>
-    </details>
-    
-    <details>
-      <summary>単行本系列</summary>
-      <div id="tankobonFilter" class="filter-group"></div>
-    </details>
+  <!-- Filters -->
+  <details>
+    <summary>初出掲載誌</summary>
+    <div id="magazineFilter" class="filter-group"></div>
+  </details>
 
-    <details>
-      <summary>その他単行本</summary>
-      <div id="othertankobonFilter" class="filter-group"></div>
-    </details>
+  <details>
+    <summary>単行本系列</summary>
+    <div id="tankobonFilter" class="filter-group"></div>
+  </details>
 
-    <details>
-      <summary>文庫系列</summary>
-      <div id="bunkobonFilter" class="filter-group"></div>
-    </details>
-    
-    <details>
-      <summary>ぴっかぴかコミックススペシャル</summary>
-      <div id="pikkapikaFilter" class="filter-group"></div>
-    </details>
-    
-    <details>
-      <summary>大全集</summary>
-      <div id="completeCollectionFilter" class="filter-group"></div>
-    </details>
-  </aside>
+  <details>
+    <summary>その他単行本</summary>
+    <div id="othertankobonFilter" class="filter-group"></div>
+  </details>
 
-  <!-- RIGHT CONTENT -->
-  <main class="content">
-    <div id="pagination"></div>
-    <div class="grid" id="mangalist">Loading...</div>
-  </main>
+  <details>
+    <summary>文庫系列</summary>
+    <div id="bunkobonFilter" class="filter-group"></div>
+  </details>
 
+  <details>
+    <summary>ぴっかぴかコミックススペシャル</summary>
+    <div id="pikkapikaFilter" class="filter-group"></div>
+  </details>
+
+  <details>
+    <summary>大全集</summary>
+    <div id="completeCollectionFilter" class="filter-group"></div>
+  </details>
+
+  <div id="resultCount" class="result-count"></div>
 </div>
+
+<!-- MAIN CONTENT -->
+<main class="content">
+  <div id="pagination"></div>
+  <div class="grid" id="mangalist">Loading...</div>
+</main>
 
 <script>
 const SHEET_URL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";

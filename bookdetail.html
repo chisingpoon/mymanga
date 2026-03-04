@@ -182,6 +182,23 @@ body {
   cursor: zoom-in;
 }
 
+.jp-detail-button {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 8px 16px;
+  background-color: #0077cc;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.jp-detail-button:hover {
+  background-color: #005fa3;
+}
+
+
 img {
   user-select: none;
   -webkit-user-drag: none;
@@ -376,7 +393,17 @@ document.getElementById("content").innerHTML = `
         <div><strong>定価:</strong> ${jpinfo?.定価 || ""}</div>
         <div><strong>ISBN:</strong> ${jpinfo?.ISBN || ""}</div>
         <!-- ✅ JP detail link -->
-        ${jpinfo?.ISBN ? `<div><a href="bookdetailjp.html?isbn=${encodeURIComponent(jpinfo.ISBN)}" target="_blank">查看日文原版詳情</a></div>` : ''}
+        ${jpinfo?.ISBN ? `
+            <div>
+              <a 
+                href="bookdetailjp.html?isbn=${encodeURIComponent(jpinfo.ISBN)}" 
+                target="_blank" 
+                class="jp-detail-button"
+              >
+                查看日文原版詳情
+              </a>
+            </div>
+          ` : ''}
       </div>
       </div>
   </div>

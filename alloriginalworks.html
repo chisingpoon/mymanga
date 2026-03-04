@@ -440,7 +440,7 @@ body.dark .resizer:hover {
   </div>
 
   <div class="filter-dropdown">
-    <label>ぴっかぴかコミックススペシャル</label>
+    <label>兒童版</label>
     <div class="checkbox-list" id="pikkapikaFilter"></div>
   </div>
 
@@ -696,7 +696,7 @@ function applyFilters() {
         const tankobonMatch = !tankobonChecked.length || tankobonChecked.includes(row.単行本);
         const bunkobonMatch = !bunkobonChecked.length || bunkobonChecked.includes(row.文庫);
         const othertankoboMatch = !othertankoboChecked.length || othertankoboChecked.includes(row.その他単行本);
-        const pikkapikaMatch = !pikkapikaChecked.length || pikkapikaChecked.includes(row.ぴっかぴかコミックススペシャル);
+        const pikkapikaMatch = !pikkapikaChecked.length || pikkapikaChecked.includes(row.兒童版);
         const completeCollectionMatch = !completeCollectionChecked.length || completeCollectionChecked.includes(row.大全集);
 
         return searchMatch && magazineMatch && tankobonMatch && bunkobonMatch &&

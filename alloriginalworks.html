@@ -163,6 +163,30 @@ body {
   cursor: not-allowed;
 }
 
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  font-size: 13px;
+}
+
+.data-table th,
+.data-table td {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.data-table th {
+  background: #f0f0f0;
+  font-weight: bold;
+}
+
+.data-table tr:hover {
+  background: #f9f9f9;
+}
+  
 .active-page {
   background: #333 !important;
   color: white;
@@ -357,6 +381,14 @@ body {
   overflow-y: auto;
   padding-right: 5px;
 }
+
+.data-table th {
+  user-select: none;
+}
+
+.data-table th:hover {
+  background: #e6e6e6;
+}
 </style>
 </head>
 
@@ -438,6 +470,8 @@ let sheetData = [];
 let currentPage = 1;
 const itemsPerPage = 12;   // change this to 8, 16, etc.
 let currentList = [];      // you already use this for modal nav
+let currentSortColumn = null;
+let currentSortDirection = "asc"; // "asc" or "desc"
 
 fetch(SHEET_URL)
   .then(res => res.json())
@@ -638,6 +672,35 @@ function clearSearch() {
   applyFilters();
 }
 
+function sortBy(column) {
+
+  if (currentSortColumn === column) {
+    currentSortDirection = currentSortDirection === "asc" ? "desc" : "asc";
+  } else {
+    currentSortColumn = column;
+    currentSortDirection = "asc";
+  }
+
+  currentList.sort((a, b) => {
+    let valA = a[column] || "";
+    let valB = b[column] || "";
+
+    // Try numeric compare first
+    if (!isNaN(valA) && !isNaN(valB)) {
+      return currentSortDirection === "asc"
+        ? Number(valA) - Number(valB)
+        : Number(valB) - Number(valA);
+    }
+
+    // Otherwise string compare
+    return currentSortDirection === "asc"
+      ? valA.toString().localeCompare(valB.toString(), 'ja')
+      : valB.toString().localeCompare(valA.toString(), 'ja');
+  });
+
+  currentPage = 1;
+  renderPage();
+}
 
 function closeModal() {
   document.getElementById("detailModal").style.display = "none";
@@ -728,23 +791,48 @@ function renderPage() {
   const end = start + itemsPerPage;
   const pageItems = currentList.slice(start, end);
 
-  const html = pageItems.map(row => `
-    <div class="grid" onclick="window.open('bookdetailjp.html?isbn=${row.ISBN}', '_blank')">
-      <div>番: ${row.番}</div>
-      <div>初出掲載誌: ${row.初出掲載誌}</div>
-      <div>初出掲載号: ${row.初出掲載号}</div>
-      <div>初出掲載頁: ${row.初出掲載頁}</div>
-      <div>初出副題: ${row.初出副題}</div>
-      <div>全集副題: ${row.全集副題}</div>
-      <div>全集副題香港譯名: ${row.全集副題香港譯名}</div>
-      <div>単行本: ${row.単行本}</div>
-      <div>その他単行本: ${row.その他単行本}</div>
-      <div>文庫: ${row.文庫}</div>
-      <div>兒童版: ${row.兒童版}</div>
-      <div>大全集: ${row.大全集}</div>
-      <div>備考: ${row.備考}</div>
-    </div>
+let html = `
+  <table class="data-table">
+    <thead>
+      <tr>
+        ${createSortableHeader("初出掲載誌")}
+        ${createSortableHeader("初出掲載号")}
+        ${createSortableHeader("初出掲載頁")}
+        ${createSortableHeader("初出副題")}
+        ${createSortableHeader("全集副題")}
+        ${createSortableHeader("全集副題香港譯名")}
+        ${createSortableHeader("単行本")}
+        ${createSortableHeader("その他単行本")}
+        ${createSortableHeader("文庫")}
+        ${createSortableHeader("兒童版")}
+        ${createSortableHeader("大全集")}
+        ${createSortableHeader("備考")}
+      </tr>
+    </thead>
+    <tbody>
+`;
+
+  html += pageItems.map(row => `
+    <tr onclick="window.open('bookdetailjp.html?isbn=${row.ISBN}', '_blank')" style="cursor:pointer;">
+      <td>${row.初出掲載誌 || ""}</td>
+      <td>${row.初出掲載号 || ""}</td>
+      <td>${row.初出掲載頁 || ""}</td>
+      <td>${row.初出副題 || ""}</td>
+      <td>${row.全集副題 || ""}</td>
+      <td>${row.全集副題香港譯名 || ""}</td>
+      <td>${row.単行本 || ""}</td>
+      <td>${row.その他単行本 || ""}</td>
+      <td>${row.文庫 || ""}</td>
+      <td>${row.兒童版 || ""}</td>
+      <td>${row.大全集 || ""}</td>
+      <td>${row.備考 || ""}</td>
+    </tr>
   `).join("");
+
+  html += `
+      </tbody>
+    </table>
+  `;
 
   document.getElementById("mangalist").innerHTML =
     pageItems.length ? html : "No Manga found.";
@@ -752,6 +840,19 @@ function renderPage() {
   renderPaginationControls();
 }
 
+function createSortableHeader(columnName) {
+
+  let arrow = "";
+
+  if (currentSortColumn === columnName) {
+    arrow = currentSortDirection === "asc" ? " ▲" : " ▼";
+  }
+
+  return `<th onclick="sortBy('${columnName}')" style="cursor:pointer;">
+            ${columnName}${arrow}
+          </th>`;
+}
+  
 function renderPaginationControls() {
 
   const totalPages = Math.ceil(currentList.length / itemsPerPage);

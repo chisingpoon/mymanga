@@ -73,7 +73,16 @@ body {
 }
 
 .filter-row-top {
-  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Result count stays fixed on right */
+.result-count {
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: 20px;
 }
 
 #clearFiltersBtn {
@@ -94,6 +103,8 @@ body {
   position: relative;
   flex: 1 1 280px;
   max-width: 420px;
+  margin-left: 10px;
+  margin-right: auto;
 }
 
 .search-wrapper input {

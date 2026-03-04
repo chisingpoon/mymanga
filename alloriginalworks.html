@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>日本原作目録</title>
+
+<style>
+body {
+  font-family: Arial;
+  padding: 30px;
+  background: #f5f5f5;
+}
+
+.controls {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.controls input,
+.controls select {
+  padding: 8px 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+@media (max-width: 768px) {
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .controls input,
+  .controls select {
+    width: 100%;
+    font-size: 16px;   /* better for touch */
+  }
+
+}
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #eee;
+}
+
+.site-title {
+  margin: 0;
+  font-size: 24px;
+}
+
+.header-link {
+  text-decoration: none;
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: #f5f5f5;
+  color: #333;
+  transition: 0.2s ease;
+}
+
+.header-link:hover {
+  background: #333;
+  color: white;
+}
+  
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 15px;
+}
+
+.card {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.card img {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.price {
+  color: green;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.detail-container {
+  display: flex;
+  gap: 20px;
+  align-items: stretch;  /* important */
+}
+
+.detail-left {
+  width: 35%;
+}
+
+.detail-left img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;   /* show full image */
+  display: block;
+}
+
+.detail-right {
+  width: 65%;
+}
+
+.detail-row {
+  margin-bottom: 8px;
+}
+
+.detail-description {
+  margin-top: 15px;
+}
+
+.detail-description p {
+  margin-top: 5px;
+  line-height: 1.6;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-box {
+  background: white;
+  width: 90%;
+  max-width: 900px;
+  margin: 5% auto;
+  padding: 20px;
+  border-radius: 8px;
+  position: relative;
+  display: flex;
+}
+
+#pagination button {
+  margin: 0 4px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+#pagination button:hover:not(:disabled) {
+  background: #f0f0f0;
+}
+
+#pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.active-page {
+  background: #333 !important;
+  color: white;
+  font-weight: bold;
+}
+
+#pagination {
+  margin-top: 20px;
+  text-align: center;
+}
+
+#pagination button {
+  margin: 0 4px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+#pagination button:hover:not(:disabled) {
+  background: #f0f0f0;
+}
+
+#pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.active-page {
+  background: #333 !important;
+  color: white;
+  font-weight: bold;
+}
+
+.ellipsis {
+  margin: 0 6px;
+  color: #888;
+}
+
+#detailContent {
+  width: 100%;
+}
+
+.layout {
+  display: flex;
+  gap: 20px;
+}
+
+.sidebar {
+  width: 260px;
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  height: fit-content;
+}
+
+.sidebar h3 {
+  margin-top: 12px;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.sidebar input,
+.sidebar select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.sidebar {
+  font-size: 13px;
+}
+
+.sidebar label {
+  margin-bottom: 3px;
+}
+
+.sidebar label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.sidebar input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+#searchInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.content {
+  flex: 1;
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+}
+
+/* Collapsible filter styling */
+.sidebar details {
+  margin-bottom: 10px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.sidebar summary {
+  font-weight: bold;
+  cursor: pointer;
+  list-style: none;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.sidebar summary::-webkit-details-marker {
+  display: none;
+}
+
+.sidebar summary::after {
+  content: "▾";
+  float: right;
+  transition: transform 0.2s ease;
+}
+
+.sidebar details[open] summary::after {
+  transform: rotate(180deg);
+}
+
+/* Search Wrapper */
+.search-wrapper {
+  position: relative;
+  margin-bottom: 6px;
+}
+
+.search-wrapper input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 28px 6px 28px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* Clear button */
+#clearFiltersBtn:hover {
+  background: #f0f0f0;
+}
+  
+.clear-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  cursor: pointer;
+  color: #888;
+  display: none;
+}
+
+.clear-btn:hover {
+  color: #000;
+}
+
+/* Result counter */
+.result-count {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.filter-group {
+  max-height: 250px;   /* scroll if long */
+  overflow-y: auto;
+  padding-right: 5px;
+}
+</style>
+</head>
+
+<body>
+
+<header class="page-header">
+  <div class="header-left">
+    <h1 class="site-title">日本原作目録</h1>
+  </div>
+
+  <div class="header-right">
+    <a href="Publish.html" class="header-link">香港出版目録</a>
+  </div>
+    <div class="header-right">
+    <a href="PublishJP.html" class="header-link">日本出版目録</a>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar">
+    <button id="clearFiltersBtn" onclick="clearAllFilters()" style="margin-bottom:10px; width:100%; padding:6px 0; font-size:13px; border-radius:6px; border:1px solid #ccc; cursor:pointer;">
+      清除所有篩選
+    </button>
+
+    <h3>搜尋</h3>
+    <div class="search-wrapper">
+      <input type="text"
+             id="searchInput"
+             placeholder="任何文字搜尋..."
+             oninput="handleSearchInput()">
+      <span class="clear-btn" onclick="clearSearch()">×</span>
+    </div>
+    <div id="resultCount" class="result-count"></div>
+    
+    <details>
+      <summary>初出掲載誌</summary>
+      <div id="magazineFilter" class="filter-group"></div>
+    </details>
+    
+    <details>
+      <summary>単行本系列</summary>
+      <div id="tankobonFilter" class="filter-group"></div>
+    </details>
+
+    <details>
+      <summary>その他単行本</summary>
+      <div id="othertankobonFilter" class="filter-group"></div>
+    </details>
+
+    <details>
+      <summary>文庫系列</summary>
+      <div id="bunkobonFilter" class="filter-group"></div>
+    </details>
+    
+    <details>
+      <summary>ぴっかぴかコミックススペシャル</summary>
+      <div id="pikkapikaFilter" class="filter-group"></div>
+    </details>
+    
+    <details>
+      <summary>大全集</summary>
+      <div id="completeCollectionFilter" class="filter-group"></div>
+    </details>
+  </aside>
+
+  <!-- RIGHT CONTENT -->
+  <main class="content">
+    <div id="pagination"></div>
+    <div class="grid" id="mangalist">Loading...</div>
+  </main>
+
+</div>
+
+<script>
+const SHEET_URL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
+let sheetData = [];
+let currentPage = 1;
+const itemsPerPage = 12;   // change this to 8, 16, etc.
+let currentList = [];      // you already use this for modal nav
+
+fetch(SHEET_URL)
+  .then(res => res.json())
+  .then(data => {
+
+    // Only keep Active = Yes
+    sheetData = data.filter(row => 
+      row.掲載番 != null && row.掲載番 !== ""
+    );
+    populateMagazine(); 
+    populateTankobon(); 
+    populateBunkobon();
+    populateOtherTankobon();
+    populatePikkapika();
+    populateCompleteCollection();
+    applyFilters();
+  })
+  .catch(error => {
+    document.getElementById("mangalist").innerHTML = "Failed to load data.";
+    console.error(error);
+  });
+
+function clearAllFilters() {
+  // Clear search input
+  const searchInput = document.getElementById("searchInput");
+  searchInput.value = "";
+
+  // Clear all checkboxes
+  document.querySelectorAll('.sidebar input[type="checkbox"]').forEach(cb => {
+    cb.checked = false;
+  });
+
+  // Hide the clear (×) button
+  const clearBtn = document.querySelector(".clear-btn");
+  if (clearBtn) clearBtn.style.display = "none";
+
+  // Apply filters again to refresh list
+  applyFilters();
+}
+
+function populateMagazine() {
+  const container = document.getElementById("magazineFilter");
+  if (!container) return;
+
+  const magazines = [...new Set(sheetData.map(row => row.初出掲載誌))];
+
+  magazines.forEach(mag => {
+    const label = document.createElement("label"mag);
+
+    label.innerHTML = `
+      <input type="checkbox" value="${mag}"
+             onchange="applyFilters()"> ${mag}
+    `;
+
+    container.appendChild(label);
+  });
+}
+
+function populateTankobon() {
+  const container = document.getElementById("tankobonFilter");
+  if (!container) return;
+
+  const tankobons = [...new Set(sheetData.map(row => row.単行本))];
+
+  tankobons.forEach(tkb => {
+    const label = document.createElement("label");
+
+    label.innerHTML = `
+      <input type="checkbox" value="${tkb}"
+             onchange="applyFilters()"> ${tkb}
+    `;
+
+    container.appendChild(label);
+  });
+}
+  
+function populateOtherTankobon() {
+  const container = document.getElementById("othertankobonFilter");
+  const othertankobons = [...new Set(sheetData.map(row => row.その他単行本))];
+
+  othertankobons.forEach(otkb => {
+    const label = document.createElement("label");
+
+    label.innerHTML = `
+      <input type="checkbox" value="${otkb}"
+             onchange="applyFilters()"> ${otkb}
+    `;
+
+    container.appendChild(label);
+  });
+}
+
+function populateBunkobon() {
+  const container = document.getElementById("bunkobonFilter");
+  const bunkobons = [...new Set(sheetData.map(row => row.文庫))];
+
+  bunkobons.forEach(bkb => {
+    const label = document.createElement("label");
+
+    label.innerHTML = `
+      <input type="checkbox" value="${bkb}"
+             onchange="applyFilters()"> ${bkb}
+    `;
+
+    container.appendChild(label);
+  });
+}
+
+
+
+function populatePikkapika() {
+  const container = document.getElementById("pikkapikaFilter");
+  const pikkapikas = [...new Set(sheetData.map(row => row.ぴっかぴかコミックススペシャル))];
+
+  pikkapikas.forEach(pkpk => {
+    const label = document.createElement("label");
+
+    label.innerHTML = `
+      <input type="checkbox" value="${pkpk}"
+             onchange="applyFilters()"> ${pkpk}
+    `;
+
+    container.appendChild(label);
+  });
+}
+
+function populateCompleteCollection() {
+  const container = document.getElementById("completeCollectionFilter");
+  const completeCollections = [...new Set(sheetData.map(row => row.大全集))];
+
+  completeCollections.forEach(cc => {
+    const label = document.createElement("label");
+
+    label.innerHTML = `
+      <input type="checkbox" value="${cc}"
+             onchange="applyFilters()"> ${cc}
+    `;
+
+    container.appendChild(label);
+  });
+}
+
+function openDetail(id) {
+
+  currentIndex = currentList.findIndex(d => d.ISBN === id);
+  const detail = currentList[currentIndex];
+
+  if (!detail) {
+    document.getElementById("detailContent").innerHTML =
+      "No detail found.";
+  } else {
+    document.getElementById("detailContent").innerHTML = `
+  <div class="detail-container">
+
+    <div class="detail-left">
+      <img src="${detail.Image || ""}" 
+      alt="${detail.標題} ${detail.巻}"      
+      onclick="openLightbox('${detail.Image}')"
+      style="cursor: zoom-in;">
+    </div>
+
+    <div class="detail-right">
+      <h1>${detail.標題 || ""} ${detail.巻 || ""}</h1>
+      <h2>${detail.副標題 || ""}</h2>
+      <div class="detail-row"><strong>系列: </strong>${detail.系列 || ""}</div>  
+      <div class="detail-row"><strong>著: </strong>${detail.著 || ""}</div>
+      <div class="detail-row"><strong>話: </strong> ${detail.話 || ""}</div>
+      <div class="detail-row"><strong>判型: </strong> ${detail.判型 || ""}</div>
+      <div class="detail-row date"><strong>初版発行日: </strong> ${detail.初版発行日 || ""}</div>
+      <div class="detail-row price"><strong>定価: </strong> $¥{detail.定価 || ""}</div>
+      <div class="detail-row"><strong>頁: </strong> ${detail.頁 || ""}</div>   
+      <div class="detail-row"><strong>ISBN:</strong> ${detail.ISBN || ""}</div>
+    </div>
+
+  </div>
+  <button onclick="prevItem()" style="position:absolute; left:10px; top:50%;">◀</button>
+  <button onclick="nextItem()" style="position:absolute; right:10px; top:50%;">▶</button>
+    `;
+  }
+
+  document.getElementById("detailModal").style.display = "block";
+}
+
+function handleSearchInput() {
+  const input = document.getElementById("searchInput");
+  const clearBtn = document.querySelector(".clear-btn");
+
+  clearBtn.style.display = input.value ? "block" : "none";
+  applyFilters();
+}
+
+function clearSearch() {
+  const input = document.getElementById("searchInput");
+  const clearBtn = document.querySelector(".clear-btn");
+
+  input.value = "";
+  clearBtn.style.display = "none";
+  applyFilters();
+}
+
+
+function closeModal() {
+  document.getElementById("detailModal").style.display = "none";
+}
+
+function openLightbox(src) {
+  document.getElementById("lightboxImg").src = src;
+  document.getElementById("imageLightbox").style.display = "flex";
+}
+
+function closeLightbox() {
+  document.getElementById("imageLightbox").style.display = "none";
+}
+
+function nextItem() {
+  if (currentIndex < currentList.length - 1) {
+    currentIndex++;
+    openDetail(currentList[currentIndex].ISBN);
+  }
+}
+
+function prevItem() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    openDetail(currentList[currentIndex].ISBN);
+  }
+}
+  
+function applyFilters() {
+
+  const search = document.getElementById("searchInput").value.toLowerCase();
+  const magazine = [...document.querySelectorAll('#magazineFilter input:checked')]
+  .map(cb => cb.value);
+  const tankobon = [...document.querySelectorAll('#tankobonFilter input:checked')]
+  .map(cb => cb.value);
+  const othertankobo = [...document.querySelectorAll('#othertankobonFilter input:checked')]
+  .map(cb => cb.value);
+  const bunkobon = [...document.querySelectorAll('#bunkobonFilter input:checked')]
+  .map(cb => cb.value);
+  const pikkapika = [...document.querySelectorAll('#pikkapikaFilter input:checked')]
+  .map(cb => cb.value);
+  const completeCollection = [...document.querySelectorAll('#completeCollectionFilter input:checked')]
+  .map(cb => cb.value);
+  
+
+  
+  let filtered = sheetData.filter(row => {
+
+    const searchMatch = Object.values(row)
+      .join(" ")
+      .toLowerCase()
+      .includes(search);
+
+    const magazineMatch =
+      magazine.length === 0 || magazine.includes(row.初出掲載誌);
+
+    const tankobonMatch =
+      tankobon.length === 0 || tankobon.includes(row.単行本);
+
+    const bunkobonMatch =
+      bunkobon.length === 0 || bunkobon.includes(row.文庫);
+
+    const othertankoboMatch =
+      othertankobo.length === 0 || othertankobo.includes(row.その他単行本);
+    
+    const pikkapikaMatch =
+      pikkapika.length === 0 || pikkapika.includes(row.ぴっかぴかコミックススペシャル);
+    
+    const completeCollectionMatch =
+      completeCollection.length === 0 || completeCollection.includes(row.大全集);
+    
+    return searchMatch && magazineMatch && tankobonMatch && bunkobonMatch && othertankoboMatch && pikkapikaMatch && completeCollectionMatch;
+  });
+
+//  document.getElementById("mangalist").innerHTML =
+//    filtered.length ? html : "No Manga found.";
+  currentList = filtered;
+  currentPage = 1; // reset to first page when filtering
+
+  document.getElementById("resultCount").textContent =
+  `共 ${filtered.length} 本作品`;
+  renderPage();
+}
+
+function renderPage() {
+
+  const start = (currentPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  const pageItems = currentList.slice(start, end);
+
+  const html = pageItems.map(row => `
+    <div class="grid" onclick="window.open('bookdetailjp.html?isbn=${row.ISBN}', '_blank')">
+      <div>番: ${row.番}</div>
+      <div>初出掲載誌: ${row.初出掲載誌}</div>
+      <div>初出掲載号: ${row.初出掲載号}</div>
+      <div>初出掲載頁: ${row.初出掲載頁}</div>
+      <div>初出副題: ${row.初出副題}</div>
+      <div>全集副題: ${row.全集副題}</div>
+      <div>全集副題香港譯名: ${row.全集副題香港譯名}</div>
+      <div>単行本: ${row.単行本}</div>
+      <div>その他単行本: ${row.その他単行本}</div>
+      <div>文庫: ${row.文庫}</div>
+      <div>兒童版: ${row.兒童版}</div>
+      <div>大全集: ${row.大全集}</div>
+      <div>備考: ${row.備考}</div>
+    </div>
+  `).join("");
+
+  document.getElementById("mangalist").innerHTML =
+    pageItems.length ? html : "No Manga found.";
+
+  renderPaginationControls();
+}
+
+function renderPaginationControls() {
+
+  const totalPages = Math.ceil(currentList.length / itemsPerPage);
+
+  if (totalPages <= 1) {
+    document.getElementById("pagination").innerHTML = "";
+    return;
+  }
+
+  let html = "";
+
+  // ----- Page Info -----
+  html += `<div style="margin-bottom:10px;">
+             Page ${currentPage} of ${totalPages}
+           </div>`;
+
+  // ----- First -----
+  html += `
+    <button onclick="changePage(1)" ${currentPage === 1 ? "disabled" : ""}>
+      &laquo; First
+    </button>
+  `;
+
+  // ----- Prev -----
+  html += `
+    <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? "disabled" : ""}>
+      &lsaquo; Prev
+    </button>
+  `;
+
+  // ----- Page Numbers Logic -----
+
+  const maxVisible = 5;
+  let startPage = Math.max(1, currentPage - 2);
+  let endPage = Math.min(totalPages, currentPage + 2);
+
+  // Adjust window if near edges
+  if (currentPage <= 3) {
+    endPage = Math.min(totalPages, maxVisible);
+  }
+
+  if (currentPage >= totalPages - 2) {
+    startPage = Math.max(1, totalPages - (maxVisible - 1));
+  }
+
+  // Always show page 1
+  if (startPage > 1) {
+    html += `<button onclick="changePage(1)">1</button>`;
+    if (startPage > 2) {
+      html += `<span class="ellipsis">...</span>`;
+    }
+  }
+
+  // Middle Pages
+  for (let i = startPage; i <= endPage; i++) {
+    html += `
+      <button onclick="changePage(${i})"
+        ${i === currentPage ? "class='active-page'" : ""}>
+        ${i}
+      </button>
+    `;
+  }
+
+  // Always show last page
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) {
+      html += `<span class="ellipsis">...</span>`;
+    }
+    html += `<button onclick="changePage(${totalPages})">${totalPages}</button>`;
+  }
+
+  // ----- Next -----
+  html += `
+    <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? "disabled" : ""}>
+      Next &rsaquo;
+    </button>
+  `;
+
+  // ----- Last -----
+  html += `
+    <button onclick="changePage(${totalPages})" ${currentPage === totalPages ? "disabled" : ""}>
+      Last &raquo;
+    </button>
+  `;
+
+  document.getElementById("pagination").innerHTML = html;
+}
+
+function changePage(page) {
+
+  const totalPages = Math.ceil(currentList.length / itemsPerPage);
+
+  if (page < 1 || page > totalPages) return;
+
+  currentPage = page;
+  renderPage();
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+  
+  document.addEventListener("contextmenu", function(e) {
+    if (e.target.tagName === "IMG") {
+      e.preventDefault();
+    }
+  });
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "F12") {
+      e.preventDefault();
+    }
+  });
+</script>
+<div id="detailModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);">
+  <div class="modal-box">
+    <button onclick="closeModal()" style="position:absolute; right:10px; top:10px;">X</button>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<div id="imageLightbox" onclick="closeLightbox()" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.9);
+  justify-content:center;
+  align-items:center;
+  z-index:2000;
+">
+  <img id="lightboxImg" style="
+    max-width:90%;
+    max-height:90%;
+    object-fit:contain;
+    cursor:zoom-out;
+  ">
+</div>
+</body>
+</html>

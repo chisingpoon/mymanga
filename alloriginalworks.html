@@ -4,7 +4,266 @@
 <meta charset="UTF-8">
 <title>日本原作目録</title>
 
-V
+<style>
+
+/* ===============================
+   BASE
+================================= */
+body {
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", Arial, sans-serif;
+  padding: 30px;
+  background: #f4f5f7;
+  color: #222;
+}
+
+/* ===============================
+   HEADER
+================================= */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 35px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+.site-title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.header-link {
+  text-decoration: none;
+  font-size: 13px;
+  padding: 7px 14px;
+  border-radius: 6px;
+  background: #fff;
+  color: #333;
+  border: 1px solid #ddd;
+  transition: 0.2s ease;
+}
+
+.header-link:hover {
+  background: #222;
+  color: #fff;
+  border-color: #222;
+}
+
+/* ===============================
+   TOP FILTERS (Sticky)
+================================= */
+.top-filters {
+  background: #fff;
+  padding: 18px 20px;
+  border-radius: 10px;
+  margin-bottom: 25px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  align-items: center;
+}
+
+.filter-row-top {
+  margin-bottom: 18px;
+}
+
+#clearFiltersBtn {
+  padding: 6px 14px;
+  font-size: 12px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+}
+
+#clearFiltersBtn:hover {
+  background: #222;
+  color: #fff;
+}
+
+.search-wrapper {
+  position: relative;
+  flex: 1 1 280px;
+  max-width: 420px;
+}
+
+.search-wrapper input {
+  width: 100%;
+  padding: 7px 30px 7px 12px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+}
+
+.clear-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #aaa;
+  display: none;
+}
+
+.clear-btn:hover {
+  color: #000;
+}
+
+.result-count {
+  font-size: 12px;
+  color: #666;
+}
+
+.filter-dropdown {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  min-width: 170px;
+}
+
+.filter-dropdown label {
+  font-weight: 600;
+  margin-bottom: 4px;
+  font-size: 11px;
+  color: #666;
+}
+
+.filter-dropdown select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* ===============================
+   TABLE
+================================= */
+.content {
+  overflow-x: auto;
+}
+
+.data-table {
+  border-collapse: collapse;
+  background: #fff;
+  font-size: 12.5px;
+  width: 100%;
+}
+
+.data-table th,
+.data-table td {
+  padding: 6px 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.data-table th {
+  background: #fafafa;
+  font-weight: 600;
+  border-bottom: 2px solid #ddd;
+  cursor: pointer;
+}
+
+.data-table th:hover {
+  background: #f0f0f0;
+}
+
+.data-table td {
+  border-bottom: 1px solid #eee;
+}
+
+.data-table tr:hover td {
+  background: #f9fafc;
+}
+
+/* ===============================
+   PAGINATION
+================================= */
+#pagination {
+  margin-top: 25px;
+  text-align: center;
+  font-size: 12px;
+}
+
+#pagination button {
+  margin: 0 4px;
+  padding: 5px 10px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+#pagination button:hover:not(:disabled) {
+  background: #222;
+  color: #fff;
+}
+
+.active-page {
+  background: #222 !important;
+  color: #fff;
+}
+
+/* ===============================
+   MODAL
+================================= */
+.modal-box {
+  background: #fff;
+  width: 90%;
+  max-width: 950px;
+  margin: 4% auto;
+  padding: 25px;
+  border-radius: 12px;
+}
+
+.detail-container {
+  display: flex;
+  gap: 25px;
+}
+
+.detail-left {
+  width: 35%;
+}
+
+.detail-left img {
+  width: 100%;
+  object-fit: contain;
+}
+
+.detail-right {
+  width: 65%;
+}
+
+/* ===============================
+   RESPONSIVE
+================================= */
+@media (max-width: 900px) {
+  body {
+    padding: 18px;
+  }
+
+  .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .detail-container {
+    flex-direction: column;
+  }
+
+  .detail-left,
+  .detail-right {
+    width: 100%;
+  }
+}
+
+</style>
 </head>
 
 <body>

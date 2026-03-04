@@ -633,12 +633,23 @@ function handleSearchInput() {
 }
 
 function clearSearch() {
-  const input = document.getElementById("searchInput");
-  const clearBtn = document.querySelector(".clear-btn");
+  if (!sheetData || !sheetData.length) return;
 
+  const input = document.getElementById("searchInput");
   input.value = "";
-  clearBtn.style.display = "none";
-  applyFilters();
+
+  const clearBtn = document.querySelector(".clear-btn");
+  if (clearBtn) clearBtn.style.display = "none";
+
+  // Reset currentList to all rows with 掲載番
+  currentList = sheetData.filter(row => row.掲載番 && row.掲載番.trim() !== "");
+  currentPage = 1;
+
+  // Update result count
+  document.getElementById("resultCount").textContent = `共 ${currentList.length} 本作品`;
+
+  // Re-render table
+  renderPage();
 }
 
 function sortBy(column) {

@@ -405,8 +405,8 @@ body {
     <div id="resultCount" class="result-count"></div>
     
     <details>
-      <summary>標題</summary>
-      <div id="titleFilter" class="filter-group"></div>
+      <summary>類</summary>
+      <div id="categoryFilter" class="filter-group"></div>
     </details>
     
     <details>
@@ -444,7 +444,7 @@ fetch(SHEET_URL)
     sheetData = data.filter(row =>
       row.Active?.toLowerCase() === "yes"
     );
-    populateTitles(); 
+    populateCategories(); 
     populateSeries();
     populateAuthors();
     applyFilters();
@@ -476,18 +476,18 @@ function clearAllFilters() {
   applyFilters();
 }
 
-function populateTitles() {
-  const container = document.getElementById("titleFilter");
+function populateCategories() {
+  const container = document.getElementById("categoryFilter");
   if (!container) return;
 
-  const titles = [...new Set(sheetData.map(row => row.標題))];
+  const categories = [...new Set(sheetData.map(row => row.類))];
 
-  titles.forEach(title => {
+  categories.forEach(category => {
     const label = document.createElement("label");
 
     label.innerHTML = `
-      <input type="checkbox" value="${title}"
-             onchange="applyFilters()"> ${title}
+      <input type="checkbox" value="${category}"
+             onchange="applyFilters()"> ${category}
     `;
 
     container.appendChild(label);
@@ -619,7 +619,7 @@ function applyFilters() {
   const search = document.getElementById("searchInput").value.toLowerCase();
   const series = [...document.querySelectorAll('#seriesFilter input:checked')]
   .map(cb => cb.value);
-  const title = [...document.querySelectorAll('#titleFilter input:checked')]
+  const category = [...document.querySelectorAll('#categoryFilter input:checked')]
   .map(cb => cb.value);
   const author = [...document.querySelectorAll('#authorFilter input:checked')]
   .map(cb => cb.value);
@@ -638,13 +638,13 @@ function applyFilters() {
     const seriesMatch =
       series.length === 0 || series.includes(row.系列);
 
-    const titleMatch =
-      title.length === 0 || title.includes(row.標題);
+    const categoryMatch =
+      category.length === 0 || title.includes(row.類);
 
     const authorMatch =
       author.length === 0 || author.includes(row.著);
     
-    return searchMatch && seriesMatch && titleMatch && authorMatch;
+    return searchMatch && seriesMatch && categoryMatch && authorMatch;
   });
 
   // Sort price

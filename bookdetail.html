@@ -324,6 +324,48 @@ const tableRows = storyRows.map(d => `
     </table>
   ` : "";
   
+const jpCard = jpinfo ? `
+  <!-- JP CARD -->
+  <div class="card">
+    <div class="card-inner">
+
+      <div class="book-image">
+        <img src="${jpinfo.Image || ""}" 
+             alt="${jpinfo.標題} ${jpinfo.巻}" 
+             class="clickable-image"
+             onclick="openImageModal('${jpinfo.Image || ""}')">
+      </div>
+
+      <div class="column-box">
+        <h3>日文原版資料</h3>
+        <h1>${jpinfo.標題 || ""} ${jpinfo.巻 || ""}</h1>
+        <h2>${jpinfo.副標題 || ""}</h2>    
+        <div><strong>系列:</strong> ${jpinfo.系列 || ""}</div>
+        <div><strong>著:</strong> ${jpinfo.著 || ""}</div>
+        <div><strong>判型:</strong> ${jpinfo.判型 || ""}</div>
+        <div><strong>頁:</strong> ${jpinfo.頁 || ""}</div>
+        <div><strong>話:</strong> ${jpinfo.話 || ""}</div>
+        <div><strong>初版発行日:</strong> ${jpinfo.初版発行日 || ""}</div>
+        <div><strong>定価:</strong> ${jpinfo.定価 || ""}</div>
+        <div><strong>ISBN:</strong> ${jpinfo.ISBN || ""}</div>
+
+        ${jpinfo.ISBN ? `
+          <div>
+            <a 
+              href="bookdetailjp.html?isbn=${encodeURIComponent(jpinfo.ISBN)}" 
+              target="_blank" 
+              class="jp-detail-button"
+            >
+              查看日文原版詳情
+            </a>
+          </div>
+        ` : ''}
+      </div>
+
+    </div>
+  </div>
+` : "";
+
 document.getElementById("content").innerHTML = `
 
   <!-- ===== Top Section ===== -->
@@ -367,47 +409,7 @@ document.getElementById("content").innerHTML = `
 
 
   <!-- JP CARD -->
-  <div class="card">
-    <div class="card-inner">
-
-      <!-- Column 3: JP Image -->
-      
-      <div class="book-image">
-        <img src="${jpinfo?.Image || ""}" 
-             alt="${jpinfo?.標題} ${jpinfo?.巻}" 
-             class="clickable-image"
-             onclick="openImageModal('${jpinfo?.Image || ""}')">
-      </div>
-      
-      <!-- Column 4: JP Data -->
-      <div class="column-box">
-        <h3>日文原版資料</h3>
-        <h1>${jpinfo?.標題 || ""} ${jpinfo?.巻 || ""}</h1>
-        <h2>${jpinfo?.副標題 || ""}</h2>    
-        <div><strong>系列:</strong> ${jpinfo?.系列 || ""}</div>
-        <div><strong>著:</strong> ${jpinfo?.著 || ""}</div>
-        <div><strong>判型:</strong> ${jpinfo?.判型 || ""}</div>
-        <div><strong>頁:</strong> ${jpinfo?.頁 || ""}</div>
-        <div><strong>話:</strong> ${jpinfo?.話 || ""}</div>
-        <div><strong>初版発行日:</strong> ${jpinfo?.初版発行日 || ""}</div>
-        <div><strong>定価:</strong> ${jpinfo?.定価 || ""}</div>
-        <div><strong>ISBN:</strong> ${jpinfo?.ISBN || ""}</div>
-        <!-- ✅ JP detail link -->
-        ${jpinfo?.ISBN ? `
-            <div>
-              <a 
-                href="bookdetailjp.html?isbn=${encodeURIComponent(jpinfo.ISBN)}" 
-                target="_blank" 
-                class="jp-detail-button"
-              >
-                查看日文原版詳情
-              </a>
-            </div>
-          ` : ''}
-      </div>
-      </div>
-  </div>
-
+   ${jpCard}
 </div>
 
   <!-- ===== Bottom Details Table (OUTSIDE top-section) ===== -->

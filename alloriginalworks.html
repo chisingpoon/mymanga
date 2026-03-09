@@ -630,7 +630,7 @@ function clearSearch() {
     populateCompleteCollection();
 
     // 4️⃣ Reset table to all rows
-    currentList = sheetData.filter(r => r.掲載番 && r.掲載番.trim() !== "");
+    currentList = sheetData.filter(r => r.作品番 && r.作品番.trim() !== "");
     currentPage = 1;
 
     // 5️⃣ Update result count

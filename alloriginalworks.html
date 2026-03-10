@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+   <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
@@ -421,6 +421,48 @@ body.dark .checkbox-list::-webkit-scrollbar-thumb {
 .filter-dropdown:nth-child(1) { flex: 1.4; } /* magazine wider */
 .filter-dropdown:nth-child(2) { flex: 1.2; }
 .filter-dropdown:nth-child(n+3) { flex: 1; }
+
+/* Checkbox Dropdown */
+.checkbox-dropdown {
+  position: relative;
+}
+
+.dropdown-btn {
+  padding: 7px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.dropdown-btn:hover {
+  background: #f2f2f2;
+}
+
+.dropdown-panel {
+  display: none;
+  position: absolute;
+  top: 36px;
+  left: 0;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  width: 160px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+  z-index: 2000;
+}
+
+.dropdown-panel.show {
+  display: block;
+}
+
+body.dark .dropdown-panel {
+  background: #1e1e1e;
+  border: 1px solid #444;
+}
+
 </style>
 </head>
 
@@ -453,6 +495,16 @@ body.dark .checkbox-list::-webkit-scrollbar-thumb {
              oninput="handleSearchInput()">
       <span class="clear-btn" onclick="clearSearch()">×</span>
     </div>
+
+    <div class="checkbox-dropdown">
+        <button class="dropdown-btn" onclick="toggleTypeDropdown()">
+          作品類 ▼
+        </button>
+
+        <div class="dropdown-panel" id="typeFilterPanel">
+          <div class="checkbox-list" id="typeFilter"></div>
+        </div>
+     </div>
 
     <div id="resultCount" class="result-count"></div>
   </div>
@@ -526,7 +578,8 @@ fetch(SHEET_URL)
       sheetData = data.filter(row =>
         row.作品番 && row.作品番.trim() !== ""
       );
-
+       
+      populateLengthTypeFilter();
       populateMagazine(); 
       populateTankobon(); 
       populateBunkobon();
@@ -547,7 +600,37 @@ fetch(SHEET_URL)
     document.getElementById("mangalist").innerHTML =
       "❌ Network error. Check console.";
   });
+   
+document.addEventListener("click", function(e) {
+  const dropdown = document.querySelector(".checkbox-dropdown");
+  if (!dropdown.contains(e.target)) {
+    document.getElementById("typeFilterPanel").classList.remove("show");
+  }
+});
+   
+function toggleLengthTypeDropdown() {
+  document.getElementById("lengthTypeFilterPanel").classList.toggle("show");
+}
 
+function populateLengthTypeFilter() {
+
+  const container = document.getElementById("lengthTypeFilter");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  const lengthTypes = [...new Set(sheetData.map(row => row.作品類).filter(Boolean))].sort();
+
+  lengthTypes.forEach(lent => {
+    const label = document.createElement("label");
+
+    label.innerHTML =
+      `<input type="checkbox" value="${lent}" onchange="applyFilters()"> ${lent}`;
+
+    container.appendChild(label);
+  });
+}
+   
 function populateMagazine() {
     const container = document.getElementById("magazineFilter");
     if (!container) return;
@@ -657,6 +740,7 @@ function clearSearch() {
     if (clearBtn) clearBtn.style.display = "none";
 
     // 3️⃣ Repopulate all checkbox filters (all unchecked)
+    populateLengthTypeFilter();
     populateMagazine();
     populateTankobon();
     populateVolZero();
@@ -741,7 +825,8 @@ function applyFilters() {
         return Array.from(document.getElementById(containerId).querySelectorAll("input[type=checkbox]:checked"))
                     .map(cb => cb.value);
     }
-
+   
+    const lengthTypeChecked = getCheckedValues("lengthTypeFilter");
     const magazineChecked = getCheckedValues("magazineFilter");
     const tankobonChecked = getCheckedValues("tankobonFilter");
     const volZeroChecked = getCheckedValues("volZeroFilter");
@@ -752,7 +837,7 @@ function applyFilters() {
 
     let filtered = sheetData.filter(row => {
         const searchMatch = Object.values(row).join(" ").toLowerCase().includes(search);
-
+        const lengthTypeMatch = !lengthTypeChecked.length || lengthTypeChecked.includes(row.作品類);
         const magazineMatch = !magazineChecked.length || magazineChecked.includes(row.初出掲載誌);
         const tankobonMatch = !tankobonChecked.length || tankobonChecked.includes(row.単行本);
         const bunkobonMatch = !bunkobonChecked.length || bunkobonChecked.includes(row.文庫);
@@ -761,7 +846,7 @@ function applyFilters() {
         const pikkapikaMatch = !pikkapikaChecked.length || pikkapikaChecked.includes(row.兒童版);
         const completeCollectionMatch = !completeCollectionChecked.length || completeCollectionChecked.includes(row.大全集);
 
-        return searchMatch && magazineMatch && tankobonMatch && bunkobonMatch &&
+        return searchMatch && lengthTypeMatch && magazineMatch && tankobonMatch && bunkobonMatch &&
                volZeroMatch && doramiMatch && pikkapikaMatch && completeCollectionMatch;
     });
 

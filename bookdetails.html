@@ -21,7 +21,7 @@
     flex: 1 1 300px;
     min-width: 300px;
     max-width: 600px;
-    align-items: stretch; /* stretch both columns */
+    align-items: flex-start; /* align top of image and text */
   }
 
   /* Image wrapper ensures image height matches text column */
@@ -32,10 +32,11 @@
   }
 
   .card .img-wrapper img {
-    max-height: 100%; /* scale to match card height */
-    width: auto;
+    height: 100%;       /* scale to match text column */
+    width: auto;        /* maintain aspect ratio */
     object-fit: contain;
     border-radius: 4px;
+    display: block;
   }
 
   /* Text column */
@@ -138,12 +139,10 @@ async function loadCards(ISBNHK, ISBNJP){
     const book = JP.find(r=>r.ISBN===ISBNJP);
     if(book) container.innerHTML += createCard(book,'JP','日文版');
   }
-  // Equal height no longer needed
 }
 
 async function loadWorks(ISBNJP){
   if(!ISBNJP) return;
-
   const works = await fetchJSON('works');
   const complete = await fetchJSON('complete');
 
@@ -163,11 +162,10 @@ async function loadWorks(ISBNJP){
     '出版副題','收錄初出掲載誌','收錄初出掲載号',
     '出版備考','副題港譯','色'
   ];
-
   const extraCols = complete.length ? Object.keys(complete[0]).filter(k => !originalCols.includes(k)) : [];
   let columns = [...originalCols, ...extraCols];
 
-  const hiddenCols = ['出版備考', '色']; // hide columns
+  const hiddenCols = ['出版備考','色'];
   columns = columns.filter(col => !hiddenCols.includes(col));
 
   const thead = document.querySelector('#works-table thead tr');

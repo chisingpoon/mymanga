@@ -7,10 +7,31 @@
 <style>
   body { font-family: Arial, sans-serif; margin: 20px; }
   .cards { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 40px; }
-  .card { border: 1px solid #ccc; border-radius: 8px; padding: 16px; width: 300px; box-shadow: 2px 2px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: flex-start; }
-  .card img { max-width: 100%; height: auto; display: block; margin-bottom: 10px; }
+  
+  /* Horizontal card layout */
+  .card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 16px;
+    width: 500px;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .card img {
+    max-width: 150px;
+    height: auto;
+    display: block;
+    border-radius: 4px;
+  }
+  .card .card-data {
+    flex: 1;
+    overflow-wrap: anywhere;
+  }
 
-  /* Horizontal + vertical scroll container */
+  /* Table scrollable */
   #table-wrapper { overflow-x: auto; border: 1px solid #ccc; position: relative; }
   #table-container { max-height: 400px; overflow-y: auto; }
 
@@ -46,11 +67,11 @@
       <table id="works-table">
         <thead>
           <tr>
-            <!-- Header will be dynamically generated -->
+            <!-- Header dynamically generated -->
           </tr>
         </thead>
         <tbody>
-          <!-- Table rows will be injected here -->
+          <!-- Rows dynamically generated -->
         </tbody>
       </table>
     </div>
@@ -58,33 +79,35 @@
 </div>
 
 <script>
-// OpenSheet URLs for your sheets
+// OpenSheet JSON URLs
 const urlHK = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
 const urlJP = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP";
 const urlWorks = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品";
 const urlComplete = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
 
-// Helper: fetch CSV/TSV and parse into array of objects
+// Fetch JSON
 async function fetchJSON(url) {
   const res = await fetch(url);
-  if (!res.ok) throw new Error("Failed to fetch: " + url);
-  const data = await res.json();
-  return data; // Already an array of objects
+  if(!res.ok) throw new Error("Failed to fetch: " + url);
+  return await res.json();
 }
 
-// Helper: create card HTML
-function createCard(data, sheetName) {
-  let html = `<div class="card"><h3>${sheetName}</h3>`;
+// Create horizontal card
+function createCard(data, sheetName){
+  let html = `<div class="card">`;
   if(data.Image) html += `<img src="${data.Image}" alt="Book Image">`;
-  for(const key in data) {
-    html += `<strong>${key}:</strong> ${data[key]}<br>`;
+  html += `<div class="card-data"><h3>${sheetName}</h3>`;
+  for(const key in data){
+    if(key !== "Image"){
+      html += `<strong>${key}:</strong> ${data[key]}<br>`;
+    }
   }
-  html += `</div>`;
+  html += `</div></div>`;
   return html;
 }
 
-// Parse query parameters
-function getQueryParams() {
+// URL query
+function getQueryParams(){
   const params = new URLSearchParams(window.location.search);
   return {
     ISBNHK: params.get('ISBNHK'),
@@ -93,56 +116,53 @@ function getQueryParams() {
 }
 
 // Main
-async function showBooks(ISBNHK = null, ISBNJP = null) {
+async function showBooks(ISBNHK=null, ISBNJP=null){
   const cardsContainer = document.getElementById('cards-container');
   cardsContainer.innerHTML = '';
 
   let HKData=[], JPData=[], worksData=[];
 
-  if(ISBNHK) {
+  if(ISBNHK){
     const HK = await fetchJSON(urlHK);
     HKData = HK.filter(row => row.ISBN === ISBNHK);
-    HKData.forEach(d => cardsContainer.innerHTML += createCard(d, '出版目録HK'));
+    HKData.forEach(d => cardsContainer.innerHTML += createCard(d,'出版目録HK'));
   }
 
-  if(ISBNJP) {
+  if(ISBNJP){
     const JP = await fetchJSON(urlJP);
     JPData = JP.filter(row => row.ISBN === ISBNJP);
-    JPData.forEach(d => cardsContainer.innerHTML += createCard(d, '出版目録JP'));
+    JPData.forEach(d => cardsContainer.innerHTML += createCard(d,'出版目録JP'));
   }
 
-  // Equalize card heights
+  // Equal card heights
   const cards = document.querySelectorAll('.card');
   let maxHeight = 0;
-  cards.forEach(c => { c.style.height = 'auto'; if(c.offsetHeight > maxHeight) maxHeight = c.offsetHeight; });
-  cards.forEach(c => c.style.height = maxHeight + 'px');
+  cards.forEach(c=>{ c.style.height='auto'; if(c.offsetHeight>maxHeight) maxHeight=c.offsetHeight; });
+  cards.forEach(c=>c.style.height = maxHeight+'px');
 
   // Bottom table
-  if(ISBNJP) {
+  if(ISBNJP){
     const works = await fetchJSON(urlWorks);
     const completeList = await fetchJSON(urlComplete);
 
-    worksData = works.filter(row => row.ISBN === ISBNJP);
+    worksData = works.filter(row=>row.ISBN===ISBNJP);
 
-    if(worksData.length > 0) {
-      // Merge by 作品番
-      worksData = worksData.map(row => {
-        const match = completeList.find(c => c['作品番'] === row['作品番']);
+    if(worksData.length>0){
+      worksData = worksData.map(row=>{
+        const match = completeList.find(c=>c['作品番']===row['作品番']);
         if(match){
-          for(const key in match){
-            if(key !== '作品番') row[key] = match[key];
-          }
+          for(const key in match) if(key!=='作品番') row[key]=match[key];
         }
         return row;
       });
 
       const originalCols = ['ISBN','作品番','類','番','巻','收錄話','收錄頁','出版副題','收錄初出掲載誌','收錄初出掲載号','出版備考','副題港譯','色'];
-      const extraCols = completeList.length > 0 ? Object.keys(completeList[0]).filter(k => !originalCols.includes(k)) : [];
-
+      const extraCols = completeList.length>0?Object.keys(completeList[0]).filter(k=>!originalCols.includes(k)):[];
+      
       // Header
       const theadRow = document.querySelector('#works-table thead tr');
-      theadRow.innerHTML = '';
-      [...originalCols, ...extraCols].forEach(col => {
+      theadRow.innerHTML='';
+      [...originalCols,...extraCols].forEach(col=>{
         const th = document.createElement('th');
         th.textContent = col;
         if(['類','番','巻','收錄話','收錄頁','色'].includes(col)) th.classList.add('nowrap');
@@ -151,34 +171,33 @@ async function showBooks(ISBNHK = null, ISBNJP = null) {
 
       // Body
       const tbody = document.querySelector('#works-table tbody');
-      tbody.innerHTML = '';
-      worksData.sort((a,b) => (a.收錄話 || 0) - (b.收錄話 || 0));
-      worksData.forEach(row => {
+      tbody.innerHTML='';
+      worksData.sort((a,b)=>(a.收錄話||0)-(b.收錄話||0));
+      worksData.forEach(row=>{
         const tr = document.createElement('tr');
-        [...originalCols, ...extraCols].forEach(col => {
+        [...originalCols,...extraCols].forEach(col=>{
           const td = document.createElement('td');
-          td.textContent = row[col] || '';
+          td.textContent = row[col]||'';
           if(['類','番','巻','收錄話','收錄頁','色'].includes(col)) td.classList.add('nowrap');
           tr.appendChild(td);
         });
         tbody.appendChild(tr);
       });
 
-      document.getElementById('bottom-section').style.display = 'block';
+      document.getElementById('bottom-section').style.display='block';
     } else {
-      document.getElementById('bottom-section').style.display = 'none';
+      document.getElementById('bottom-section').style.display='none';
     }
   } else {
-    document.getElementById('bottom-section').style.display = 'none';
+    document.getElementById('bottom-section').style.display='none';
   }
 }
 
-// Load on page ready
-window.addEventListener('DOMContentLoaded', () => {
-  const { ISBNHK, ISBNJP } = getQueryParams();
-  showBooks(ISBNHK, ISBNJP);
+// Load page
+window.addEventListener('DOMContentLoaded',()=>{
+  const {ISBNHK,ISBNJP} = getQueryParams();
+  showBooks(ISBNHK,ISBNJP);
 });
 </script>
-
 </body>
 </html>

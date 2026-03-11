@@ -65,17 +65,11 @@ const urlWorks = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2
 const urlComplete = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
 
 // Helper: fetch CSV/TSV and parse into array of objects
-async function fetchCSV(url) {
+async function fetchJSON(url) {
   const res = await fetch(url);
-  const text = await res.text();
-  const lines = text.split('\n').filter(l => l.trim() !== '');
-  const headers = lines[0].split('\t');
-  return lines.slice(1).map(line => {
-    const values = line.split('\t');
-    let obj = {};
-    headers.forEach((h,i)=> obj[h.trim()] = values[i] ? values[i].trim() : '');
-    return obj;
-  });
+  if (!res.ok) throw new Error("Failed to fetch: " + url);
+  const data = await res.json();
+  return data; // Already an array of objects
 }
 
 // Helper: create card HTML
@@ -106,13 +100,13 @@ async function showBooks(ISBNHK = null, ISBNJP = null) {
   let HKData=[], JPData=[], worksData=[];
 
   if(ISBNHK) {
-    const HK = await fetchCSV(urlHK);
+    const HK = await fetchJSON(urlHK);
     HKData = HK.filter(row => row.ISBN === ISBNHK);
     HKData.forEach(d => cardsContainer.innerHTML += createCard(d, '出版目録HK'));
   }
 
   if(ISBNJP) {
-    const JP = await fetchCSV(urlJP);
+    const JP = await fetchJSON(urlJP);
     JPData = JP.filter(row => row.ISBN === ISBNJP);
     JPData.forEach(d => cardsContainer.innerHTML += createCard(d, '出版目録JP'));
   }
@@ -125,8 +119,8 @@ async function showBooks(ISBNHK = null, ISBNJP = null) {
 
   // Bottom table
   if(ISBNJP) {
-    const works = await fetchCSV(urlWorks);
-    const completeList = await fetchCSV(urlComplete);
+    const works = await fetchJSON(urlWorks);
+    const completeList = await fetchJSON(urlComplete);
 
     worksData = works.filter(row => row.ISBN === ISBNJP);
 

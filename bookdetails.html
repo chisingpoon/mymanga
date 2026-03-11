@@ -14,7 +14,6 @@
       display: flex;
       flex-direction: row;
       gap: 16px;
-      align-items: stretch;      /* make children stretch to same height */
       border: 1px solid #ccc;
       border-radius: 8px;
       padding: 16px;
@@ -22,17 +21,24 @@
       flex: 1 1 300px;
       min-width: 300px;
       max-width: 600px;
-      overflow: hidden;
+      align-items: stretch; /* make image and text same height */
     }
     
     .card img {
-      height: 100%;              /* match card height */
-      width: auto;               /* keep aspect ratio */
-      object-fit: contain;       /* prevent distortion */
+      width: auto;
+      height: auto;
+      max-height: 100%;  /* fit image to card height */
+      object-fit: contain;
       border-radius: 4px;
-      flex-shrink: 0;            /* don't shrink image */
+      align-self: stretch; /* stretch to match card height */
     }
-    .card-data { flex: 1; display: flex; flex-direction: column; }
+    
+    .card .card-data {
+      flex: 1;  /* allow text column to grow */
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
     .card-data h3 { margin-top: 0; }
     .card-data .field { display: flex; gap: 6px; margin-bottom: 4px; }
 

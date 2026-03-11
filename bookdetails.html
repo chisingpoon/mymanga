@@ -1,99 +1,38 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-HK">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>書籍詳細資訊</title>
-<style>
-  body { font-family: Arial, sans-serif; margin: 20px; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>書籍詳細資訊</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1, h2 { margin-bottom: 16px; }
 
-  /* Cards container auto-fit */
-  .cards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    margin-bottom: 40px;
-    justify-content: flex-start;
-  }
+    /* Cards layout */
+    #cards-container { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 40px; }
+    .card { border: 1px solid #ccc; border-radius: 8px; padding: 16px; display: flex; gap: 16px; flex: 1 1 300px; min-width: 300px; max-width: 600px; }
+    .card img { width: auto; height: 180px; object-fit: contain; border-radius: 4px; }
+    .card-data { flex: 1; display: flex; flex-direction: column; }
+    .card-data h3 { margin-top: 0; }
+    .card-data .field { display: flex; gap: 6px; margin-bottom: 4px; }
 
-  /* Horizontal card layout with image auto-fit */
-  .card {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 16px;
-    box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
-
-    display: flex;
-    flex-direction: row;
-    gap: 16px;
-    align-items: stretch;
-    flex: 1 1 300px;   
-    min-width: 300px;
-    max-width: 600px;
-
-    max-height: 50vh;
-    overflow: hidden;  
-  }
-
-  .card img {
-    width: auto;
-    height: 100%;       
-    max-height: 100%;
-    object-fit: contain; 
-    border-radius: 4px;
-
-    -webkit-user-drag: none;
-    user-select: none;
-    pointer-events: none;
-  }
-
-  .card .card-data {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    overflow-wrap: anywhere;
-  }
-
-  .card .card-data div.field {
-    display: flex;
-    justify-content: flex-start;
-    gap: 6px;
-    flex-wrap: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .card .card-data div.field strong {
-    flex-shrink: 0; 
-  }
-
-  .card .card-data div.field span {
-    flex: 1;           
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  #bottom-section { display: none; margin-top: 40px; }
-  table { border-collapse: collapse; width: 100%; min-width: 1200px; }
-  th, td { padding: 8px; border: 1px solid #ccc; text-align: left; }
-  th { position: sticky; top: 0; background-color: #f0f0f0; }
-  .nowrap { white-space: nowrap; }
-  tbody tr:nth-child(odd) { background-color: #fafafa; }
-  tbody tr:nth-child(even) { background-color: #f5f5f5; }
-  tbody tr:hover { background-color: #ffeeba; }
-</style>
+    /* Table layout */
+    #table-wrapper { overflow-x: auto; border: 1px solid #ccc; }
+    table { border-collapse: collapse; width: 100%; min-width: 1400px; }
+    th, td { padding: 8px; border: 1px solid #ccc; text-align: left; }
+    th { position: sticky; top: 0; background-color: #f0f0f0; }
+    .nowrap { white-space: nowrap; }
+  </style>
 </head>
 <body>
 
 <h1>書籍詳細資訊</h1>
 
-<div id="cards-container" class="cards"></div>
+<div id="cards-container"></div>
 
-<div id="bottom-section">
+<div id="bottom-section" style="display:none;">
   <h2>書籍收錄作品</h2>
-  <div id="table-wrapper" style="overflow-x:auto;">
+  <div id="table-wrapper">
     <table id="works-table">
       <thead><tr></tr></thead>
       <tbody></tbody>
@@ -102,157 +41,160 @@
 </div>
 
 <script>
-// -----------------------------
-// Your JS goes here
-// -----------------------------
+  // Disable right-click
+  document.addEventListener('contextmenu', e => e.preventDefault());
 
-// Disable right-click
-document.addEventListener('contextmenu', e => e.preventDefault());
+  const urls = {
+    HK: "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK",
+    JP: "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP",
+    works: "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品",
+    complete: "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表"
+  };
 
-const urls = {
-  HK: "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK",
-  JP: "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP",
-  works: "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品",
-  complete: "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表"
-};
-
-const cardFields = {
-  HK: {
-    "Title": "書名",
-    "Volume": "集數",
-    "Subtitle": "副題",
-    "Author": "作者",
-    "Publisher": "出版社",
-    "IssueDate": "出版日期",
-    "Page": "頁數",
-    "Size": "尺寸",
-    "Price": "定價",
-    "ISBN": "ISBN",
-    "OriginalTitle": "原作標題",
-    "OriginalSubtitle": "原作副題",
-    "OriginCountry": "地區"
-  },
-  JP: {
-    "系列": "系列",
-    "巻": "巻",
-    "類": "作品",
-    "標題": "書名",
-    "副標題": "副題",
-    "著": "作者",
-    "初版発行日": "初版發行日",
-    "頁": "頁數",
-    "判型": "判型",
-    "定価": "定價",
-    "ISBN": "ISBN"
-  }
-};
-
-const cache = {};
-
-async function fetchJSON(name){
-  if(cache[name]) return cache[name];
-  const res = await fetch(urls[name]);
-  if(!res.ok) throw new Error("Fetch failed: "+name);
-  cache[name] = await res.json();
-  return cache[name];
-}
-
-function createCard(data,type,title){
-  let html = `<div class="card">`;
-  if(data.Image){ html += `<img src="${data.Image}" alt="Book Image">`; }
-  html += `<div class="card-data"><h3>${title}</h3>`;
-  const fields = cardFields[type];
-  for(const key in fields){
-    if(data[key]!==undefined && data[key]!==""){
-      html += `<div class="field"><strong>${fields[key]}:</strong> <span>${data[key]}</span></div>`;
+  const cardFields = {
+    HK: {
+      "Title": "書名",
+      "Volume": "集數",
+      "Subtitle": "副題",
+      "Author": "作者",
+      "Publisher": "出版社",
+      "IssueDate": "出版日期",
+      "Page": "頁數",
+      "Size": "尺寸",
+      "Price": "定價",
+      "ISBN": "ISBN",
+      "OriginalTitle": "原作標題",
+      "OriginalSubtitle": "原作副題",
+      "OriginCountry": "地區"
+    },
+    JP: {
+      "系列": "系列",
+      "巻": "巻",
+      "類": "作品",
+      "標題": "書名",
+      "副標題": "副題",
+      "著": "作者",
+      "初版発行日": "初版發行日",
+      "頁": "頁數",
+      "判型": "判型",
+      "定価": "定價",
+      "ISBN": "ISBN"
     }
+  };
+
+  const cache = {};
+
+  async function fetchJSON(name) {
+    if(cache[name]) return cache[name];
+    const res = await fetch(urls[name]);
+    if(!res.ok) throw new Error("Fetch failed: "+name);
+    cache[name] = await res.json();
+    return cache[name];
   }
-  html += `</div></div>`;
-  return html;
-}
 
-function getParams(){
-  const p = new URLSearchParams(window.location.search);
-  return { ISBNHK: p.get('ISBNHK'), ISBNJP: p.get('ISBNJP') };
-}
-
-async function loadCards(ISBNHK,ISBNJP){
-  const container = document.getElementById('cards-container');
-  container.innerHTML = '';
-  if(ISBNHK){
-    const HK = await fetchJSON('HK');
-    const book = HK.find(r => r.ISBN === ISBNHK);
-    if(book){ container.innerHTML += createCard(book,'HK','香港版'); }
+  function createCard(data, type, title) {
+    let html = `<div class="card">`;
+    if(data.Image){
+      html += `<img src="${data.Image}" alt="Book Image">`;
+    }
+    html += `<div class="card-data"><h3>${title}</h3>`;
+    const fields = cardFields[type];
+    for(const key in fields){
+      if(data[key]){
+        html += `<div class="field"><strong>${fields[key]}:</strong> <span>${data[key]}</span></div>`;
+      }
+    }
+    html += `</div></div>`;
+    return html;
   }
-  if(ISBNJP){
-    const JP = await fetchJSON('JP');
-    const book = JP.find(r => r.ISBN === ISBNJP);
-    if(book){ container.innerHTML += createCard(book,'JP','日文版'); }
+
+  function getParams() {
+    const p = new URLSearchParams(window.location.search);
+    return {
+      ISBNHK: p.get('ISBNHK'),
+      ISBNJP: p.get('ISBNJP')
+    };
   }
-  equalizeCardHeight();
-}
 
-function equalizeCardHeight(){
-  const cards = document.querySelectorAll('.card');
-  let max = 0;
-  cards.forEach(c=>{ c.style.height='auto'; if(c.offsetHeight>max) max=c.offsetHeight; });
-  cards.forEach(c=>c.style.height=max+'px');
-}
+  async function loadCards(ISBNHK, ISBNJP) {
+    const container = document.getElementById('cards-container');
+    container.innerHTML = '';
+    if(ISBNHK){
+      const HK = await fetchJSON('HK');
+      const book = HK.find(r => r.ISBN === ISBNHK);
+      if(book) container.innerHTML += createCard(book,'HK','香港版');
+    }
+    if(ISBNJP){
+      const JP = await fetchJSON('JP');
+      const book = JP.find(r => r.ISBN === ISBNJP);
+      if(book) container.innerHTML += createCard(book,'JP','日文版');
+    }
+    equalizeCardHeight();
+  }
 
-async function loadWorks(ISBNJP){
-  if(!ISBNJP) return;
-  const works = await fetchJSON('works');
-  const complete = await fetchJSON('complete');
-  let rows = works.filter(r=>r.ISBN===ISBNJP);
-  if(rows.length===0) return;
-
-  rows = rows.map(r=>{
-    const match = complete.find(c=>c['作品番']===r['作品番']);
-    if(match){ for(const k in match){ if(k!=='作品番') r[k]=match[k]; } }
-    return r;
-  });
-
-  const originalCols = [
-    'ISBN','作品番','類','番','巻','收錄話','收錄頁',
-    '出版副題','收錄初出掲載誌','收錄初出掲載号',
-    '出版備考','副題港譯','色'
-  ];
-
-  const extraCols = complete.length ? Object.keys(complete[0]).filter(k=>!originalCols.includes(k)) : [];
-  const columns = [...originalCols,...extraCols];
-
-  const thead = document.querySelector('#works-table thead tr');
-  const tbody = document.querySelector('#works-table tbody');
-  thead.innerHTML=''; tbody.innerHTML='';
-
-  columns.forEach(col=>{
-    const th=document.createElement('th');
-    th.textContent=col;
-    if(['類','番','巻','收錄話','收錄頁','色'].includes(col)) th.classList.add('nowrap');
-    thead.appendChild(th);
-  });
-
-  rows.sort((a,b)=>(a.收錄話||0)-(b.收錄話||0));
-
-  rows.forEach(r=>{
-    const tr=document.createElement('tr');
-    columns.forEach(col=>{
-      const td=document.createElement('td');
-      td.textContent=r[col]||'';
-      if(['類','番','巻','收錄話','收錄頁','色'].includes(col)) td.classList.add('nowrap');
-      tr.appendChild(td);
+  function equalizeCardHeight() {
+    const cards = document.querySelectorAll('.card');
+    let max = 0;
+    cards.forEach(c=>{
+      c.style.height = 'auto';
+      if(c.offsetHeight > max) max = c.offsetHeight;
     });
-    tbody.appendChild(tr);
+    cards.forEach(c => c.style.height = max + 'px');
+  }
+
+  async function loadWorks(ISBNJP){
+    if(!ISBNJP) return;
+    const works = await fetchJSON('works');
+    const complete = await fetchJSON('complete');
+    let rows = works.filter(r => r.ISBN === ISBNJP);
+    if(rows.length === 0) return;
+    rows = rows.map(r=>{
+      const match = complete.find(c=>c['作品番']===r['作品番']);
+      if(match){
+        for(const k in match) if(k!=='作品番') r[k]=match[k];
+      }
+      return r;
+    });
+
+    const originalCols = [
+      'ISBN','作品番','類','番','巻','收錄話','收錄頁',
+      '出版副題','收錄初出掲載誌','收錄初出掲載号',
+      '出版備考','副題港譯','色'
+    ];
+    const extraCols = complete.length ? Object.keys(complete[0]).filter(k=>!originalCols.includes(k)) : [];
+    const columns = [...originalCols, ...extraCols];
+
+    const thead = document.querySelector('#works-table thead tr');
+    const tbody = document.querySelector('#works-table tbody');
+    thead.innerHTML=''; tbody.innerHTML='';
+
+    columns.forEach(col=>{
+      const th = document.createElement('th');
+      th.textContent = col;
+      if(['類','番','巻','收錄話','收錄頁','色'].includes(col)) th.classList.add('nowrap');
+      thead.appendChild(th);
+    });
+
+    rows.sort((a,b)=>(a.收錄話||0)-(b.收錄話||0));
+    rows.forEach(r=>{
+      const tr = document.createElement('tr');
+      columns.forEach(col=>{
+        const td = document.createElement('td');
+        td.textContent = r[col]||'';
+        if(['類','番','巻','收錄話','收錄頁','色'].includes(col)) td.classList.add('nowrap');
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('bottom-section').style.display='block';
+  }
+
+  window.addEventListener('DOMContentLoaded', async ()=>{
+    const {ISBNHK, ISBNJP} = getParams();
+    await loadCards(ISBNHK, ISBNJP);
+    await loadWorks(ISBNJP);
   });
-
-  document.getElementById('bottom-section').style.display='block';
-}
-
-window.addEventListener('DOMContentLoaded', async ()=>{
-  const {ISBNHK,ISBNJP} = getParams();
-  await loadCards(ISBNHK,ISBNJP);
-  await loadWorks(ISBNJP);
-});
 </script>
 
 </body>

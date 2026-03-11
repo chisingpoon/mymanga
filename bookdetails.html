@@ -138,44 +138,63 @@ function equalizeCardHeight(){
 
 async function loadWorks(ISBNJP){
   if(!ISBNJP) return;
+
   const works = await fetchJSON('works');
   const complete = await fetchJSON('complete');
-  let rows = works.filter(r=>r.ISBN===ISBNJP);
-  if(rows.length===0) return;
-  rows = rows.map(r=>{
-    const match = complete.find(c=>c['作品番']===r['作品番']);
-    if(match) for(const k in match) if(k!=='作品番') r[k]=match[k];
+
+  let rows = works.filter(r => r.ISBN === ISBNJP);
+  if(rows.length === 0) return;
+
+  rows = rows.map(r => {
+    const match = complete.find(c => c['作品番'] === r['作品番']);
+    if(match){
+      for(const k in match) if(k !== '作品番') r[k] = match[k];
+    }
     return r;
   });
 
-  const originalCols=['ISBN','作品番','類','番','巻','收錄話','收錄頁','出版副題','收錄初出掲載誌','收錄初出掲載号','出版備考','副題港譯','色'];
-  const extraCols = complete.length ? Object.keys(complete[0]).filter(k=>!originalCols.includes(k)) : [];
-  const columns = [...originalCols,...extraCols];
+  const originalCols = [
+    'ISBN','作品番','類','番','巻','收錄話','收錄頁',
+    '出版副題','收錄初出掲載誌','收錄初出掲載号',
+    '出版備考','副題港譯','色'
+  ];
 
-  const thead=document.querySelector('#works-table thead tr');
-  const tbody=document.querySelector('#works-table tbody');
-  thead.innerHTML=''; tbody.innerHTML='';
+  const extraCols = complete.length ? Object.keys(complete[0]).filter(k => !originalCols.includes(k)) : [];
+  let columns = [...originalCols, ...extraCols];
 
-  columns.forEach(col=>{
-    const th=document.createElement('th'); th.textContent=col;
-    if(['類','番','巻','收錄話','收錄頁','色'].includes(col)) th.classList.add('nowrap');
+  // -------------------------
+  // DEFINE COLUMNS TO HIDE
+  // -------------------------
+  const hiddenCols = ['出版備考', '色']; // <-- put any columns you want hidden here
+  columns = columns.filter(col => !hiddenCols.includes(col));
+
+  const thead = document.querySelector('#works-table thead tr');
+  const tbody = document.querySelector('#works-table tbody');
+  thead.innerHTML = '';
+  tbody.innerHTML = '';
+
+  columns.forEach(col => {
+    const th = document.createElement('th');
+    th.textContent = col;
+    if(['類','番','巻','收錄話','收錄頁'].includes(col)) th.classList.add('nowrap');
     thead.appendChild(th);
   });
 
-  rows.sort((a,b)=>(a.收錄話||0)-(b.收錄話||0));
-  rows.forEach(r=>{
-    const tr=document.createElement('tr');
-    columns.forEach(col=>{
-      const td=document.createElement('td'); td.textContent=r[col]||'';
-      if(['類','番','巻','收錄話','收錄頁','色'].includes(col)) td.classList.add('nowrap');
+  rows.sort((a,b) => (a.收錄話||0) - (b.收錄話||0));
+
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    columns.forEach(col => {
+      const td = document.createElement('td');
+      td.textContent = r[col] || '';
+      if(['類','番','巻','收錄話','收錄頁'].includes(col)) td.classList.add('nowrap');
       tr.appendChild(td);
     });
     tbody.appendChild(tr);
   });
 
-  document.getElementById('bottom-section').style.display='block';
+  document.getElementById('bottom-section').style.display = 'block';
 }
-
 window.addEventListener('DOMContentLoaded', async ()=>{
   const {ISBNHK, ISBNJP} = getParams();
   await loadCards(ISBNHK, ISBNJP);

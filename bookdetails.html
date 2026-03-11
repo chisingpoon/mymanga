@@ -62,10 +62,7 @@
       "Page": "頁數",
       "Size": "尺寸",
       "Price": "定價",
-      "ISBN": "ISBN",
-      "OriginalTitle": "原作標題",
-      "OriginalSubtitle": "原作副題",
-      "OriginCountry": "地區"
+      "ISBN": "ISBN"
     },
     JP: {
       "系列": "系列",
@@ -101,7 +98,20 @@
     const fields = cardFields[type];
     for(const key in fields){
       if(data[key]){
-        html += `<div class="field"><strong>${fields[key]}:</strong> <span>${data[key]}</span></div>`;
+      
+        // Example: make "Title" a <h1> instead of normal field
+        if(key === "Title" || key === "標題"){  
+          html += `<h1>${data[key]}</h1>`;  
+        } 
+        else if (key === "Subtitle" || key === "副標題" || key === "Volume" || key === "巻") {
+          html += `<h2>${data[key]}</h2>`;
+        }  else {
+          html += `
+          <div class="field">
+            <strong>${fields[key]}:</strong>
+            <span>${data[key]}</span>
+          </div>`;
+        }
       }
     }
     html += `</div></div>`;

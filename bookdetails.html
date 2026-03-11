@@ -55,6 +55,25 @@
     overflow-wrap: anywhere;
   }
 
+  /* Inline card fields: header and value same line */
+  .card .card-data div.field {
+    display: flex;
+    justify-content: flex-start;
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .card .card-data div.field strong {
+    flex-shrink: 0; /* header never shrinks */
+  }
+  .card .card-data div.field span {
+    flex: 1;           /* value takes remaining space */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   /* Table scrollable */
   #table-wrapper { overflow-x: auto; border: 1px solid #ccc; position: relative; }
   #table-container { max-height: 400px; overflow-y: auto; }
@@ -121,14 +140,14 @@ async function fetchJSON(url) {
   return await res.json();
 }
 
-// Create horizontal card
+// Create horizontal card with inline fields
 function createCard(data, sheetName){
   let html = `<div class="card">`;
   if(data.Image) html += `<img src="${data.Image}" alt="Book Image">`;
   html += `<div class="card-data"><h3>${sheetName}</h3>`;
   for(const key in data){
     if(key !== "Image"){
-      html += `<strong>${key}:</strong> ${data[key]}<br>`;
+      html += `<div class="field"><strong>${key}:</strong> <span>${data[key]}</span></div>`;
     }
   }
   html += `</div></div>`;

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Data Viewer</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  .cards { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 40px; }
+  .card { border: 1px solid #ccc; border-radius: 8px; padding: 16px; width: 300px; box-shadow: 2px 2px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: flex-start; }
+  .card img { max-width: 100%; height: auto; display: block; margin-bottom: 10px; }
+
+  /* Horizontal + vertical scroll container */
+  #table-wrapper { overflow-x: auto; border: 1px solid #ccc; }
+  #table-container { max-height: 400px; overflow-y: auto; }
+
+  table { border-collapse: collapse; table-layout: auto; width: 100%; min-width: 1200px; }
+  th, td { padding: 8px; text-align: left; border: 1px solid #ccc; white-space: normal; }
+  th { background-color: #f0f0f0; position: sticky; top: 0; z-index: 2; }
+
+  /* Force single-line columns */
+  .nowrap { white-space: nowrap; }
+
+  /* Alternating row colors */
+  tbody tr:nth-child(odd) { background-color: #fafafa; }
+  tbody tr:nth-child(even) { background-color: #f5f5f5; }
+
+  /* Hover effect */
+  tbody tr:hover { background-color: #ffeeba; }
+
+  h2 { margin-top: 40px; }
+</style>
+</head>
+<body>
+
+<h1>Book Data Viewer</h1>
+
+<div id="cards-container" class="cards">
+  <!-- Cards will be injected here -->
+</div>
+
+<div id="bottom-section" style="display:none;">
+  <h2>書籍收錄作品 / 作品完整列表</h2>
+  <div id="table-wrapper">
+    <div id="table-container">
+      <table id="works-table">
+        <thead>
+          <tr>
+            <!-- Header will be dynamically generated -->
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Table rows will be injected here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// URLs for your published Google Sheets CSV
+const urlHK = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
+const urlJP = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP";
+const urlWorks = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品";
+const urlComplete = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
+
+// Helper: fetch and parse CSV to array of objects
+async function fetchCSV(url) {
+  const res = await fetch(url);
+  const text = await res.text();
+  const lines = text.split('\n').filter(l => l.trim() !== '');
+  const headers = lines[0].split('\t');
+  return lines.slice(1).map(line => {
+    const values = line.split('\t');
+    let obj = {};
+    headers.forEach((h,i)=> obj[h.trim()] = values[i] ? values[i].trim() : '');
+    return obj;
+  });
+}
+
+// Helper: create card HTML
+function createCard(data, sheetName) {
+  let html = `<div class="card"><h3>${sheetName}</h3>`;
+  if(data.Image) html += `<img src="${data.Image}" alt="Book Image">`;
+  for(const key in data) {
+    html += `<strong>${key}:</strong> ${data[key]}<br>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+// Parse query parameters from URL
+function getQueryParams() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    ISBNHK: params.get('ISBNHK'),
+    ISBNJP: params.get('ISBNJP')
+  };
+}
+
+// Main function
+async function showBooks(ISBNHK = null, ISBNJP = null) {
+  const cardsContainer = document.getElementById('cards-container');
+  cardsContainer.innerHTML = '';
+
+  let HKData=[], JPData=[], worksData=[];
+
+  // Fetch HK data
+  if(ISBNHK) {
+    const HK = await fetchCSV(urlHK);
+    HKData = HK.filter(row => row.ISBN === ISBNHK);
+    HKData.forEach(d => cardsContainer.innerHTML += createCard(d, '出版目録HK'));
+  }
+
+  // Fetch JP data
+  if(ISBNJP) {
+    const JP = await fetchCSV(urlJP);
+    JPData = JP.filter(row => row.ISBN === ISBNJP);
+    JPData.forEach(d => cardsContainer.innerHTML += createCard(d, '出版目録JP'));
+  }
+
+  // Adjust card heights to be equal
+  const cards = document.querySelectorAll('.card');
+  let maxHeight = 0;
+  cards.forEach(c => { c.style.height = 'auto'; if(c.offsetHeight > maxHeight) maxHeight = c.offsetHeight; });
+  cards.forEach(c => c.style.height = maxHeight + 'px');
+
+  // Bottom section only appears if ISBNJP provided AND data exists
+  if(ISBNJP) {
+    const works = await fetchCSV(urlWorks);
+    const completeList = await fetchCSV(urlComplete);
+
+    // Filter works by ISBNJP
+    worksData = works.filter(row => row.ISBN === ISBNJP);
+
+    if(worksData.length > 0) {
+      // Merge complete list columns by 作品番
+      worksData = worksData.map(row => {
+        const match = completeList.find(c => c['作品番'] === row['作品番']);
+        if(match){
+          for(const key in match){
+            if(key !== '作品番') row[key] = match[key];
+          }
+        }
+        return row;
+      });
+
+      // Define original columns
+      const originalCols = ['ISBN','作品番','類','番','巻','收錄話','收錄頁','出版副題','收錄初出掲載誌','收錄初出掲載号','出版備考','副題港譯','色'];
+
+      // Define extra columns from completeList
+      const extraCols = completeList.length > 0 ? Object.keys(completeList[0]).filter(k => !originalCols.includes(k)) : [];
+
+      // Build table header
+      const theadRow = document.querySelector('#works-table thead tr');
+      theadRow.innerHTML = '';
+      [...originalCols, ...extraCols].forEach(col => {
+        const th = document.createElement('th');
+        th.textContent = col;
+        if(['類','番','巻','收錄話','收錄頁','色'].includes(col)) th.classList.add('nowrap');
+        theadRow.appendChild(th);
+      });
+
+      // Build table body
+      const tbody = document.querySelector('#works-table tbody');
+      tbody.innerHTML = '';
+      worksData.forEach(row => {
+        const tr = document.createElement('tr');
+        [...originalCols, ...extraCols].forEach(col => {
+          const td = document.createElement('td');
+          td.textContent = row[col] || '';
+          if(['類','番','巻','收錄話','收錄頁','色'].includes(col)) td.classList.add('nowrap');
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('bottom-section').style.display = 'block';
+    } else {
+      document.getElementById('bottom-section').style.display = 'none';
+    }
+  } else {
+    document.getElementById('bottom-section').style.display = 'none';
+  }
+}
+
+// On page load
+window.addEventListener('DOMContentLoaded', () => {
+  const { ISBNHK, ISBNJP } = getQueryParams();
+  showBooks(ISBNHK, ISBNJP);
+});
+</script>
+
+</body>
+</html>

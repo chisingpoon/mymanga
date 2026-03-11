@@ -8,7 +8,7 @@
   body { font-family: Arial, sans-serif; margin: 20px; }
   h1, h2 { margin-bottom: 16px; }
 
-  /* Cards */
+  /* Cards layout */
   #cards-container { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 40px; }
   .card {
     display: flex;
@@ -21,27 +21,34 @@
     flex: 1 1 300px;
     min-width: 300px;
     max-width: 600px;
-    align-items: stretch;
+    align-items: stretch; /* stretch both columns */
   }
 
-  .card img {
+  /* Image wrapper ensures image height matches card height */
+  .card .img-wrapper {
+    flex: 0 0 auto;           /* do not grow */
+    display: flex;
+    align-items: stretch;      /* stretch image to match card height */
+  }
+
+  .card .img-wrapper img {
+    height: 100%;
     width: auto;
-    height: 100%;       /* fill card height */
-    object-fit: contain; /* maintain aspect ratio */
+    object-fit: contain;
     border-radius: 4px;
   }
 
+  /* Text column */
   .card .card-data {
     flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
   }
-
   .card-data h1, .card-data h2, .card-data h3 { margin: 4px 0; }
   .card-data .field { display: flex; gap: 6px; margin-bottom: 4px; }
 
-  /* Table */
+  /* Table layout */
   #table-wrapper { overflow-x: auto; border: 1px solid #ccc; }
   table { border-collapse: collapse; width: 100%; min-width: 1400px; }
   th, td { padding: 8px; border: 1px solid #ccc; text-align: left; }
@@ -96,7 +103,12 @@ async function fetchJSON(name){
 
 function createCard(data,type,title){
   let html = `<div class="card">`;
-  if(data.Image) html += `<img src="${data.Image}" alt="Book Image">`;
+
+  // Wrap image to match card height
+  if(data.Image){
+    html += `<div class="img-wrapper"><img src="${data.Image}" alt="Book Image"></div>`;
+  }
+
   html += `<div class="card-data"><h3>${title}</h3>`;
   const fields = cardFields[type];
   for(const key in fields){
@@ -159,19 +171,20 @@ async function loadWorks(ISBNJP){
     '出版副題','收錄初出掲載誌','收錄初出掲載号',
     '出版備考','副題港譯','色'
   ];
+
   const extraCols = complete.length ? Object.keys(complete[0]).filter(k => !originalCols.includes(k)) : [];
   let columns = [...originalCols, ...extraCols];
 
   // -------------------------
-  // HIDE SPECIFIC COLUMNS
+  // Define columns to hide
   // -------------------------
-  const hiddenColsWorks = ['出版副題','收錄初出掲載誌']; // hide columns from works
-  const hiddenColsComplete = ['出版備考','色'];           // hide columns from complete
-  columns = columns.filter(col => !hiddenColsWorks.includes(col) && !hiddenColsComplete.includes(col));
+  const hiddenCols = ['出版備考', '色']; // Hide any columns from both spreadsheets
+  columns = columns.filter(col => !hiddenCols.includes(col));
 
   const thead = document.querySelector('#works-table thead tr');
   const tbody = document.querySelector('#works-table tbody');
-  thead.innerHTML = ''; tbody.innerHTML = '';
+  thead.innerHTML = '';
+  tbody.innerHTML = '';
 
   columns.forEach(col => {
     const th = document.createElement('th');
@@ -202,5 +215,6 @@ window.addEventListener('DOMContentLoaded', async ()=>{
   await loadWorks(ISBNJP);
 });
 </script>
+
 </body>
 </html>

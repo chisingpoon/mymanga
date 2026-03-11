@@ -11,10 +11,10 @@
   .card img { max-width: 100%; height: auto; display: block; margin-bottom: 10px; }
 
   /* Horizontal + vertical scroll container */
-  #table-wrapper { overflow-x: auto; border: 1px solid #ccc; }
+  #table-wrapper { overflow-x: auto; border: 1px solid #ccc; position: relative; }
   #table-container { max-height: 400px; overflow-y: auto; }
 
-  table { border-collapse: collapse; table-layout: auto; width: 100%; min-width: 1200px; }
+  table { border-collapse: collapse; table-layout: auto; width: 100%; min-width: 1400px; }
   th, td { padding: 8px; text-align: left; border: 1px solid #ccc; white-space: normal; }
   th { position: sticky; top: 0; background-color: #f0f0f0; z-index: 5; }
 
@@ -58,13 +58,13 @@
 </div>
 
 <script>
-// URLs for your published Google Sheets CSV
+// OpenSheet URLs for your sheets
 const urlHK = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
 const urlJP = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP";
 const urlWorks = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品";
 const urlComplete = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
 
-// Helper: fetch and parse CSV to array of objects
+// Helper: fetch CSV/TSV and parse into array of objects
 async function fetchCSV(url) {
   const res = await fetch(url);
   const text = await res.text();
@@ -89,7 +89,7 @@ function createCard(data, sheetName) {
   return html;
 }
 
-// Parse query parameters from URL
+// Parse query parameters
 function getQueryParams() {
   const params = new URLSearchParams(window.location.search);
   return {
@@ -98,43 +98,40 @@ function getQueryParams() {
   };
 }
 
-// Main function
+// Main
 async function showBooks(ISBNHK = null, ISBNJP = null) {
   const cardsContainer = document.getElementById('cards-container');
   cardsContainer.innerHTML = '';
 
   let HKData=[], JPData=[], worksData=[];
 
-  // Fetch HK data
   if(ISBNHK) {
     const HK = await fetchCSV(urlHK);
     HKData = HK.filter(row => row.ISBN === ISBNHK);
     HKData.forEach(d => cardsContainer.innerHTML += createCard(d, '出版目録HK'));
   }
 
-  // Fetch JP data
   if(ISBNJP) {
     const JP = await fetchCSV(urlJP);
     JPData = JP.filter(row => row.ISBN === ISBNJP);
     JPData.forEach(d => cardsContainer.innerHTML += createCard(d, '出版目録JP'));
   }
 
-  // Adjust card heights to be equal
+  // Equalize card heights
   const cards = document.querySelectorAll('.card');
   let maxHeight = 0;
   cards.forEach(c => { c.style.height = 'auto'; if(c.offsetHeight > maxHeight) maxHeight = c.offsetHeight; });
   cards.forEach(c => c.style.height = maxHeight + 'px');
 
-  // Bottom section only appears if ISBNJP provided AND data exists
+  // Bottom table
   if(ISBNJP) {
     const works = await fetchCSV(urlWorks);
     const completeList = await fetchCSV(urlComplete);
 
-    // Filter works by ISBNJP
     worksData = works.filter(row => row.ISBN === ISBNJP);
 
     if(worksData.length > 0) {
-      // Merge complete list columns by 作品番
+      // Merge by 作品番
       worksData = worksData.map(row => {
         const match = completeList.find(c => c['作品番'] === row['作品番']);
         if(match){
@@ -145,13 +142,10 @@ async function showBooks(ISBNHK = null, ISBNJP = null) {
         return row;
       });
 
-      // Define original columns
       const originalCols = ['ISBN','作品番','類','番','巻','收錄話','收錄頁','出版副題','收錄初出掲載誌','收錄初出掲載号','出版備考','副題港譯','色'];
-
-      // Define extra columns from completeList
       const extraCols = completeList.length > 0 ? Object.keys(completeList[0]).filter(k => !originalCols.includes(k)) : [];
 
-      // Build table header
+      // Header
       const theadRow = document.querySelector('#works-table thead tr');
       theadRow.innerHTML = '';
       [...originalCols, ...extraCols].forEach(col => {
@@ -161,9 +155,10 @@ async function showBooks(ISBNHK = null, ISBNJP = null) {
         theadRow.appendChild(th);
       });
 
-      // Build table body
+      // Body
       const tbody = document.querySelector('#works-table tbody');
       tbody.innerHTML = '';
+      worksData.sort((a,b) => (a.收錄話 || 0) - (b.收錄話 || 0));
       worksData.forEach(row => {
         const tr = document.createElement('tr');
         [...originalCols, ...extraCols].forEach(col => {
@@ -184,7 +179,7 @@ async function showBooks(ISBNHK = null, ISBNJP = null) {
   }
 }
 
-// On page load
+// Load on page ready
 window.addEventListener('DOMContentLoaded', () => {
   const { ISBNHK, ISBNJP } = getQueryParams();
   showBooks(ISBNHK, ISBNJP);

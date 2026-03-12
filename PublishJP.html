@@ -685,7 +685,8 @@ function renderPage() {
   const html = pageItems.map(row => `
 <!--    <div class="card" onclick="openDetail('${row.ISBN}')"> -->
 <!--    <div class="card" onclick="location.href='bookdetailjp.html?isbn=${row.ISBN}'"> -->
-    <div class="card" onclick="window.open('bookdetailjp.html?isbn=${row.ISBN}', '_blank')">
+<!--    <div class="card" onclick="window.open('bookdetailjp.html?isbn=${row.ISBN}', '_blank')"> -->
+    <div class="card" onclick="window.open('bookdetail.html?ISBNJP=${row.ISBN}', '_blank')">
       <img src="${row.Image}" alt="${row.標題}">
       <h3>書名: ${row.標題} ${row.巻}</h3>
       <h4>${row.副標題}</h4>

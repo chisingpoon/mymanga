@@ -183,4 +183,136 @@ function render(manga, storyRows, jpinfo) {
       <td>${d.収録話 || ""}</td>
       <td>${d.全集副題香港譯名 || ""}</td>
       <td>${d.出版副題 || ""}</td>
-      <td>${d.頁 ||
+      <td>${d.頁 || ""}</td>
+      <td>${d.初出副題 || ""}</td>
+      <td>${d.全集副題 || ""}</td>
+      <td>${d.初出掲載誌 || ""}</td>
+      <td>${d.初出掲載号 || ""}</td>
+      <td>${d.大全集 || ""}</td>
+      <td>${d.出版備考 || ""}</td>
+    </tr>
+  `).join("");
+
+  const tableSection = storyRows.length > 0 ? `
+    <h2>收錄話</h2>
+    <table class="details-table">
+      <thead>
+        <tr>
+          <th>番</th>
+          <th>巻</th>
+          <th>収録話</th>
+          <th>香港譯名</th>
+          <th>日本副題</th>
+          <th>頁</th>
+          <th>初出副題</th>
+          <th>全集副題</th>
+          <th>初出掲載誌</th>
+          <th>初出掲載号</th>
+          <th>大全集</th>
+          <th>日本出版備考</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${tableRows}
+      </tbody>
+    </table>
+  ` : "";
+
+  const jpCard = jpinfo ? `
+    <div class="card">
+      <div class="card-inner">
+        <div class="book-image">
+          <img src="${jpinfo.Image || ""}" alt="${jpinfo.標題} ${jpinfo.巻}" class="clickable-image" onclick="openImageModal('${jpinfo.Image || ""}')">
+        </div>
+        <div class="column-box">
+          <h3>日文原版資料</h3>
+          <h1>${jpinfo.標題 || ""} ${jpinfo.巻 || ""}</h1>
+          <h2>${jpinfo.副標題 || ""}</h2>
+          <div><strong>系列:</strong> ${jpinfo.系列 || ""}</div>
+          <div><strong>著:</strong> ${jpinfo.著 || ""}</div>
+          <div><strong>判型:</strong> ${jpinfo.判型 || ""}</div>
+          <div><strong>頁:</strong> ${jpinfo.頁 || ""}</div>
+          <div><strong>話:</strong> ${jpinfo.話 || ""}</div>
+          <div><strong>初版発行日:</strong> ${jpinfo.初版発行日 || ""}</div>
+          <div><strong>定価:</strong> ${jpinfo.定価 || ""}</div>
+          <div><strong>ISBN:</strong> ${jpinfo.ISBN || ""}</div>
+        </div>
+      </div>
+    </div>
+  ` : "";
+
+  const hkCard = manga ? `
+    <div class="card">
+      <div class="card-inner">
+        <div class="book-image">
+          <img src="${manga.Image || ""}" alt="${manga.Title} ${manga.Volume}" class="clickable-image" onclick="openImageModal('${manga.Image || ""}')">
+        </div>
+        <div class="column-box">
+          <h3>${manga.OriginCountry || ""}版資料</h3>
+          <h1>${manga.Title || ""} ${manga.Volume || ""}</h1>
+          <h2>${manga.Subtitle || ""}</h2>
+          <div><strong>作者:</strong> ${manga.Author || ""}</div>
+          <div><strong>出版社:</strong> ${manga.Publisher || ""}</div>
+          <div><strong>尺碼:</strong> ${manga.Size || ""}</div>
+          <div><strong>出版日期:</strong> ${manga.IssueDate || ""}</div>
+          <div><strong>售價:</strong> $${manga.Price || ""}</div>
+          <div><strong>頁數:</strong> ${manga.Page || ""}</div>
+          <div><strong>出版地區:</strong> ${manga.OriginCountry || ""}</div>
+          <div><strong>ISBN:</strong> ${manga.ISBN || ""}</div>
+        </div>
+      </div>
+    </div>
+  ` : "";
+
+  document.getElementById("content").innerHTML = `
+    <!-- Top Section -->
+    <div class="top-section">
+      ${hkCard}
+      ${jpCard}
+    </div>
+
+    <!-- Bottom Details Table (if applicable) -->
+    ${tableSection}
+  `;
+}
+
+function openImageModal(src) {
+  const modal = document.getElementById("imageModal");
+  const modalImg = document.getElementById("modalImage");
+  
+  modalImg.src = src;
+  modal.classList.add("show");
+}
+
+function closeImageModal() {
+  const modal = document.getElementById("imageModal");
+  modal.classList.remove("show");
+}
+
+// ESC key close
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") {
+    closeImageModal();
+  }
+});
+
+// Disable right-click everywhere
+window.addEventListener("contextmenu", function (e) {
+  e.preventDefault();
+  return false;
+}, true);
+
+// Disable dragging
+window.addEventListener("dragstart", function(e) {
+  e.preventDefault();
+});
+</script>
+
+<!-- Image Modal -->
+<div id="imageModal" class="image-modal">
+  <span class="image-close" onclick="closeImageModal()">&times;</span>
+  <img id="modalImage">
+</div>
+
+</body>
+</html>

@@ -276,35 +276,43 @@ async function loadJP(){
 /* ---------- LOAD TABLE ---------- */
 async function loadTable(){
   if(!ISBNJP) return;
-  document.getElementById("bottomSection").style.display="block";
 
   const works = await fetchWithCache(worksURL);
   const master = await fetchWithCache(masterURL);
 
   const masterMap = {};
-  master.forEach(r=>{ masterMap[key(r["作品番"])] = r; });
+  master.forEach(r => { masterMap[key(r["作品番"])] = r; });
 
-  let filtered = works.filter(r=>key(r.ISBN)===key(ISBNJP));
-  filtered = filtered.map(w=>{ return {...w, ...(masterMap[key(w["作品番"])]||{})}; });
-  filtered.sort((a,b)=>Number(a["收錄話"]||0)-Number(b["收錄話"]||0));
+  let filtered = works.filter(r => key(r.ISBN) === key(ISBNJP));
+  filtered = filtered.map(w => ({ ...w, ...(masterMap[key(w["作品番"])] || {}) }));
+  filtered.sort((a,b) => Number(a["收錄話"]||0) - Number(b["收錄話"]||0));
+
+  const bottomSection = document.getElementById("bottomSection");
+
+  if(filtered.length === 0){
+    bottomSection.style.display = "none";  // hide if no data
+    return;
+  }
+
+  // there is data → show bottom section
+  bottomSection.style.display = "block";
 
   let allColumns = new Set();
-  filtered.forEach(r=>Object.keys(r).forEach(c=>allColumns.add(c)));
-  let visibleColumns = [...allColumns].filter(c=>!hiddenColumns.includes(c));
-  visibleColumns.sort((a,b)=>{
-    let ia = columnOrder.indexOf(a); let ib = columnOrder.indexOf(b);
-    if(ia===-1)ia=999; if(ib===-1)ib=999;
+  filtered.forEach(r => Object.keys(r).forEach(c => allColumns.add(c)));
+  let visibleColumns = [...allColumns].filter(c => !hiddenColumns.includes(c));
+  visibleColumns.sort((a,b) => {
+    let ia = columnOrder.indexOf(a), ib = columnOrder.indexOf(b);
+    if(ia===-1) ia=999; if(ib===-1) ib=999;
     return ia-ib || a.localeCompare(b);
   });
 
   let table = document.getElementById("worksTable");
   let html = "<tr>"+visibleColumns.map(c=>"<th>"+c+"</th>").join("")+"</tr>";
-  filtered.forEach(r=>{
-    html+="<tr>"+visibleColumns.map(c=>"<td>"+(r[c]??"")+"</td>").join("")+"</tr>";
+  filtered.forEach(r => {
+    html += "<tr>"+visibleColumns.map(c => "<td>"+(r[c]??"")+"</td>").join("")+"</tr>";
   });
   table.innerHTML = html;
 }
-
 /* ---------- SECURITY ---------- */
 document.addEventListener("contextmenu",e=>e.preventDefault());
 document.addEventListener("dragstart",e=>{

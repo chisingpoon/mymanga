@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Book Viewer</title>
-
   <style>
     body {
       font-family: Arial, Helvetica, sans-serif;
@@ -24,12 +23,12 @@
       background: white;
       border-radius: 12px;
       padding: 25px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
       display: flex;
       flex-direction: row;
       gap: 20px;
       align-items: stretch; /* align image to match card height */
-      height: auto;  /* Ensures the card height adjusts based on its content */
+      height: auto;
     }
 
     /* IMAGE BOX */
@@ -41,12 +40,12 @@
       background: #f5f5f5;
       border-radius: 8px;
       overflow: hidden;
-      height: 100%; /* Ensure the image box takes the full height of the card */
+      height: 100%; /* Image box fills the full height of the card */
     }
 
     /* FIX: Auto-fit the image height while maintaining the aspect ratio */
     .book-image img {
-      height: 100%; /* Make the image fill the card height */
+      height: 100%; /* Ensure the image fills the height of the card */
       width: auto;  /* Keep aspect ratio intact */
       object-fit: contain;  /* Ensure the image does not stretch */
       display: block;
@@ -71,7 +70,7 @@
       background: white;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
     }
 
     table {
@@ -93,15 +92,17 @@
     }
 
     /* MOBILE */
-    @media (max-width:700px){
+    @media (max-width: 700px) {
       .card {
         flex-direction: column;
         align-items: center;
       }
+
       .book-image {
         width: 100%;
         height: auto;
       }
+
       .book-image img {
         width: auto;
         max-height: 250px;
@@ -109,7 +110,6 @@
     }
   </style>
 </head>
-
 <body>
   <div id="topSection"></div>
 
@@ -186,7 +186,7 @@
 
     /* ---------- DATA SOURCES ---------- */
     const hkURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
-    const jpURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP";
+    const jpURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目錄JP";
     const worksURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品";
     const masterURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
 
@@ -235,7 +235,6 @@
     /* ---------- LOAD CARDS ---------- */
     async function loadHK() {
       if (!ISBNHK) return;
-
       let data = await fetchWithCache(hkURL);
       let row = data.find(r => key(r.ISBN) === key(ISBNHK));
       if (row) {
@@ -245,8 +244,66 @@
 
     async function loadJP() {
       if (!ISBNJP) return;
-
       let data = await fetchWithCache(jpURL);
       let row = data.find(r => key(r.ISBN) === key(ISBNJP));
       if (row) {
-        document.getElementById("topSection").appendChild(createCard(row, "標題
+        document.getElementById("topSection").appendChild(createCard(row, "標題", jpCardFieldLabels));
+      }
+    }
+
+    /* ---------- LOAD TABLE ---------- */
+    async function loadTable() {
+      if (!ISBNJP) return;
+      const works = await fetchWithCache(worksURL);
+      const master = await fetchWithCache(masterURL);
+
+      const masterMap = {};
+      master.forEach(r => { masterMap[key(r["作品番"])] = r; });
+
+      let filtered = works.filter(r => key(r.ISBN) === key(ISBNJP));
+      filtered = filtered.map(w => ({ ...w, ...(masterMap[key(w["作品番"])] || {}) }));
+      filtered.sort((a, b) => Number(a["收錄話"] || 0) - Number(b["收錄話"] || 0));
+
+      if (filtered.length === 0) {
+        document.getElementById("bottomSection").style.display = "none";
+        return;
+      }
+
+      document.getElementById("bottomSection").style.display = "block";
+
+      let allColumns = new Set();
+      filtered.forEach(r => Object.keys(r).forEach(c => allColumns.add(c)));
+      let visibleColumns = [...allColumns].filter(c => !hiddenColumns.includes(c));
+      visibleColumns.sort((a, b) => {
+        let ia = columnOrder.indexOf(a);
+        let ib = columnOrder.indexOf(b);
+        if (ia === -1) ia = 999;
+        if (ib === -1) ib = 999;
+        return ia - ib || a.localeCompare(b);
+      });
+
+      let table = document.getElementById("worksTable");
+      let html = "<tr>" + visibleColumns.map(c => "<th>" + c + "</th>").join("") + "</tr>";
+      filtered.forEach(r => {
+        html += "<tr>" + visibleColumns.map(c => "<td>" + (r[c] ?? "") + "</td>").join("") + "</tr>";
+      });
+      table.innerHTML = html;
+    }
+
+    /* ---------- SECURITY ---------- */
+    document.addEventListener("contextmenu", e => e.preventDefault());
+    document.addEventListener("dragstart", e => {
+      if (e.target.tagName === "IMG") e.preventDefault();
+    });
+
+    /* ---------- RUN ---------- */
+    async function init() {
+      await loadHK();
+      await loadJP();
+      await loadTable();
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -25,43 +25,50 @@ body {
   border-radius: 12px;
   padding: 25px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-  display: flex;
-  flex-direction: row;
-  gap: 20px;
-  align-items: stretch; /* align image to match card height */
+}
+
+/* FIX: make image + text two columns */
+.card-inner{
+  display:grid;
+  grid-template-columns:180px 1fr;
+  gap:20px;
+  align-items:stretch;
 }
 
 /* IMAGE BOX */
 .book-image {
-  flex: 0 0 160px; /* fixed width */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f5f5f5;
-  border-radius: 8px;
-  overflow: hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#f5f5f5;
+  border-radius:8px;
+  overflow:hidden;
 }
 
-.book-image img {
-  height: 100%;      /* fill the card height */
-  width: auto;        /* maintain aspect ratio */
-  object-fit: contain;
-  display: block;
+/* FIX: prevent original image size overflow */
+.book-image img{
+  max-height:100%;
+  max-width:100%;
+  object-fit:contain;
+  display:block;
 }
 
 /* TEXT */
 .cardContent {
-  font-size: 14px;
-  flex: 1;
+  font-size:14px;
 }
 
-/* Table */
+.field{
+  margin:3px 0;
+}
+
+/* ---------- TABLE ---------- */
 #bottomSection {
-  display: none;
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  display:none;
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 3px 8px rgba(0,0,0,0.15);
 }
 
 table {
@@ -84,23 +91,21 @@ th {
 
 /* MOBILE */
 @media (max-width:700px){
-  .card {
-    flex-direction: column;
-    align-items: center;
+
+  .card-inner{
+    grid-template-columns:1fr;
   }
-  .book-image {
-    width: 100%;
-    height: auto;
+
+  .book-image img{
+    max-height:250px;
   }
-  .book-image img {
-    width: auto;
-    max-height: 250px;
-  }
+
 }
 </style>
 </head>
 
 <body>
+
 <div id="topSection"></div>
 
 <div id="bottomSection">
@@ -109,8 +114,11 @@ th {
 </div>
 
 <script>
+
 /* ---------- CONFIG ---------- */
+
 const hiddenColumns = ["ISBN"]; 
+
 const columnOrder = [
   "作品番","作品名","作者","類","番","巻","收錄話","收錄頁",
   "出版副題","收錄初出掲載誌","收錄初出掲載号","出版備考",
@@ -120,148 +128,243 @@ const columnOrder = [
 ];
 
 const hkCardFieldLabels = {
-  "Title": "書名","Volume": "卷數","Subtitle": "副標題","Author": "作者",
-  "Publisher": "出版社","Price": "定價","Page": "頁數","IssueDate": "發行日期",
-  "Size": "尺寸","RetailPoint": "零售點","ISBN": "ISBN","OriginalTitle": "原書名",
-  "OriginalSubtitle": "原副標題","OriginCountry": "原產地","ISBN_JP": "日本ISBN",
-  "Active": "是否上架","Sold": "已售數"
+  "Title": "書名",
+  "Volume": "卷數",
+  "Subtitle": "副標題",
+  "Author": "作者",
+  "Publisher": "出版社",
+  "Price": "定價",
+  "Page": "頁數",
+  "IssueDate": "發行日期",
+  "Size": "尺寸",
+  "RetailPoint": "零售點",
+  "ISBN": "ISBN",
+  "OriginalTitle": "原書名",
+  "OriginalSubtitle": "原副標題",
+  "OriginCountry": "原產地",
+  "ISBN_JP": "日本ISBN",
+  "Active": "是否上架",
+  "Sold": "已售數"
 };
 
 const jpCardFieldLabels = {
-  "標題": "タイトル","巻": "巻数","副標題": "サブタイトル","著": "著者",
-  "出版社": "出版社","定価": "定価","頁": "ページ","初版発行日": "初版発行日",
-  "判型": "判型","ISBN": "ISBN","Active": "販売中","Image": "画像"
+  "標題": "タイトル",
+  "巻": "巻数",
+  "副標題": "サブタイトル",
+  "著": "著者",
+  "出版社": "出版社",
+  "定価": "定価",
+  "頁": "ページ",
+  "初版発行日": "初版発行日",
+  "判型": "判型",
+  "ISBN": "ISBN",
+  "Active": "販売中",
+  "Image": "画像"
 };
 
 /* ---------- CACHE ---------- */
+
 const CACHE_TIME = 10 * 60 * 1000;
+
 async function fetchWithCache(url){
+
   let cache = localStorage.getItem(url);
+
   if(cache){
     let obj = JSON.parse(cache);
     if(Date.now() - obj.time < CACHE_TIME){
       return obj.data;
     }
   }
+
   let data = await (await fetch(url)).json();
-  localStorage.setItem(url,JSON.stringify({time:Date.now(),data:data}));
+
+  localStorage.setItem(url,JSON.stringify({
+    time:Date.now(),
+    data:data
+  }));
+
   return data;
 }
 
 /* ---------- URL PARAMETERS ---------- */
+
 const params = new URLSearchParams(location.search);
+
 const ISBNHK = params.get("ISBNHK");
 const ISBNJP = params.get("ISBNJP");
 
 /* ---------- DATA SOURCES ---------- */
+
 const hkURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
 const jpURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP";
 const worksURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品";
 const masterURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
 
 /* ---------- HELPERS ---------- */
-function key(v){ return String(v||"").trim(); }
+
+function key(v){
+  return String(v||"").trim();
+}
 
 function createCard(data, titleField, labelMap){
+
   let card = document.createElement("div");
   card.className = "card";
 
   let inner = document.createElement("div");
   inner.className = "card-inner";
 
-  // IMAGE
   let imageBox = document.createElement("div");
   imageBox.className = "book-image";
+
   let img = document.createElement("img");
   img.src = data.Image || "";
+
   imageBox.appendChild(img);
 
-  // CONTENT
   let content = document.createElement("div");
   content.className = "cardContent";
 
   let title = document.createElement("h2");
   title.textContent = data[titleField] || "";
+
   content.appendChild(title);
 
   for(let k in data){
+
     if(k === titleField || k === "Image") continue;
+
     let div = document.createElement("div");
     div.className = "field";
-    div.innerHTML = "<b>" + (labelMap[k] || k) + "</b>: " + (data[k] || "");
+
+    div.innerHTML =
+      "<b>" + (labelMap[k] || k) + "</b>: " + (data[k] || "");
+
     content.appendChild(div);
   }
 
   inner.appendChild(imageBox);
   inner.appendChild(content);
+
   card.appendChild(inner);
 
   return card;
 }
 
 /* ---------- LOAD CARDS ---------- */
+
 async function loadHK(){
+
   if(!ISBNHK) return;
+
   let data = await fetchWithCache(hkURL);
+
   let row = data.find(r=>key(r.ISBN)===key(ISBNHK));
+
   if(row){
-    document.getElementById("topSection").appendChild(createCard(row, "Title", hkCardFieldLabels));
+    document
+      .getElementById("topSection")
+      .appendChild(createCard(row,"Title",hkCardFieldLabels));
   }
 }
 
 async function loadJP(){
+
   if(!ISBNJP) return;
+
   let data = await fetchWithCache(jpURL);
+
   let row = data.find(r=>key(r.ISBN)===key(ISBNJP));
+
   if(row){
-    document.getElementById("topSection").appendChild(createCard(row, "標題", jpCardFieldLabels));
+    document
+      .getElementById("topSection")
+      .appendChild(createCard(row,"標題",jpCardFieldLabels));
   }
 }
 
 /* ---------- LOAD TABLE ---------- */
+
 async function loadTable(){
+
   if(!ISBNJP) return;
+
   const works = await fetchWithCache(worksURL);
   const master = await fetchWithCache(masterURL);
 
   const masterMap = {};
-  master.forEach(r=>{ masterMap[key(r["作品番"])] = r; });
 
-  let filtered = works.filter(r=>key(r.ISBN)===key(ISBNJP));
-  filtered = filtered.map(w=>({ ...w, ...(masterMap[key(w["作品番"])]||{}) }));
-  filtered.sort((a,b)=>Number(a["收錄話"]||0)-Number(b["收錄話"]||0));
+  master.forEach(r=>{
+    masterMap[key(r["作品番"])] = r;
+  });
+
+  let filtered = works.filter(
+    r=>key(r.ISBN)===key(ISBNJP)
+  );
+
+  filtered = filtered.map(w=>{
+    return {...w, ...(masterMap[key(w["作品番"])]||{})};
+  });
+
+  filtered.sort(
+    (a,b)=>Number(a["收錄話"]||0)-Number(b["收錄話"]||0)
+  );
 
   if(filtered.length === 0){
-    document.getElementById("bottomSection").style.display = "none";
+    document.getElementById("bottomSection").style.display="none";
     return;
   }
 
-  document.getElementById("bottomSection").style.display = "block";
+  document.getElementById("bottomSection").style.display="block";
 
   let allColumns = new Set();
-  filtered.forEach(r=>Object.keys(r).forEach(c=>allColumns.add(c)));
-  let visibleColumns = [...allColumns].filter(c=>!hiddenColumns.includes(c));
+
+  filtered.forEach(r=>{
+    Object.keys(r).forEach(c=>allColumns.add(c));
+  });
+
+  let visibleColumns = [...allColumns]
+    .filter(c=>!hiddenColumns.includes(c));
+
   visibleColumns.sort((a,b)=>{
-    let ia = columnOrder.indexOf(a); let ib = columnOrder.indexOf(b);
-    if(ia===-1)ia=999; if(ib===-1)ib=999;
+
+    let ia = columnOrder.indexOf(a);
+    let ib = columnOrder.indexOf(b);
+
+    if(ia===-1) ia=999;
+    if(ib===-1) ib=999;
+
     return ia-ib || a.localeCompare(b);
   });
 
   let table = document.getElementById("worksTable");
-  let html = "<tr>"+visibleColumns.map(c=>"<th>"+c+"</th>").join("")+"</tr>";
+
+  let html =
+    "<tr>"+
+    visibleColumns.map(c=>"<th>"+c+"</th>").join("")+
+    "</tr>";
+
   filtered.forEach(r=>{
-    html+="<tr>"+visibleColumns.map(c=>"<td>"+(r[c]??"")+"</td>").join("")+"</tr>";
+    html +=
+      "<tr>"+
+      visibleColumns.map(c=>"<td>"+(r[c]??"")+"</td>").join("")+
+      "</tr>";
   });
+
   table.innerHTML = html;
 }
 
 /* ---------- SECURITY ---------- */
+
 document.addEventListener("contextmenu",e=>e.preventDefault());
+
 document.addEventListener("dragstart",e=>{
   if(e.target.tagName==="IMG") e.preventDefault();
 });
 
 /* ---------- RUN ---------- */
+
 async function init(){
   await loadHK();
   await loadJP();
@@ -269,6 +372,8 @@ async function init(){
 }
 
 init();
+
 </script>
+
 </body>
 </html>

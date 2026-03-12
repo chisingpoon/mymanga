@@ -237,19 +237,35 @@ function createCard(data,titleField,labelMap){
   return card;
 }
 
+/* ---------- EQUAL HEIGHT FUNCTION ---------- */
+function setEqualHeight(){
+  const cards = Array.from(document.querySelectorAll(".card"));
+  if(cards.length === 0) return;
+  // reset height first
+  cards.forEach(c => c.style.height="auto");
+  let maxHeight = Math.max(...cards.map(c=>c.offsetHeight));
+  cards.forEach(c => c.style.height=maxHeight + "px");
+}
+
 /* ---------- LOAD CARDS ---------- */
 async function loadHK(){
   if(!ISBNHK) return;
   let data = await fetchWithCache(hkURL);
   let row = data.find(r=>key(r.ISBN)===key(ISBNHK));
-  if(row) document.getElementById("hkCard").appendChild(createCard(row,"Title",hkCardFieldLabels));
+  if(row){
+    document.getElementById("hkCard").appendChild(createCard(row,"Title",hkCardFieldLabels));
+    setEqualHeight(); // recalc after adding
+  }
 }
 
 async function loadJP(){
   if(!ISBNJP) return;
   let data = await fetchWithCache(jpURL);
   let row = data.find(r=>key(r.ISBN)===key(ISBNJP));
-  if(row) document.getElementById("jpCard").appendChild(createCard(row,"標題",jpCardFieldLabels));
+  if(row){
+    document.getElementById("jpCard").appendChild(createCard(row,"標題",jpCardFieldLabels));
+    setEqualHeight(); // recalc after adding
+  }
 }
 
 /* ---------- LOAD TABLE ---------- */
@@ -284,22 +300,14 @@ async function loadTable(){
   table.innerHTML=html;
 }
 
-/* ---------- EQUAL HEIGHT FUNCTION ---------- */
-function setEqualHeight(){
-  const cards = Array.from(document.querySelectorAll(".card"));
-  if(cards.length<2) return;
-  let maxHeight = Math.max(...cards.map(c=>c.offsetHeight));
-  cards.forEach(c=>c.style.height=maxHeight + "px");
-}
-
 /* ---------- SECURITY ---------- */
 document.addEventListener("contextmenu",e=>e.preventDefault());
 document.addEventListener("dragstart",e=>{if(e.target.tagName==="IMG") e.preventDefault();});
 
 /* ---------- RUN ---------- */
 Promise.all([loadHK(), loadJP(), loadTable()]).then(()=>{
-  setEqualHeight();
-  window.addEventListener("resize", setEqualHeight); // recalc on resize
+  // recalc on resize
+  window.addEventListener("resize", setEqualHeight);
 });
 </script>
 

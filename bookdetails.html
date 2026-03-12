@@ -31,13 +31,13 @@ body{
   box-shadow:0 3px 8px rgba(0,0,0,0.15);
   min-height:260px;
   height:100%;
-  align-items:stretch; /* ensures children stretch to card height */
+  align-items:stretch;
 }
 
 .card img{
-  height:100%;      /* auto-fit card height */
-  width:auto;       /* maintain aspect ratio */
-  max-width:220px;  /* optional limit */
+  height:100%;
+  width:auto;
+  max-width:220px;
   object-fit:contain;
   pointer-events:none;
   user-select:none;
@@ -70,7 +70,7 @@ body{
 table{
   border-collapse:collapse;
   width:100%;
-  table-layout:auto;
+  table-layout:auto; /* allow auto sizing */
 }
 
 th,td{
@@ -82,6 +82,7 @@ th,td{
 
 th{
   background:#eee;
+  white-space:nowrap; /* prevent breaking header */
 }
 
 /* ---------- MOBILE ---------- */
@@ -111,26 +112,17 @@ th{
 
 <script>
 /* ---------- BACKEND COLUMN CONFIG ---------- */
-const columnConfig = {
-  "作品番":true,
-  "作品名":true,
-  "作者":true,
-  "類":true,
-  "番":true,
-  "巻":true,
-  "收錄話":true,
-  "收錄頁":true,
-  "出版副題":true,
-  "收錄初出掲載誌":true,
-  "收錄初出掲載号":true,
-  "出版備考":true,
-  "副題港譯":true,
-  "色":true,
-  "ISBN":false
-};
+const hiddenColumns = ["ISBN"]; 
+const columnOrder = [
+  "作品番","作品名","作者","類","番","巻","收錄話","收錄頁",
+  "出版副題","收錄初出掲載誌","收錄初出掲載号","出版備考",
+  "副題港譯","色","初出掲載誌","掲載番","初出掲載号","初出掲載頁",
+  "初出副題","単行本","第0巻","ドラミちゃん","文庫","兒童版",
+  "藤子不二雄ランド","大全集","頁","全集副題","備考","全集副題香港譯名","作品類"
+];
 
-/* ---------- CACHE SETTINGS ---------- */
-const CACHE_TIME = 10 * 60 * 1000; // 10 minutes
+/* ---------- CACHE ---------- */
+const CACHE_TIME = 10 * 60 * 1000;
 async function fetchWithCache(url){
   let cache = localStorage.getItem(url);
   if(cache){
@@ -159,11 +151,11 @@ const masterURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF
 function key(v){ return String(v||"").trim(); }
 function createCard(data,titleField){
   let card = document.createElement("div");
-  card.className="card";
+  card.className = "card";
   let img = document.createElement("img");
   img.src = data.Image||"";
   let content = document.createElement("div");
-  content.className="cardContent";
+  content.className = "cardContent";
   let title = document.createElement("h2");
   title.textContent = data[titleField]||"";
   content.appendChild(title);
@@ -179,25 +171,22 @@ function createCard(data,titleField){
   return card;
 }
 
-/* ---------- LOAD HK CARD ---------- */
+/* ---------- LOAD CARDS ---------- */
 async function loadHK(){
   if(!ISBNHK) return;
   let data = await fetchWithCache(hkURL);
   let row = data.find(r=>key(r.ISBN)===key(ISBNHK));
   if(row){
-    let card=createCard(row,"Title");
-    document.getElementById("hkCard").appendChild(card);
+    document.getElementById("hkCard").appendChild(createCard(row,"Title"));
   }
 }
 
-/* ---------- LOAD JP CARD ---------- */
 async function loadJP(){
   if(!ISBNJP) return;
   let data = await fetchWithCache(jpURL);
   let row = data.find(r=>key(r.ISBN)===key(ISBNJP));
   if(row){
-    let card=createCard(row,"標題");
-    document.getElementById("jpCard").appendChild(card);
+    document.getElementById("jpCard").appendChild(createCard(row,"標題"));
   }
 }
 
@@ -209,27 +198,26 @@ async function loadTable(){
   const works = await fetchWithCache(worksURL);
   const master = await fetchWithCache(masterURL);
 
-  /* join with master */
   const masterMap = {};
   master.forEach(r=>{ masterMap[key(r["作品番"])] = r; });
 
   let filtered = works.filter(r=>key(r.ISBN)===key(ISBNJP));
   filtered = filtered.map(w=>{ return {...w, ...(masterMap[key(w["作品番"])]||{})}; });
-
   filtered.sort((a,b)=>Number(a["收錄話"]||0)-Number(b["收錄話"]||0));
 
-  /* determine columns */
-  let columns = Object.keys(columnConfig).filter(c=>columnConfig[c]);
+  let allColumns = new Set();
+  filtered.forEach(r=>Object.keys(r).forEach(c=>allColumns.add(c)));
+  let visibleColumns = [...allColumns].filter(c=>!hiddenColumns.includes(c));
+  visibleColumns.sort((a,b)=>{
+    let ia = columnOrder.indexOf(a); let ib = columnOrder.indexOf(b);
+    if(ia===-1)ia=999; if(ib===-1)ib=999;
+    return ia-ib || a.localeCompare(b);
+  });
 
-  /* build table */
   let table = document.getElementById("worksTable");
-  let html="<tr>";
-  columns.forEach(c=>{ html+="<th>"+c+"</th>"; });
-  html+="</tr>";
+  let html = "<tr>"+visibleColumns.map(c=>"<th>"+c+"</th>").join("")+"</tr>";
   filtered.forEach(r=>{
-    html+="<tr>";
-    columns.forEach(c=>{ html+="<td>"+(r[c]??"")+"</td>"; });
-    html+="</tr>";
+    html+="<tr>"+visibleColumns.map(c=>"<td>"+(r[c]??"")+"</td>").join("")+"</tr>";
   });
   table.innerHTML = html;
 }
@@ -241,12 +229,7 @@ document.addEventListener("dragstart",e=>{
 });
 
 /* ---------- RUN ---------- */
-Promise.all([
-  loadHK(),
-  loadJP(),
-  loadTable()
-]);
-
+Promise.all([loadHK(),loadJP(),loadTable()]);
 </script>
 </body>
 </html>

@@ -23,7 +23,6 @@ body{
 /* ---------- CARD ---------- */
 .card{
   display:flex;
-  flex-direction:row;
   gap:20px;
   background:white;
   border-radius:10px;
@@ -42,8 +41,6 @@ body{
 
 .cardContent{
   flex:1;
-  display:flex;
-  flex-direction:column;
 }
 
 .cardContent h2{
@@ -64,6 +61,19 @@ body{
 #hkCard .card,
 #jpCard .card{
   flex:1;
+}
+
+.imgWrap{
+  width:160px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.imgWrap img{
+  height:100%;
+  width:auto;
+  object-fit:contain;
 }
 
 /* ---------- TABLE ---------- */
@@ -195,8 +205,13 @@ function createCard(data, titleField, labelMap){
   let card = document.createElement("div");
   card.className = "card";
   
+  let imgWrap = document.createElement("div");
+  imgWrap.className = "imgWrap";
+  
   let img = document.createElement("img");
   img.src = data.Image || "";
+  
+  imgWrap.appendChild(img);
   
   let content = document.createElement("div");
   content.className = "cardContent";
@@ -213,7 +228,7 @@ function createCard(data, titleField, labelMap){
     content.appendChild(div);
   }
   
-  card.appendChild(img);
+  card.appendChild(imgWrap);
   card.appendChild(content);
   return card;
 }

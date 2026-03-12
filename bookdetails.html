@@ -3,105 +3,115 @@
 <head>
 <meta charset="UTF-8">
 <title>Book Viewer</title>
-
 <style>
 body{
-  font-family:Arial, Helvetica, sans-serif;
-  margin:20px;
-  background:#f3f3f3;
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 20px;
+  background: #f3f3f3;
 }
 
 #topSection{
-  display:flex;
-  flex-wrap:wrap;
-  gap:20px;
-  margin-bottom:30px;
-  align-items:flex-start;
-  justify-content:flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 30px;
+  align-items: stretch; /* all cards equal height */
+  justify-content: flex-start; /* left align */
 }
 
-#hkCard,
-#jpCard{
-  flex:0 0 420px;
-  max-width:100%;
+#hkCard, #jpCard{
+  flex: 0 0 420px;
+  max-width: 100%;
+  display: flex;
 }
 
 .card{
-  display:flex;
-  flex-direction:row;
-  gap:20px;
-  background:white;
-  border-radius:10px;
-  padding:18px;
-  box-shadow:0 3px 8px rgba(0,0,0,0.15);
-  min-height:260px;
-  align-items:stretch;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: row;
+  gap: 20px;
+  background: white;
+  border-radius: 10px;
+  padding: 18px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  min-height: 260px;
+  align-items: stretch; /* ensures equal height within flex */
 }
 
 .imgWrapper{
-  flex:0 0 auto;
-  max-width:220px;
-  display:flex;
-  align-items:center;
+  flex: 0 0 auto;
+  max-width: 220px;
+  display: flex;
+  align-items: center;
 }
 .imgWrapper img{
-  max-height:100%;
-  width:auto;
-  object-fit:contain;
-  pointer-events:none;
-  user-select:none;
+  max-height: 100%;
+  width: auto;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
 }
 
 .cardContent{
-  flex:1;
-  overflow:auto;
+  flex: 1;
+  overflow: auto;
 }
 
 .cardContent h2{
-  margin:0 0 12px 0;
-  font-size:clamp(22px,2vw,32px);
+  margin: 0 0 12px 0;
+  font-size: clamp(22px, 2vw, 32px);
 }
 
 .field{
-  font-size:14px;
-  margin:3px 0;
+  font-size: 14px;
+  margin: 3px 0;
 }
 
 #bottomSection{
-  display:none;
-  background:white;
-  padding:20px;
-  border-radius:10px;
-  box-shadow:0 3px 8px rgba(0,0,0,0.15);
+  display: none;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
 }
 
 table{
-  border-collapse:collapse;
-  width:100%;
-  table-layout:auto;
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: auto;
 }
 
-th,td{
-  border:1px solid #ddd;
-  padding:6px 10px;
-  vertical-align:top;
-  word-break:break-word;
+th, td{
+  border: 1px solid #ddd;
+  padding: 6px 10px;
+  vertical-align: top;
+  word-break: break-word;
 }
 
 th{
-  background:#eee;
-  white-space:nowrap;
+  background: #eee;
+  white-space: nowrap;
 }
 
-@media (max-width:700px){
-  #hkCard,#jpCard{flex:1 1 100%;}
-  .card{flex-direction:column;align-items:center;}
-  .imgWrapper{max-width:100%;width:100%;}
-  .imgWrapper img{max-height:250px;width:auto;}
+@media(max-width:700px){
+  #hkCard, #jpCard{
+    flex: 1 1 100%;
+  }
+  .card{
+    flex-direction: column;
+    align-items: center;
+  }
+  .imgWrapper{
+    max-width: 100%;
+    width: 100%;
+  }
+  .imgWrapper img{
+    max-height: 250px;
+    width: auto;
+  }
 }
 </style>
 </head>
-
 <body>
 
 <div id="topSection">
@@ -115,55 +125,11 @@ th{
 </div>
 
 <script>
-const hiddenColumns = ["ISBN"];
-const columnOrder = [
-  "作品番","作品名","作者","類","番","巻","收錄話","收錄頁",
-  "出版副題","收錄初出掲載誌","收錄初出掲載号","出版備考",
-  "副題港譯","色","初出掲載誌","掲載番","初出掲載号","初出掲載頁",
-  "初出副題","単行本","第0巻","ドラミちゃん","文庫","兒童版",
-  "藤子不二雄ランド","大全集","頁","全集副題","備考","全集副題香港譯名","作品類"
-];
-
-const hkCardFieldLabels = {
-  "Title": "書名",
-  "Volume": "卷數",
-  "Subtitle": "副標題",
-  "Author": "作者",
-  "Publisher": "出版社",
-  "Price": "定價",
-  "Page": "頁數",
-  "IssueDate": "發行日期",
-  "Size": "尺寸",
-  "RetailPoint": "零售點",
-  "ISBN": "ISBN",
-  "OriginalTitle": "原書名",
-  "OriginalSubtitle": "原副標題",
-  "OriginCountry": "原產地",
-  "ISBN_JP": "日本ISBN",
-  "Active": "是否上架",
-  "Sold": "已售數"
-};
-
-const jpCardFieldLabels = {
-  "標題": "タイトル",
-  "巻": "巻数",
-  "副標題": "サブタイトル",
-  "著": "著者",
-  "出版社": "出版社",
-  "定価": "定価",
-  "頁": "ページ",
-  "初版発行日": "初版発行日",
-  "判型": "判型",
-  "ISBN": "ISBN",
-  "Active": "販売中",
-  "Image": "画像"
-};
-
-const CACHE_TIME = 10*60*1000;
 const params = new URLSearchParams(location.search);
 const ISBNHK = params.get("ISBNHK");
 const ISBNJP = params.get("ISBNJP");
 
+const CACHE_TIME = 10 * 60 * 1000;
 const hkURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
 const jpURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP";
 const worksURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品";
@@ -172,39 +138,45 @@ const masterURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF
 function key(v){ return String(v||"").trim(); }
 
 async function fetchWithCache(url){
-  let cache = localStorage.getItem(url);
-  if(cache){
-    let obj = JSON.parse(cache);
-    if(Date.now() - obj.time < CACHE_TIME) return obj.data;
+  try{
+    const cache = localStorage.getItem(url);
+    if(cache){
+      const obj = JSON.parse(cache);
+      if(Date.now() - obj.time < CACHE_TIME) return obj.data;
+    }
+    const response = await fetch(url);
+    const data = await response.json();
+    localStorage.setItem(url, JSON.stringify({time: Date.now(), data}));
+    return data;
+  }catch(e){
+    console.error("Fetch failed:", url, e);
+    return [];
   }
-  let data = await (await fetch(url)).json();
-  localStorage.setItem(url,JSON.stringify({time:Date.now(),data:data}));
-  return data;
 }
 
-function createCard(data,titleField,labelMap){
-  let card = document.createElement("div");
-  card.className="card";
+function createCard(data, titleField){
+  const card = document.createElement("div");
+  card.className = "card";
 
-  let img = document.createElement("img");
-  img.src = data.Image||"";
+  const img = document.createElement("img");
+  img.src = data.Image || "";
 
-  let imgWrapper = document.createElement("div");
-  imgWrapper.className="imgWrapper";
+  const imgWrapper = document.createElement("div");
+  imgWrapper.className = "imgWrapper";
   imgWrapper.appendChild(img);
 
-  let content = document.createElement("div");
-  content.className="cardContent";
+  const content = document.createElement("div");
+  content.className = "cardContent";
 
-  let title = document.createElement("h2");
-  title.textContent = data[titleField]||"";
+  const title = document.createElement("h2");
+  title.textContent = data[titleField] || "";
   content.appendChild(title);
 
-  for(let k in data){
-    if(k===titleField || k==="Image") continue;
-    let div=document.createElement("div");
-    div.className="field";
-    div.innerHTML="<b>"+(labelMap[k]||k)+"</b>: "+data[k];
+  for(const k in data){
+    if(k === titleField || k === "Image") continue;
+    const div = document.createElement("div");
+    div.className = "field";
+    div.innerHTML = "<b>" + k + "</b>: " + data[k];
     content.appendChild(div);
   }
 
@@ -213,71 +185,45 @@ function createCard(data,titleField,labelMap){
   return card;
 }
 
-function setEqualHeight(){
-  const cards = Array.from(document.querySelectorAll(".card"));
-  if(cards.length===0) return;
-  cards.forEach(c=>c.style.height="auto");
-  let maxH = Math.max(...cards.map(c=>c.offsetHeight));
-  cards.forEach(c=>c.style.height=maxH+"px");
-}
-
-async function loadHK(){
-  if(!ISBNHK) return;
-  let data = await fetchWithCache(hkURL);
-  let row = data.find(r=>key(r.ISBN)===key(ISBNHK));
-  if(row){
-    document.getElementById("hkCard").appendChild(createCard(row,"Title",hkCardFieldLabels));
-    setEqualHeight();
-  }
-}
-
-async function loadJP(){
-  if(!ISBNJP) return;
-  let data = await fetchWithCache(jpURL);
-  let row = data.find(r=>key(r.ISBN)===key(ISBNJP));
-  if(row){
-    document.getElementById("jpCard").appendChild(createCard(row,"標題",jpCardFieldLabels));
-    setEqualHeight();
-  }
+async function loadCard(containerId, url, ISBN, titleField){
+  if(!ISBN) return;
+  try{
+    const data = await fetchWithCache(url);
+    const row = data.find(r=>key(r.ISBN)===key(ISBN));
+    if(row){
+      document.getElementById(containerId).appendChild(createCard(row, titleField));
+    }
+  }catch(e){ console.error(e); }
 }
 
 async function loadTable(){
   if(!ISBNJP) return;
-  document.getElementById("bottomSection").style.display="block";
+  try{
+    const [works, master] = await Promise.all([fetchWithCache(worksURL), fetchWithCache(masterURL)]);
+    const masterMap = {};
+    master.forEach(r=>masterMap[key(r["作品番"])] = r);
 
-  const works = await fetchWithCache(worksURL);
-  const master = await fetchWithCache(masterURL);
-  const masterMap = {};
-  master.forEach(r=>masterMap[key(r["作品番"])]=r);
+    let filtered = works.filter(r=>key(r.ISBN)===key(ISBNJP));
+    filtered = filtered.map(w=>({...w, ...(masterMap[key(w["作品番")]]||{})}));
 
-  let filtered = works.filter(r=>key(r.ISBN)===key(ISBNJP));
-  filtered = filtered.map(w=>({...w,...(masterMap[key(w["作品番")]]||{})}));
-  filtered.sort((a,b)=>Number(a["收錄話"]||0)-Number(b["收錄話"]||0));
+    if(filtered.length === 0) return;
 
-  let allColumns = new Set();
-  filtered.forEach(r=>Object.keys(r).forEach(c=>allColumns.add(c)));
+    document.getElementById("bottomSection").style.display = "block";
 
-  let visibleColumns = [...allColumns].filter(c=>!hiddenColumns.includes(c));
-  visibleColumns.sort((a,b)=>{
-    let ia=columnOrder.indexOf(a),ib=columnOrder.indexOf(b);
-    if(ia===-1) ia=999; if(ib===-1) ib=999;
-    return ia-ib || a.localeCompare(b);
-  });
+    const columns = Array.from(new Set(filtered.flatMap(r=>Object.keys(r))));
+    const table = document.getElementById("worksTable");
 
-  let table = document.getElementById("worksTable");
-  let html="<tr>"+visibleColumns.map(c=>"<th>"+c+"</th>").join("")+"</tr>";
-  filtered.forEach(r=>{
-    html+="<tr>"+visibleColumns.map(c=>"<td>"+(r[c]??"")+"</td>").join("")+"</tr>";
-  });
-  table.innerHTML=html;
+    let html = "<tr>"+columns.map(c=>"<th>"+c+"</th>").join("")+"</tr>";
+    filtered.forEach(r=>{
+      html+="<tr>"+columns.map(c=>"<td>"+(r[c]||"")+"</td>").join("")+"</tr>";
+    });
+    table.innerHTML = html;
+  }catch(e){ console.error(e); }
 }
 
-document.addEventListener("contextmenu",e=>e.preventDefault());
-document.addEventListener("dragstart",e=>{if(e.target.tagName==="IMG") e.preventDefault();});
-
-Promise.all([loadHK(),loadJP(),loadTable()]).then(()=>{
-  window.addEventListener("resize", setEqualHeight);
-});
+loadCard("hkCard", hkURL, ISBNHK, "Title");
+loadCard("jpCard", jpURL, ISBNJP, "標題");
+loadTable();
 </script>
 
 </body>

@@ -25,18 +25,15 @@ body {
   border-radius: 12px;
   padding: 25px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-}
-
-/* FIX: make image + text two columns */
-.card-inner{
-  display:grid;
-  grid-template-columns:180px 1fr;
-  gap:20px;
-  align-items:stretch;
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: stretch; /* align image to match card height */
 }
 
 /* IMAGE BOX */
 .book-image {
+  flex: 0 0 160px; /* fixed width */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -57,6 +54,7 @@ body {
 /* TEXT */
 .cardContent {
   font-size: 14px;
+  flex: 1;
 }
 
 .field {
@@ -92,15 +90,18 @@ th {
 
 /* MOBILE */
 @media (max-width:700px){
-  .card-inner {
-    grid-template-columns: 1fr;
+  .card {
+    flex-direction: column;
+    align-items: center;
   }
-
+  .book-image {
+    width: 100%;
+    height: auto;
+  }
   .book-image img {
+    width: auto;
     max-height: 250px;
-    width: auto;  /* Ensure image is responsive */
   }
-
 }
 </style>
 </head>
@@ -262,4 +263,4 @@ async function loadTable() {
   master.forEach(r => { masterMap[key(r["作品番"])] = r; });
 
   let filtered = works.filter(r => key(r.ISBN) === key(ISBNJP));
-  filtered = filtered.map(w => { return { ...w, ...(masterMap[key(w["作品番"])] || {}) };
+  filtered = filtered.map(w => { return { ...w, ...(masterMap[key(w["作品番

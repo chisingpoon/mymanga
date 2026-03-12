@@ -49,30 +49,18 @@
       font-size: 14px;
     }
 
-    .book-info {
-      width: 70%;
-    }
-
-    .book-info h1 {
-      margin-top: 0;
-    }
-
-    .info-row {
-      margin-bottom: 8px;
-    }
-
     /* ===== Details Table ===== */
     .details-table {
-      width: 100%;              /* Fill browser width */
+      width: 100%;              
       border-collapse: collapse;
-      table-layout: auto;       /* Natural sizing */
+      table-layout: auto;       
     }
 
     .details-table th,
     .details-table td {
       border: 1px solid #ccc;
       padding: 6px 10px;
-      word-break: break-word;   /* Prevent overflow */
+      word-break: break-word;
     }
 
     .details-table th {
@@ -118,27 +106,6 @@
     .clickable-image {
       cursor: zoom-in;
     }
-
-    .jp-detail-button {
-      display: inline-block;
-      margin-top: 15px;
-      padding: 8px 16px;
-      background-color: #0077cc;
-      color: white;
-      text-decoration: none;
-      border-radius: 6px;
-      font-weight: bold;
-      transition: background-color 0.3s;
-    }
-
-    .jp-detail-button:hover {
-      background-color: #005fa3;
-    }
-
-    img {
-      user-select: none;
-      -webkit-user-drag: none;
-    }
   </style>
 </head>
 <body>
@@ -151,8 +118,7 @@ const params = new URLSearchParams(window.location.search);
 const isbnhk = params.get("isbnhk");  // HK ISBN
 const isbnjp = params.get("isbnjp");  // JP ISBN
 
-console.log('HK ISBN from URL:', isbnhk);  // Debugging HK ISBN value
-console.log('JP ISBN from URL:', isbnjp);  // Debugging JP ISBN value
+console.log('isbnhk:', isbnhk, 'isbnjp:', isbnjp);  // Debugging ISBNs
 
 // 2️⃣ Sheet URLs
 const MANGALIST_SHEET =
@@ -165,6 +131,11 @@ const STORYDETAIL_SHEET =
   "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
 
 // 3️⃣ Load everything
+if (!isbnhk && !isbnjp) {
+  document.getElementById("content").innerHTML = "Please provide a valid ISBN (isbnhk or isbnjp) in the URL.";
+  return;
+}
+
 Promise.all([
   fetch(MANGALIST_SHEET).then(r => r.json()),
   fetch(JPINFO_SHEET).then(r => r.json()),
@@ -172,25 +143,25 @@ Promise.all([
   fetch(STORYDETAIL_SHEET).then(r => r.json())
 ])
 .then(([hkbooks, jpbooks, bookStories, allStories]) => {
-  console.log(hkbooks, jpbooks, bookStories, allStories);  // Debugging fetched data
-  
+  console.log('Loaded Sheets:', { hkbooks, jpbooks, bookStories, allStories });
+
   // 1️⃣ Find HK book if isbnhk is provided
   const manga = isbnhk ? hkbooks.find(b => b.ISBN?.trim() === isbnhk?.trim()) : null;
-  console.log('Found HK Book:', manga);  // Debugging found HK book
-  
+  console.log('Found HK Book:', manga);
+
   // 2️⃣ Find JP book if isbnjp is provided
   const jpinfo = isbnjp ? jpbooks.find(j => j.ISBN?.trim() === isbnjp?.trim()) : null;
-  console.log('Found JP Book:', jpinfo);  // Debugging found JP book
-  
+  console.log('Found JP Book:', jpinfo);
+
   if (!manga && !jpinfo) {
     document.getElementById("content").innerHTML = "Book not found.";
     return;
   }
-  
+
   const collectedWorks = jpinfo ? bookStories
     .filter(r => r.ISBN?.trim() === jpinfo.ISBN?.trim())
     .sort((a, b) => Number(a.話) - Number(b.話)) : [];
-  
+
   const mergedRows = collectedWorks.map(r => {
     const detail = allStories.find(s => s.作品番?.trim() === r.作品番?.trim());
     return { ...r, ...detail };
@@ -212,47 +183,4 @@ function render(manga, storyRows, jpinfo) {
       <td>${d.収録話 || ""}</td>
       <td>${d.全集副題香港譯名 || ""}</td>
       <td>${d.出版副題 || ""}</td>
-      <td>${d.頁 || ""}</td>
-      <td>${d.初出副題 || ""}</td>
-      <td>${d.全集副題 || ""}</td>
-      <td>${d.初出掲載誌 || ""}</td>
-      <td>${d.初出掲載号 || ""}</td>
-      <td>${d.大全集 || ""}</td>
-      <td>${d.出版備考 || ""}</td>
-    </tr>
-  `).join("");
-
-  const tableSection = storyRows.length > 0 ? `
-    <h2>収録話</h2>
-    <table class="details-table">
-      <thead>
-        <tr>
-          <th>番</th>
-          <th>巻</th>
-          <th>収録話</th>
-          <th>香港譯名</th>
-          <th>日本副題</th>
-          <th>頁</th>
-          <th>初出副題</th>
-          <th>全集副題</th>
-          <th>初出掲載誌</th>
-          <th>初出掲載号</th>
-          <th>大全集</th>
-          <th>日本出版備考</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${tableRows}
-      </tbody>
-    </table>
-  ` : "";
-
-  const jpCard = jpinfo ? `
-    <div class="card">
-      <div class="card-inner">
-        <div class="book-image">
-          <img src="${jpinfo.Image || ""}" alt="${jpinfo.標題} ${jpinfo.巻}" class="clickable-image" onclick="openImageModal('${jpinfo.Image || ""}')">
-        </div>
-        <div class="column-box">
-          <h3>日文原版資料</h3>
-          <h1>${jpinfo.標題 || ""} ${jpinfo.巻 || ""}</h
+      <td>${d.頁 ||

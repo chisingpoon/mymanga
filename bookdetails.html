@@ -12,12 +12,12 @@ body{
 }
 
 /* ---------- TOP SECTION ---------- */
-/* TOP SECTION */
 #topSection{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
   gap:40px;
   margin-bottom:40px;
+  align-items:stretch; /* ensure all cards are equal height */
 }
 
 /* CARD */
@@ -26,6 +26,9 @@ body{
   border-radius:12px;
   padding:25px;
   box-shadow:0 6px 20px rgba(0,0,0,0.08);
+  display:flex;
+  flex-direction:column;
+  height:100%; /* full height inside grid */
 }
 
 /* INNER CARD LAYOUT */
@@ -33,26 +36,26 @@ body{
   display:grid;
   grid-template-columns:40% 60%;
   gap:20px;
+  height:100%; /* make inner content stretch */
 }
 
 /* IMAGE BOX */
 .book-image{
   width:100%;
-  aspect-ratio:3 / 4;
   display:flex;
   align-items:center;
   justify-content:center;
   background:#f5f5f5;
   border-radius:8px;
   overflow:hidden;
+  height:100%; /* stretch container to full height */
 }
 
 .book-image img{
-  max-width:100%;
-  max-height:100%;
-  object-fit:contain;
+  width:auto;
+  height:100%;       /* force image to fill container height */
+  object-fit:contain; /* scale to fit */
 }
-
 /* TEXT */
 .cardContent{
   font-size:14px;

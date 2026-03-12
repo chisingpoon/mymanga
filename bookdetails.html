@@ -5,141 +5,117 @@
 <title>Book Viewer</title>
 
 <style>
-body{
-  font-family:Arial, Helvetica, sans-serif;
-  margin:20px;
-  background:#f3f3f3;
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 20px;
+  background: #f3f3f3;
 }
 
 /* ---------- TOP SECTION ---------- */
-#topSection{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
-  gap:40px;
-  margin-bottom:40px;
-  align-items:stretch; /* ensure all cards are equal height */
+#topSection {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 40px;
+  margin-bottom: 40px;
 }
 
-/* CARD */
-.card{
-  background:white;
-  border-radius:12px;
-  padding:25px;
-  box-shadow:0 6px 20px rgba(0,0,0,0.08);
+/* ---------- CARD ---------- */
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: row;
   gap: 20px;
-  align-items: stretch;  /* make children stretch to same height */
+  align-items: flex-start; /* card height follows text */
 }
 
-/* INNER CARD LAYOUT */
-.card-inner{
-  display:flex;       /* flex instead of grid */
+.card-inner {
+  display: flex;
   flex-direction: row;
   gap: 20px;
-  align-items: stretch;  /* make image and text stretch same height */
   width: 100%;
+  align-items: flex-start; /* image aligns to top */
 }
 
 /* IMAGE BOX */
-.book-image{
-  flex: 0 0 auto;    /* fixed width for image */
-  width: 160px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#f5f5f5;
-  border-radius:8px;
-  overflow:hidden;
+.book-image {
+  flex: 0 0 160px; /* fixed width */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  border-radius: 8px;
+  overflow: hidden;
+  height: auto; /* do not stretch card height */
 }
 
-/* image fills the height of the card */
-.book-image img{
-  height: 100%;      /* fill the height of .book-image */
-  width: auto;
+.book-image img {
+  max-height: 100%; /* fit inside card height */
+  max-width: 100%;  /* fit inside width */
   object-fit: contain;
+  display: block;
 }
 
 /* TEXT */
-.cardContent{
-  flex:1;           /* take remaining space */
-  display:flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-  
-.field{
-  font-size:14px;
-  margin:3px 0;
+.cardContent {
+  font-size: 14px;
+  flex: 1;
 }
 
-#hkCard,
-#jpCard{
-  display:flex;
-}
-
-#hkCard .card,
-#jpCard .card{
-  flex:1;
-}
-
-.imgWrap{
-  width:160px;
-  flex:0 0 160px;   /* fixed column */
-  display:flex;
-  align-items:stretch;
-}
-
-.imgWrap img{
-  height:100%;
-  width:100%;
-  object-fit:contain;
+.field {
+  font-size: 14px;
+  margin: 3px 0;
 }
 
 /* ---------- TABLE ---------- */
-#bottomSection{
-  display:none;
-  background:white;
-  padding:20px;
-  border-radius:10px;
-  box-shadow:0 3px 8px rgba(0,0,0,0.15);
+#bottomSection {
+  display: none; /* hide if no data */
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
 }
 
-table{
-  border-collapse:collapse;
-  width:100%;
-  table-layout:auto; /* allow auto sizing */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: auto;
 }
 
-th,td{
-  border:1px solid #ddd;
-  padding:6px 10px;
-  vertical-align:top;
-  word-break:break-word;
+th, td {
+  border: 1px solid #ddd;
+  padding: 6px 10px;
+  vertical-align: top;
+  word-break: break-word;
 }
 
-th{
-  background:#eee;
-  white-space:nowrap; /* prevent breaking header */
+th {
+  background: #eee;
+  white-space: nowrap;
 }
 
 /* ---------- MOBILE ---------- */
 @media (max-width:700px){
-  .card{
-    flex-direction:column;
-    align-items:center;
+  .card {
+    flex-direction: column;
+    align-items: center;
   }
-  .card img{
-    height:auto;
-    max-height:250px;
+  .book-image {
+    width: 100%;
+    height: auto;
+  }
+  .book-image img {
+    width: auto;
+    max-height: 250px;
   }
 }
 </style>
 </head>
 
 <body>
-<div id="topSection">
-</div>
+<div id="topSection"></div>
 
 <div id="bottomSection">
   <h2>收錄作品</h2>
@@ -147,52 +123,30 @@ th{
 </div>
 
 <script>
-/* ---------- BACKEND COLUMN CONFIG ---------- */
+/* ---------- CONFIG ---------- */
 const hiddenColumns = ["ISBN"]; 
 const columnOrder = [
   "作品番","作品名","作者","類","番","巻","收錄話","收錄頁",
   "出版副題","收錄初出掲載誌","收錄初出掲載号","出版備考",
-  "副題港譯","色","初出掲載誌","掲載番","初出掲載号","初出掲載頁",
+  "副題港譯","色","初出掲載誌","掲載番","掲載号","初出掲載頁",
   "初出副題","単行本","第0巻","ドラミちゃん","文庫","兒童版",
   "藤子不二雄ランド","大全集","頁","全集副題","備考","全集副題香港譯名","作品類"
 ];
-  
-// Labels for HK card
+
 const hkCardFieldLabels = {
-  "Title": "書名",
-  "Volume": "卷數",
-  "Subtitle": "副標題",
-  "Author": "作者",
-  "Publisher": "出版社",
-  "Price": "定價",
-  "Page": "頁數",
-  "IssueDate": "發行日期",
-  "Size": "尺寸",
-  "RetailPoint": "零售點",
-  "ISBN": "ISBN",
-  "OriginalTitle": "原書名",
-  "OriginalSubtitle": "原副標題",
-  "OriginCountry": "原產地",
-  "ISBN_JP": "日本ISBN",
-  "Active": "是否上架",
-  "Sold": "已售數"
+  "Title": "書名","Volume": "卷數","Subtitle": "副標題","Author": "作者",
+  "Publisher": "出版社","Price": "定價","Page": "頁數","IssueDate": "發行日期",
+  "Size": "尺寸","RetailPoint": "零售點","ISBN": "ISBN","OriginalTitle": "原書名",
+  "OriginalSubtitle": "原副標題","OriginCountry": "原產地","ISBN_JP": "日本ISBN",
+  "Active": "是否上架","Sold": "已售數"
 };
 
-// Labels for JP card
 const jpCardFieldLabels = {
-  "標題": "タイトル",
-  "巻": "巻数",
-  "副標題": "サブタイトル",
-  "著": "著者",
-  "出版社": "出版社",
-  "定価": "定価",
-  "頁": "ページ",
-  "初版発行日": "初版発行日",
-  "判型": "判型",
-  "ISBN": "ISBN",
-  "Active": "販売中",
-  "Image": "画像"
+  "標題": "タイトル","巻": "巻数","副標題": "サブタイトル","著": "著者",
+  "出版社": "出版社","定価": "定価","頁": "ページ","初版発行日": "初版発行日",
+  "判型": "判型","ISBN": "ISBN","Active": "販売中","Image": "画像"
 };
+
 /* ---------- CACHE ---------- */
 const CACHE_TIME = 10 * 60 * 1000;
 async function fetchWithCache(url){
@@ -221,6 +175,7 @@ const masterURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF
 
 /* ---------- HELPERS ---------- */
 function key(v){ return String(v||"").trim(); }
+
 function createCard(data, titleField, labelMap){
   let card = document.createElement("div");
   card.className = "card";
@@ -228,14 +183,11 @@ function createCard(data, titleField, labelMap){
   let inner = document.createElement("div");
   inner.className = "card-inner";
 
-  // IMAGE CONTAINER
+  // IMAGE
   let imageBox = document.createElement("div");
   imageBox.className = "book-image";
-
   let img = document.createElement("img");
-  img.src = data.Image || "";         // make sure JP data has Image field
-  img.alt = data[titleField] || "";
-  
+  img.src = data.Image || "";
   imageBox.appendChild(img);
 
   // CONTENT
@@ -248,7 +200,6 @@ function createCard(data, titleField, labelMap){
 
   for(let k in data){
     if(k === titleField || k === "Image") continue;
-
     let div = document.createElement("div");
     div.className = "field";
     div.innerHTML = "<b>" + (labelMap[k] || k) + "</b>: " + (data[k] || "");
@@ -261,6 +212,7 @@ function createCard(data, titleField, labelMap){
 
   return card;
 }
+
 /* ---------- LOAD CARDS ---------- */
 async function loadHK(){
   if(!ISBNHK) return;
@@ -283,43 +235,40 @@ async function loadJP(){
 /* ---------- LOAD TABLE ---------- */
 async function loadTable(){
   if(!ISBNJP) return;
-
   const works = await fetchWithCache(worksURL);
   const master = await fetchWithCache(masterURL);
 
   const masterMap = {};
-  master.forEach(r => { masterMap[key(r["作品番"])] = r; });
+  master.forEach(r=>{ masterMap[key(r["作品番"])] = r; });
 
-  let filtered = works.filter(r => key(r.ISBN) === key(ISBNJP));
-  filtered = filtered.map(w => ({ ...w, ...(masterMap[key(w["作品番"])] || {}) }));
-  filtered.sort((a,b) => Number(a["收錄話"]||0) - Number(b["收錄話"]||0));
-
-  const bottomSection = document.getElementById("bottomSection");
+  let filtered = works.filter(r=>key(r.ISBN)===key(ISBNJP));
+  filtered = filtered.map(w=>({ ...w, ...(masterMap[key(w["作品番"])]||{}) }));
+  filtered.sort((a,b)=>Number(a["收錄話"]||0)-Number(b["收錄話"]||0));
 
   if(filtered.length === 0){
-    bottomSection.style.display = "none";  // hide if no data
+    document.getElementById("bottomSection").style.display = "none";
     return;
   }
 
-  // there is data → show bottom section
-  bottomSection.style.display = "block";
+  document.getElementById("bottomSection").style.display = "block";
 
   let allColumns = new Set();
-  filtered.forEach(r => Object.keys(r).forEach(c => allColumns.add(c)));
-  let visibleColumns = [...allColumns].filter(c => !hiddenColumns.includes(c));
-  visibleColumns.sort((a,b) => {
-    let ia = columnOrder.indexOf(a), ib = columnOrder.indexOf(b);
-    if(ia===-1) ia=999; if(ib===-1) ib=999;
+  filtered.forEach(r=>Object.keys(r).forEach(c=>allColumns.add(c)));
+  let visibleColumns = [...allColumns].filter(c=>!hiddenColumns.includes(c));
+  visibleColumns.sort((a,b)=>{
+    let ia = columnOrder.indexOf(a); let ib = columnOrder.indexOf(b);
+    if(ia===-1)ia=999; if(ib===-1)ib=999;
     return ia-ib || a.localeCompare(b);
   });
 
   let table = document.getElementById("worksTable");
   let html = "<tr>"+visibleColumns.map(c=>"<th>"+c+"</th>").join("")+"</tr>";
-  filtered.forEach(r => {
-    html += "<tr>"+visibleColumns.map(c => "<td>"+(r[c]??"")+"</td>").join("")+"</tr>";
+  filtered.forEach(r=>{
+    html+="<tr>"+visibleColumns.map(c=>"<td>"+(r[c]??"")+"</td>").join("")+"</tr>";
   });
   table.innerHTML = html;
 }
+
 /* ---------- SECURITY ---------- */
 document.addEventListener("contextmenu",e=>e.preventDefault());
 document.addEventListener("dragstart",e=>{
@@ -327,13 +276,13 @@ document.addEventListener("dragstart",e=>{
 });
 
 /* ---------- RUN ---------- */
-init();
-
 async function init(){
   await loadHK();
   await loadJP();
   await loadTable();
 }
+
+init();
 </script>
 </body>
 </html>

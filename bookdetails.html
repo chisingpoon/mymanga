@@ -18,7 +18,7 @@ body{
   gap:20px;
   margin-bottom:30px;
   align-items:flex-start;
-  justify-content:flex-start;  /* always left align */
+  justify-content:flex-start;  /* always left aligned */
 }
 
 /* containers for cards */
@@ -137,9 +137,8 @@ th{
 </div>
 
 <script>
-/* ---------- BACKEND COLUMN CONFIG ---------- */
-const hiddenColumns = ["ISBN"]; 
-
+/* ---------- CONFIG ---------- */
+const hiddenColumns = ["ISBN"];
 const columnOrder = [
   "作品番","作品名","作者","類","番","巻","收錄話","收錄頁",
   "出版副題","收錄初出掲載誌","收錄初出掲載号","出版備考",
@@ -147,8 +146,6 @@ const columnOrder = [
   "初出副題","単行本","第0巻","ドラミちゃん","文庫","兒童版",
   "藤子不二雄ランド","大全集","頁","全集副題","備考","全集副題香港譯名","作品類"
 ];
-
-/* ---------- LABELS ---------- */
 
 const hkCardFieldLabels = {
   "Title": "書名",
@@ -185,9 +182,18 @@ const jpCardFieldLabels = {
   "Image": "画像"
 };
 
-/* ---------- CACHE ---------- */
-
 const CACHE_TIME = 10 * 60 * 1000;
+const params = new URLSearchParams(location.search);
+const ISBNHK = params.get("ISBNHK");
+const ISBNJP = params.get("ISBNJP");
+
+const hkURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
+const jpURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP";
+const worksURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品";
+const masterURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
+
+/* ---------- HELPERS ---------- */
+function key(v){ return String(v||"").trim(); }
 
 async function fetchWithCache(url){
   let cache = localStorage.getItem(url);
@@ -199,23 +205,6 @@ async function fetchWithCache(url){
   localStorage.setItem(url,JSON.stringify({time:Date.now(),data:data}));
   return data;
 }
-
-/* ---------- URL PARAMETERS ---------- */
-
-const params = new URLSearchParams(location.search);
-const ISBNHK = params.get("ISBNHK");
-const ISBNJP = params.get("ISBNJP");
-
-/* ---------- DATA SOURCES ---------- */
-
-const hkURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
-const jpURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP";
-const worksURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品";
-const masterURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
-
-/* ---------- HELPERS ---------- */
-
-function key(v){ return String(v||"").trim(); }
 
 function createCard(data,titleField,labelMap){
   let card = document.createElement("div");
@@ -245,12 +234,10 @@ function createCard(data,titleField,labelMap){
 
   card.appendChild(imgWrapper);
   card.appendChild(content);
-
   return card;
 }
 
 /* ---------- LOAD CARDS ---------- */
-
 async function loadHK(){
   if(!ISBNHK) return;
   let data = await fetchWithCache(hkURL);
@@ -266,7 +253,6 @@ async function loadJP(){
 }
 
 /* ---------- LOAD TABLE ---------- */
-
 async function loadTable(){
   if(!ISBNJP) return;
   document.getElementById("bottomSection").style.display="block";
@@ -293,9 +279,17 @@ async function loadTable(){
   let table = document.getElementById("worksTable");
   let html="<tr>"+visibleColumns.map(c=>"<th>"+c+"</th>").join("")+"</tr>";
   filtered.forEach(r=>{
-    html+="<tr>"+visibleColumns.map(c=><td>"+(r[c]??"")+"</td>").join("")+"</tr>";
+    html+="<tr>"+visibleColumns.map(c=>"<td>"+(r[c]??"")+"</td>").join("")+"</tr>";
   });
   table.innerHTML=html;
+}
+
+/* ---------- EQUAL HEIGHT FUNCTION ---------- */
+function setEqualHeight(){
+  const cards = Array.from(document.querySelectorAll(".card"));
+  if(cards.length<2) return;
+  let maxHeight = Math.max(...cards.map(c=>c.offsetHeight));
+  cards.forEach(c=>c.style.height=maxHeight + "px");
 }
 
 /* ---------- SECURITY ---------- */
@@ -303,7 +297,10 @@ document.addEventListener("contextmenu",e=>e.preventDefault());
 document.addEventListener("dragstart",e=>{if(e.target.tagName==="IMG") e.preventDefault();});
 
 /* ---------- RUN ---------- */
-Promise.all([loadHK(), loadJP(), loadTable()]);
+Promise.all([loadHK(), loadJP(), loadTable()]).then(()=>{
+  setEqualHeight();
+  window.addEventListener("resize", setEqualHeight); // recalc on resize
+});
 </script>
 
 </body>

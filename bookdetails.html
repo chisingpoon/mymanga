@@ -38,6 +38,7 @@ body{
   width:auto;
   max-width:220px;
   object-fit:contain;
+  align-self:stretch;
 }
 
 .cardContent{
@@ -48,18 +49,20 @@ body{
   margin:0 0 12px 0;
   font-size:clamp(22px,2vw,32px);
 }
-  
-#topSection{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
-  gap:20px;
-  margin-bottom:30px;
-  align-items:start;
-}
 
 .field{
   font-size:14px;
   margin:3px 0;
+}
+
+#hkCard,
+#jpCard{
+  display:flex;
+}
+
+#hkCard .card,
+#jpCard .card{
+  flex:1;
 }
 
 /* ---------- TABLE ---------- */
@@ -105,8 +108,6 @@ th{
 
 <body>
 <div id="topSection">
-  <div id="hkCard"></div>
-  <div id="jpCard"></div>
 </div>
 
 <div id="bottomSection">
@@ -221,7 +222,7 @@ async function loadHK(){
   let data = await fetchWithCache(hkURL);
   let row = data.find(r=>key(r.ISBN)===key(ISBNHK));
   if(row){
-    document.getElementById("hkCard").appendChild(createCard(row, "Title", hkCardFieldLabels));
+    document.getElementById("topSection").appendChild(createCard(row, "Title", hkCardFieldLabels));
   }
 }
 

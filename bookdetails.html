@@ -14,10 +14,23 @@ body{
 /* ---------- TOP SECTION ---------- */
 #topSection{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
+  grid-template-columns:repeat(2, minmax(420px, 1fr));
   gap:20px;
   margin-bottom:30px;
   align-items:stretch;
+}
+
+#topSection.singleCard {
+  grid-template-columns: 1fr; /* For single card display (only JP card) */
+}
+
+#jpCard {
+  order: -1; /* Moves JP card to the left when it's the only card */
+  display: none; /* Hide JP card when only HK card is displayed */
+}
+
+#hkCard {
+  display: none; /* Hide HK card when ISBNHK is not passed */
 }
 
 /* ---------- CARD ---------- */
@@ -70,7 +83,7 @@ body{
 table{
   border-collapse:collapse;
   width:100%;
-  table-layout:auto; /* allow auto sizing */
+  table-layout:auto;
 }
 
 th,td{
@@ -82,7 +95,7 @@ th,td{
 
 th{
   background:#eee;
-  white-space:nowrap; /* prevent breaking header */
+  white-space:nowrap;
 }
 
 /* ---------- MOBILE ---------- */
@@ -111,17 +124,18 @@ th{
 </div>
 
 <script>
-/* ---------- BACKEND COLUMN CONFIG ---------- */
+/* ---------- BACKEND CONFIG ---------- */
 const hiddenColumns = ["ISBN"]; 
+
 const columnOrder = [
   "作品番","作品名","作者","類","番","巻","收錄話","收錄頁",
-  "出版副題","收錄初出掲載誌","收錄初出掲載号","出版備考",
+  "出版副題","収録初出掲載誌","収録初出掲載号","出版備考",
   "副題港譯","色","初出掲載誌","掲載番","初出掲載号","初出掲載頁",
   "初出副題","単行本","第0巻","ドラミちゃん","文庫","兒童版",
   "藤子不二雄ランド","大全集","頁","全集副題","備考","全集副題香港譯名","作品類"
 ];
-  
-// Labels for HK card
+
+// HK card labels
 const hkCardFieldLabels = {
   "Title": "書名",
   "Volume": "卷數",
@@ -142,7 +156,7 @@ const hkCardFieldLabels = {
   "Sold": "已售數"
 };
 
-// Labels for JP card
+// JP card labels
 const jpCardFieldLabels = {
   "標題": "タイトル",
   "巻": "巻数",
@@ -157,8 +171,9 @@ const jpCardFieldLabels = {
   "Active": "販売中",
   "Image": "画像"
 };
+
 /* ---------- CACHE ---------- */
-const CACHE_TIME = 10 * 60 * 1000;
+const CACHE_TIME = 10*60*1000;
 async function fetchWithCache(url){
   let cache = localStorage.getItem(url);
   if(cache){
@@ -168,7 +183,7 @@ async function fetchWithCache(url){
     }
   }
   let data = await (await fetch(url)).json();
-  localStorage.setItem(url,JSON.stringify({time:Date.now(),data:data}));
+  localStorage.setItem(url, JSON.stringify({time:Date.now(), data:data}));
   return data;
 }
 
@@ -181,95 +196,4 @@ const ISBNJP = params.get("ISBNJP");
 const hkURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
 const jpURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP";
 const worksURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品";
-const masterURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
-
-/* ---------- HELPERS ---------- */
-function key(v){ return String(v||"").trim(); }
-function createCard(data, titleField, labelMap){
-  let card = document.createElement("div");
-  card.className = "card";
-  
-  let img = document.createElement("img");
-  img.src = data.Image || "";
-  
-  let content = document.createElement("div");
-  content.className = "cardContent";
-  
-  let title = document.createElement("h2");
-  title.textContent = data[titleField] || "";
-  content.appendChild(title);
-  
-  for(let k in data){
-    if(k === titleField || k === "Image") continue;
-    let div = document.createElement("div");
-    div.className = "field";
-    div.innerHTML = "<b>" + (labelMap[k] || k) + "</b>: " + data[k];
-    content.appendChild(div);
-  }
-  
-  card.appendChild(img);
-  card.appendChild(content);
-  return card;
-}
-/* ---------- LOAD CARDS ---------- */
-async function loadHK(){
-  if(!ISBNHK) return;
-  let data = await fetchWithCache(hkURL);
-  let row = data.find(r=>key(r.ISBN)===key(ISBNHK));
-  if(row){
-    document.getElementById("hkCard").appendChild(createCard(row, "Title", hkCardFieldLabels));
-  }
-}
-
-async function loadJP(){
-  if(!ISBNJP) return;
-  let data = await fetchWithCache(jpURL);
-  let row = data.find(r=>key(r.ISBN)===key(ISBNJP));
-  if(row){
-    document.getElementById("jpCard").appendChild(createCard(row, "標題", jpCardFieldLabels));
-  }
-}
-
-/* ---------- LOAD TABLE ---------- */
-async function loadTable(){
-  if(!ISBNJP) return;
-  document.getElementById("bottomSection").style.display="block";
-
-  const works = await fetchWithCache(worksURL);
-  const master = await fetchWithCache(masterURL);
-
-  const masterMap = {};
-  master.forEach(r=>{ masterMap[key(r["作品番"])] = r; });
-
-  let filtered = works.filter(r=>key(r.ISBN)===key(ISBNJP));
-  filtered = filtered.map(w=>{ return {...w, ...(masterMap[key(w["作品番"])]||{})}; });
-  filtered.sort((a,b)=>Number(a["收錄話"]||0)-Number(b["收錄話"]||0));
-
-  let allColumns = new Set();
-  filtered.forEach(r=>Object.keys(r).forEach(c=>allColumns.add(c)));
-  let visibleColumns = [...allColumns].filter(c=>!hiddenColumns.includes(c));
-  visibleColumns.sort((a,b)=>{
-    let ia = columnOrder.indexOf(a); let ib = columnOrder.indexOf(b);
-    if(ia===-1)ia=999; if(ib===-1)ib=999;
-    return ia-ib || a.localeCompare(b);
-  });
-
-  let table = document.getElementById("worksTable");
-  let html = "<tr>"+visibleColumns.map(c=>"<th>"+c+"</th>").join("")+"</tr>";
-  filtered.forEach(r=>{
-    html+="<tr>"+visibleColumns.map(c=>"<td>"+(r[c]??"")+"</td>").join("")+"</tr>";
-  });
-  table.innerHTML = html;
-}
-
-/* ---------- SECURITY ---------- */
-document.addEventListener("contextmenu",e=>e.preventDefault());
-document.addEventListener("dragstart",e=>{
-  if(e.target.tagName==="IMG") e.preventDefault();
-});
-
-/* ---------- RUN ---------- */
-Promise.all([loadHK(),loadJP(),loadTable()]);
-</script>
-</body>
-</html>
+const masterURL = "https://opensheet.elk.sh/1Ker

@@ -41,7 +41,7 @@ body{
 /* IMAGE BOX */
 .book-image{
   width:100%;
-  aspect-ratio:3/4;          /* fixed book proportion */
+  aspect-ratio:3/4;      /* force height proportional to width */
   display:flex;
   align-items:center;
   justify-content:center;
@@ -51,9 +51,9 @@ body{
 }
 
 .book-image img{
-  max-width:100%; 
-  max-height:100%;
-  object-fit:contain;        /* scale to fit container */
+  width:100%;
+  height:100%;           /* fill container height */
+  object-fit:contain;    /* scale properly */
 }
   
 /* TEXT */
@@ -215,23 +215,23 @@ const masterURL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF
 /* ---------- HELPERS ---------- */
 function key(v){ return String(v||"").trim(); }
 function createCard(data, titleField, labelMap){
-
   let card = document.createElement("div");
   card.className = "card";
 
   let inner = document.createElement("div");
   inner.className = "card-inner";
 
-  /* IMAGE */
+  // IMAGE CONTAINER
   let imageBox = document.createElement("div");
   imageBox.className = "book-image";
 
   let img = document.createElement("img");
-  img.src = data.Image || "";
-
+  img.src = data.Image || "";         // make sure JP data has Image field
+  img.alt = data[titleField] || "";
+  
   imageBox.appendChild(img);
 
-  /* CONTENT */
+  // CONTENT
   let content = document.createElement("div");
   content.className = "cardContent";
 
@@ -245,13 +245,11 @@ function createCard(data, titleField, labelMap){
     let div = document.createElement("div");
     div.className = "field";
     div.innerHTML = "<b>" + (labelMap[k] || k) + "</b>: " + (data[k] || "");
-
     content.appendChild(div);
   }
 
   inner.appendChild(imageBox);
   inner.appendChild(content);
-
   card.appendChild(inner);
 
   return card;

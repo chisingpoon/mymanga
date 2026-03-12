@@ -26,22 +26,25 @@ body{
   border-radius:12px;
   padding:25px;
   box-shadow:0 6px 20px rgba(0,0,0,0.08);
-  display:flex;
-  flex-direction:column;
-  height:100%; /* full height inside grid */
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: stretch;  /* make children stretch to same height */
 }
 
 /* INNER CARD LAYOUT */
 .card-inner{
-  display:grid;
-  grid-template-columns:40% 60%;
-  gap:20px;
+  display:flex;       /* flex instead of grid */
+  flex-direction: row;
+  gap: 20px;
+  align-items: stretch;  /* make image and text stretch same height */
+  width: 100%;
 }
 
 /* IMAGE BOX */
 .book-image{
-  width:100%;
-  aspect-ratio:3/4;      /* force height proportional to width */
+  flex: 0 0 auto;    /* fixed width for image */
+  width: 160px;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -50,17 +53,21 @@ body{
   overflow:hidden;
 }
 
+/* image fills the height of the card */
 .book-image img{
-  width:100%;
-  height:100%;           /* fill container height */
-  object-fit:contain;    /* scale properly */
-}
-  
-/* TEXT */
-.cardContent{
-  font-size:14px;
+  height: 100%;      /* fill the height of .book-image */
+  width: auto;
+  object-fit: contain;
 }
 
+/* TEXT */
+.cardContent{
+  flex:1;           /* take remaining space */
+  display:flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+  
 .field{
   font-size:14px;
   margin:3px 0;

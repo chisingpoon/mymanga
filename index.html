@@ -3,78 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsive Card Index</title>
+    <title>叮噹多啦A夢漫畫資訊</title>
     <style>
-        /* Base Styles */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f0f2f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background-color: #f1f5f9;
             margin: 0;
             padding: 20px;
             display: flex;
             justify-content: center;
         }
 
-        /* The Responsive Container */
         .container {
             width: 100%;
-            /* This ensures it stays slim on desktop but expands on mobile */
-            max-width: 600px; 
+            max-width: 700px;
             display: flex;
             flex-direction: column;
-            gap: 16px; /* Vertical spacing */
+            gap: 24px;
         }
 
-        /* Card Styling */
+        /* Main Card */
         .card {
-            background: #ffffff;
-            border-radius: 15px;
+            background: white;
+            border-radius: 16px;
             padding: 24px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e1e4e8;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
         }
 
-        .card h2 {
-            margin: 0 0 12px 0;
+        h2 {
+            margin: 0 0 16px 0;
             font-size: 1.25rem;
-            color: #1a1a1a;
+            color: #0f172a;
         }
 
-        .link-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+        /* Sub-Card */
+        .sub-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #cbd5e1;
+            margin-bottom: 12px;
         }
 
-        /* Making links look like buttons for easier tapping on mobile */
+        h3 {
+            margin: 0 0 12px 0;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+        }
+
+        /* Grid for 2-Column Links */
+        .link-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* Default to 1 column for mobile */
+            gap: 10px;
+        }
+
+        /* Responsive Breakpoint: Switches to 2 columns on screens wider than 480px */
+        @media (min-width: 480px) {
+            .link-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
         .link-item {
             text-decoration: none;
-            color: #0066cc;
-            background: #f8f9fa;
-            padding: 12px 16px;
+            color: #334155;
+            background: white;
+            padding: 12px;
             border-radius: 8px;
+            font-size: 0.9rem;
             font-weight: 500;
-            transition: background 0.2s, transform 0.1s;
-            border: 1px solid transparent;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
         }
 
         .link-item:hover {
-            background: #eef2ff;
-            border-color: #0066cc;
-        }
-
-        .link-item:active {
-            transform: scale(0.98);
-        }
-
-        /* Desktop specific tweak */
-        @media (min-width: 768px) {
-            body {
-                padding-top: 60px;
-            }
-            .card {
-                padding: 32px;
-            }
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background: #eff6ff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
     </style>
 </head>
@@ -89,10 +103,15 @@
             <div class="sub-card">
                 <h3>捷徑</h3>
                 <div class="link-list">
-                    <a href="publishhk.html?title=叮噹,叮噹大長篇" class="link-item">叮噹系列 →</a>
-                    <a href="publishhk.html?title=多啦A夢,多啦A夢大長篇" class="link-item">多啦A夢系列 →</a>
+                    <a href="publishhk.html?title=叮噹" class="link-item">叮噹系列 →</a>
+                    <a href="publishhk.html?title=叮噹大長篇" class="link-item">叮噹大長篇系列 →</a>
+                    <a href="publishhk.html?title=多啦A夢" class="link-item">多啦A夢系列 →</a>
+                    <a href="publishhk.html?title=多啦A夢大長篇" class="link-item">多啦A夢大長篇系列 →</a>
+                    <a href="publishhk.html?title=多啦A夢文庫版" class="link-item">文庫版系列 →</a>
+                    <a href="publishhk.html?title=多啦A夢大長篇文庫版" class="link-item">大長篇文庫版系列 →</a>
+                    <a href="publishhk.html?title=藤子．F．不二雄大全集 多啦A夢" class="link-item">藤子．F．不二雄大全集 多啦A夢系列 →</a>
+                    <a href="publishhk.html?title=藤子．F．不二雄大全集 多啦A夢大長篇" class="link-item">藤子．F．不二雄大全集 多啦A夢大長篇系列 →</a>
                     <a href="publishhk.html?title=多啦A夢彩色電影版" class="link-item">彩色電影版系列 →</a>
-                    <a href="publishhk.html?title=多啦A夢大長篇文庫版,多啦A夢大長篇文庫版" class="link-item">文庫版系列 →</a>
                     <a href="publishhk.html?title=多啦A夢超棒球外傳" class="link-item">多啦A夢超棒球外傳系列 →</a>
                 </div>
             </div>
@@ -108,9 +127,11 @@
                 <div class="link-list">
                     <a href="publishjp.html?category=ドラえもん,ドラえもんプラス" class="link-item">ドラえもん →</a>
                     <a href="publishjp.html?category=大長編ドラえもん" class="link-item">大長編ドラえもん →</a>
-                    <a href="publishjp.html?series=藤子・Ｆ・不二雄大全集" class="link-item">藤子・Ｆ・不二雄大全集系列 →</a>
+                    <a href="publishjp.html?category=藤子・Ｆ・不二雄大全集 ドラえもん" class="link-item">藤子・Ｆ・不二雄大全集 ドラえもん →</a>
+                    <a href="publishjp.html?category=藤子・Ｆ・不二雄大全集 大長編ドラえもん" class="link-item">藤子・Ｆ・不二雄大全集 大長編ドラえもん →</a>
+                    <a href="publishjp.html?category=小学館コロコロ文庫 ドラえもん" class="link-item">小学館コロコロ文庫 ドラえもん系列 →</a>
+                    <a href="publishjp.html?category=小学館コロコロ文庫 大長編ドラえもん" class="link-item">小学館コロコロ文庫 大長編ドラえもん系列 →</a>      
                     <a href="publishjp.html?series=てんとう虫コミックス" class="link-item">てんとう虫コミックス系列 →</a>
-                    <a href="publishjp.html?series=小学館コロコロ文庫" class="link-item">小学館コロコロ文庫系列 →</a>
                 </div>
             </div>
         </section>

@@ -103,7 +103,7 @@ async function loadSheets() {
       const contentDiv = document.getElementById("content");
       const loadingMsg = document.createElement("div");
       loadingMsg.id = "loadingTable";
-      loadingMsg.innerText = "Loading bottom table...";
+      loadingMsg.innerText = "正在讀取資訊...";
       contentDiv.appendChild(loadingMsg);
 
       const [bookStories, allStories] = await Promise.all([

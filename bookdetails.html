@@ -4,105 +4,28 @@
 <meta charset="UTF-8">
 <title>Book Detail</title>
 <style>
-body {
-  font-family: Arial;
-  padding: 40px;
-}
-.top-section {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  margin-bottom: 40px;
-}
-.card {
-  background: white;
-  border-radius: 12px;
-  padding: 25px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-}
-.card-inner {
-  display: grid;
-  grid-template-columns: 40% 60%;
-  gap: 20px;
-  height: 100%;
-}
-.book-image {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-}
-.book-image img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  border-radius: 8px;
-}
-.column-box {
-  font-size: 14px;
-}
+body { font-family: Arial; padding: 40px; }
+.top-section { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+.card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+.card-inner { display: grid; grid-template-columns: 40% 60%; gap: 20px; height: 100%; }
+.book-image { position: relative; width: 100%; height: 100%; border-radius: 8px; overflow: hidden; }
+.book-image img { position: absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; border-radius:8px; }
+.column-box { font-size: 14px; }
 
 /* Table styling */
-.details-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: auto; /* auto-fit columns based on content */
-}
-.details-table th, .details-table td {
-  border: 1px solid #ccc;
-  padding: 6px 10px;
-  word-break: break-word;
-  white-space: normal; /* wrap by default */
-}
-.details-table th.nowrap, .details-table td.nowrap {
-  white-space: nowrap; /* keep nowrap columns single-line */
-}
-.details-table th {
-  background: #f2f2f2;
-  text-align: left;
-}
-.details-table tr:nth-child(even) {
-  background: #fafafa;
-}
+.details-table { width: 100%; border-collapse: collapse; table-layout: auto; }
+.details-table th, .details-table td { border: 1px solid #ccc; padding: 6px 10px; word-break: break-word; white-space: normal; }
+.details-table th.nowrap, .details-table td.nowrap { white-space: nowrap; }
+.details-table th { background: #f2f2f2; text-align: left; }
+.details-table tr:nth-child(even) { background: #fafafa; }
 
 /* Image modal */
-.image-modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-.image-modal.show {
-  display: flex;
-}
-.image-modal img {
-  max-width: 90%;
-  max-height: 90%;
-  object-fit: contain;
-  border-radius: 8px;
-}
-.image-close {
-  position: absolute;
-  top: 20px;
-  right: 30px;
-  font-size: 40px;
-  color: white;
-  cursor: pointer;
-}
-.clickable-image {
-  cursor: zoom-in;
-}
-img {
-  user-select: none;
-  -webkit-user-drag: none;
-}
+.image-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 9999; }
+.image-modal.show { display: flex; }
+.image-modal img { max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 8px; }
+.image-close { position: absolute; top: 20px; right: 30px; font-size: 40px; color: white; cursor: pointer; }
+.clickable-image { cursor: zoom-in; }
+img { user-select: none; -webkit-user-drag: none; }
 </style>
 </head>
 <body>
@@ -113,6 +36,31 @@ img {
 // ===== Configuration =====
 const hideColumns = ["全集副題香港譯名", "作品類"]; // Columns to hide
 const nowrapColumns = ["ISBN", "作品番", "巻"]; // Columns to keep single-line
+const columnOrder = [ // Backend-style order configuration
+  "ISBN",
+  "作品番",
+  "巻",
+  "Title",
+  "Subtitle",
+  "Author",
+  "Publisher",
+  "Price",
+  "Page",
+  "IssueDate",
+  "Size",
+  "RetailPoint",
+  "OriginalTitle",
+  "OriginalSubtitle",
+  "Image",
+  "OriginCountry",
+  "定価",
+  "初版発行日",
+  "系列",
+  "著",
+  "話",
+  "頁"
+  // add all other columns you want in desired order
+];
 
 // ===== URL parameters =====
 const params = new URLSearchParams(window.location.search);
@@ -213,15 +161,17 @@ function renderPage(manga, jpinfo, storyRows) {
 
   document.getElementById("content").innerHTML = `<div class="top-section">${hkCard}${jpCard}</div>`;
 
-  // ===== Bottom Table =====
   if (storyRows.length > 0) {
-    // Trim keys and remove hidden columns
     const allColumns = Array.from(new Set(storyRows.flatMap(row => Object.keys(row).map(k => k?.trim()))))
       .filter(c => !hideColumns.includes(c));
 
-    const thead = `<tr>${allColumns.map(c => `<th class="${nowrapColumns.includes(c) ? 'nowrap' : ''}">${c}</th>`).join('')}</tr>`;
+    // Arrange columns by configuration
+    const finalColumns = columnOrder.filter(c => allColumns.includes(c))
+      .concat(allColumns.filter(c => !columnOrder.includes(c))); // append remaining columns at end
+
+    const thead = `<tr>${finalColumns.map(c => `<th class="${nowrapColumns.includes(c) ? 'nowrap' : ''}">${c}</th>`).join('')}</tr>`;
     const tbody = storyRows.map(row => `
-      <tr>${allColumns.map(c => `<td class="${nowrapColumns.includes(c) ? 'nowrap' : ''}">${row[c]?.trim() || ""}</td>`).join('')}</tr>
+      <tr>${finalColumns.map(c => `<td class="${nowrapColumns.includes(c) ? 'nowrap' : ''}">${row[c]?.trim() || ""}</td>`).join('')}</tr>
     `).join("");
 
     const tableSection = `
@@ -247,7 +197,6 @@ function closeImageModal() {
   modal.classList.remove("show");
 }
 
-// ===== Key and interaction events =====
 document.addEventListener("keydown", e => { if(e.key==="Escape") closeImageModal(); });
 window.addEventListener("contextmenu", e => e.preventDefault(), true);
 window.addEventListener("dragstart", e => e.preventDefault());

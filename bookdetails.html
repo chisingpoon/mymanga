@@ -111,7 +111,7 @@ img {
 
 <script>
 // ===== Configuration =====
-const hideColumns = []; // Columns to hide
+const hideColumns = [!全集副題香港譯名", "作品類"]; // Columns to hide
 const nowrapColumns = ["ISBN", "作品番", "巻"]; // Columns to keep single-line
 
 // ===== URL parameters =====
@@ -215,12 +215,13 @@ function renderPage(manga, jpinfo, storyRows) {
 
   // ===== Bottom Table =====
   if (storyRows.length > 0) {
-    const allColumns = Array.from(new Set(storyRows.flatMap(row => Object.keys(row))))
+    // Trim keys and remove hidden columns
+    const allColumns = Array.from(new Set(storyRows.flatMap(row => Object.keys(row).map(k => k?.trim()))))
       .filter(c => !hideColumns.includes(c));
 
     const thead = `<tr>${allColumns.map(c => `<th class="${nowrapColumns.includes(c) ? 'nowrap' : ''}">${c}</th>`).join('')}</tr>`;
     const tbody = storyRows.map(row => `
-      <tr>${allColumns.map(c => `<td class="${nowrapColumns.includes(c) ? 'nowrap' : ''}">${row[c] || ""}</td>`).join('')}</tr>
+      <tr>${allColumns.map(c => `<td class="${nowrapColumns.includes(c) ? 'nowrap' : ''}">${row[c]?.trim() || ""}</td>`).join('')}</tr>
     `).join("");
 
     const tableSection = `

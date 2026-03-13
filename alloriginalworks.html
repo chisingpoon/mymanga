@@ -9,11 +9,15 @@
    BASE
 ================================= */
 body {
-  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", Arial, sans-serif;
+  font-family: "Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",Arial,sans-serif;
   padding: 30px;
   background: #f4f5f7;
   color: #222;
+  transition: background 0.3s, color 0.3s;
 }
+
+a { text-decoration: none; }
+button { cursor: pointer; transition: all 0.2s; }
 
 /* ===============================
    HEADER
@@ -27,383 +31,154 @@ body {
   border-bottom: 1px solid #ddd;
 }
 
-.site-title {
-  margin: 0;
-  font-size: 26px;
-  font-weight: 700;
-}
+.site-title { font-size: 26px; font-weight: 700; margin:0; }
 
+.header-right { display: flex; gap: 10px; align-items: center; }
 .header-link {
-  text-decoration: none;
-  font-size: 13px;
-  padding: 7px 14px;
-  border-radius: 6px;
-  background: #fff;
-  color: #333;
-  border: 1px solid #ddd;
-  transition: 0.2s ease;
+  padding: 7px 14px; border-radius: 6px; background:#fff;
+  color:#333; border:1px solid #ddd; font-size:13px;
 }
+.header-link:hover { background:#222; color:#fff; border-color:#222; }
 
-.header-link:hover {
-  background: #222;
-  color: #fff;
-  border-color: #222;
+#darkModeToggle {
+  padding:5px 10px; font-size:13px; border-radius:6px; border:1px solid #ccc; background:#fff;
 }
-
-.header-right {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
+#darkModeToggle:hover { background:#222; color:#fff; border-color:#222; }
 
 /* ===============================
    TOP FILTERS
 ================================= */
 .top-filters {
-  background: #fff;
-  padding: 18px 20px;
-  border-radius: 10px;
-  margin-bottom: 25px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+  background:#fff; padding:18px 20px; border-radius:10px; margin-bottom:25px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.05);
+  position: sticky; top:0; z-index:1000;
 }
 
-.filter-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
-  align-items: flex-start;
-}
+.filter-row { display:flex; flex-wrap:wrap; gap:18px; align-items:flex-start; }
+.filter-row-top { display:flex; align-items:center; gap:15px; }
+.filter-row-bottom { display:flex; flex-wrap:nowrap; gap:20px; align-items:flex-start; margin-top:20px; }
 
-.filter-row-top {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
+#clearFiltersBtn { padding:6px 14px; font-size:12px; border-radius:20px; border:1px solid #ccc; background:#fff; min-width:80px; }
+#clearFiltersBtn:hover { background:#222; color:#fff; }
 
-.result-count {
-  white-space: nowrap;
-  flex-shrink: 0;
-  margin-left: 20px;
-}
-
-#clearFiltersBtn {
-  padding: 6px 14px;
-  font-size: 12px;
-  border-radius: 20px;
-  border: 1px solid #ccc;
-  background: #fff;
-  cursor: pointer;
-  flex-shrink: 0;
-  min-width: 80px;
-  z-index: 1;
-}
-
-#clearFiltersBtn:hover {
-  background: #222;
-  color: #fff;
-}
-
-.search-wrapper {
-  position: relative;
-  flex: 1 1 280px;
-  max-width: 420px;
-  margin-left: 10px;
-  margin-right: auto;
-}
-
+.search-wrapper { position:relative; flex:1 1 280px; max-width:420px; margin-left:10px; margin-right:auto; }
 .search-wrapper input {
-  width: 100%;
-  padding: 7px 30px 7px 12px;
-  border-radius: 20px;
-  border: 1px solid #ccc;
+  width:100%; padding:7px 30px 7px 12px; border-radius:20px; border:1px solid #ccc;
 }
-
 .clear-btn {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  color: #aaa;
-  display: none;
+  position:absolute; right:12px; top:50%; transform:translateY(-50%);
+  cursor:pointer; color:#aaa; display:none;
 }
+.clear-btn:hover { color:#000; }
 
-.clear-btn:hover {
-  color: #000;
-}
+.result-count { font-size:12px; color:#666; white-space:nowrap; flex-shrink:0; margin-left:20px; }
 
-.result-count {
-  font-size: 12px;
-  color: #666;
-}
-
-.filter-dropdown {
-  display: flex;
-  flex-direction: column;
-  font-size: 12px;
-  flex: 1;
-  min-width: 0;
-}
-
-.filter-dropdown label {
-  font-weight: 600;
-  margin-bottom: 4px;
-  font-size: 11px;
-  color: #666;
-}
-
-.filter-dropdown select {
-  padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-/* Checkbox Dropdown */
-.checkbox-dropdown {
-  position: relative;
-}
-
-.dropdown-btn {
-  padding: 7px 12px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background: #fff;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.dropdown-btn:hover {
-  background: #f2f2f2;
-}
-
-.dropdown-panel {
-  display: none;
-  position: absolute;
-  top: 36px;
-  left: 0;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 10px;
-  width: 160px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-  z-index: 2000;
-}
-
-.dropdown-panel.show {
-  display: block;
-}
+.filter-dropdown { display:flex; flex-direction:column; font-size:12px; flex:1; min-width:0; }
+.filter-dropdown label { font-weight:600; margin-bottom:4px; font-size:11px; color:#666; }
+.filter-dropdown select { padding:6px 10px; border-radius:6px; border:1px solid #ccc; }
 
 .checkbox-list {
-  display: flex;
-  flex-direction: column;
-  max-height: 200px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  font-size: 12px;
-  padding-right: 6px;
-  border-right: 2px solid #ddd;
+  display:flex; flex-direction:column; max-height:200px; overflow-y:auto; overflow-x:hidden; font-size:12px;
+  padding-right:6px; border-right:2px solid #ddd;
 }
-
-.checkbox-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.checkbox-list::-webkit-scrollbar-thumb {
-  background: #bbb;
-  border-radius: 6px;
-}
+.checkbox-list label { margin-bottom:4px; }
+.checkbox-list::-webkit-scrollbar { width:6px; }
+.checkbox-list::-webkit-scrollbar-thumb { background:#bbb; border-radius:6px; }
 
 /* ===============================
    TABLE
 ================================= */
-.content {
-  overflow-x: auto;
-}
-
-.data-table {
-  border-collapse: collapse;
-  background: #fff;
-  font-size: 12.5px;
-  width: 100%;
-}
-
-.data-table th,
-.data-table td {
-  padding: 6px 10px;
-  text-align: left;
-  white-space: nowrap;
-}
-
-.data-table th {
-  background: #fafafa;
-  font-weight: 600;
-  border-bottom: 2px solid #ddd;
-  cursor: pointer;
-  position: relative;
-}
-
-.data-table td {
-  border-bottom: 1px solid #eee;
-}
-
-.data-table tr:hover td {
-  background: #f9fafc;
-}
-
-.resizer {
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 5px;
-  height: 100%;
-  cursor: col-resize;
-  user-select: none;
-}
-
-.resizer:hover {
-  background: rgba(0,0,0,0.2);
-}
+.content { overflow-x:auto; }
+.data-table { border-collapse:collapse; background:#fff; font-size:12.5px; width:100%; }
+.data-table th, .data-table td { padding:6px 10px; text-align:left; white-space:nowrap; transition: background 0.2s ease; }
+.data-table th { background:#fafafa; font-weight:600; border-bottom:2px solid #ddd; cursor:pointer; position:sticky; top:0; z-index:10; }
+.data-table th:hover { background:#f0f0f0; }
+.data-table td { border-bottom:1px solid #eee; }
+.data-table tr:hover td { background:#f9fafc; }
+.resizer { position:absolute; right:0; top:0; width:5px; height:100%; cursor:col-resize; user-select:none; }
+.resizer:hover { background:rgba(0,0,0,0.2); }
 
 /* ===============================
    PAGINATION
 ================================= */
-#pagination {
-  margin-top: 25px;
-  text-align: center;
-  font-size: 12px;
-}
-
-#pagination button {
-  margin: 0 4px;
-  padding: 5px 10px;
-  border: 1px solid #ddd;
-  background: #fff;
-  cursor: pointer;
-  border-radius: 6px;
-}
-
-#pagination button:hover:not(:disabled) {
-  background: #222;
-  color: #fff;
-}
-
-.active-page {
-  background: #222 !important;
-  color: #fff;
-}
+#pagination { margin-top:25px; text-align:center; font-size:12px; }
+#pagination button { margin:0 4px; padding:5px 10px; border:1px solid #ddd; background:#fff; border-radius:6px; }
+#pagination button:hover:not(:disabled) { background:#222; color:#fff; }
+.active-page { background:#222 !important; color:#fff; }
 
 /* ===============================
-   MODAL
+   MODAL & LIGHTBOX
 ================================= */
-.modal-box {
-  background: #fff;
-  width: 90%;
-  max-width: 950px;
-  margin: 4% auto;
-  padding: 25px;
-  border-radius: 12px;
-}
+.modal-box { background:#fff; width:90%; max-width:950px; margin:4% auto; padding:25px; border-radius:12px; position:relative; }
+#detailModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1500; }
+#imageLightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); justify-content:center; align-items:center; z-index:2000; }
+#imageLightbox img { max-width:90%; max-height:90%; object-fit:contain; cursor:zoom-out; }
 
 /* ===============================
    RESPONSIVE
 ================================= */
-@media (max-width: 900px) {
-  body {
-    padding: 18px;
-  }
-
-  .filter-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
+@media (max-width:900px) { body{padding:18px;} .filter-row{flex-direction:column; align-items:stretch;} .filter-row-bottom{flex-wrap:wrap;} }
+@media (max-width:600px) {
+  .data-table, .data-table thead, .data-table tbody, .data-table tr, .data-table td, .data-table th { display:block; }
+  .data-table tr { margin-bottom:15px; }
+  .data-table td { padding-left:50%; white-space:normal; position:relative; }
+  .data-table td::before { content:attr(data-label); position:absolute; left:10px; font-weight:600; }
 }
 
 /* ===============================
    DARK MODE
 ================================= */
-body.dark {
-  background: #121212;
-  color: #e0e0e0;
-}
+body.dark { background:#121212; color:#e0e0e0; }
+body.dark .page-header { border-bottom:1px solid #333; }
+body.dark .header-link, body.dark #darkModeToggle { background:#1e1e1e; color:#ddd; border:1px solid #333; }
+body.dark .header-link:hover, body.dark #darkModeToggle:hover { background:#fff; color:#000; border-color:#222; }
+body.dark .top-filters, body.dark .data-table, body.dark .modal-box { background:#1e1e1e; color:#ddd; }
+body.dark .filter-dropdown select, body.dark .search-wrapper input, body.dark #clearFiltersBtn { background:#2a2a2a; color:#ddd; border:1px solid #444; }
+body.dark .data-table th { background:#222; border-bottom:2px solid #444; }
+body.dark .data-table td { border-bottom:1px solid #333; }
+body.dark .data-table tr:hover td { background:#2a2a2a; }
+body.dark #pagination button { background:#2a2a2a; border:1px solid #444; color:#ddd; }
+body.dark #pagination button:hover:not(:disabled) { background:#fff; color:#000; }
+body.dark .checkbox-list { border-right:2px solid #444; }
+body.dark .checkbox-list::-webkit-scrollbar-thumb { background:#666; }
+body.dark .resizer:hover { background: rgba(255,255,255,0.3); }
 
-body.dark .page-header {
-  border-bottom: 1px solid #333;
+/* ===============================
+   DROPDOWN
+================================= */
+.checkbox-dropdown { position:relative; }
+.dropdown-btn { padding:7px 12px; border-radius:6px; border:1px solid #ccc; background:#fff; cursor:pointer; font-size:12px; }
+.dropdown-btn:hover { background:#f2f2f2; }
+.dropdown-panel {
+  display:none; position:absolute; top:36px; left:0; background:#fff; border:1px solid #ddd;
+  border-radius:8px; padding:10px; width:160px; box-shadow:0 5px 15px rgba(0,0,0,0.15); z-index:2000; transition:opacity 0.2s;
+  opacity:0;
 }
+.dropdown-panel.show { display:block; opacity:1; }
+body.dark .dropdown-panel { background:#1e1e1e; border:1px solid #444; }
 
-body.dark .header-link {
-  background: #1e1e1e;
-  color: #ddd;
-  border: 1px solid #333;
-}
-
-body.dark .header-link:hover {
-  background: #fff;
-  color: #000;
-}
-
-body.dark .top-filters,
-body.dark .data-table,
-body.dark .modal-box {
-  background: #1e1e1e;
-  color: #ddd;
-}
-
-body.dark .filter-dropdown select,
-body.dark .search-wrapper input,
-body.dark #clearFiltersBtn {
-  background: #2a2a2a;
-  color: #ddd;
-  border: 1px solid #444;
-}
-
-body.dark .data-table th {
-  background: #222;
-  border-bottom: 2px solid #444;
-}
-
-body.dark .data-table td {
-  border-bottom: 1px solid #333;
-}
-
-body.dark .data-table tr:hover td {
-  background: #2a2a2a;
-}
-
-body.dark #pagination button {
-  background: #2a2a2a;
-  border: 1px solid #444;
-  color: #ddd;
-}
-
-body.dark #pagination button:hover:not(:disabled) {
-  background: #fff;
-  color: #000;
-}
 </style>
 </head>
+
 <body>
 
 <header class="page-header">
-  <h1 class="site-title">日本原作目録</h1>
+  <div class="header-left"><h1 class="site-title">日本原作目録</h1></div>
   <div class="header-right">
     <a href="Publish.html" class="header-link">香港出版目録</a>
     <a href="PublishJP.html" class="header-link">日本出版目録</a>
+    <button id="darkModeToggle" onclick="toggleDarkMode()">🌙 Dark</button>
   </div>
 </header>
 
-<!-- TOP FILTERS -->
 <div class="top-filters">
 
   <div class="filter-row filter-row-top">
-    <button id="clearFiltersBtn" onclick="clearFilters()">清除所有篩選</button>
+    <button id="clearFiltersBtn" onclick="clearSearch()">清除所有篩選</button>
 
     <div class="search-wrapper">
-      <input type="text" id="searchInput" placeholder="任何文字搜尋..." oninput="handleSearchInput()">
-      <span class="clear-btn" onclick="clearFilters()">×</span>
+      <input type="text" id="searchInput" placeholder="任何文字搜尋..." aria-label="搜索作品" oninput="handleSearchInput()">
+      <span class="clear-btn" onclick="clearSearch()">×</span>
     </div>
 
     <div class="checkbox-dropdown">
@@ -417,41 +192,15 @@ body.dark #pagination button:hover:not(:disabled) {
   </div>
 
   <div class="filter-row filter-row-bottom">
-    <div class="filter-dropdown">
-      <label>初出掲載誌</label>
-      <div class="checkbox-list" id="magazineFilter"></div>
-    </div>
-
-    <div class="filter-dropdown">
-      <label>単行本系列</label>
-      <div class="checkbox-list" id="tankobonFilter"></div>
-    </div>
-
-    <div class="filter-dropdown">
-      <label>第0巻</label>
-      <div class="checkbox-list" id="volZeroFilter"></div>
-    </div>
-
-    <div class="filter-dropdown">
-      <label>ドラミちゃん</label>
-      <div class="checkbox-list" id="doramiFilter"></div>
-    </div>
-
-    <div class="filter-dropdown">
-      <label>文庫系列</label>
-      <div class="checkbox-list" id="bunkobonFilter"></div>
-    </div>
-
-    <div class="filter-dropdown">
-      <label>兒童版</label>
-      <div class="checkbox-list" id="pikkapikaFilter"></div>
-    </div>
-
-    <div class="filter-dropdown">
-      <label>大全集</label>
-      <div class="checkbox-list" id="completeCollectionFilter"></div>
-    </div>
+    <div class="filter-dropdown"><label>初出掲載誌</label><div class="checkbox-list" id="magazineFilter"></div></div>
+    <div class="filter-dropdown"><label>単行本系列</label><div class="checkbox-list" id="tankobonFilter"></div></div>
+    <div class="filter-dropdown"><label>第0巻</label><div class="checkbox-list" id="volZeroFilter"></div></div>
+    <div class="filter-dropdown"><label>ドラミちゃん</label><div class="checkbox-list" id="doramiFilter"></div></div>
+    <div class="filter-dropdown"><label>文庫系列</label><div class="checkbox-list" id="bunkobonFilter"></div></div>
+    <div class="filter-dropdown"><label>兒童版</label><div class="checkbox-list" id="pikkapikaFilter"></div></div>
+    <div class="filter-dropdown"><label>大全集</label><div class="checkbox-list" id="completeCollectionFilter"></div></div>
   </div>
+
 </div>
 
 <main class="content">
@@ -459,230 +208,265 @@ body.dark #pagination button:hover:not(:disabled) {
   <div class="grid" id="mangalist">Loading...</div>
 </main>
 
+<!-- MODALS -->
+<div id="detailModal" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <button onclick="closeModal()" style="position:absolute; right:10px; top:10px;">X</button>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<div id="imageLightbox" onclick="closeLightbox()">
+  <img id="lightboxImg">
+</div>
+
 <script>
+/* ===============================
+   DATA & FILTERS
+================================= */
 const SHEET_URL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
-let sheetData = [];
-let currentList = [];
-let currentPage = 1;
-const itemsPerPage = 50;
-let currentSortColumn = null;
-let currentSortDirection = "asc";
+let sheetData = [], currentList = [], currentPage = 1, itemsPerPage = 50;
+let currentSortColumn = null, currentSortDirection = "asc";
+let searchTimeout;
 
-// --------------- Helper: numeric + text sort ----------------
-function numericTextSort(a, b) {
-  const numA = parseFloat(a) || NaN;
-  const numB = parseFloat(b) || NaN;
-  const aNum = !isNaN(numA);
-  const bNum = !isNaN(numB);
-  if(aNum && bNum) return numA - numB;
-  if(aNum) return -1;
-  if(bNum) return 1;
-  return a.localeCompare(b,'ja');
-}
-
-// --------------- Fetch data ----------------
 fetch(SHEET_URL)
   .then(res => res.text())
   .then(text => {
-    const data = JSON.parse(text);
-    sheetData = data.filter(r => r.作品番 && r.作品番.trim()!=="");
-    populateAllFilters();
-    applyUrlFilters();
-    applyFilters();
+    try {
+      const data = JSON.parse(text);
+      sheetData = data.filter(r => r.作品番 && r.作品番.trim()!=="");
+      initializeFilters();
+      applyFilters();
+    } catch(e){ console.error("JSON parse error", e); document.getElementById("mangalist").innerHTML="❌ Invalid JSON";}
   })
-  .catch(err => {
-    console.error(err);
-    document.getElementById("mangalist").textContent = "❌ Failed to load data";
-  });
+  .catch(e=>{console.error("Fetch error",e); document.getElementById("mangalist").innerHTML="❌ Network error";});
 
-// --------------- URL Parameter Handling ----------------
-function getUrlParams() {
-  const params = {};
-  location.search.slice(1).split("&").forEach(pair=>{
-    if(!pair) return;
-    const [key,value] = pair.split("=");
-    params[key] = decodeURIComponent(value||"");
-  });
-  return params;
+function initializeFilters(){
+  const filters = [
+    {id:"magazineFilter", col:"初出掲載誌"},
+    {id:"tankobonFilter", col:"単行本"},
+    {id:"volZeroFilter", col:"第0巻"},
+    {id:"doramiFilter", col:"ドラミちゃん"},
+    {id:"bunkobonFilter", col:"文庫"},
+    {id:"pikkapikaFilter", col:"兒童版"},
+    {id:"completeCollectionFilter", col:"大全集"},
+    {id:"lengthTypeFilter", col:"作品類"}
+  ];
+  filters.forEach(f => populateCheckboxFilter(f.id,[...new Set(sheetData.map(r=>r[f.col]).filter(Boolean))].sort()));
 }
 
-function applyUrlFilters() {
-  const params = getUrlParams();
-  if(params.search) {
-    document.getElementById("searchInput").value = params.search;
-    document.querySelector(".clear-btn").style.display = "block";
-  }
-  const multiCheck = (containerId, valStr)=>{
-    if(!valStr) return;
-    const values = valStr.split(",");
-    const container = document.getElementById(containerId);
-    container.querySelectorAll("input[type=checkbox]").forEach(cb=>{
-      if(values.includes(cb.value)) cb.checked=true;
-    });
-  };
-  multiCheck("lengthTypeFilter", params.type);
-  multiCheck("magazineFilter", params.magazine);
-  multiCheck("tankobonFilter", params.tankobon);
-  multiCheck("volZeroFilter", params.vol0);
-  multiCheck("doramiFilter", params.dorami);
-  multiCheck("bunkobonFilter", params.bunko);
-  multiCheck("pikkapikaFilter", params.pikkapika);
-  multiCheck("completeCollectionFilter", params.complete);
-}
+function populateCheckboxFilter(id, values){
+  const container = document.getElementById(id);
+  if(!container) return;
+  container.innerHTML = "";
 
-// --------------- Filter population ----------------
-function populateCheckboxFilter(containerId, values){
-  const container = document.getElementById(containerId);
-  container.innerHTML="";
-  values.sort(numericTextSort).forEach(val=>{
+  // Natural sort: numbers within strings sorted numerically
+  values.sort((a, b) => {
+    const regex = /(\d+)|(\D+)/g; // splits numbers and non-numbers
+    const aParts = a.match(regex);
+    const bParts = b.match(regex);
+
+    const len = Math.min(aParts.length, bParts.length);
+
+    for(let i = 0; i < len; i++){
+      const aPart = aParts[i];
+      const bPart = bParts[i];
+
+      const aNum = parseInt(aPart, 10);
+      const bNum = parseInt(bPart, 10);
+
+      if(!isNaN(aNum) && !isNaN(bNum)){
+        if(aNum !== bNum) return aNum - bNum;
+      } else {
+        if(aPart !== bPart) return aPart.localeCompare(bPart, 'ja');
+      }
+    }
+
+    return aParts.length - bParts.length; // shorter comes first if equal so far
+  });
+
+  values.forEach(v=>{
     const label = document.createElement("label");
-    label.innerHTML=`<input type="checkbox" value="${val}" onchange="applyFilters()"> ${val}`;
+    label.innerHTML = `<input type="checkbox" value="${v}" onchange="applyFilters()"> ${v}`;
     container.appendChild(label);
   });
 }
 
-function populateAllFilters() {
-  const uniq = (arr)=>[...new Set(arr.filter(Boolean))];
-  populateCheckboxFilter("lengthTypeFilter", uniq(sheetData.map(r=>r.作品類)));
-  populateCheckboxFilter("magazineFilter", uniq(sheetData.map(r=>r.初出掲載誌)));
-  populateCheckboxFilter("tankobonFilter", uniq(sheetData.map(r=>r.単行本)));
-  populateCheckboxFilter("volZeroFilter", uniq(sheetData.map(r=>r.第0巻)));
-  populateCheckboxFilter("doramiFilter", uniq(sheetData.map(r=>r.ドラミちゃん)));
-  populateCheckboxFilter("bunkobonFilter", uniq(sheetData.map(r=>r.文庫)));
-  populateCheckboxFilter("pikkapikaFilter", uniq(sheetData.map(r=>r.兒童版)));
-  populateCheckboxFilter("completeCollectionFilter", uniq(sheetData.map(r=>r.大全集)));
+function getCheckedValues(id){
+  const c=document.getElementById(id);
+  return c?Array.from(c.querySelectorAll("input[type=checkbox]:checked")).map(i=>i.value):[];
 }
 
-// --------------- Filter logic ----------------
-function toggleDropdown(panelId){
-  document.getElementById(panelId).classList.toggle("show");
-}
-
-function handleSearchInput(){ 
-  document.querySelector(".clear-btn").style.display = document.getElementById("searchInput").value?"block":"none";
-  applyFilters();
-}
-
-function updateLengthTypeBtn(){
-  const checked = document.querySelectorAll("#lengthTypeFilter input:checked").length;
-  document.getElementById("lengthTypeBtn").textContent = checked?`作品類 (${checked}) ▼`:"作品類 ▼";
-}
-
-function clearFilters(){
-  document.getElementById("searchInput").value="";
-  document.querySelector(".clear-btn").style.display="none";
-  populateAllFilters();
-  applyFilters();
-}
-
-function getCheckedValues(containerId){
-  return Array.from(document.getElementById(containerId).querySelectorAll("input:checked")).map(cb=>cb.value);
+/* ===============================
+   SEARCH & FILTER LOGIC
+================================= */
+function handleSearchInput(){
+  const input=document.getElementById("searchInput");
+  document.querySelector(".clear-btn").style.display=input.value?"block":"none";
+  clearTimeout(searchTimeout); searchTimeout=setTimeout(applyFilters,300);
 }
 
 function applyFilters(){
-  updateLengthTypeBtn();
-  const search = document.getElementById("searchInput").value.toLowerCase();
+  const search=document.getElementById("searchInput").value.toLowerCase();
+  const lengthType=getCheckedValues("lengthTypeFilter"),
+        magazine=getCheckedValues("magazineFilter"),
+        tankobon=getCheckedValues("tankobonFilter"),
+        volZero=getCheckedValues("volZeroFilter"),
+        dorami=getCheckedValues("doramiFilter"),
+        bunkobon=getCheckedValues("bunkobonFilter"),
+        pikkapika=getCheckedValues("pikkapikaFilter"),
+        complete=getCheckedValues("completeCollectionFilter");
 
-  const filters = {
-    type: getCheckedValues("lengthTypeFilter"),
-    magazine: getCheckedValues("magazineFilter"),
-    tankobon: getCheckedValues("tankobonFilter"),
-    vol0: getCheckedValues("volZeroFilter"),
-    dorami: getCheckedValues("doramiFilter"),
-    bunko: getCheckedValues("bunkobonFilter"),
-    pikkapika: getCheckedValues("pikkapikaFilter"),
-    complete: getCheckedValues("completeCollectionFilter")
-  };
-
-  currentList = sheetData.filter(row=>{
-    const searchMatch = Object.values(row).join(" ").toLowerCase().includes(search);
-    return searchMatch &&
-           (!filters.type.length||filters.type.includes(row.作品類)) &&
-           (!filters.magazine.length||filters.magazine.includes(row.初出掲載誌)) &&
-           (!filters.tankobon.length||filters.tankobon.includes(row.単行本)) &&
-           (!filters.vol0.length||filters.vol0.includes(row.第0巻)) &&
-           (!filters.dorami.length||filters.dorami.includes(row.ドラミちゃん)) &&
-           (!filters.bunko.length||filters.bunko.includes(row.文庫)) &&
-           (!filters.pikkapika.length||filters.pikkapika.includes(row.兒童版)) &&
-           (!filters.complete.length||filters.complete.includes(row.大全集));
+  currentList = sheetData.filter(r=>{
+    const match = Object.values(r).join(" ").toLowerCase().includes(search);
+    return match &&
+      (!lengthType.length || lengthType.includes(r.作品類)) &&
+      (!magazine.length || magazine.includes(r.初出掲載誌)) &&
+      (!tankobon.length || tankobon.includes(r.単行本)) &&
+      (!volZero.length || volZero.includes(r.第0巻)) &&
+      (!dorami.length || dorami.includes(r.ドラミちゃん)) &&
+      (!bunkobon.length || bunkobon.includes(r.文庫)) &&
+      (!pikkapika.length || pikkapika.includes(r.兒童版)) &&
+      (!complete.length || complete.includes(r.大全集));
   });
 
-  currentPage=1;
   document.getElementById("resultCount").textContent=`共 ${currentList.length} 部作品`;
   renderPage();
 }
 
-// --------------- Pagination & Table ----------------
-function createSortableHeader(col){
+function clearSearch(){
+  document.getElementById("searchInput").value="";
+  document.querySelector(".clear-btn").style.display="none";
+  initializeFilters();
+  applyFilters();
+}
+
+/* ===============================
+   TABLE RENDERING
+================================= */
+function renderPage(){
+  const start=(currentPage-1)*itemsPerPage, end=start+itemsPerPage;
+  const pageItems=currentList.slice(start,end);
+
+  let html=`<table class="data-table"><thead><tr>`;
+  const columns=["初出掲載誌","初出掲載号","初出掲載頁","初出副題","全集副題","全集副題香港譯名","単行本","第0巻","ドラミちゃん","文庫","兒童版","大全集","備考"];
+  columns.forEach(c=>{html+=createSortableHeader(c);});
+  html+=`</tr></thead><tbody>`;
+
+  pageItems.forEach(row=>{
+    html+=`<tr>`;
+    columns.forEach(col=>{
+      const val=row[col]||"";
+      html+=`<td data-label="${col}">${val}</td>`;
+    });
+    html+=`</tr>`;
+  });
+
+  html+=`</tbody></table>`;
+  document.getElementById("mangalist").innerHTML=pageItems.length?html:"No Manga found.";
+  makeColumnsResizable(); renderPaginationControls();
+}
+
+function createSortableHeader(name){
   let arrow = "";
-  if(currentSortColumn===col) arrow = currentSortDirection==="asc"?" ▲":" ▼";
-  return `<th onclick="sortBy('${col}')">${col}${arrow}</th>`;
+  if(currentSortColumn===name) arrow = currentSortDirection==="asc"?" ▲":" ▼";
+  return `<th onclick="sortBy('${name}')">${name}${arrow}</th>`;
 }
 
 function sortBy(col){
-  if(currentSortColumn===col){
-    currentSortDirection=currentSortDirection==="asc"?"desc":"asc";
-  } else {
-    currentSortColumn=col;
-    currentSortDirection="asc";
-  }
-
+  if(currentSortColumn===col) currentSortDirection=currentSortDirection==="asc"?"desc":"asc";
+  else {currentSortColumn=col; currentSortDirection="asc";}
   currentList.sort((a,b)=>{
-    let valA = a[col]||"";
-    let valB = b[col]||"";
-    let cmp = numericTextSort(valA,valB);
-    return currentSortDirection==="asc"?cmp:-cmp;
+    const valA=(a[col]||"").toString().toLowerCase();
+    const valB=(b[col]||"").toString().toLowerCase();
+    if(valA<valB) return currentSortDirection==="asc"?-1:1;
+    if(valA>valB) return currentSortDirection==="asc"?1:-1;
+    return 0;
   });
-
   renderPage();
 }
 
-function renderPage(){
-  const start = (currentPage-1)*itemsPerPage;
-  const end = start+itemsPerPage;
-  const listToShow = currentList.slice(start,end);
-  const container = document.getElementById("mangalist");
-
-  if(listToShow.length===0){
-    container.innerHTML="<p>無符合條件的結果</p>";
-    document.getElementById("pagination").innerHTML="";
-    return;
-  }
-
-  let html=`<table class="data-table"><tr>`;
-  Object.keys(listToShow[0]).forEach(col=>{
-    html+=createSortableHeader(col);
-  });
-  html+="</tr>";
-
-  listToShow.forEach(row=>{
-    html+="<tr>";
-    Object.values(row).forEach(v=>{
-      html+=`<td>${v||""}</td>`;
-    });
-    html+="</tr>";
-  });
-  html+="</table>";
-  container.innerHTML=html;
-
-  renderPagination();
-}
-
-function renderPagination(){
+/* ===============================
+   PAGINATION
+================================= */
+function renderPaginationControls(){
   const totalPages=Math.ceil(currentList.length/itemsPerPage);
-  const container=document.getElementById("pagination");
-  if(totalPages<=1){container.innerHTML="";return;}
   let html="";
+  if(totalPages<=1){ document.getElementById("pagination").innerHTML=""; return; }
+
+  html+=`<button onclick="changePage(1)" ${currentPage===1?"disabled":""}>« First</button>`;
+  html+=`<button onclick="changePage(${currentPage-1})" ${currentPage===1?"disabled":""}>‹ Prev</button>`;
+
   for(let i=1;i<=totalPages;i++){
-    html+=`<button ${i===currentPage?'class="active-page"':''} onclick="goPage(${i})">${i}</button>`;
+    html+=`<button class="${i===currentPage?'active-page':''}" onclick="changePage(${i})">${i}</button>`;
   }
-  container.innerHTML=html;
+
+  html+=`<button onclick="changePage(${currentPage+1})" ${currentPage===totalPages?"disabled":""}>Next ›</button>`;
+  html+=`<button onclick="changePage(${totalPages})" ${currentPage===totalPages?"disabled":""}>Last »</button>`;
+  document.getElementById("pagination").innerHTML=html;
 }
 
-function goPage(page){
-  currentPage=page;
-  renderPage();
+function changePage(page){ currentPage=page; renderPage(); }
+
+/* ===============================
+   RESIZABLE COLUMNS
+================================= */
+function makeColumnsResizable(){
+  const table = document.querySelector(".data-table");
+  if(!table) return;
+  const cols = table.querySelectorAll("th");
+  cols.forEach(th=>{
+    if(th.querySelector(".resizer")) return;
+    const resizer = document.createElement("div");
+    resizer.className="resizer"; th.appendChild(resizer);
+    let startX, startWidth;
+    resizer.addEventListener("mousedown", e=>{
+      startX=e.pageX; startWidth=th.offsetWidth;
+      document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mouseup", onMouseUp);
+    });
+    function onMouseMove(e){ th.style.width=startWidth+(e.pageX-startX)+"px"; }
+    function onMouseUp(){ document.removeEventListener("mousemove", onMouseMove); document.removeEventListener("mouseup", onMouseUp);}
+  });
 }
+
+/* ===============================
+   DROPDOWN UTILS
+================================= */
+function toggleDropdown(id){
+  const panel=document.getElementById(id);
+  panel.classList.toggle("show");
+}
+document.addEventListener("click", e=>{
+  document.querySelectorAll(".dropdown-panel").forEach(panel=>{
+    if(!panel.parentElement.contains(e.target)) panel.classList.remove("show");
+  });
+});
+
+/* ===============================
+   DARK MODE
+================================= */
+function toggleDarkMode(){
+  document.body.classList.toggle("dark");
+  const btn=document.getElementById("darkModeToggle");
+  btn.textContent=document.body.classList.contains("dark")?"☀ Light":"🌙 Dark";
+}
+
+/* ===============================
+   MODALS
+================================= */
+function closeModal(){ document.getElementById("detailModal").style.display="none"; }
+function openModal(content){
+  document.getElementById("detailContent").innerHTML=content;
+  document.getElementById("detailModal").style.display="block";
+}
+
+function openLightbox(src){
+  document.getElementById("imageLightbox").style.display="flex";
+  document.getElementById("lightboxImg").src=src;
+}
+function closeLightbox(){ document.getElementById("imageLightbox").style.display="none"; }
+
 </script>
 
 </body>

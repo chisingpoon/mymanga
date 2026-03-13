@@ -43,7 +43,7 @@
             border-radius: 12px;
             padding: 16px;
             border: 1px solid #cbd5e1;
-            margin-bottom: 12px;
+            margin-top: 12px;
         }
 
         h3 {
@@ -54,20 +54,20 @@
             color: #64748b;
         }
 
-        /* Grid for 2-Column Links */
+        /* Grid for 2-Column Links inside Sub-Cards */
         .link-grid {
             display: grid;
-            grid-template-columns: 1fr; /* Default to 1 column for mobile */
+            grid-template-columns: 1fr; /* 1 col on small mobile */
             gap: 10px;
         }
 
-        /* Responsive Breakpoint: Switches to 2 columns on screens wider than 480px */
         @media (min-width: 480px) {
             .link-grid {
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: 1fr 1fr; /* 2 cols on tablet/desktop */
             }
         }
 
+        /* General Link Item Styling */
         .link-item {
             text-decoration: none;
             color: #334155;
@@ -90,6 +90,12 @@
             background: #eff6ff;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
+
+        /* Style for the 'All Records' link to make it full width */
+        .standalone-link {
+            margin-bottom: 12px;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -97,48 +103,50 @@
     <div class="container">
         <section class="card">
             <h2>香港漫畫資訊記錄</h2>
-            <div class="link-list standalone-link">
-                <a href="publishhk.html" class="link-item">所有香港漫畫資訊記錄 →</a>
+            <div class="standalone-link">
+                <a href="publishhk.html" class="link-item" style="background-color: #f0f7ff; border-color: #3b82f6; color: #1d4ed8;">所有香港漫畫資訊記錄 →</a>
             </div>
+            
             <div class="sub-card">
-                <h3>捷徑</h3>
-                <div class="link-list">
+                <h2>捷徑</h2>
+                <div class="link-grid">
                     <a href="publishhk.html?title=叮噹" class="link-item">叮噹系列 →</a>
                     <a href="publishhk.html?title=叮噹大長篇" class="link-item">叮噹大長篇系列 →</a>
                     <a href="publishhk.html?title=多啦A夢" class="link-item">多啦A夢系列 →</a>
                     <a href="publishhk.html?title=多啦A夢大長篇" class="link-item">多啦A夢大長篇系列 →</a>
                     <a href="publishhk.html?title=多啦A夢文庫版" class="link-item">文庫版系列 →</a>
                     <a href="publishhk.html?title=多啦A夢大長篇文庫版" class="link-item">大長篇文庫版系列 →</a>
-                    <a href="publishhk.html?title=藤子．F．不二雄大全集 多啦A夢" class="link-item">藤子．F．不二雄大全集 多啦A夢系列 →</a>
-                    <a href="publishhk.html?title=藤子．F．不二雄大全集 多啦A夢大長篇" class="link-item">藤子．F．不二雄大全集 多啦A夢大長篇系列 →</a>
-                    <a href="publishhk.html?title=多啦A夢彩色電影版" class="link-item">彩色電影版系列 →</a>
-                    <a href="publishhk.html?title=多啦A夢超棒球外傳" class="link-item">多啦A夢超棒球外傳系列 →</a>
+                    <a href="publishhk.html?title=藤子．F．不二雄大全集 多啦A夢" class="link-item">大全集 系列 →</a>
+                    <a href="publishhk.html?title=藤子．F．不二雄大全集 多啦A夢大長篇" class="link-item">大全集 大長篇 →</a>
+                    <a href="publishhk.html?title=多啦A夢彩色電影版" class="link-item">彩色電影版 →</a>
+                    <a href="publishhk.html?title=多啦A夢超棒球外傳" class="link-item">超棒球外傳 →</a>
                 </div>
             </div>
         </section>
 
         <section class="card">
             <h2>日本漫畫資訊記錄</h2>
-            <div class="link-list standalone-link">
-                <a href="publishjp.html" class="link-item">所有日本漫畫資訊記錄 →</a>
+            <div class="standalone-link">
+                <a href="publishjp.html" class="link-item" style="background-color: #f0f7ff; border-color: #3b82f6; color: #1d4ed8;">所有日本漫畫資訊記錄 →</a>
             </div> 
+
             <div class="sub-card">
-                <h3>捷徑</h3>
-                <div class="link-list">
+                <h2>捷徑</h2>
+                <div class="link-grid">
                     <a href="publishjp.html?category=ドラえもん,ドラえもんプラス" class="link-item">ドラえもん →</a>
                     <a href="publishjp.html?category=大長編ドラえもん" class="link-item">大長編ドラえもん →</a>
-                    <a href="publishjp.html?category=藤子・Ｆ・不二雄大全集 ドラえもん" class="link-item">藤子・Ｆ・不二雄大全集 ドラえもん →</a>
-                    <a href="publishjp.html?category=藤子・Ｆ・不二雄大全集 大長編ドラえもん" class="link-item">藤子・Ｆ・不二雄大全集 大長編ドラえもん →</a>
-                    <a href="publishjp.html?category=小学館コロコロ文庫 ドラえもん" class="link-item">小学館コロコロ文庫 ドラえもん系列 →</a>
-                    <a href="publishjp.html?category=小学館コロコロ文庫 大長編ドラえもん" class="link-item">小学館コロコロ文庫 大長編ドラえもん系列 →</a>      
-                    <a href="publishjp.html?series=てんとう虫コミックス" class="link-item">てんとう虫コミックス系列 →</a>
+                    <a href="publishjp.html?category=藤子・Ｆ・不二雄大全集 ドラえもん" class="link-item">大全集 ドラえもん →</a>
+                    <a href="publishjp.html?category=藤子・Ｆ・不二雄大全集 大長編ドラえもん" class="link-item">大全集 大長編 →</a>
+                    <a href="publishjp.html?category=小学館コロコロ文庫 ドラえもん" class="link-item">文庫 ドラえもん →</a>
+                    <a href="publishjp.html?category=小学館コロコロ文庫 大長編ドラえもん" class="link-item">文庫 大長編 →</a>      
+                    <a href="publishjp.html?series=てんとう虫コミックス" class="link-item">てんとう虫系列 →</a>
                 </div>
             </div>
         </section>
 
         <section class="card">
             <h2>日本原作記錄</h2>
-            <div class="link-list standalone-link">
+            <div class="standalone-link">
                 <a href="alloriginalworks.html" class="link-item">所有原作資訊記錄</a>
             </div>
         </section>

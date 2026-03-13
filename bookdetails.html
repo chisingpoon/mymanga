@@ -175,9 +175,23 @@ function renderBottomTable(jpinfo, bookStories, allStories) {
   const collectedWorks = bookStories
     .filter(r => r.ISBN?.trim() === jpinfo.ISBN?.trim())
     .sort((a,b)=>Number(a.收錄話 || 0) - Number(b.收錄話 || 0));
-
-  const storyMap = new Map(allStories.map(s => [s.作品番?.trim(), s]));
-  const mergedRows = collectedWorks.map(r => ({...r, ...storyMap.get(r.作品番?.trim())}));
+  
+  const storyMap = new Map(
+    allStories.map(s => [s.作品番?.trim(), s])
+  );
+  
+  // SAFE MERGE (no random mapping)
+  const mergedRows = collectedWorks.map(r => {
+    const key = r.作品番?.trim();
+    const story = key ? storyMap.get(key) : null;
+  
+    if (!story) {
+      // No match → return original row only
+      return { ...r };
+    }
+  
+    return { ...r, ...story };
+  });
 
   if (!mergedRows.length) return;
 

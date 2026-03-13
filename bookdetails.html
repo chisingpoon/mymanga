@@ -22,7 +22,7 @@ body { font-family: Arial; padding: 40px; }
 }
 .details-table th.nowrap, .details-table td.nowrap {
   white-space: nowrap; /* keep single-line */
-  width: 1%;           /* auto-fit text */
+  width: 1%;
 }
 .details-table th { background: #f2f2f2; text-align: left; }
 .details-table tr:nth-child(even) { background: #fafafa; }
@@ -95,16 +95,14 @@ async function loadSheets() {
       return;
     }
 
-    // Render top cards immediately
     renderCards(manga, jpinfo);
 
-    // Load bottom table asynchronously if JP ISBN exists
+    // Load bottom table asynchronously
     if (jpinfo) {
-      const contentDiv = document.getElementById("content");
       const loadingMsg = document.createElement("div");
       loadingMsg.id = "loadingTable";
-      loadingMsg.innerText = "正在讀取資訊...";
-      contentDiv.appendChild(loadingMsg);
+      loadingMsg.innerText = "Loading bottom table...";
+      document.getElementById("content").appendChild(loadingMsg);
 
       const [bookStories, allStories] = await Promise.all([
         fetch(BOOKSTORY_SHEET).then(r => r.json()),
@@ -170,7 +168,7 @@ function renderCards(manga, jpinfo) {
   document.getElementById("content").innerHTML = `<div class="top-section">${hkCard}${jpCard}</div>`;
 }
 
-// ===== Render bottom table =====
+// ===== Optimized bottom table rendering =====
 function renderBottomTable(jpinfo, bookStories, allStories) {
   const collectedWorks = bookStories
     .filter(r => r.ISBN?.trim() === jpinfo.ISBN?.trim())
@@ -181,22 +179,45 @@ function renderBottomTable(jpinfo, bookStories, allStories) {
 
   if (!mergedRows.length) return;
 
-  const allColumns = Array.from(new Set(mergedRows.flatMap(r => Object.keys(r).map(k=>k?.trim()))))
+  // Build column list dynamically (visible only)
+  const allColumns = Array.from(new Set(mergedRows.flatMap(r => Object.keys(r).map(k => k?.trim()))))
     .filter(c => !hideColumns.includes(c));
   const finalColumns = columnOrderTable.filter(c => allColumns.includes(c))
-    .concat(allColumns.filter(c=>!columnOrderTable.includes(c)));
+    .concat(allColumns.filter(c => !columnOrderTable.includes(c)));
 
-  const thead = `<tr>${finalColumns.map(c=>`<th class="${nowrapColumns.includes(c)?'nowrap':''}">${c}</th>`).join('')}</tr>`;
-  const tbody = mergedRows.map(r=>`<tr>${finalColumns.map(c=>`<td class="${nowrapColumns.includes(c)?'nowrap':''}">${r[c]?.trim()||""}</td>`).join('')}</tr>`).join('');
+  // Build table using DocumentFragment for performance
+  const table = document.createElement("table");
+  table.className = "details-table";
+  const thead = document.createElement("thead");
+  const trHead = document.createElement("tr");
+  finalColumns.forEach(c => {
+    const th = document.createElement("th");
+    th.textContent = c;
+    if (nowrapColumns.includes(c)) th.classList.add("nowrap");
+    trHead.appendChild(th);
+  });
+  thead.appendChild(trHead);
+  table.appendChild(thead);
 
-  const tableHTML = `
-    <h2>收錄故事</h2>
-    <table class="details-table">
-      <thead>${thead}</thead>
-      <tbody>${tbody}</tbody>
-    </table>
-  `;
-  document.getElementById("content").insertAdjacentHTML('beforeend', tableHTML);
+  const tbody = document.createElement("tbody");
+  const fragment = document.createDocumentFragment();
+  mergedRows.forEach(r => {
+    const tr = document.createElement("tr");
+    finalColumns.forEach(c => {
+      const td = document.createElement("td");
+      td.textContent = r[c]?.trim() || "";
+      if (nowrapColumns.includes(c)) td.classList.add("nowrap");
+      tr.appendChild(td);
+    });
+    fragment.appendChild(tr);
+  });
+  tbody.appendChild(fragment);
+  table.appendChild(tbody);
+
+  const h2 = document.createElement("h2");
+  h2.textContent = "收錄故事";
+  document.getElementById("content").appendChild(h2);
+  document.getElementById("content").appendChild(table);
 }
 
 // ===== Image modal =====

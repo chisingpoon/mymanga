@@ -453,12 +453,70 @@ fetch(SHEET_URL)
     populatePublishers();
     populateAuthors();
     populateOriginCountries();
+    applyUrlFilters();
     applyFilters();
   })
   .catch(error => {
     document.getElementById("mangalist").innerHTML = "Failed to load data.";
     console.error(error);
   });
+function getUrlParams() {
+  const params = new URLSearchParams(window.location.search);
+  const obj = {};
+  for (const [key, value] of params.entries()) {
+    obj[key] = value;
+  }
+  return obj;
+}
+
+function applyUrlFilters() {
+  const params = getUrlParams();
+
+  // Search
+  if (params.search) {
+    const searchInput = document.getElementById("searchInput");
+    searchInput.value = decodeURIComponent(params.search);
+    document.querySelector(".clear-btn").style.display = searchInput.value ? "block" : "none";
+  }
+
+  // Sorts
+  if (params.sortPrice) {
+    document.getElementById("sortPrice").value = params.sortPrice;
+  }
+
+  if (params.sortIssueDate) {
+    document.getElementById("sortIssueDate").value = params.sortIssueDate;
+  }
+
+  // Checkboxes (comma-separated)
+  if (params.title) {
+    params.title.split(",").forEach(val => {
+      const checkbox = document.querySelector(`#titleFilter input[value="${val}"]`);
+      if (checkbox) checkbox.checked = true;
+    });
+  }
+
+  if (params.publisher) {
+    params.publisher.split(",").forEach(val => {
+      const checkbox = document.querySelector(`#publisherFilter input[value="${val}"]`);
+      if (checkbox) checkbox.checked = true;
+    });
+  }
+
+  if (params.author) {
+    params.author.split(",").forEach(val => {
+      const checkbox = document.querySelector(`#authorFilter input[value="${val}"]`);
+      if (checkbox) checkbox.checked = true;
+    });
+  }
+
+  if (params.originCountry) {
+    params.originCountry.split(",").forEach(val => {
+      const checkbox = document.querySelector(`#originCountryFilter input[value="${val}"]`);
+      if (checkbox) checkbox.checked = true;
+    });
+  }
+}
 
 function clearAllFilters() {
   // Clear search input

@@ -224,6 +224,16 @@ body.dark .dropdown-panel { background:#1e1e1e; border:1px solid #444; }
 /* ===============================
    DATA & FILTERS
 ================================= */
+const urlParamToFilterId = {
+  "作品類": "lengthTypeFilter",
+  "初出掲載誌": "magazineFilter",
+  "単行本": "tankobonFilter",
+  "第0巻": "volZeroFilter",
+  "ドラミちゃん": "doramiFilter",
+  "文庫": "bunkobonFilter",
+  "兒童版": "pikkapikaFilter",
+  "大全集": "completeCollectionFilter"
+};
 const SHEET_URL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
 let sheetData = [], currentList = [], currentPage = 1, itemsPerPage = 50;
 let currentSortColumn = null, currentSortDirection = "asc";
@@ -306,40 +316,46 @@ function handleSearchInput(){
   clearTimeout(searchTimeout); searchTimeout=setTimeout(applyFilters,300);
 }
 
+// Utility: get decoded URL parameters as object
 function getUrlParams() {
+  const search = window.location.search.substring(1);
   const params = {};
-  location.search.slice(1).split("&").forEach(pair => {
-    if(!pair) return;
-    const [key, value] = pair.split("=");
-    params[key] = decodeURIComponent(value || "");
+  if (!search) return params;
+
+  search.split("&").forEach(pair => {
+    let [key, value] = pair.split("=");
+    if (!key) return;
+    key = decodeURIComponent(key);
+    value = decodeURIComponent(value || "");
+    params[key] = value;
   });
   return params;
 }
 
 function applyUrlFilters() {
   const params = getUrlParams();
-  const multiCheck = (containerId, valStr) => {
-    if(!valStr) return;
-    const values = valStr.split(",");
-    const container = document.getElementById(containerId);
-    container.querySelectorAll("input[type=checkbox]").forEach(cb => {
-      if(values.includes(cb.value)) cb.checked = true;
-    });
-  };
 
-  if(params.search) {
-    document.getElementById("searchInput").value = params.search;
+  // Apply search keyword if present
+  if (params.search) {
+    const searchInput = document.getElementById("searchInput");
+    searchInput.value = params.search;
     document.querySelector(".clear-btn").style.display = params.search ? "block" : "none";
   }
 
-  multiCheck("lengthTypeFilter", params.type);
-  multiCheck("magazineFilter", params.magazine);
-  multiCheck("tankobonFilter", params.tankobon);
-  multiCheck("volZeroFilter", params.vol0);
-  multiCheck("doramiFilter", params.dorami);
-  multiCheck("bunkobonFilter", params.bunko);
-  multiCheck("pikkapikaFilter", params.pikkapika);
-  multiCheck("completeCollectionFilter", params.complete);
+  // Loop through all parameters
+  for (const key in params) {
+    const filterId = urlParamToFilterId[key];
+    if (!filterId) continue; // skip unknown params
+
+    const values = params[key].split(","); // multi-select support
+    const container = document.getElementById(filterId);
+    if (!container) continue;
+
+    // Check the checkboxes that match URL values
+    container.querySelectorAll("input[type=checkbox]").forEach(cb => {
+      if (values.includes(cb.value)) cb.checked = true;
+    });
+  }
 }
 
 function applyFilters(){

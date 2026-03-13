@@ -11,12 +11,16 @@ body { font-family: Arial; padding: 40px; }
 .book-image { position: relative; width: 100%; height: 100%; border-radius: 8px; overflow: hidden; }
 .book-image img { position: absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; border-radius:8px; }
 .column-box { font-size: 14px; }
-.details-container { position: relative; height: 600px; overflow: auto; border:1px solid #ccc; margin-top:20px; }
-.details-table { border-collapse: collapse; width:100%; table-layout:auto; position:absolute; top:0; left:0; }
-.details-table th, .details-table td { border:1px solid #ccc; padding:6px 10px; white-space: normal; word-break: break-word;}
-.details-table th.nowrap, .details-table td.nowrap { white-space: nowrap; width:1%; }
-.details-table th { background:#f2f2f2; text-align:left; }
-.details-table tr:nth-child(even) { background:#fafafa; }
+
+/* Table styles */
+.table-wrapper { margin-top:20px; border:1px solid #ccc; overflow:auto; max-height:600px; }
+.table-header, .table-row { display:grid; grid-template-columns: repeat(auto-fit, minmax(50px, auto)); }
+.table-header div, .table-row div { border:1px solid #ccc; padding:6px 10px; white-space: normal; word-break: break-word; }
+.table-header div.nowrap, .table-row div.nowrap { white-space: nowrap; }
+.table-header { background:#f2f2f2; font-weight:bold; position:sticky; top:0; z-index:1; }
+.table-row:nth-child(even) { background:#fafafa; }
+
+/* Image modal */
 .image-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 9999; }
 .image-modal.show { display: flex; }
 .image-modal img { max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 8px; }
@@ -28,12 +32,14 @@ img { user-select: none; -webkit-user-drag: none; }
 <body>
 
 <div id="content">Loading...</div>
+
 <div id="imageModal" class="image-modal">
   <span class="image-close" onclick="closeImageModal()">&times;</span>
   <img id="modalImage">
 </div>
 
 <script>
+// ===== Config =====
 const hideColumns = ["ISBN","作品番","類","番","頁","收錄初出掲載誌","收錄初出掲載号","掲載番","初出掲載頁","単行本","第0巻","ドラミちゃん","文庫","兒童版","藤子不二雄ランド","全集副題","備考","全集副題香港譯名","作品類"];
 const nowrapColumns = ["巻","收錄話","副題港譯","收錄頁","初出掲載誌","初出掲載号","大全集"];
 const columnOrderTable = [
@@ -47,78 +53,54 @@ const params = new URLSearchParams(window.location.search);
 const isbnhk = (params.get("isbnhk")||"").trim();
 const isbnjp = (params.get("isbnjp")||"").trim();
 
-const MANGALIST_SHEET="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
-const JPINFO_SHEET="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP";
-const STORYDETAIL_SHEET="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
-const BOOKSTORY_SHEET="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品";
+const SHEETS = {
+  MANGALIST:"https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK",
+  JPINFO:"https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP",
+  BOOKSTORY:"https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品",
+  STORYDETAIL:"https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表"
+};
 
-async function fetchSheetSafe(url){
-  try{ const res = await fetch(url); if(!res.ok) throw new Error("HTTP"); return await res.json(); }
-  catch(e){ console.warn("Sheet load failed:",url,e); return []; }
-}
+// ===== Helpers =====
+async function fetchSheet(url){ try{ const r=await fetch(url); if(!r.ok) throw Error(); return r.json(); } catch(e){console.warn("Sheet fail:",url); return []; } }
+function createRow(row, columns){ const div=document.createElement("div"); div.className="table-row"; columns.forEach(c=>{ const cell=document.createElement("div"); cell.textContent=row[c]||""; if(nowrapColumns.includes(c)) cell.classList.add("nowrap"); div.appendChild(cell); }); return div; }
+function createHeader(columns){ const div=document.createElement("div"); div.className="table-header"; columns.forEach(c=>{ const cell=document.createElement("div"); cell.textContent=c; if(nowrapColumns.includes(c)) cell.classList.add("nowrap"); div.appendChild(cell); }); return div; }
 
-if(!isbnhk && !isbnjp){ document.getElementById("content").innerText="Please provide a valid ISBN."; }
-else { loadSheets(); }
-
-async function loadSheets(){
+// ===== Main =====
+(async ()=>{
+  if(!isbnhk && !isbnjp){ document.getElementById("content").innerText="Please provide a valid ISBN."; return; }
   document.getElementById("content").innerText="Loading top cards...";
-  const [hkBooks,jpBooks] = await Promise.all([fetchSheetSafe(MANGALIST_SHEET), fetchSheetSafe(JPINFO_SHEET)]);
-  const manga = isbnhk ? hkBooks.find(b=>b.ISBN?.trim()===isbnhk):null;
-  const jpinfo = isbnjp ? jpBooks.find(j=>j.ISBN?.trim()===isbnjp):null;
+  const [hkBooks,jpBooks]=await Promise.all([fetchSheet(SHEETS.MANGALIST),fetchSheet(SHEETS.JPINFO)]);
+  const manga = isbnhk? hkBooks.find(b=>b.ISBN?.trim()===isbnhk):null;
+  const jpinfo = isbnjp? jpBooks.find(b=>b.ISBN?.trim()===isbnjp):null;
   if(!manga && !jpinfo){ document.getElementById("content").innerText="Book not found."; return; }
-  renderCards(manga,jpinfo);
+
+  // Render top cards
+  const topHtml = `<div class="top-section">
+    ${manga?`<div class="card"><div class="card-inner"><div class="book-image"><img src="${manga.Image||''}" class="clickable-image" onclick="openImageModal('${manga.Image||''}')"></div><div class="column-box"><h3>${manga.OriginCountry||''}版資料</h3><h1>${manga.Title||''}</h1><div><strong>作者:</strong>${manga.Author||''}</div><div><strong>出版社:</strong>${manga.Publisher||''}</div><div><strong>出版日期:</strong>${manga.IssueDate||''}</div><div><strong>頁數:</strong>${manga.Page||''}</div></div></div></div>`:""}
+    ${jpinfo?`<div class="card"><div class="card-inner"><div class="book-image"><img src="${jpinfo.Image||''}" class="clickable-image" onclick="openImageModal('${jpinfo.Image||''}')"></div><div class="column-box"><h3>日文原版資料</h3><h1>${jpinfo.標題||''}</h1><div><strong>著:</strong>${jpinfo.著||''}</div><div><strong>頁:</strong>${jpinfo.頁||''}</div></div></div></div>`:""}
+  </div>`;
+  document.getElementById("content").innerHTML = topHtml;
+
   if(jpinfo){
-    document.getElementById("content").insertAdjacentHTML("beforeend","<div id='loadingTable'>Loading bottom table...</div>");
-    const [bookStories,allStories] = await Promise.all([fetchSheetSafe(BOOKSTORY_SHEET), fetchSheetSafe(STORYDETAIL_SHEET)]);
-    document.getElementById("loadingTable")?.remove();
-    renderVirtualTable(jpinfo, bookStories, allStories);
+    document.getElementById("content").insertAdjacentHTML("beforeend","<h2>收錄故事</h2><div id='tableContainer' class='table-wrapper'></div>");
+    const [bookStories,allStories]=await Promise.all([fetchSheet(SHEETS.BOOKSTORY),fetchSheet(SHEETS.STORYDETAIL)]);
+    const collectedWorks = bookStories.filter(r=>r.ISBN?.trim()===jpinfo.ISBN?.trim());
+    const storyMap = new Map(allStories.map(s=>[s.作品番?.trim(),s]));
+    const merged = collectedWorks.map(r=>({...r,...storyMap.get(r.作品番?.trim())}));
+    if(!merged.length) return;
+
+    // Determine columns
+    const allCols = Array.from(new Set(merged.flatMap(r=>Object.keys(r)))).filter(c=>!hideColumns.includes(c));
+    const columns = columnOrderTable.filter(c=>allCols.includes(c)).concat(allCols.filter(c=>!columnOrderTable.includes(c)));
+
+    const container=document.getElementById("tableContainer");
+    container.appendChild(createHeader(columns));
+    merged.forEach(r=>container.appendChild(createRow(r,columns)));
   }
-}
+})();
 
-function renderCards(manga,jpinfo){
-  const hkCard = manga?`<div class="card"><div class="card-inner"><div class="book-image"><img src="${manga.Image||''}" class="clickable-image" onclick="openImageModal('${manga.Image||''}')"></div><div class="column-box"><h3>${manga.OriginCountry||''}版資料</h3><h1>${manga.Title||''} ${manga.Volume||''}</h1><h2>${manga.Subtitle||''}</h2><div><strong>作者:</strong>${manga.Author||''}</div><div><strong>出版社:</strong>${manga.Publisher||''}</div><div><strong>出版日期:</strong>${manga.IssueDate||''}</div><div><strong>頁數:</strong>${manga.Page||''}</div><div><strong>ISBN:</strong>${manga.ISBN||''}</div></div></div></div>`:"";
-  const jpCard = jpinfo?`<div class="card"><div class="card-inner"><div class="book-image"><img src="${jpinfo.Image||''}" class="clickable-image" onclick="openImageModal('${jpinfo.Image||''}')"></div><div class="column-box"><h3>日文原版資料</h3><h1>${jpinfo.標題||''} ${jpinfo.巻||''}</h1><h2>${jpinfo.副標題||''}</h2><div><strong>著:</strong>${jpinfo.著||''}</div><div><strong>頁:</strong>${jpinfo.頁||''}</div><div><strong>初版発行日:</strong>${jpinfo.初版発行日||''}</div><div><strong>定価:</strong>${jpinfo.定価||''}</div><div><strong>ISBN:</strong>${jpinfo.ISBN||''}</div></div></div></div>`:"";
-  document.getElementById("content").innerHTML=`<div class="top-section">${hkCard}${jpCard}</div>`;
-}
-
-// ===== Virtualized table =====
-function renderVirtualTable(jpinfo, bookStories, allStories){
-  const collectedWorks = bookStories.filter(r=>r.ISBN?.trim()===jpinfo.ISBN?.trim()).sort((a,b)=>Number(a.話||a.收錄話||0)-Number(b.話||b.收錄話||0));
-  const storyMap = new Map(allStories.map(s=>[s.作品番?.trim(),s]));
-  const mergedRows = collectedWorks.map(r=>({...r,...storyMap.get(r.作品番?.trim())}));
-  if(!mergedRows.length) return;
-
-  const allColumns = Array.from(new Set(mergedRows.flatMap(r=>Object.keys(r)))).filter(c=>!hideColumns.includes(c));
-  const finalColumns = columnOrderTable.filter(c=>allColumns.includes(c)).concat(allColumns.filter(c=>!columnOrderTable.includes(c)));
-
-  const container = document.createElement("div"); container.className="details-container";
-  const table = document.createElement("table"); table.className="details-table"; table.style.height = mergedRows.length*30+"px";
-  const thead = document.createElement("thead"); const tr = document.createElement("tr");
-  finalColumns.forEach(c=>{ const th=document.createElement("th"); th.textContent=c; if(nowrapColumns.includes(c)) th.classList.add("nowrap"); tr.appendChild(th); });
-  thead.appendChild(tr); table.appendChild(thead); container.appendChild(table);
-  document.getElementById("content").appendChild(document.createElement("h2")).textContent="收錄故事";
-  document.getElementById("content").appendChild(container);
-
-  const rowHeight = 30; const visibleCount = Math.ceil(container.clientHeight/rowHeight)+10;
-  const fragment = document.createDocumentFragment();
-  let startIdx = 0;
-
-  function renderRows(){
-    table.querySelectorAll("tbody").forEach(b=>b.remove());
-    const tbody = document.createElement("tbody");
-    const end = Math.min(startIdx+visibleCount, mergedRows.length);
-    for(let i=startIdx;i<end;i++){
-      const tr = document.createElement("tr");
-      finalColumns.forEach(c=>{const td=document.createElement("td"); td.textContent=mergedRows[i][c]?.trim()||''; if(nowrapColumns.includes(c)) td.classList.add("nowrap"); tr.appendChild(td);});
-      tr.style.position="absolute"; tr.style.top=i*rowHeight+"px"; tbody.appendChild(tr);
-    }
-    table.appendChild(tbody);
-  }
-  renderRows();
-  container.addEventListener("scroll",()=>{ startIdx = Math.floor(container.scrollTop/rowHeight); renderRows(); });
-}
-
-function openImageModal(src){const modal=document.getElementById("imageModal");document.getElementById("modalImage").src=src;modal.classList.add("show");}
+// ===== Image modal =====
+function openImageModal(src){const m=document.getElementById("imageModal");document.getElementById("modalImage").src=src;m.classList.add("show");}
 function closeImageModal(){document.getElementById("imageModal").classList.remove("show");}
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeImageModal();});
 </script>

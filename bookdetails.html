@@ -5,7 +5,6 @@
 <title>Book Detail</title>
 
 <style>
-
 body{font-family:Arial;padding:40px;}
 
 .top-section{
@@ -103,7 +102,6 @@ cursor:pointer;
 }
 
 .clickable-image{cursor:zoom-in;}
-img{user-select:none;-webkit-user-drag:none;}
 
 </style>
 </head>
@@ -114,11 +112,10 @@ img{user-select:none;-webkit-user-drag:none;}
 
 <script>
 
-// ===== CONFIG =====
+// CACHE SETTINGS
+const CACHE_TTL=3600000;
 
-const CACHE_TTL = 3600000;
-const SHEET_ID="1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8";
-
+// CONFIG
 const hideColumns=[
 "ISBN","作品番","類","番","頁","收錄初出掲載誌","收錄初出掲載号",
 "掲載番","初出掲載頁","単行本","第0巻","ドラミちゃん","文庫",
@@ -139,8 +136,7 @@ const columnOrderTable=[
 "出版備考","備考","全集副題香港譯名","作品類"
 ];
 
-// ===== URL PARAMS =====
-
+// URL params
 const params=new URLSearchParams(window.location.search);
 const isbnhk=(params.get("isbnhk")||"").trim();
 const isbnjp=(params.get("isbnjp")||"").trim();
@@ -151,12 +147,10 @@ document.getElementById("content").innerHTML="Please provide ISBN.";
 loadData();
 }
 
-// ===== FETCH SHEET WITH CACHE =====
+// Cached fetch
+async function fetchCached(url){
 
-async function fetchSheet(sheet,query){
-
-const cacheKey="sheet_"+sheet+"_"+query;
-
+const cacheKey="sheet_"+url;
 const cached=localStorage.getItem(cacheKey);
 
 if(cached){
@@ -166,25 +160,8 @@ return obj.data;
 }
 }
 
-const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheet)}&tq=${encodeURIComponent(query)}`;
-
 const res=await fetch(url);
-const text=await res.text();
-
-const json=JSON.parse(
-text.match(/google\.visualization\.Query\.setResponse\(([\s\S]+)\);/)[1]
-);
-
-const cols=json.table.cols.map(c=>c.label);
-const rows=json.table.rows;
-
-const data=rows.map(r=>{
-const obj={};
-r.c.forEach((cell,i)=>{
-obj[cols[i]]=cell?.v??"";
-});
-return obj;
-});
+const data=await res.json();
 
 localStorage.setItem(cacheKey,JSON.stringify({
 time:Date.now(),
@@ -192,29 +169,26 @@ data:data
 }));
 
 return data;
-
 }
 
-// ===== LOAD DATA =====
+// Sheet URLs
+const HK_URL="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
+const JP_URL="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP";
+const WORK_URL="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品";
+const STORY_URL="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表";
 
+// Load data
 async function loadData(){
 
 try{
 
-const [hk,jp]=await Promise.all([
-
-isbnhk
-? fetchSheet("出版目録HK",`SELECT * WHERE ISBN='${isbnhk}'`)
-: Promise.resolve([]),
-
-isbnjp
-? fetchSheet("出版目録JP",`SELECT * WHERE ISBN='${isbnjp}'`)
-: Promise.resolve([])
-
+const [hkbooks,jpbooks]=await Promise.all([
+isbnhk?fetchCached(HK_URL):Promise.resolve([]),
+isbnjp?fetchCached(JP_URL):Promise.resolve([])
 ]);
 
-const manga=hk[0];
-const jpinfo=jp[0];
+const manga=isbnhk?hkbooks.find(b=>b.ISBN?.trim()===isbnhk):null;
+const jpinfo=isbnjp?jpbooks.find(j=>j.ISBN?.trim()===isbnjp):null;
 
 if(!manga && !jpinfo){
 document.getElementById("content").innerHTML="Book not found.";
@@ -225,46 +199,27 @@ renderCards(manga,jpinfo);
 
 if(!jpinfo)return;
 
-// Load works
-const works=await fetchSheet(
-"書籍收錄作品",
-`SELECT * WHERE ISBN='${isbnjp}'`
-);
+const loading=document.createElement("div");
+loading.innerText="Loading stories...";
+document.getElementById("content").appendChild(loading);
 
-if(!works.length)return;
+const [bookStories,allStories]=await Promise.all([
+fetchCached(WORK_URL),
+fetchCached(STORY_URL)
+]);
 
-// Collect IDs
-const ids=[...new Set(works.map(w=>w["作品番"]))];
+loading.remove();
 
-const idQuery=ids.map(i=>`'${i}'`).join(",");
-
-// Load story details
-const stories=await fetchSheet(
-"作品完整列表",
-`SELECT * WHERE \`作品番\` IN (${idQuery})`
-);
-
-// Join
-const storyMap=new Map(stories.map(s=>[s["作品番"],s]));
-
-const merged=works.map(w=>({
-...w,
-...storyMap.get(w["作品番"])
-}));
-
-renderTable(merged);
+renderTable(jpinfo,bookStories,allStories);
 
 }catch(e){
-
 console.error(e);
 document.getElementById("content").innerHTML="Failed to load data.";
-
 }
 
 }
 
-// ===== RENDER CARDS =====
-
+// Render cards
 function renderCards(manga,jpinfo){
 
 const hkCard=manga?`
@@ -301,19 +256,23 @@ const jpCard=jpinfo?`
 </div>
 </div>`:"";
 
-document.getElementById("content").innerHTML=
-`<div class="top-section">${hkCard}${jpCard}</div>`;
-
+document.getElementById("content").innerHTML=`<div class="top-section">${hkCard}${jpCard}</div>`;
 }
 
-// ===== TABLE =====
+// Render table
+function renderTable(jpinfo,bookStories,allStories){
 
-function renderTable(rows){
+const collected=bookStories
+.filter(r=>r.ISBN?.trim()===jpinfo.ISBN?.trim())
+.sort((a,b)=>Number(a.收錄話||0)-Number(b.收錄話||0));
 
-if(!rows.length)return;
+const storyMap=new Map(allStories.map(s=>[s.作品番?.trim(),s]));
 
-const cols=Object.keys(rows[0])
-.filter(c=>!hideColumns.includes(c));
+const merged=collected.map(r=>({...r,...storyMap.get(r.作品番?.trim())}));
+
+if(!merged.length)return;
+
+const cols=Object.keys(merged[0]).filter(c=>!hideColumns.includes(c));
 
 const finalCols=columnOrderTable
 .filter(c=>cols.includes(c))
@@ -337,16 +296,14 @@ table.appendChild(thead);
 
 const tbody=document.createElement("tbody");
 
-rows.forEach(r=>{
+merged.forEach(r=>{
 const tr=document.createElement("tr");
-
 finalCols.forEach(c=>{
 const td=document.createElement("td");
 td.textContent=r[c]||"";
 if(nowrapColumns.includes(c))td.classList.add("nowrap");
 tr.appendChild(td);
 });
-
 tbody.appendChild(tr);
 });
 
@@ -360,8 +317,7 @@ document.getElementById("content").appendChild(table);
 
 }
 
-// ===== IMAGE MODAL =====
-
+// Image modal
 function openImageModal(src){
 const modal=document.getElementById("imageModal");
 document.getElementById("modalImage").src=src;
@@ -372,14 +328,9 @@ function closeImageModal(){
 document.getElementById("imageModal").classList.remove("show");
 }
 
-// ===== EVENTS =====
-
 document.addEventListener("keydown",e=>{
 if(e.key==="Escape")closeImageModal();
 });
-
-window.addEventListener("contextmenu",e=>e.preventDefault(),true);
-window.addEventListener("dragstart",e=>e.preventDefault());
 
 </script>
 

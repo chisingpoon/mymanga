@@ -473,43 +473,64 @@ function getUrlParams() {
 }
 
 function applyUrlFilters() {
-  const params = getUrlParams();
+  const params = new URLSearchParams(window.location.search);
 
-  // Search box
-  if (params.search) {
-    const searchInput = document.getElementById("searchInput");
-    searchInput.value = params.search;
-    const clearBtn = document.querySelector(".clear-btn");
-    if (clearBtn) clearBtn.style.display = searchInput.value ? "block" : "none";
+  // ----- Helper to decode and split multiple values -----
+  function getParamList(key) {
+    if (!params.has(key)) return [];
+    const value = decodeURIComponent(params.get(key) || "");
+    return value.split(",").map(v => v.trim()).filter(Boolean);
   }
 
-  // Sorts
-  if (params.sortPrice) {
-    document.getElementById("sortPrice").value = params.sortPrice;
-  }
+  const categories = getParamList("category");  // 類
+  const seriesList = getParamList("series");    // 系列
+  const authors = getParamList("author");       // 著
 
-  if (params.sortIssueDate) {
-    document.getElementById("sortIssueDate").value = params.sortIssueDate;
-  }
-
-  // Helper to check checkboxes and open parent <details>
-  function checkAndOpen(containerId, values) {
-    if (!values) return;
-    const items = values.split(",");
-    items.forEach(val => {
-      const checkbox = document.querySelector(`#${containerId} input[value="${val}"]`);
-      if (checkbox) {
-        checkbox.checked = true;
-        const details = checkbox.closest("details");
-        if (details) details.open = true;
-      }
+  // ----- Check matching checkboxes -----
+  function checkCheckboxes(containerId, values) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const checkboxes = container.querySelectorAll("input[type='checkbox']");
+    checkboxes.forEach(cb => {
+      cb.checked = values.includes(cb.value);
     });
+
+    // Open <details> if any checkbox checked
+    const details = container.closest("details");
+    if (details) {
+      details.open = values.some(v => [...checkboxes].some(cb => cb.value === v));
+    }
   }
 
-  checkAndOpen("categoryFilter", params.category);
-  checkAndOpen("seriesFilter", params.series);
-  checkAndOpen("authorFilter", params.author);
+  checkCheckboxes("categoryFilter", categories);
+  checkCheckboxes("seriesFilter", seriesList);
+  checkCheckboxes("authorFilter", authors);
+
+  // ----- Optional: apply search -----
+  const searchParam = params.has("search") ? decodeURIComponent(params.get("search")) : "";
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput) {
+    searchInput.value = searchParam;
+    const clearBtn = document.querySelector(".clear-btn");
+    if (clearBtn) clearBtn.style.display = searchParam ? "block" : "none";
+  }
+
+  // ----- Optional: apply sorting -----
+  const sortIssueDate = params.get("sortIssueDate") || "";
+  const sortPrice = params.get("sortPrice") || "";
+
+  if (sortIssueDate) document.getElementById("sortIssueDate").value = sortIssueDate;
+  if (sortPrice) document.getElementById("sortPrice").value = sortPrice;
+
+  // ----- Finally, apply filters -----
+  applyFilters();
 }
+
+// Run this after your sheetData is loaded
+window.addEventListener("DOMContentLoaded", () => {
+  // Wait a short moment to ensure filters are populated
+  setTimeout(applyUrlFilters, 100);
+});
 
 function clearAllFilters() {
   // Clear search input

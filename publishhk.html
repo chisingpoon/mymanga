@@ -5,7 +5,6 @@
 <title>香港版漫畫資料</title>
 
 <style>
-/* Styles remain unchanged from the previous provided ones */
 body {
   font-family: Arial;
   padding: 30px;
@@ -28,6 +27,20 @@ body {
   border: 1px solid #ccc;
 }
 
+@media (max-width: 768px) {
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .controls input,
+  .controls select {
+    width: 100%;
+    font-size: 16px;   /* better for touch */
+  }
+
+}
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -56,7 +69,6 @@ body {
   background: #333;
   color: white;
 }
-
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -68,20 +80,6 @@ body {
   border-radius: 8px;
   padding: 15px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  position: relative;
-  cursor: pointer;  /* Indicates clickability */
-}
-
-.card:hover::after {
-  content: "點擊查看詳情";
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  font-size: 14px;
-  color: #333;
-  background-color: rgba(255, 255, 255, 0.7);
-  padding: 5px 8px;
-  border-radius: 4px;
 }
 
 .card img {
@@ -94,6 +92,40 @@ body {
   color: green;
   font-weight: bold;
   margin-top: 5px;
+}
+
+.detail-container {
+  display: flex;
+  gap: 20px;
+  align-items: stretch;  /* important */
+}
+
+.detail-left {
+  width: 35%;
+}
+
+.detail-left img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;   /* show full image */
+  display: block;
+}
+
+.detail-right {
+  width: 65%;
+}
+
+.detail-row {
+  margin-bottom: 8px;
+}
+
+.detail-description {
+  margin-top: 15px;
+}
+
+.detail-description p {
+  margin-top: 5px;
+  line-height: 1.6;
 }
 
 .modal-content {
@@ -110,6 +142,35 @@ body {
   border-radius: 8px;
   position: relative;
   display: flex;
+}
+
+#pagination button {
+  margin: 0 4px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+#pagination button:hover:not(:disabled) {
+  background: #f0f0f0;
+}
+
+#pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.active-page {
+  background: #333 !important;
+  color: white;
+  font-weight: bold;
+}
+
+#pagination {
+  margin-top: 20px;
+  text-align: center;
 }
 
 #pagination button {
@@ -174,6 +235,10 @@ body {
   border: 1px solid #ccc;
 }
 
+.sidebar {
+  font-size: 13px;
+}
+
 .sidebar label {
   margin-bottom: 3px;
 }
@@ -200,7 +265,70 @@ body {
   margin-bottom: 8px;
 }
 
-/* Additional Styles for Search Wrapper and Filter */
+.content {
+  flex: 1;
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+}
+
+/* Collapsible filter styling */
+.sidebar details {
+  margin-bottom: 10px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.sidebar summary {
+  font-weight: bold;
+  cursor: pointer;
+  list-style: none;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.sidebar summary::-webkit-details-marker {
+  display: none;
+}
+
+.sidebar summary::after {
+  content: "▾";
+  float: right;
+  transition: transform 0.2s ease;
+}
+
+.sidebar details[open] summary::after {
+  transform: rotate(180deg);
+}
+
+/* Search Wrapper */
+.search-wrapper {
+  position: relative;
+  margin-bottom: 6px;
+}
+
+.search-wrapper input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 28px 6px 28px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* Clear button */
+#clearFiltersBtn:hover {
+  background: #f0f0f0;
+}
+  
 .clear-btn {
   position: absolute;
   right: 8px;
@@ -214,6 +342,19 @@ body {
 
 .clear-btn:hover {
   color: #000;
+}
+
+/* Result counter */
+.result-count {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.filter-group {
+  max-height: 250px;   /* scroll if long */
+  overflow-y: auto;
+  padding-right: 5px;
 }
 </style>
 </head>
@@ -232,6 +373,7 @@ body {
 </header>
 
 <div class="layout">
+
   <!-- LEFT SIDEBAR -->
   <aside class="sidebar">
     <button id="clearFiltersBtn" onclick="clearAllFilters()" style="margin-bottom:10px; width:100%; padding:6px 0; font-size:13px; border-radius:6px; border:1px solid #ccc; cursor:pointer;">
@@ -253,16 +395,19 @@ body {
 
     <h3>搜尋</h3>
     <div class="search-wrapper">
-      <input type="text" id="searchInput" placeholder="任何文字搜尋..." oninput="handleSearchInput()">
+      <input type="text"
+             id="searchInput"
+             placeholder="任何文字搜尋..."
+             oninput="handleSearchInput()">
       <span class="clear-btn" onclick="clearSearch()">×</span>
     </div>
     <div id="resultCount" class="result-count"></div>
-
+    
     <details>
       <summary>書名</summary>
       <div id="titleFilter" class="filter-group"></div>
     </details>
-
+    
     <details>
       <summary>出版社</summary>
       <div id="publisherFilter" class="filter-group"></div>
@@ -277,6 +422,8 @@ body {
       <summary>出版地區</summary>
       <div id="originCountryFilter" class="filter-group"></div>
     </details>
+
+
   </aside>
 
   <!-- RIGHT CONTENT -->
@@ -284,10 +431,10 @@ body {
     <div id="pagination"></div>
     <div class="grid" id="mangalist">Loading...</div>
   </main>
+
 </div>
 
 <script>
-// ===== Configuration =====
 const SHEET_URL = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK";
 let sheetData = [];
 let currentPage = 1;
@@ -295,15 +442,13 @@ const itemsPerPage = 20;   // change this to 8, 16, etc.
 let currentList = [];      // you already use this for modal nav
 
 fetch(SHEET_URL)
-  .then(res => {
-    if (!res.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return res.json();
-  })
+  .then(res => res.json())
   .then(data => {
+
     // Only keep Active = Yes
-    sheetData = data.filter(row => row.Active?.toLowerCase() === "yes");
+    sheetData = data.filter(row =>
+      row.Active?.toLowerCase() === "yes"
+    );
     populateTitles(); 
     populatePublishers();
     populateAuthors();
@@ -315,7 +460,6 @@ fetch(SHEET_URL)
     document.getElementById("mangalist").innerHTML = "Failed to load data.";
     console.error(error);
   });
-
 function getUrlParams() {
   const params = new URLSearchParams(window.location.search);
   const obj = {};
@@ -327,6 +471,7 @@ function getUrlParams() {
 
 function applyUrlFilters() {
   const params = getUrlParams();
+
   // Search
   if (params.search) {
     const searchInput = document.getElementById("searchInput");
@@ -342,22 +487,244 @@ function applyUrlFilters() {
   if (params.sortIssueDate) {
     document.getElementById("sortIssueDate").value = params.sortIssueDate;
   }
+
+  // Helper to check checkboxes and open parent <details>
+  function checkAndOpen(containerId, values) {
+    if (!values) return;
+    const items = values.split(",");
+    items.forEach(val => {
+      const checkbox = document.querySelector(`#${containerId} input[value="${val}"]`);
+      if (checkbox) {
+        checkbox.checked = true;
+        // Open the parent <details>
+        const details = checkbox.closest("details");
+        if (details) details.open = true;
+      }
+    });
+  }
+
+  checkAndOpen("titleFilter", params.title);
+  checkAndOpen("publisherFilter", params.publisher);
+  checkAndOpen("authorFilter", params.author);
+  checkAndOpen("originCountryFilter", params.originCountry);
 }
 
+function clearAllFilters() {
+  // Clear search input
+  const searchInput = document.getElementById("searchInput");
+  searchInput.value = "";
+
+  // Clear all checkboxes
+  document.querySelectorAll('.sidebar input[type="checkbox"]').forEach(cb => {
+    cb.checked = false;
+  });
+
+  // Reset sort selects
+  document.getElementById("sortIssueDate").value = "";
+  document.getElementById("sortPrice").value = "";
+
+  // Hide the clear (×) button
+  const clearBtn = document.querySelector(".clear-btn");
+  if (clearBtn) clearBtn.style.display = "none";
+
+  // Apply filters again to refresh list
+  applyFilters();
+}
+
+function populateTitles() {
+  const container = document.getElementById("titleFilter");
+  if (!container) return;
+
+  const titles = [...new Set(sheetData.map(row => row.Title))];
+
+  titles.forEach(title => {
+    const label = document.createElement("label");
+
+    label.innerHTML = `
+      <input type="checkbox" value="${title}"
+             onchange="applyFilters()"> ${title}
+    `;
+
+    container.appendChild(label);
+  });
+}
+
+function populatePublishers() {
+  const container = document.getElementById("publisherFilter");
+  const publishers = [...new Set(sheetData.map(row => row.Publisher))];
+
+  publishers.forEach(pub => {
+    const label = document.createElement("label");
+
+    label.innerHTML = `
+      <input type="checkbox" value="${pub}"
+             onchange="applyFilters()"> ${pub}
+    `;
+
+    container.appendChild(label);
+  });
+}
+
+
+
+function populateAuthors() {
+  const container = document.getElementById("authorFilter");
+  const authors = [...new Set(sheetData.map(row => row.Author))];
+
+  authors.forEach(author => {
+    const label = document.createElement("label");
+
+    label.innerHTML = `
+      <input type="checkbox" value="${author}"
+             onchange="applyFilters()"> ${author}
+    `;
+
+    container.appendChild(label);
+  });
+}
+
+function populateOriginCountries() {
+  const container = document.getElementById("originCountryFilter");
+  const origins = [...new Set(sheetData.map(row => row.OriginCountry))];
+
+  origins.forEach(origin => {
+    const label = document.createElement("label");
+
+    label.innerHTML = `
+      <input type="checkbox" value="${origin}"
+             onchange="applyFilters()"> ${origin}
+    `;
+
+    container.appendChild(label);
+  });
+}
+
+function openDetail(id) {
+
+  currentIndex = currentList.findIndex(d => d.ISBN === id);
+  const detail = currentList[currentIndex];
+
+  if (!detail) {
+    document.getElementById("detailContent").innerHTML =
+      "No detail found.";
+  } else {
+    document.getElementById("detailContent").innerHTML = `
+  <div class="detail-container">
+
+    <div class="detail-left">
+      <img src="${detail.Image || ""}" 
+      alt="${detail.Title} ${detail.Volume}"      
+      onclick="openLightbox('${detail.Image}')"
+      style="cursor: zoom-in;">
+    </div>
+
+    <div class="detail-right">
+      <h1>${detail.Title || ""} ${detail.Volume || ""}</h1>
+      <h2>${detail.Subtitle || ""}</h2>
+      <div class="detail-row"><strong>日文書名: </strong>${detail.OriginalTitle || ""} ${detail.Volume || ""}  ${detail.OriginalSubtitle || ""}</div>  
+      <div class="detail-row"><strong>作者: </strong>${detail.Author || ""}</div>
+      <div class="detail-row"><strong>出版社: </strong> ${detail.Publisher || ""}</div>
+      <div class="detail-row"><strong>尺碼: </strong> ${detail.Size || ""}</div>
+      <div class="detail-row date"><strong>出版日期: </strong> ${detail.IssueDate || ""}</div>
+      <div class="detail-row price"><strong>售價: </strong> $${detail.Price || ""}</div>
+      <div class="detail-row"><strong>頁數: </strong> ${detail.Page || ""}</div>
+      <div class="detail-row"><strong>出版地區: </strong> ${detail.OriginCountry || ""}</div>      
+      <div class="detail-row"><strong>ISBN:</strong> ${detail.ISBN || ""}</div>
+    </div>
+
+  </div>
+  <button onclick="prevItem()" style="position:absolute; left:10px; top:50%;">◀</button>
+  <button onclick="nextItem()" style="position:absolute; right:10px; top:50%;">▶</button>
+    `;
+  }
+
+  document.getElementById("detailModal").style.display = "block";
+}
+
+function handleSearchInput() {
+  const input = document.getElementById("searchInput");
+  const clearBtn = document.querySelector(".clear-btn");
+
+  clearBtn.style.display = input.value ? "block" : "none";
+  applyFilters();
+}
+
+function clearSearch() {
+  const input = document.getElementById("searchInput");
+  const clearBtn = document.querySelector(".clear-btn");
+
+  input.value = "";
+  clearBtn.style.display = "none";
+  applyFilters();
+}
+
+
+function closeModal() {
+  document.getElementById("detailModal").style.display = "none";
+}
+
+function openLightbox(src) {
+  document.getElementById("lightboxImg").src = src;
+  document.getElementById("imageLightbox").style.display = "flex";
+}
+
+function closeLightbox() {
+  document.getElementById("imageLightbox").style.display = "none";
+}
+
+function nextItem() {
+  if (currentIndex < currentList.length - 1) {
+    currentIndex++;
+    openDetail(currentList[currentIndex].ISBN);
+  }
+}
+
+
+function closeModal() {
+  document.getElementById("detailModal").style.display = "none";
+}
+
+function openLightbox(src) {
+  document.getElementById("lightboxImg").src = src;
+  document.getElementById("imageLightbox").style.display = "flex";
+}
+
+function closeLightbox() {
+  document.getElementById("imageLightbox").style.display = "none";
+}
+
+function nextItem() {
+  if (currentIndex < currentList.length - 1) {
+    currentIndex++;
+    openDetail(currentList[currentIndex].ISBN);
+  }
+}
+
+function prevItem() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    openDetail(currentList[currentIndex].ISBN);
+  }
+}
+  
 function applyFilters() {
+
   const search = document.getElementById("searchInput").value.toLowerCase();
   const publisher = [...document.querySelectorAll('#publisherFilter input:checked')]
-    .map(cb => cb.value);
+  .map(cb => cb.value);
   const title = [...document.querySelectorAll('#titleFilter input:checked')]
-    .map(cb => cb.value);
+  .map(cb => cb.value);
   const author = [...document.querySelectorAll('#authorFilter input:checked')]
-    .map(cb => cb.value);
+  .map(cb => cb.value);
   const originCountry = [...document.querySelectorAll('#originCountryFilter input:checked')]
-    .map(cb => cb.value);
-  const sortPrice = document.getElementById("sortPrice").value;
+  .map(cb => cb.value);
+  const sortPrice = document.getElementById("sortPrice").value; 
   const sortIssueDate = document.getElementById("sortIssueDate").value;
   
   let filtered = sheetData.filter(row => {
+
+//    const searchMatch =
+//      row.Title?.toLowerCase().includes(search);
     const searchMatch = Object.values(row)
       .join(" ")
       .toLowerCase()
@@ -389,27 +756,34 @@ function applyFilters() {
 
   // Sort Issue Date
   if (sortIssueDate === "newest") {
-    filtered.sort((a, b) => new Date(b.IssueDate) - new Date(a.IssueDate));
+    filtered.sort((a, b) => new Date(b.IssueDate) - new Date(a.IssueDate) );
   }
 
   if (sortIssueDate === "oldest") {
-    filtered.sort((a, b) => new Date(a.IssueDate) - new Date(b.IssueDate));
+    filtered.sort((a, b) => new Date(a.IssueDate) - new Date(b.IssueDate)  );
   }
 
+
+//  document.getElementById("mangalist").innerHTML =
+//    filtered.length ? html : "No Manga found.";
   currentList = filtered;
   currentPage = 1; // reset to first page when filtering
-  document.getElementById("resultCount").textContent =
-    `共 ${filtered.length} 本作品`;
 
+  document.getElementById("resultCount").textContent =
+  `共 ${filtered.length} 本作品`;
   renderPage();
 }
 
 function renderPage() {
+
   const start = (currentPage - 1) * itemsPerPage;
   const end = start + itemsPerPage;
   const pageItems = currentList.slice(start, end);
 
   const html = pageItems.map(row => `
+<!--    <div class="card" onclick="openDetail('${row.ISBN}')"> -->
+<!--    <div class="card" onclick="location.href='bookdetail.html?isbn=${row.ISBN}'"> -->
+<!--   <div class="card" onclick="window.open('bookdetail.html?isbn=${row.ISBN}', '_blank')">  -->
     <div class="card" onclick="window.open('bookdetails.html?isbnhk=${row.ISBN}&isbnjp=${row.ISBN_JP}', '_blank')">
       <img src="${row.Image}" alt="${row.Title}">
       <h3>書名: ${row.Title} ${row.Volume}</h3>
@@ -426,13 +800,8 @@ function renderPage() {
   renderPaginationControls();
 }
 
-// Disable right-click menu globally
-document.addEventListener("contextmenu", function(e) {
-  e.preventDefault();
-});
-
-// Pagination
 function renderPaginationControls() {
+
   const totalPages = Math.ceil(currentList.length / itemsPerPage);
 
   if (totalPages <= 1) {
@@ -440,12 +809,131 @@ function renderPaginationControls() {
     return;
   }
 
-  let html = `<div style="margin-bottom:10px;">Page ${currentPage} of ${totalPages}</div>`;
-  
-  // More pagination buttons logic
-  // (omitted for brevity, you can include pagination buttons logic here as in your original code)
-}
-</script>
+  let html = "";
 
+  // ----- Page Info -----
+  html += `<div style="margin-bottom:10px;">
+             Page ${currentPage} of ${totalPages}
+           </div>`;
+
+  // ----- First -----
+  html += `
+    <button onclick="changePage(1)" ${currentPage === 1 ? "disabled" : ""}>
+      &laquo; First
+    </button>
+  `;
+
+  // ----- Prev -----
+  html += `
+    <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? "disabled" : ""}>
+      &lsaquo; Prev
+    </button>
+  `;
+
+  // ----- Page Numbers Logic -----
+
+  const maxVisible = 5;
+  let startPage = Math.max(1, currentPage - 2);
+  let endPage = Math.min(totalPages, currentPage + 2);
+
+  // Adjust window if near edges
+  if (currentPage <= 3) {
+    endPage = Math.min(totalPages, maxVisible);
+  }
+
+  if (currentPage >= totalPages - 2) {
+    startPage = Math.max(1, totalPages - (maxVisible - 1));
+  }
+
+  // Always show page 1
+  if (startPage > 1) {
+    html += `<button onclick="changePage(1)">1</button>`;
+    if (startPage > 2) {
+      html += `<span class="ellipsis">...</span>`;
+    }
+  }
+
+  // Middle Pages
+  for (let i = startPage; i <= endPage; i++) {
+    html += `
+      <button onclick="changePage(${i})"
+        ${i === currentPage ? "class='active-page'" : ""}>
+        ${i}
+      </button>
+    `;
+  }
+
+  // Always show last page
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) {
+      html += `<span class="ellipsis">...</span>`;
+    }
+    html += `<button onclick="changePage(${totalPages})">${totalPages}</button>`;
+  }
+
+  // ----- Next -----
+  html += `
+    <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? "disabled" : ""}>
+      Next &rsaquo;
+    </button>
+  `;
+
+  // ----- Last -----
+  html += `
+    <button onclick="changePage(${totalPages})" ${currentPage === totalPages ? "disabled" : ""}>
+      Last &raquo;
+    </button>
+  `;
+
+  document.getElementById("pagination").innerHTML = html;
+}
+
+function changePage(page) {
+
+  const totalPages = Math.ceil(currentList.length / itemsPerPage);
+
+  if (page < 1 || page > totalPages) return;
+
+  currentPage = page;
+  renderPage();
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+  
+  document.addEventListener("contextmenu", function(e) {
+    if (e.target.tagName === "IMG") {
+      e.preventDefault();
+    }
+  });
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "F12") {
+      e.preventDefault();
+    }
+  });
+</script>
+<div id="detailModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);">
+  <div class="modal-box">
+    <button onclick="closeModal()" style="position:absolute; right:10px; top:10px;">X</button>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<div id="imageLightbox" onclick="closeLightbox()" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.9);
+  justify-content:center;
+  align-items:center;
+  z-index:2000;
+">
+  <img id="lightboxImg" style="
+    max-width:90%;
+    max-height:90%;
+    object-fit:contain;
+    cursor:zoom-out;
+  ">
+</div>
 </body>
 </html>

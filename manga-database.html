@@ -1,21 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>漫畫資料庫完整版</title>
 
 <style>
 
 body{
-font-family:system-ui,-apple-system,Segoe UI,Roboto;
-background:#f3f4f6;
-margin:0;
-}
-
-.container{
-max-width:1200px;
-margin:auto;
+font-family:Arial;
+background:#f4f4f4;
 padding:30px;
 }
 
@@ -23,38 +16,22 @@ header{
 display:flex;
 justify-content:space-between;
 align-items:center;
-margin-bottom:30px;
-}
-
-h1{
-margin:0;
-font-size:26px;
-}
-
-nav a{
-cursor:pointer;
-font-weight:600;
-color:#444;
+margin-bottom:20px;
+flex-wrap:wrap;
 }
 
 .grid{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-gap:18px;
+grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+gap:15px;
 }
 
 .card{
 background:white;
-border-radius:10px;
-padding:12px;
-box-shadow:0 3px 10px rgba(0,0,0,0.08);
+border-radius:8px;
+padding:15px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
 cursor:pointer;
-transition:all .2s;
-}
-
-.card:hover{
-transform:translateY(-4px);
-box-shadow:0 8px 18px rgba(0,0,0,0.12);
 }
 
 .card img{
@@ -62,22 +39,39 @@ width:100%;
 border-radius:6px;
 }
 
-.editions-container{
+.mode-switch{
+margin-bottom:20px;
+}
+
+.mode-switch button{
+padding:8px 12px;
+margin-right:10px;
+border:none;
+background:#3b82f6;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+.mode-switch button:hover{
+background:#2563eb;
+}
+
+.editions{
 display:flex;
 gap:40px;
 flex-wrap:wrap;
 margin-bottom:25px;
 }
 
-.edition-row{
+.edition{
 display:flex;
 gap:20px;
-flex:1;
-min-width:280px;
+align-items:flex-start;
 }
 
-.edition-image{
-width:140px;
+.edition img{
+width:160px;
 border-radius:6px;
 }
 
@@ -88,10 +82,10 @@ font-size:14px;
 
 .table-wrapper{
 overflow-x:auto;
+margin-top:20px;
 background:white;
 border-radius:10px;
 box-shadow:0 4px 12px rgba(0,0,0,0.08);
-margin-top:20px;
 }
 
 table{
@@ -103,7 +97,7 @@ min-width:700px;
 thead th{
 position:sticky;
 top:0;
-background:#f9fafb;
+background:#f8fafc;
 padding:12px;
 text-align:left;
 border-bottom:2px solid #e5e7eb;
@@ -122,38 +116,16 @@ tbody tr:hover{
 background:#f1f5f9;
 }
 
-.pagination{
-margin-top:15px;
-display:flex;
-gap:8px;
-flex-wrap:wrap;
-}
-
-.page-btn{
-padding:6px 12px;
-border-radius:6px;
-background:#e5e7eb;
-cursor:pointer;
+.volume-link{
+display:inline-block;
+margin-top:8px;
 font-size:13px;
+color:#2563eb;
+text-decoration:none;
 }
 
-.page-btn.active{
-background:#3b82f6;
-color:white;
-}
-
-button{
-padding:8px 14px;
-border:none;
-background:#3b82f6;
-color:white;
-border-radius:6px;
-cursor:pointer;
-margin-bottom:15px;
-}
-
-button:hover{
-background:#2563eb;
+.volume-link:hover{
+text-decoration:underline;
 }
 
 </style>
@@ -161,39 +133,41 @@ background:#2563eb;
 
 <body>
 
-<div class="container">
-
 <header>
 <h1>漫畫資料庫完整版</h1>
-<nav>
-<a onclick="renderSeries()">系列瀏覽</a>
-</nav>
 </header>
 
-<input id="searchBar" placeholder="Search series..."
-oninput="searchSeries()"
-style="padding:8px;border-radius:6px;border:1px solid #ccc;margin-bottom:20px;width:250px;">
+<div class="mode-switch">
+<button onclick="switchMode('hk')">HK View</button>
+<button onclick="switchMode('jp')">JP View</button>
+</div>
 
 <div id="content"></div>
 
-</div>
-
 <script>
 
-const BASE="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8";
+const BASE="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8"
 
 const URLS={
 hk:BASE+"/出版目録HK",
 jp:BASE+"/出版目録JP",
 volumeStories:BASE+"/書籍收錄作品",
 stories:BASE+"/作品完整列表"
-};
+}
 
-const DB={};
+const params=new URLSearchParams(window.location.search)
+let MODE=params.get("mode")||"hk"
+let OPEN_ISBN=params.get("isbn")
 
-let currentStories=[];
-let currentPage=1;
-const rowsPerPage=10;
+const DB={}
+
+function switchMode(mode){
+
+const url=new URL(window.location)
+url.searchParams.set("mode",mode)
+window.location=url
+
+}
 
 async function loadDatabase(){
 
@@ -202,57 +176,104 @@ fetch(URLS.hk).then(r=>r.json()),
 fetch(URLS.jp).then(r=>r.json()),
 fetch(URLS.volumeStories).then(r=>r.json()),
 fetch(URLS.stories).then(r=>r.json())
-]);
+])
 
-DB.hkBooks=hk.filter(b=>b.Active==="Yes");
-DB.jpBooks=jp.filter(b=>b.Active==="Yes");
-DB.volumeStories=volStories;
-DB.stories=stories;
+DB.hkBooks=hk.filter(b=>b.Active==="Yes")
+DB.jpBooks=jp.filter(b=>b.Active==="Yes")
+DB.volumeStories=volStories
+DB.stories=stories
 
-buildIndex();
-renderSeries();
+buildIndex()
+
+if(OPEN_ISBN){
+renderVolume(OPEN_ISBN)
+}else{
+renderSeries()
+}
 
 }
 
 function buildIndex(){
 
-DB.hkByISBN={};
-DB.jpByISBN={};
-DB.storiesByISBN={};
+DB.hkByISBN={}
+DB.jpByISBN={}
+DB.storiesByISBN={}
 
-DB.hkBooks.forEach(b=>DB.hkByISBN[b.ISBN]=b);
-DB.jpBooks.forEach(b=>DB.jpByISBN[b.ISBN]=b);
+DB.hkBooks.forEach(b=>DB.hkByISBN[b.ISBN]=b)
+DB.jpBooks.forEach(b=>DB.jpByISBN[b.ISBN]=b)
 
 DB.volumeStories.forEach(v=>{
-if(!DB.storiesByISBN[v.ISBN])DB.storiesByISBN[v.ISBN]=[];
-DB.storiesByISBN[v.ISBN].push(v);
-});
+if(!DB.storiesByISBN[v.ISBN])DB.storiesByISBN[v.ISBN]=[]
+DB.storiesByISBN[v.ISBN].push(v)
+})
 
 }
 
 function renderSeries(){
 
-const titles=[...new Set(DB.hkBooks.map(b=>b.Title))];
+if(MODE==="jp"){
+
+const titles=[...new Set(DB.jpBooks.map(b=>b.系列))]
 
 const html=titles.map(t=>{
-const count=DB.hkBooks.filter(b=>b.Title===t).length;
+const count=DB.jpBooks.filter(b=>b.系列===t).length
 
 return `<div class="card" onclick="renderSeriesVolumes('${t}')">
 <h3>${t}</h3>
 <div>${count} volumes</div>
-</div>`;
+</div>`
 
-}).join("");
+}).join("")
 
-content.innerHTML=`<div class="grid">${html}</div>`;
+content.innerHTML=`<div class="grid">${html}</div>`
+
+}else{
+
+const titles=[...new Set(DB.hkBooks.map(b=>b.Title))]
+
+const html=titles.map(t=>{
+const count=DB.hkBooks.filter(b=>b.Title===t).length
+
+return `<div class="card" onclick="renderSeriesVolumes('${t}')">
+<h3>${t}</h3>
+<div>${count} volumes</div>
+</div>`
+
+}).join("")
+
+content.innerHTML=`<div class="grid">${html}</div>`
+
+}
 
 }
 
 function renderSeriesVolumes(title){
 
+if(MODE==="jp"){
+
+const vols=DB.jpBooks
+.filter(b=>b.系列===title)
+.sort((a,b)=>a.巻-b.巻)
+
+const html=vols.map(v=>`
+
+<div class="card" onclick="renderVolume('${v.ISBN}')">
+
+<img src="${v.Image}">
+
+<h3>${v.系列} ${v.巻}</h3>
+
+</div>
+
+`).join("")
+
+content.innerHTML=`<h2>${title}</h2><div class="grid">${html}</div>`
+
+}else{
+
 const vols=DB.hkBooks
 .filter(b=>b.Title===title)
-.sort((a,b)=>a.Volume-b.Volume);
+.sort((a,b)=>a.Volume-b.Volume)
 
 const html=vols.map(v=>`
 
@@ -262,95 +283,38 @@ const html=vols.map(v=>`
 
 <h3>${v.Title} ${v.Volume}</h3>
 
-<div>${v.Subtitle||""}</div>
-
 </div>
 
-`).join("");
+`).join("")
 
-content.innerHTML=`<h2>${title}</h2><div class="grid">${html}</div>`;
+content.innerHTML=`<h2>${title}</h2><div class="grid">${html}</div>`
+
+}
 
 }
 
 function renderVolume(isbn){
 
-const hk=DB.hkByISBN[isbn];
-const jp=DB.jpByISBN[hk.ISBN_JP];
+if(MODE==="jp"){
 
-currentStories=DB.storiesByISBN[hk.ISBN_JP]||[];
-currentPage=1;
+const jp=DB.jpByISBN[isbn]
+const stories=DB.storiesByISBN[isbn]||[]
+renderJPVolume(jp,stories)
 
-const hkHTML=`
+}else{
 
-<div class="edition-row">
-
-<img src="${hk.Image}" class="edition-image">
-
-<div class="edition-info">
-
-<h3>Hong Kong Edition</h3>
-
-<p><b>Title:</b> ${hk.Title}</p>
-<p><b>Author:</b> ${hk.Author}</p>
-<p><b>Publisher:</b> ${hk.Publisher}</p>
-<p><b>Date:</b> ${hk.IssueDate}</p>
-
-</div>
-
-</div>
-`;
-
-const jpHTML=jp?`
-
-<div class="edition-row">
-
-<img src="${jp.Image}" class="edition-image">
-
-<div class="edition-info">
-
-<h3>Japanese Edition</h3>
-
-<p><b>Title:</b> ${jp.標題}</p>
-<p><b>Author:</b> ${jp.著}</p>
-<p><b>Publisher:</b> ${jp.出版社}</p>
-<p><b>Date:</b> ${jp.初版発行日}</p>
-
-</div>
-
-</div>
-
-`:"";
-
-content.innerHTML=`
-
-<button onclick="renderSeriesVolumes('${hk.Title}')">Back</button>
-
-<h2>${hk.Title} ${hk.Volume}</h2>
-
-<div class="editions-container">
-
-${hkHTML}
-
-${jpHTML}
-
-</div>
-
-<div id="storySection"></div>
-
-`;
-
-renderStoryPage();
+const hk=DB.hkByISBN[isbn]
+const jp=DB.jpByISBN[hk.ISBN_JP]
+const stories=DB.storiesByISBN[hk.ISBN_JP]||[]
+renderHKVolume(hk,jp,stories)
 
 }
 
-function renderStoryPage(){
+}
 
-if(currentStories.length===0)return;
+function renderHKVolume(hk,jp,stories){
 
-const start=(currentPage-1)*rowsPerPage;
-const pageData=currentStories.slice(start,start+rowsPerPage);
-
-const rows=pageData.map(s=>`
+const rows=stories.map(s=>`
 
 <tr>
 <td>${s.巻}</td>
@@ -361,19 +325,52 @@ const rows=pageData.map(s=>`
 <td>${s.副題港譯||""}</td>
 </tr>
 
-`).join("");
+`).join("")
 
-const totalPages=Math.ceil(currentStories.length/rowsPerPage);
+const jpLink=jp?`
+<a class="volume-link" href="?mode=jp&isbn=${jp.ISBN}">
+View Japanese Original →
+</a>`:""
 
-let pageButtons="";
+content.innerHTML=`
 
-for(let i=1;i<=totalPages;i++){
+<h2>${hk.Title} ${hk.Volume}</h2>
 
-pageButtons+=`<div class="page-btn ${i===currentPage?"active":""}" onclick="goPage(${i})">${i}</div>`;
+<div class="editions">
 
-}
+<div class="edition">
 
-storySection.innerHTML=`
+<img src="${hk.Image}">
+
+<div class="edition-info">
+
+<p><b>Author:</b> ${hk.Author}</p>
+<p><b>Publisher:</b> ${hk.Publisher}</p>
+<p><b>Release:</b> ${hk.IssueDate}</p>
+
+${jpLink}
+
+</div>
+
+</div>
+
+<div class="edition">
+
+<img src="${jp?.Image||""}">
+
+<div class="edition-info">
+
+<p><b>JP Title:</b> ${jp?.標題||""}</p>
+<p><b>Author:</b> ${jp?.著||""}</p>
+<p><b>Release:</b> ${jp?.初版発行日||""}</p>
+
+</div>
+
+</div>
+
+</div>
+
+${stories.length?`
 
 <h3>Included Stories</h3>
 
@@ -382,14 +379,18 @@ storySection.innerHTML=`
 <table>
 
 <thead>
+
 <tr>
+
 <th>巻</th>
 <th>收錄話</th>
 <th>收錄頁</th>
 <th>出版副題</th>
 <th>出版備考</th>
 <th>副題港譯</th>
+
 </tr>
+
 </thead>
 
 <tbody>
@@ -402,45 +403,96 @@ ${rows}
 
 </div>
 
-<div class="pagination">
+`:""}
 
-${pageButtons}
+`
+
+}
+
+function renderJPVolume(jp,stories){
+
+const rows=stories.map(s=>`
+
+<tr>
+<td>${s.巻}</td>
+<td>${s.收錄話}</td>
+<td>${s.收錄頁}</td>
+<td>${s.出版副題}</td>
+<td>${s.出版備考}</td>
+</tr>
+
+`).join("")
+
+const hk=DB.hkBooks.find(b=>b.ISBN_JP===jp.ISBN)
+
+const hkLink=hk?`
+<a class="volume-link" href="?mode=hk&isbn=${hk.ISBN}">
+View Hong Kong Edition →
+</a>`:""
+
+content.innerHTML=`
+
+<h2>${jp.系列} ${jp.巻}</h2>
+
+<div class="editions">
+
+<div class="edition">
+
+<img src="${jp.Image}">
+
+<div class="edition-info">
+
+<p><b>Author:</b> ${jp.著}</p>
+<p><b>Release:</b> ${jp.初版発行日}</p>
+<p><b>Pages:</b> ${jp.頁}</p>
+
+${hkLink}
 
 </div>
 
-`;
-
-}
-
-function goPage(p){
-
-currentPage=p;
-renderStoryPage();
-
-}
-
-function searchSeries(){
-
-const q=searchBar.value.toLowerCase();
-
-const titles=[...new Set(DB.hkBooks.map(b=>b.Title))]
-.filter(t=>t.toLowerCase().includes(q));
-
-const html=titles.map(t=>`
-
-<div class="card" onclick="renderSeriesVolumes('${t}')">
-
-<h3>${t}</h3>
+</div>
 
 </div>
 
-`).join("");
+${stories.length?`
 
-content.innerHTML=`<div class="grid">${html}</div>`;
+<h3>Included Stories</h3>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>巻</th>
+<th>收錄話</th>
+<th>收錄頁</th>
+<th>出版副題</th>
+<th>出版備考</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+${rows}
+
+</tbody>
+
+</table>
+
+</div>
+
+`:""}
+
+`
 
 }
 
-loadDatabase();
+loadDatabase()
 
 </script>
 

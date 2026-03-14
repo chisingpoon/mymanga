@@ -189,6 +189,11 @@ let sheetData = [], currentList = [], currentPage = 1, itemsPerPage = 50;
 let currentSortColumn = null, currentSortDirection = "asc";
 let searchTimeout;
 
+// Disable right-click context menu for the whole page
+document.addEventListener('contextmenu', function(e) {
+   e.preventDefault();
+});
+   
 fetch(SHEET_URL)
   .then(res => res.text())
   .then(text => {

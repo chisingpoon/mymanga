@@ -121,6 +121,8 @@ function renderVolume(isbn) {
     const hk = DB.hkByISBN[isbn];
     const jp = DB.jpByISBN[hk.ISBN_JP];
     const stories = DB.storiesByISBN[hk.ISBN_JP] || [];
+
+    // Story details table (only if there are stories)
     const storyHTML = stories.map(s => `
         <tr>
             <td>${s.巻}</td>
@@ -158,13 +160,8 @@ function renderVolume(isbn) {
         </div>
     ` : '';
 
-    document.getElementById("content").innerHTML = `
-        <button onclick="renderSeriesVolumes('${hk.Title}')">Back to Volumes</button>
-        <h2>${hk.Title} ${hk.Volume}</h2>
-        <div class="book-info">
-            <div>${hkDetails}</div>
-            <div>${jpDetails}</div>
-        </div>
+    // Only show the stories table if there are stories
+    const storyTable = stories.length > 0 ? `
         <h3>Included Stories</h3>
         <table>
             <thead>
@@ -181,6 +178,16 @@ function renderVolume(isbn) {
                 ${storyHTML}
             </tbody>
         </table>
+    ` : ''; // Empty if no stories
+
+    document.getElementById("content").innerHTML = `
+        <button onclick="renderSeriesVolumes('${hk.Title}')">Back to Volumes</button>
+        <h2>${hk.Title} ${hk.Volume}</h2>
+        <div class="book-info">
+            <div>${hkDetails}</div>
+            <div>${jpDetails}</div>
+        </div>
+        ${storyTable}  <!-- Only shown if there are stories -->
     `;
 }
 

@@ -45,6 +45,7 @@ const URLS={ hk:BASE+"/出版目録HK", jp:BASE+"/出版目録JP", volumeStories
 const params=new URLSearchParams(window.location.search);
 let MODE=params.get("mode")||"hk";
 let OPEN_ISBN=params.get("isbn");
+let CURRENT_SERIES=null; // store series/title when viewing volumes
 const DB={};
 
 function updateNavLinks(){
@@ -52,12 +53,14 @@ function updateNavLinks(){
     let html = '';
     if(MODE==='jp'){ html += `<a onclick="switchMode('hk')">Hong Kong View</a>`; }
     else { html += `<a onclick="switchMode('jp')">Japanese View</a>`; }
-    if(OPEN_ISBN){ html += `<a class="back-link" onclick="goBackSeries()">Back to Series List</a>`; }
+    if(OPEN_ISBN && CURRENT_SERIES){ 
+        html += `<a class="back-link" onclick="goBackVolumes()">Back to Volumes List</a>`; 
+    }
     nav.innerHTML = html;
 }
 
 function switchMode(mode){ MODE=mode; OPEN_ISBN=null; updateNavLinks(); renderSeries(); }
-function goBackSeries(){ OPEN_ISBN=null; updateNavLinks(); renderSeries(); }
+function goBackVolumes(){ if(CURRENT_SERIES) renderSeriesVolumes(CURRENT_SERIES); }
 
 async function loadDatabase(){
     const [hk,jp,volStories,stories]=await Promise.all([
@@ -84,7 +87,7 @@ function buildIndex(){
 }
 
 function renderSeries(){
-    OPEN_ISBN=null; updateNavLinks();
+    OPEN_ISBN=null; CURRENT_SERIES=null; updateNavLinks();
     if(MODE==="jp"){
         const titles=[...new Set(DB.jpBooks.map(b=>b.系列))];
         const html=titles.map(t=>`<div class="card" onclick="renderSeriesVolumes('${t}')"><h3>${t}</h3><div>${DB.jpBooks.filter(b=>b.系列===t).length} volumes</div></div>`).join("");
@@ -97,6 +100,7 @@ function renderSeries(){
 }
 
 function renderSeriesVolumes(title){
+    CURRENT_SERIES = title; // remember the series
     if(MODE==="jp"){
         const vols=DB.jpBooks.filter(b=>b.系列===title).sort((a,b)=>a.巻-b.巻);
         const html=vols.map(v=>`<div class="card" onclick="renderVolume('${v.ISBN}')"><img src="${v.Image}"><h3>${v.系列} ${v.巻}</h3></div>`).join("");
@@ -123,6 +127,7 @@ function renderVolume(isbn){
     }
 }
 
+// Edition cards and stories table remain same as previous version
 function renderHKVolume(hk,jp,stories){
     let editionHTML = '';
     const cards=[];
@@ -141,7 +146,6 @@ function renderHKVolume(hk,jp,stories){
 <p><b>Author:</b> ${jp.著}</p>
 <p><b>Release:</b> ${jp.初版発行日}</p>
 </div></div>`);
-
     editionHTML = cards.join('');
 
     const rows=stories.map(s=>{

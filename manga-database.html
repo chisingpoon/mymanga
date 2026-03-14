@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <title>漫畫資料庫完整版</title>
-
 <style>
-body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 30px; margin:0; }
-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
-nav a { margin-right:15px; text-decoration:none; color:#333; font-weight:bold; cursor:pointer; }
+body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; margin:0; }
+header { margin-bottom: 10px; }
+.nav-bar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:20px; }
+.nav-bar a { text-decoration:none; color:#1f2937; font-weight:bold; cursor:pointer; padding:6px 12px; border-radius:5px; background:#e5e7eb; transition:0.2s; }
+.nav-bar a:hover { background:#3b82f6; color:white; }
 .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:15px; }
 .card { background:white; border-radius:8px; padding:15px; box-shadow:0 2px 6px rgba(0,0,0,0.1); cursor:pointer; }
 .card img { width:100%; border-radius:6px; }
@@ -24,7 +25,6 @@ tbody tr:hover { background:#f1f5f9; }
 .pagination { margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; }
 .page-btn { padding:6px 12px; border-radius:5px; background:#3b82f6; color:white; cursor:pointer; font-size:13px; user-select:none; }
 .page-btn.disabled { background:#ccc; cursor:default; }
-.back-link { margin-bottom:15px; display:inline-block; font-weight:bold; cursor:pointer; text-decoration:underline; }
 @media (max-width: 768px) {
     .editions { flex-direction: column; gap:20px; }
     .edition-card { flex-direction: row; align-items:flex-start; }
@@ -35,31 +35,36 @@ tbody tr:hover { background:#f1f5f9; }
 <body>
 <header>
 <h1>漫畫資料庫完整版</h1>
-<nav id="mode-nav"></nav>
+<div class="nav-bar" id="mode-nav"></div>
 </header>
 
 <div id="content"></div>
 
 <script>
-const BASE="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8";
+const BASE="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj8";
 const URLS={ hk:BASE+"/出版目録HK", jp:BASE+"/出版目録JP", volumeStories:BASE+"/書籍收錄作品", stories:BASE+"/作品完整列表" };
 const params=new URLSearchParams(window.location.search);
 let MODE=params.get("mode")||"hk";
 let OPEN_ISBN=params.get("isbn");
 let CURRENT_SERIES=null;
 const DB={};
-
-const PAGE_SIZE=10; 
+const PAGE_SIZE=10;
 let CURRENT_PAGE=1;
 let CURRENT_ROWS=[];
 
 function updateNavLinks(){
     const nav = document.getElementById("mode-nav");
-    let html = '';
+    let html='';
+    // Mode toggle
     if(MODE==='jp'){ html += `<a onclick="switchMode('hk')">Hong Kong View</a>`; }
     else { html += `<a onclick="switchMode('jp')">Japanese View</a>`; }
-    if(OPEN_ISBN && CURRENT_SERIES){ html += `<a class="back-link" onclick="goBackVolumes()">Back to Volumes List</a>`; }
-    if(OPEN_ISBN || CURRENT_SERIES){ html += `<a class="back-link" onclick="renderSeries()">Back to Series List</a>`; }
+
+    // Back to Volumes List only if viewing a volume
+    if(OPEN_ISBN && CURRENT_SERIES){ html += `<a onclick="goBackVolumes()">Back to Volumes List</a>`; }
+
+    // Back to Series List if viewing a volume or volume listing
+    if(OPEN_ISBN || (!OPEN_ISBN && CURRENT_SERIES)){ html += `<a onclick="renderSeries()">Back to Series List</a>`; }
+
     nav.innerHTML = html;
 }
 
@@ -104,7 +109,7 @@ function renderSeries(){
 }
 
 function renderSeriesVolumes(title){
-    CURRENT_SERIES = title;
+    CURRENT_SERIES=title;
     let html='';
     if(MODE==="jp"){
         const vols=DB.jpBooks.filter(b=>b.系列===title).sort((a,b)=>a.巻-b.巻);
@@ -114,7 +119,9 @@ function renderSeriesVolumes(title){
         html=vols.map(v=>`<div class="card" onclick="renderVolume('${v.ISBN}')"><img src="${v.Image}"><h3>${v.Title} ${v.Volume}</h3></div>`).join("");
     }
     content.innerHTML=`<h2>${title}</h2>
-<div><a class="back-link" onclick="renderSeries()">Back to Series List</a></div>
+<div class="nav-bar">
+<a onclick="renderSeries()">Back to Series List</a>
+</div>
 <div class="grid">${html}</div>`;
 }
 

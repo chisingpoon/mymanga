@@ -18,6 +18,10 @@
         .arrow { font-weight: bold; font-size: 18px; }
         .legend { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; font-size: 12px; flex-wrap: wrap; }
         .legend-box { width: 80px; height: 20px; border-radius: 4px; display: inline-block; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        table, th, td { border: 1px solid #ddd; }
+        th, td { padding: 8px 12px; text-align: left; }
+        th { background-color: #f1f1f1; }
         @media (max-width: 768px) {
             .arrow-map { flex-direction: column; align-items: flex-start; }
             .arrow { transform: rotate(90deg); margin: 5px 0; }
@@ -111,13 +115,21 @@ function renderVolume(isbn) {
     const hk = DB.hkByISBN[isbn];
     const jp = DB.jpByISBN[hk.ISBN_JP];
     const stories = DB.storiesByISBN[hk.ISBN_JP] || [];
-    const storyHTML = stories.map(s => `<div class="story" onclick="renderStory('${s.作品番}')">
-        ${s.收錄話} ${s.副題港譯 || ""}
-    </div>`).join("");
+    const storyHTML = stories.map(s => `
+        <tr>
+            <td>${s.巻}</td>
+            <td>${s.收錄話}</td>
+            <td>${s.收錄頁}</td>
+            <td>${s.出版副題}</td>
+            <td>${s.出版備考}</td>
+            <td>${s.副題港譯 || ""}</td>
+        </tr>
+    `).join("");
 
     // Add Japanese book details
     const jpDetails = jp ? `
         <h3>Japanese Edition</h3>
+        <img src="${jp.Image}" style="max-width: 150px;">
         <p><strong>Title:</strong> ${jp.標題}</p>
         <p><strong>Author:</strong> ${jp.著}</p>
         <p><strong>Publisher:</strong> ${jp.出版社}</p>
@@ -126,16 +138,39 @@ function renderVolume(isbn) {
         <p><strong>Price:</strong> ${jp.定価}</p>
     ` : '';
 
-    document.getElementById("content").innerHTML = `
-        <button onclick="renderSeriesVolumes('${hk.Title}')">Back to Volumes</button>
-        <h2>${hk.Title} ${hk.Volume}</h2>
-        <img src="${hk.Image}" style="max-width:200px">
+    // Add Hong Kong edition details
+    const hkDetails = hk ? `
+        <h3>Hong Kong Edition</h3>
+        <img src="${hk.Image}" style="max-width: 150px;">
+        <p><strong>Title:</strong> ${hk.Title}</p>
         <p><strong>Author:</strong> ${hk.Author}</p>
         <p><strong>Publisher:</strong> ${hk.Publisher}</p>
         <p><strong>Publication Date:</strong> ${hk.IssueDate}</p>
-        ${jpDetails}
+    ` : '';
+
+    document.getElementById("content").innerHTML = `
+        <button onclick="renderSeriesVolumes('${hk.Title}')">Back to Volumes</button>
+        <h2>${hk.Title} ${hk.Volume}</h2>
+        <div style="display: flex; gap: 20px;">
+            ${hkDetails}
+            ${jpDetails}
+        </div>
         <h3>Included Stories</h3>
-        ${storyHTML}
+        <table>
+            <thead>
+                <tr>
+                    <th>巻</th>
+                    <th>收錄話</th>
+                    <th>收錄頁</th>
+                    <th>出版副題</th>
+                    <th>出版備考</th>
+                    <th>副題港譯</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${storyHTML}
+            </tbody>
+        </table>
     `;
 }
 

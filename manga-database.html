@@ -20,6 +20,7 @@ th { background-color:#f1f1f1; }
 .edition-row { display:flex; gap:20px; align-items:flex-start; margin-bottom:20px; }
 .edition-image { max-width:150px; flex-shrink:0; }
 .edition-info { flex-grow:1; }
+.table-wrapper { overflow-x:auto; } /* New scrollable wrapper for table */
 @media (max-width:768px){
     .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
     .edition-row{flex-direction:column; align-items:center;}
@@ -121,6 +122,7 @@ function renderVolume(isbn){
 
     const storyTable = stories.length > 0 ? `
         <h3>Included Stories</h3>
+        <div class="table-wrapper">
         <table>
             <thead>
                 <tr>
@@ -135,9 +137,9 @@ function renderVolume(isbn){
             <tbody>
                 ${storyHTML}
             </tbody>
-        </table>` : '';
+        </table>
+        </div>` : '';
 
-    // HK Edition
     const hkHTML = hk ? `
         <div class="edition-row">
             <img src="${hk.Image}" class="edition-image">
@@ -150,7 +152,6 @@ function renderVolume(isbn){
             </div>
         </div>` : '';
 
-    // JP Edition
     const jpHTML = jp ? `
         <div class="edition-row">
             <img src="${jp.Image}" class="edition-image">

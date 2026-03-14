@@ -7,6 +7,7 @@
 <style>
 body { font-family: Arial; background: #f4f4f4; padding: 30px; }
 header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; }
+nav a { margin-right:15px; text-decoration:none; color:#333; font-weight:bold; cursor:pointer; }
 .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:15px; }
 .card { background:white; border-radius:8px; padding:15px; box-shadow:0 2px 6px rgba(0,0,0,0.1); cursor:pointer; }
 .card img { width:100%; border-radius:6px; }
@@ -26,17 +27,26 @@ tbody tr:hover { background:#f1f5f9; }
 <body>
 <header>
 <h1>漫畫資料庫完整版</h1>
+<nav>
+<a onclick="switchMode('hk')">Hong Kong View</a>
+<a onclick="switchMode('jp')">Japanese View</a>
+</nav>
 </header>
 
 <div id="content"></div>
 
 <script>
-const BASE="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8"
-const URLS={ hk:BASE+"/出版目録HK", jp:BASE+"/出版目録JP", volumeStories:BASE+"/書籍收錄作品", stories:BASE+"/作品完整列表" }
-const params=new URLSearchParams(window.location.search)
-let MODE=params.get("mode")||"hk"
-let OPEN_ISBN=params.get("isbn")
-const DB={}
+const BASE="https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8";
+const URLS={ hk:BASE+"/出版目録HK", jp:BASE+"/出版目録JP", volumeStories:BASE+"/書籍收錄作品", stories:BASE+"/作品完整列表" };
+const params=new URLSearchParams(window.location.search);
+let MODE=params.get("mode")||"hk";
+let OPEN_ISBN=params.get("isbn");
+const DB={};
+
+function switchMode(mode){
+    MODE=mode;
+    renderSeries();
+}
 
 async function loadDatabase(){
     const [hk,jp,volStories,stories]=await Promise.all([
@@ -44,72 +54,72 @@ async function loadDatabase(){
         fetch(URLS.jp).then(r=>r.json()),
         fetch(URLS.volumeStories).then(r=>r.json()),
         fetch(URLS.stories).then(r=>r.json())
-    ])
-    DB.hkBooks=hk.filter(b=>b.Active==="Yes")
-    DB.jpBooks=jp.filter(b=>b.Active==="Yes")
-    DB.volumeStories=volStories
-    DB.stories=stories
-    buildIndex()
-    if(OPEN_ISBN){ renderVolume(OPEN_ISBN) }else{ renderSeries() }
+    ]);
+    DB.hkBooks=hk.filter(b=>b.Active==="Yes");
+    DB.jpBooks=jp.filter(b=>b.Active==="Yes");
+    DB.volumeStories=volStories;
+    DB.stories=stories;
+    buildIndex();
+    if(OPEN_ISBN){ renderVolume(OPEN_ISBN); }else{ renderSeries(); }
 }
 
 function buildIndex(){
-    DB.hkByISBN={}; DB.jpByISBN={}; DB.storiesByISBN={}; DB.storyMeta={}
-    DB.hkBooks.forEach(b=>DB.hkByISBN[b.ISBN]=b)
-    DB.jpBooks.forEach(b=>DB.jpByISBN[b.ISBN]=b)
+    DB.hkByISBN={}; DB.jpByISBN={}; DB.storiesByISBN={}; DB.storyMeta={};
+    DB.hkBooks.forEach(b=>DB.hkByISBN[b.ISBN]=b);
+    DB.jpBooks.forEach(b=>DB.jpByISBN[b.ISBN]=b);
     DB.volumeStories.forEach(v=>{
-        if(!DB.storiesByISBN[v.ISBN]) DB.storiesByISBN[v.ISBN]=[]
-        DB.storiesByISBN[v.ISBN].push(v)
-    })
-    DB.stories.forEach(s=>DB.storyMeta[s.作品番]=s)
+        if(!DB.storiesByISBN[v.ISBN]) DB.storiesByISBN[v.ISBN]=[];
+        DB.storiesByISBN[v.ISBN].push(v);
+    });
+    DB.stories.forEach(s=>DB.storyMeta[s.作品番]=s);
 }
 
 function renderSeries(){
     if(MODE==="jp"){
-        const titles=[...new Set(DB.jpBooks.map(b=>b.系列))]
+        const titles=[...new Set(DB.jpBooks.map(b=>b.系列))];
         const html=titles.map(t=>{
-            const count=DB.jpBooks.filter(b=>b.系列===t).length
-            return `<div class="card" onclick="renderSeriesVolumes('${t}')"><h3>${t}</h3><div>${count} volumes</div></div>`
-        }).join("")
-        content.innerHTML=`<div class="grid">${html}</div>`
+            const count=DB.jpBooks.filter(b=>b.系列===t).length;
+            return `<div class="card" onclick="renderSeriesVolumes('${t}')"><h3>${t}</h3><div>${count} volumes</div></div>`;
+        }).join("");
+        content.innerHTML=`<div class="grid">${html}</div>`;
     } else {
-        const titles=[...new Set(DB.hkBooks.map(b=>b.Title))]
+        const titles=[...new Set(DB.hkBooks.map(b=>b.Title))];
         const html=titles.map(t=>{
-            const count=DB.hkBooks.filter(b=>b.Title===t).length
-            return `<div class="card" onclick="renderSeriesVolumes('${t}')"><h3>${t}</h3><div>${count} volumes</div></div>`
-        }).join("")
-        content.innerHTML=`<div class="grid">${html}</div>`
+            const count=DB.hkBooks.filter(b=>b.Title===t).length;
+            return `<div class="card" onclick="renderSeriesVolumes('${t}')"><h3>${t}</h3><div>${count} volumes</div></div>`;
+        }).join("");
+        content.innerHTML=`<div class="grid">${html}</div>`;
     }
 }
 
 function renderSeriesVolumes(title){
     if(MODE==="jp"){
-        const vols=DB.jpBooks.filter(b=>b.系列===title).sort((a,b)=>a.巻-b.巻)
-        const html=vols.map(v=>`<div class="card" onclick="renderVolume('${v.ISBN}')"><img src="${v.Image}"><h3>${v.系列} ${v.巻}</h3></div>`).join("")
-        content.innerHTML=`<h2>${title}</h2><div class="grid">${html}</div>`
+        const vols=DB.jpBooks.filter(b=>b.系列===title).sort((a,b)=>a.巻-b.巻);
+        const html=vols.map(v=>`<div class="card" onclick="renderVolume('${v.ISBN}')"><img src="${v.Image}"><h3>${v.系列} ${v.巻}</h3></div>`).join("");
+        content.innerHTML=`<h2>${title}</h2><div class="grid">${html}</div>`;
     } else {
-        const vols=DB.hkBooks.filter(b=>b.Title===title).sort((a,b)=>a.Volume-b.Volume)
-        const html=vols.map(v=>`<div class="card" onclick="renderVolume('${v.ISBN}')"><img src="${v.Image}"><h3>${v.Title} ${v.Volume}</h3></div>`).join("")
-        content.innerHTML=`<h2>${title}</h2><div class="grid">${html}</div>`
+        const vols=DB.hkBooks.filter(b=>b.Title===title).sort((a,b)=>a.Volume-b.Volume);
+        const html=vols.map(v=>`<div class="card" onclick="renderVolume('${v.ISBN}')"><img src="${v.Image}"><h3>${v.Title} ${v.Volume}</h3></div>`).join("");
+        content.innerHTML=`<h2>${title}</h2><div class="grid">${html}</div>`;
     }
 }
 
 function renderVolume(isbn){
     if(MODE==="jp"){
-        const jp=DB.jpByISBN[isbn]
-        const stories=DB.storiesByISBN[isbn]||[]
-        renderJPVolume(jp,stories)
+        const jp=DB.jpByISBN[isbn];
+        const stories=DB.storiesByISBN[isbn]||[];
+        renderJPVolume(jp,stories);
     } else {
-        const hk=DB.hkByISBN[isbn]
-        const jp=DB.jpByISBN[hk.ISBN_JP]
-        const stories=DB.storiesByISBN[hk.ISBN_JP]||[]
-        renderHKVolume(hk,jp,stories)
+        const hk=DB.hkByISBN[isbn];
+        const jp=DB.jpByISBN[hk.ISBN_JP];
+        const stories=DB.storiesByISBN[hk.ISBN_JP]||[];
+        renderHKVolume(hk,jp,stories);
     }
 }
 
 function renderHKVolume(hk,jp,stories){
     const rows=stories.map(s=>{
-        const meta=DB.storyMeta[s.作品番]||{}
+        const meta=DB.storyMeta[s.作品番]||{};
         return `<tr>
 <td>${s.巻}</td>
 <td>${s.收錄話}</td>
@@ -119,8 +129,8 @@ function renderHKVolume(hk,jp,stories){
 <td>${meta.初出掲載号||""}</td>
 <td>${s.出版副題||""}</td>
 <td>${s.出版備考||""}</td>
-</tr>`
-    }).join("")
+</tr>`;
+    }).join("");
     content.innerHTML=`
 <h2>${hk.Title} ${hk.Volume}</h2>
 <div class="editions">
@@ -145,12 +155,12 @@ ${stories.length?`<h3>Included Stories</h3><div class="table-wrapper"><table><th
 <th>巻</th><th>收錄話</th><th>收錄頁</th><th>副題港譯</th>
 <th>初出掲載誌</th><th>初出掲載号</th><th>出版副題</th><th>出版備考</th>
 </tr></thead><tbody>${rows}</tbody></table></div>`:""}
-`
+`;
 }
 
 function renderJPVolume(jp,stories){
     const rows=stories.map(s=>{
-        const meta=DB.storyMeta[s.作品番]||{}
+        const meta=DB.storyMeta[s.作品番]||{};
         return `<tr>
 <td>${s.巻}</td>
 <td>${s.收錄話}</td>
@@ -159,8 +169,8 @@ function renderJPVolume(jp,stories){
 <td>${meta.初出掲載号||""}</td>
 <td>${s.出版副題||""}</td>
 <td>${s.出版備考||""}</td>
-</tr>`
-    }).join("")
+</tr>`;
+    }).join("");
     content.innerHTML=`
 <h2>${jp.系列} ${jp.巻}</h2>
 <div class="editions">
@@ -177,10 +187,10 @@ ${stories.length?`<h3>Included Stories</h3><div class="table-wrapper"><table><th
 <th>巻</th><th>收錄話</th><th>收錄頁</th><th>初出掲載誌</th>
 <th>初出掲載号</th><th>出版副題</th><th>出版備考</th>
 </tr></thead><tbody>${rows}</tbody></table></div>`:""}
-`
+`;
 }
 
-loadDatabase()
+loadDatabase();
 </script>
 
 </body>

@@ -44,7 +44,7 @@
             <div v-if="view === 'series'" class="animate-in fade-in duration-500">
                 <div class="mb-8 text-center sm:text-left">
                     <h2 class="text-2xl font-black text-slate-800">{{ region === 'HK' ? '香港版系列' : '日本版系列' }}</h2>
-                    <p class="text-slate-500">Only displaying active publications</p>
+                    <p class="text-slate-500 italic">Showing active publications only</p>
                 </div>
                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     <div v-for="s in filteredSeries" @click="selectSeries(s)" 
@@ -94,7 +94,7 @@
                             <div class="bg-blue-600 px-4 py-2 text-[10px] font-black text-white uppercase tracking-widest">HK Publication</div>
                             <div class="p-6">
                                 <h2 class="text-2xl font-black text-slate-800 mb-4">{{ selectedBook.Title }}</h2>
-                                <div class="grid grid-cols-2 gap-y-4 text-sm">
+                                <div class="grid grid-cols-2 gap-y-4 text-sm text-slate-600">
                                     <div class="text-slate-400">ISBN</div><div class="font-mono font-bold">{{ selectedBook.ISBN }}</div>
                                     <div class="text-slate-400">Price</div><div class="font-bold">{{ selectedBook.Price }}</div>
                                     <div class="text-slate-400">Date</div><div class="font-bold">{{ selectedBook.IssueDate }}</div>
@@ -106,7 +106,7 @@
                             <div class="bg-red-600 px-4 py-2 text-[10px] font-black text-white uppercase tracking-widest">Japan Specs</div>
                             <div class="p-6">
                                 <h2 class="text-2xl font-black text-slate-800 mb-4">{{ jpDetail.標題 || 'N/A' }}</h2>
-                                <div class="grid grid-cols-2 gap-y-4 text-sm">
+                                <div class="grid grid-cols-2 gap-y-4 text-sm text-slate-600">
                                     <div class="text-slate-400">ISBN</div><div class="font-mono font-bold">{{ jpDetail.ISBN || 'N/A' }}</div>
                                     <div class="text-slate-400">Format</div><div class="font-bold">{{ jpDetail.判型 }}</div>
                                 </div>
@@ -166,12 +166,12 @@
                 }
             },
             computed: {
-                // Computed property to only deal with ACTIVE records
                 activeHK() {
-                    return this.db.hk.filter(item => item.Active === 'Yes');
+                    // case-insensitive check for 'yes' and handles trailing spaces
+                    return this.db.hk.filter(item => item.Active?.toString().trim().toLowerCase() === 'yes');
                 },
                 activeJP() {
-                    return this.db.jp.filter(item => item.Active === 'Yes');
+                    return this.db.jp.filter(item => item.Active?.toString().trim().toLowerCase() === 'yes');
                 },
                 filteredSeries() {
                     const data = this.region === 'HK' ? this.activeHK : this.activeJP;
@@ -186,7 +186,6 @@
                 jpDetail() {
                     if (!this.selectedBook) return {};
                     const targetISBN = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
-                    // We search the WHOLE JP list for the cross-reference, though active filter usually applies
                     return this.db.jp.find(j => j.ISBN == targetISBN) || {};
                 },
                 currentStories() {
@@ -198,7 +197,11 @@
                             ...c,
                             master: this.db.master.find(m => m.作品番 == c.作品番)
                         }))
-                        .sort((a, b) => parseInt(a.收錄話) - parseInt(b.收錄話));
+                        .sort((a, b) => {
+                            const numA = parseInt(a.收錄話) || 0;
+                            const numB = parseInt(b.收錄話) || 0;
+                            return numA - numB;
+                        });
                 }
             },
             methods: {

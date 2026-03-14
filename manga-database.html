@@ -6,18 +6,27 @@
 
 <style>
 body { font-family: Arial; background: #f4f4f4; padding: 30px; }
-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; }
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; flex-wrap:wrap; }
 nav a { margin-right:15px; text-decoration:none; color:#333; font-weight:bold; cursor:pointer; }
 .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:15px; }
 .card { background:white; border-radius:8px; padding:15px; box-shadow:0 2px 6px rgba(0,0,0,0.1); cursor:pointer; }
 .card img { width:100%; border-radius:6px; }
 .story { padding:5px 0; border-bottom:1px dotted #ddd; font-size:13px; cursor:pointer; }
 .story:last-child { border:none; }
-.matrix{display:grid; grid-template-columns:200px repeat(auto-fill,80px); gap:4px; margin-top:30px;}
-.cell{background:#eee; text-align:center; padding:6px; font-size:12px; border-radius:4px;}
-.hit{background:#4CAF50; color:white;}
-</style>
 
+.arrow-map{display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-top:20px; justify-content:flex-start;}
+.arrow-box{color:white;padding:6px 12px;border-radius:6px; min-width:80px;text-align:center; cursor:pointer;}
+.arrow{font-weight:bold; font-size:18px;}
+
+.legend {display:flex; gap:10px; margin-bottom:10px; align-items:center; font-size:12px; flex-wrap:wrap;}
+.legend-box{width:80px; height:20px; border-radius:4px; display:inline-block;}
+
+/* RESPONSIVE: stack arrows vertically on small screens */
+@media (max-width: 768px) {
+    .arrow-map { flex-direction: column; align-items: flex-start; }
+    .arrow { transform: rotate(90deg); margin:5px 0; }
+}
+</style>
 </head>
 <body>
 
@@ -123,7 +132,7 @@ function renderStory(id){
     const rows = appearances.map(a=>{
         const jp = DB.jpByISBN[a.ISBN];
         const hk = DB.hkBooks.find(b=>b.ISBN_JP===a.ISBN);
-        return `<div class="card">${jp.系列} Vol ${jp.巻}<br>HK: ${hk ? hk.Volume : "-"}</div>`;
+        return `<div class="card">${jp.系列} Vol ${jp.巻}<br>HK: ${hk ? hk.Title+" "+hk.Volume : "-"}</div>`;
     }).join("");
     document.getElementById("content").innerHTML = `
         <h2>${meta.初出副題}</h2>
@@ -132,32 +141,45 @@ function renderStory(id){
         <h3>收錄單行本</h3>
         <div class="grid">${rows}</div>
     `;
-    renderStoryMatrix(id);
-    renderStoryGraph(id);
+    renderArrowMap(id);
 }
 
-function renderStoryMatrix(id){
+function renderArrowMap(id){
     const appearances = DB.storyAppearances[id] || [];
-    const volumes = appearances.map(a=>DB.jpByISBN[a.ISBN]);
-    let html = `<h3>收錄矩陣</h3><div class="matrix">`;
-    html += `<div class="cell">Volume</div>`;
-    volumes.forEach(v=>html+=`<div class="cell">${v.巻}</div>`);
-    html += `<div class="cell">${id}</div>`;
-    volumes.forEach(v=>html+=`<div class="cell hit">●</div>`);
-    html += `</div>`;
-    document.getElementById("content").innerHTML += html;
-}
+    if(!appearances.length) return;
 
-function renderStoryGraph(id){
-    const appearances = DB.storyAppearances[id] || [];
-    let html = `<h3>完整出版歷史</h3>`;
+    const jpYears = appearances.map(a=>DB.jpByISBN[a.ISBN]?.初版発行日 ? new Date(DB.jpByISBN[a.ISBN].初版発行日).getFullYear() : 2000);
+    const hkYears = appearances.map(a=>DB.hkBooks.find(b=>b.ISBN_JP===a.ISBN)?.IssueDate ? new Date(DB.hkBooks.find(b=>b.ISBN_JP===a.ISBN).IssueDate).getFullYear() : 2000);
+    const minYear = Math.min(...jpYears.concat(hkYears));
+    const maxYear = Math.max(...jpYears.concat(hkYears));
+    function calcAlpha(year){ return 0.3 + 0.7*(year-minYear)/(maxYear-minYear || 1); }
+
+    // Legend
+    let legendHTML = `<div class="legend">
+        <div class="legend-box" style="background:rgba(76,175,80,0.3)"></div> JP oldest
+        <div class="legend-box" style="background:rgba(76,175,80,1)"></div> JP newest
+        <div class="legend-box" style="background:rgba(255,152,0,0.3)"></div> HK oldest
+        <div class="legend-box" style="background:rgba(255,152,0,1)"></div> HK newest
+    </div>`;
+    document.getElementById("content").innerHTML += legendHTML;
+
+    let html = `<h3>出版流程圖（點擊方塊可跳轉）</h3>`;
     appearances.forEach(a=>{
         const jp = DB.jpByISBN[a.ISBN];
         const hk = DB.hkBooks.find(b=>b.ISBN_JP===a.ISBN);
-        html += `<div style="margin-bottom:10px;">
-            <strong>Magazine:</strong> ${a.收錄初出掲載誌} #${a.收錄初出掲載号}<br>
-            <strong>JP Volume:</strong> ${jp.系列} Vol ${jp.巻}<br>
-            <strong>HK Volume:</strong> ${hk ? hk.Title+" "+hk.Volume : "-"}
+
+        const jpYear = jp?.初版発行日 ? new Date(jp.初版発行日).getFullYear() : 2000;
+        const hkYear = hk?.IssueDate ? new Date(hk.IssueDate).getFullYear() : 2000;
+
+        const jpColor = `rgba(76,175,80,${calcAlpha(jpYear)})`;
+        const hkColor = `rgba(255,152,0,${calcAlpha(hkYear)})`;
+
+        html += `<div class="arrow-map">
+            <div class="arrow-box" style="background:#4fc3f7;" title="Magazine: ${a.收錄初出掲載誌} #${a.收錄初出掲載号}">${a.收錄初出掲載誌} #${a.收錄初出掲載号}</div>
+            <span class="arrow">→</span>
+            <div class="arrow-box" style="background:${jpColor};" title="JP Volume: ${jp.系列} Vol ${jp.巻} / ${jp.初版発行日}" onclick="renderVolume('${jp.ISBN}')">JP Vol: ${jp.系列} ${jp.巻}</div>
+            <span class="arrow">→</span>
+            <div class="arrow-box" style="background:${hkColor};" title="HK Volume: ${hk ? hk.Title+' '+hk.Volume : '-'} / ${hk ? hk.IssueDate : '-'}" onclick="renderVolume('${hk?.ISBN}')">HK Vol: ${hk ? hk.Title+' '+hk.Volume : '-'}</div>
         </div>`;
     });
     document.getElementById("content").innerHTML += html;

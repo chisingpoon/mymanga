@@ -22,9 +22,15 @@
         table, th, td { border: 1px solid #ddd; }
         th, td { padding: 8px 12px; text-align: left; }
         th { background-color: #f1f1f1; }
+        .book-info { display: flex; gap: 20px; align-items: flex-start; }
+        .book-info img { max-width: 150px; }
+        .book-info div { flex-grow: 1; }
+        .book-details { margin-top: 10px; }
         @media (max-width: 768px) {
             .arrow-map { flex-direction: column; align-items: flex-start; }
             .arrow { transform: rotate(90deg); margin: 5px 0; }
+            .book-info { flex-direction: column; align-items: center; }
+            .book-info div { margin-top: 10px; }
         }
     </style>
 </head>
@@ -130,30 +136,34 @@ function renderVolume(isbn) {
     const jpDetails = jp ? `
         <h3>Japanese Edition</h3>
         <img src="${jp.Image}" style="max-width: 150px;">
-        <p><strong>Title:</strong> ${jp.標題}</p>
-        <p><strong>Author:</strong> ${jp.著}</p>
-        <p><strong>Publisher:</strong> ${jp.出版社}</p>
-        <p><strong>Publication Date:</strong> ${jp.初版発行日}</p>
-        <p><strong>Size:</strong> ${jp.判型}</p>
-        <p><strong>Price:</strong> ${jp.定価}</p>
+        <div class="book-details">
+            <p><strong>Title:</strong> ${jp.標題}</p>
+            <p><strong>Author:</strong> ${jp.著}</p>
+            <p><strong>Publisher:</strong> ${jp.出版社}</p>
+            <p><strong>Publication Date:</strong> ${jp.初版発行日}</p>
+            <p><strong>Size:</strong> ${jp.判型}</p>
+            <p><strong>Price:</strong> ${jp.定価}</p>
+        </div>
     ` : '';
 
     // Add Hong Kong edition details
     const hkDetails = hk ? `
         <h3>Hong Kong Edition</h3>
         <img src="${hk.Image}" style="max-width: 150px;">
-        <p><strong>Title:</strong> ${hk.Title}</p>
-        <p><strong>Author:</strong> ${hk.Author}</p>
-        <p><strong>Publisher:</strong> ${hk.Publisher}</p>
-        <p><strong>Publication Date:</strong> ${hk.IssueDate}</p>
+        <div class="book-details">
+            <p><strong>Title:</strong> ${hk.Title}</p>
+            <p><strong>Author:</strong> ${hk.Author}</p>
+            <p><strong>Publisher:</strong> ${hk.Publisher}</p>
+            <p><strong>Publication Date:</strong> ${hk.IssueDate}</p>
+        </div>
     ` : '';
 
     document.getElementById("content").innerHTML = `
         <button onclick="renderSeriesVolumes('${hk.Title}')">Back to Volumes</button>
         <h2>${hk.Title} ${hk.Volume}</h2>
-        <div style="display: flex; gap: 20px;">
-            ${hkDetails}
-            ${jpDetails}
+        <div class="book-info">
+            <div>${hkDetails}</div>
+            <div>${jpDetails}</div>
         </div>
         <h3>Included Stories</h3>
         <table>
@@ -172,65 +182,6 @@ function renderVolume(isbn) {
             </tbody>
         </table>
     `;
-}
-
-function renderStory(id) {
-    const meta = DB.storyMeta[id];
-    const appearances = DB.storyAppearances[id] || [];
-    const rows = appearances.map(a => {
-        const jp = DB.jpByISBN[a.ISBN];
-        const hk = DB.hkBooks.find(b => b.ISBN_JP === a.ISBN);
-        return `<div class="card">${jp.系列} Vol ${jp.巻}<br>HK: ${hk ? hk.Title + " " + hk.Volume : "-"}</div>`;
-    }).join("");
-    document.getElementById("content").innerHTML = `
-        <h2>${meta.初出副題}</h2>
-        <p>初出掲載誌: ${meta.初出掲載誌}</p>
-        <p>初出掲載号: ${meta.初出掲載号}</p>
-        <h3>收錄單行本</h3>
-        <div class="grid">${rows}</div>
-    `;
-    renderArrowMap(id);
-}
-
-function renderArrowMap(id) {
-    const appearances = DB.storyAppearances[id] || [];
-    if (!appearances.length) return;
-
-    const jpYears = appearances.map(a => DB.jpByISBN[a.ISBN]?.初版発行日 ? new Date(DB.jpByISBN[a.ISBN].初版発行日).getFullYear() : 2000);
-    const hkYears = appearances.map(a => DB.hkBooks.find(b => b.ISBN_JP === a.ISBN)?.IssueDate ? new Date(DB.hkBooks.find(b => b.ISBN_JP === a.ISBN).IssueDate).getFullYear() : 2000);
-    const minYear = Math.min(...jpYears.concat(hkYears));
-    const maxYear = Math.max(...jpYears.concat(hkYears));
-    function calcAlpha(year) { return 0.3 + 0.7 * (year - minYear) / (maxYear - minYear || 1); }
-
-    // Legend
-    let legendHTML = `<div class="legend">
-        <div class="legend-box" style="background:rgba(76,175,80,0.3)"></div> JP oldest
-        <div class="legend-box" style="background:rgba(76,175,80,1)"></div> JP newest
-        <div class="legend-box" style="background:rgba(255,152,0,0.3)"></div> HK oldest
-        <div class="legend-box" style="background:rgba(255,152,0,1)"></div> HK newest
-    </div>`;
-    document.getElementById("content").innerHTML += legendHTML;
-
-    let html = `<h3>出版流程圖（點擊方塊可跳轉）</h3>`;
-    appearances.forEach(a => {
-        const jp = DB.jpByISBN[a.ISBN];
-        const hk = DB.hkBooks.find(b => b.ISBN_JP === a.ISBN);
-
-        const jpYear = jp?.初版発行日 ? new Date(jp.初版発行日).getFullYear() : 2000;
-        const hkYear = hk?.IssueDate ? new Date(hk.IssueDate).getFullYear() : 2000;
-
-        const jpColor = `rgba(76,175,80,${calcAlpha(jpYear)})`;
-        const hkColor = `rgba(255,152,0,${calcAlpha(hkYear)})`;
-
-        html += `<div class="arrow-map">
-            <div class="arrow-box" style="background:#4fc3f7;" title="Magazine: ${a.收錄初出掲載誌} #${a.收錄初出掲載号}">${a.收錄初出掲載誌} #${a.收錄初出掲載号}</div>
-            <span class="arrow">→</span>
-            <div class="arrow-box" style="background:${jpColor};" title="JP Volume: ${jp.系列} Vol ${jp.巻} / ${jp.初版発行日}" onclick="renderVolume('${jp.ISBN}')">JP Vol: ${jp.系列} ${jp.巻}</div>
-            <span class="arrow">→</span>
-            <div class="arrow-box" style="background:${hkColor};" title="HK Volume: ${hk ? hk.Title + ' ' + hk.Volume : '-'} / ${hk ? hk.IssueDate : '-'}" onclick="renderVolume('${hk?.ISBN}')">HK Vol: ${hk ? hk.Title + ' ' + hk.Volume : '-'}</div>
-        </div>`;
-    });
-    document.getElementById("content").innerHTML += html;
 }
 
 function searchSeries() {

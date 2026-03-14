@@ -1,41 +1,40 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>漫畫資料庫完整版</title>
-
-<style>
-body { font-family: Arial; background: #f4f4f4; padding: 30px; }
-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; flex-wrap:wrap; }
-nav a { margin-right:15px; text-decoration:none; color:#333; font-weight:bold; cursor:pointer; }
-.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:15px; }
-.card { background:white; border-radius:8px; padding:15px; box-shadow:0 2px 6px rgba(0,0,0,0.1); cursor:pointer; }
-.card img { width:100%; border-radius:6px; }
-.story { padding:5px 0; border-bottom:1px dotted #ddd; font-size:13px; cursor:pointer; }
-.story:last-child { border:none; }
-
-.arrow-map{display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-top:20px; justify-content:flex-start;}
-.arrow-box{color:white;padding:6px 12px;border-radius:6px; min-width:80px;text-align:center; cursor:pointer;}
-.arrow{font-weight:bold; font-size:18px;}
-
-.legend {display:flex; gap:10px; margin-bottom:10px; align-items:center; font-size:12px; flex-wrap:wrap;}
-.legend-box{width:80px; height:20px; border-radius:4px; display:inline-block;}
-
-/* RESPONSIVE: stack arrows vertically on small screens */
-@media (max-width: 768px) {
-    .arrow-map { flex-direction: column; align-items: flex-start; }
-    .arrow { transform: rotate(90deg); margin:5px 0; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漫畫資料庫完整版</title>
+    <style>
+        body { font-family: Arial; background: #f4f4f4; padding: 30px; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; }
+        nav a { margin-right: 15px; text-decoration: none; color: #333; font-weight: bold; cursor: pointer; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
+        .card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); cursor: pointer; }
+        .card img { width: 100%; border-radius: 6px; }
+        .story { padding: 5px 0; border-bottom: 1px dotted #ddd; font-size: 13px; cursor: pointer; }
+        .story:last-child { border: none; }
+        .arrow-map { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 20px; justify-content: flex-start; }
+        .arrow-box { color: white; padding: 6px 12px; border-radius: 6px; min-width: 80px; text-align: center; cursor: pointer; }
+        .arrow { font-weight: bold; font-size: 18px; }
+        .legend { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; font-size: 12px; flex-wrap: wrap; }
+        .legend-box { width: 80px; height: 20px; border-radius: 4px; display: inline-block; }
+        @media (max-width: 768px) {
+            .arrow-map { flex-direction: column; align-items: flex-start; }
+            .arrow { transform: rotate(90deg); margin: 5px 0; }
+        }
+    </style>
 </head>
 <body>
 
 <header>
-<h1>漫畫資料庫完整版</h1>
-<nav>
-<a onclick="renderSeries()">系列瀏覽</a>
-</nav>
+    <h1>漫畫資料庫完整版</h1>
+    <nav>
+        <a onclick="renderSeries()">系列瀏覽</a>
+    </nav>
 </header>
+
+<!-- Search Bar -->
+<input type="text" id="searchBar" placeholder="Search Series" oninput="searchSeries()" style="margin-bottom: 20px; padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
 
 <div id="content"></div>
 
@@ -50,15 +49,15 @@ const URLS = {
 const DB = {};
 
 async function loadDatabase(){
-    const [hk,jp,volStories,stories] = await Promise.all([
-        fetch(URLS.hk).then(r=>r.json()),
-        fetch(URLS.jp).then(r=>r.json()),
-        fetch(URLS.volumeStories).then(r=>r.json()),
-        fetch(URLS.stories).then(r=>r.json())
+    const [hk, jp, volStories, stories] = await Promise.all([
+        fetch(URLS.hk).then(r => r.json()),
+        fetch(URLS.jp).then(r => r.json()),
+        fetch(URLS.volumeStories).then(r => r.json()),
+        fetch(URLS.stories).then(r => r.json())
     ]);
 
-    DB.hkBooks = hk.filter(b=>b.Active==="Yes");
-    DB.jpBooks = jp.filter(b=>b.Active==="Yes");
+    DB.hkBooks = hk.filter(b => b.Active === "Yes");
+    DB.jpBooks = jp.filter(b => b.Active === "Yes");
     DB.volumeStories = volStories;
     DB.stories = stories;
     buildIndex();
@@ -72,67 +71,81 @@ function buildIndex(){
     DB.storyMeta = {};
     DB.storyAppearances = {};
 
-    DB.hkBooks.forEach(b=>DB.hkByISBN[b.ISBN]=b);
-    DB.jpBooks.forEach(b=>DB.jpByISBN[b.ISBN]=b);
+    DB.hkBooks.forEach(b => DB.hkByISBN[b.ISBN] = b);
+    DB.jpBooks.forEach(b => DB.jpByISBN[b.ISBN] = b);
 
-    DB.volumeStories.forEach(v=>{
-        if(!DB.storiesByISBN[v.ISBN]) DB.storiesByISBN[v.ISBN]=[];
+    DB.volumeStories.forEach(v => {
+        if (!DB.storiesByISBN[v.ISBN]) DB.storiesByISBN[v.ISBN] = [];
         DB.storiesByISBN[v.ISBN].push(v);
 
-        if(!DB.storyAppearances[v.作品番]) DB.storyAppearances[v.作品番]=[];
+        if (!DB.storyAppearances[v.作品番]) DB.storyAppearances[v.作品番] = [];
         DB.storyAppearances[v.作品番].push(v);
     });
 
-    DB.stories.forEach(s=>DB.storyMeta[s.作品番]=s);
+    DB.stories.forEach(s => DB.storyMeta[s.作品番] = s);
 }
 
-function renderSeries(){
-    const titles = [...new Set(DB.hkBooks.map(b=>b.Title))];
-    const html = titles.map(t=>{
-        const count = DB.hkBooks.filter(b=>b.Title===t).length;
+function renderSeries() {
+    const titles = [...new Set(DB.hkBooks.map(b => b.Title))];
+    const html = titles.map(t => {
+        const count = DB.hkBooks.filter(b => b.Title === t).length;
         return `<div class="card" onclick="renderSeriesVolumes('${t}')">
             <h3>${t}</h3><div>${count} volumes</div>
         </div>`;
     }).join("");
-    document.getElementById("content").innerHTML=`<div class="grid">${html}</div>`;
+    document.getElementById("content").innerHTML = `<div class="grid">${html}</div>`;
 }
 
-function renderSeriesVolumes(title){
-    const vols = DB.hkBooks.filter(b=>b.Title===title)
-                .sort((a,b)=>parseFloat(a.Volume)-parseFloat(b.Volume));
-    const html = vols.map(v=>`<div class="card" onclick="renderVolume('${v.ISBN}')">
+function renderSeriesVolumes(title) {
+    const vols = DB.hkBooks.filter(b => b.Title === title)
+        .sort((a, b) => parseFloat(a.Volume) - parseFloat(b.Volume));
+    const html = vols.map(v => `<div class="card" onclick="renderVolume('${v.ISBN}')">
         <img src="${v.Image}">
         <h3>${v.Title} ${v.Volume}</h3>
         <div>${v.Subtitle || ""}</div>
     </div>`).join("");
-    document.getElementById("content").innerHTML=`<h2>${title}</h2><div class="grid">${html}</div>`;
+    document.getElementById("content").innerHTML = `<h2>${title}</h2><div class="grid">${html}</div>`;
 }
 
-function renderVolume(isbn){
+function renderVolume(isbn) {
     const hk = DB.hkByISBN[isbn];
     const jp = DB.jpByISBN[hk.ISBN_JP];
     const stories = DB.storiesByISBN[hk.ISBN_JP] || [];
-    const storyHTML = stories.map(s=>`<div class="story" onclick="renderStory('${s.作品番}')">
+    const storyHTML = stories.map(s => `<div class="story" onclick="renderStory('${s.作品番}')">
         ${s.收錄話} ${s.副題港譯 || ""}
     </div>`).join("");
+
+    // Add Japanese book details
+    const jpDetails = jp ? `
+        <h3>Japanese Edition</h3>
+        <p><strong>Title:</strong> ${jp.標題}</p>
+        <p><strong>Author:</strong> ${jp.著}</p>
+        <p><strong>Publisher:</strong> ${jp.出版社}</p>
+        <p><strong>Publication Date:</strong> ${jp.初版発行日}</p>
+        <p><strong>Size:</strong> ${jp.判型}</p>
+        <p><strong>Price:</strong> ${jp.定価}</p>
+    ` : '';
+
     document.getElementById("content").innerHTML = `
+        <button onclick="renderSeriesVolumes('${hk.Title}')">Back to Volumes</button>
         <h2>${hk.Title} ${hk.Volume}</h2>
         <img src="${hk.Image}" style="max-width:200px">
-        <p>作者: ${hk.Author}</p>
-        <p>出版社: ${hk.Publisher}</p>
-        <p>出版日期: ${hk.IssueDate}</p>
-        <h3>收錄作品</h3>
+        <p><strong>Author:</strong> ${hk.Author}</p>
+        <p><strong>Publisher:</strong> ${hk.Publisher}</p>
+        <p><strong>Publication Date:</strong> ${hk.IssueDate}</p>
+        ${jpDetails}
+        <h3>Included Stories</h3>
         ${storyHTML}
     `;
 }
 
-function renderStory(id){
+function renderStory(id) {
     const meta = DB.storyMeta[id];
     const appearances = DB.storyAppearances[id] || [];
-    const rows = appearances.map(a=>{
+    const rows = appearances.map(a => {
         const jp = DB.jpByISBN[a.ISBN];
-        const hk = DB.hkBooks.find(b=>b.ISBN_JP===a.ISBN);
-        return `<div class="card">${jp.系列} Vol ${jp.巻}<br>HK: ${hk ? hk.Title+" "+hk.Volume : "-"}</div>`;
+        const hk = DB.hkBooks.find(b => b.ISBN_JP === a.ISBN);
+        return `<div class="card">${jp.系列} Vol ${jp.巻}<br>HK: ${hk ? hk.Title + " " + hk.Volume : "-"}</div>`;
     }).join("");
     document.getElementById("content").innerHTML = `
         <h2>${meta.初出副題}</h2>
@@ -144,15 +157,15 @@ function renderStory(id){
     renderArrowMap(id);
 }
 
-function renderArrowMap(id){
+function renderArrowMap(id) {
     const appearances = DB.storyAppearances[id] || [];
-    if(!appearances.length) return;
+    if (!appearances.length) return;
 
-    const jpYears = appearances.map(a=>DB.jpByISBN[a.ISBN]?.初版発行日 ? new Date(DB.jpByISBN[a.ISBN].初版発行日).getFullYear() : 2000);
-    const hkYears = appearances.map(a=>DB.hkBooks.find(b=>b.ISBN_JP===a.ISBN)?.IssueDate ? new Date(DB.hkBooks.find(b=>b.ISBN_JP===a.ISBN).IssueDate).getFullYear() : 2000);
+    const jpYears = appearances.map(a => DB.jpByISBN[a.ISBN]?.初版発行日 ? new Date(DB.jpByISBN[a.ISBN].初版発行日).getFullYear() : 2000);
+    const hkYears = appearances.map(a => DB.hkBooks.find(b => b.ISBN_JP === a.ISBN)?.IssueDate ? new Date(DB.hkBooks.find(b => b.ISBN_JP === a.ISBN).IssueDate).getFullYear() : 2000);
     const minYear = Math.min(...jpYears.concat(hkYears));
     const maxYear = Math.max(...jpYears.concat(hkYears));
-    function calcAlpha(year){ return 0.3 + 0.7*(year-minYear)/(maxYear-minYear || 1); }
+    function calcAlpha(year) { return 0.3 + 0.7 * (year - minYear) / (maxYear - minYear || 1); }
 
     // Legend
     let legendHTML = `<div class="legend">
@@ -164,9 +177,9 @@ function renderArrowMap(id){
     document.getElementById("content").innerHTML += legendHTML;
 
     let html = `<h3>出版流程圖（點擊方塊可跳轉）</h3>`;
-    appearances.forEach(a=>{
+    appearances.forEach(a => {
         const jp = DB.jpByISBN[a.ISBN];
-        const hk = DB.hkBooks.find(b=>b.ISBN_JP===a.ISBN);
+        const hk = DB.hkBooks.find(b => b.ISBN_JP === a.ISBN);
 
         const jpYear = jp?.初版発行日 ? new Date(jp.初版発行日).getFullYear() : 2000;
         const hkYear = hk?.IssueDate ? new Date(hk.IssueDate).getFullYear() : 2000;
@@ -179,10 +192,24 @@ function renderArrowMap(id){
             <span class="arrow">→</span>
             <div class="arrow-box" style="background:${jpColor};" title="JP Volume: ${jp.系列} Vol ${jp.巻} / ${jp.初版発行日}" onclick="renderVolume('${jp.ISBN}')">JP Vol: ${jp.系列} ${jp.巻}</div>
             <span class="arrow">→</span>
-            <div class="arrow-box" style="background:${hkColor};" title="HK Volume: ${hk ? hk.Title+' '+hk.Volume : '-'} / ${hk ? hk.IssueDate : '-'}" onclick="renderVolume('${hk?.ISBN}')">HK Vol: ${hk ? hk.Title+' '+hk.Volume : '-'}</div>
+            <div class="arrow-box" style="background:${hkColor};" title="HK Volume: ${hk ? hk.Title + ' ' + hk.Volume : '-'} / ${hk ? hk.IssueDate : '-'}" onclick="renderVolume('${hk?.ISBN}')">HK Vol: ${hk ? hk.Title + ' ' + hk.Volume : '-'}</div>
         </div>`;
     });
     document.getElementById("content").innerHTML += html;
+}
+
+function searchSeries() {
+    const query = document.getElementById("searchBar").value.toLowerCase();
+    const filteredTitles = DB.hkBooks.filter(b => b.Title.toLowerCase().includes(query));
+
+    const html = filteredTitles.map(t => {
+        const count = DB.hkBooks.filter(b => b.Title === t).length;
+        return `<div class="card" onclick="renderSeriesVolumes('${t}')">
+            <h3>${t}</h3><div>${count} volumes</div>
+        </div>`;
+    }).join("");
+
+    document.getElementById("content").innerHTML = `<div class="grid">${html}</div>`;
 }
 
 loadDatabase();

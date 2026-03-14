@@ -11,20 +11,20 @@ nav a { margin-right: 15px; text-decoration: none; color: #333; font-weight: bol
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 15px; }
 .card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); cursor: pointer; }
 .card img { width: 100%; border-radius: 6px; }
-.story { padding:5px 0; border-bottom:1px dotted #ddd; font-size:13px; cursor:pointer; }
-.story:last-child { border:none; }
 table { width:100%; border-collapse: collapse; margin-top: 20px; }
 table, th, td { border:1px solid #ddd; }
 th, td { padding: 8px 12px; text-align:left; }
 th { background-color:#f1f1f1; }
-.edition-row { display:flex; gap:20px; align-items:flex-start; margin-bottom:20px; }
+.editions-container { display: flex; gap: 40px; flex-wrap: wrap; margin-bottom:20px; } /* container for HK + JP side by side */
+.edition-row { display:flex; gap:20px; align-items:flex-start; margin-bottom:20px; flex:1 1 300px; } /* each edition: image + info */
 .edition-image { max-width:150px; flex-shrink:0; }
 .edition-info { flex-grow:1; }
-.table-wrapper { overflow-x:auto; } /* New scrollable wrapper for table */
+.table-wrapper { overflow-x:auto; }
 @media (max-width:768px){
     .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
     .edition-row{flex-direction:column; align-items:center;}
     .edition-info{margin-top:10px;}
+    .editions-container{flex-direction:column;}
 }
 input#searchBar { margin-bottom: 20px; padding:8px; border-radius:5px; border:1px solid #ccc; width:100%; max-width:400px; }
 </style>
@@ -169,8 +169,10 @@ function renderVolume(isbn){
     document.getElementById("content").innerHTML=`
         <button onclick="renderSeriesVolumes('${hk.Title}')">Back to Volumes</button>
         <h2>${hk.Title} ${hk.Volume}</h2>
-        ${hkHTML}
-        ${jpHTML}
+        <div class="editions-container">
+            ${hkHTML}
+            ${jpHTML}
+        </div>
         ${storyTable}
     `;
 }

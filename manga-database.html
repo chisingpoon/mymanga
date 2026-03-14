@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>漫畫資料庫完整版</title>
@@ -120,7 +120,9 @@ function buildIndex() {
 }
 
 function renderSeries() {
-    OPEN_ISBN = null; CURRENT_SERIES = null; updateNavLinks();
+    OPEN_ISBN = null;
+    CURRENT_SERIES = null;
+    updateNavLinks();
     let titles;
     if (MODE === "jp") {
         titles = [...new Set(DB.jpBooks.map(b => b.系列))];
@@ -131,7 +133,55 @@ function renderSeries() {
     }
 }
 
-// --- You can reuse the previous renderSeriesVolumes / renderVolume / table functions from prior version ---
+function renderSeriesVolumes(title) {
+    CURRENT_SERIES = title;
+    let html = '';
+    if (MODE === "jp") {
+        const vols = DB.jpBooks.filter(b => b.系列 === title).sort((a, b) => a.巻 - b.巻);
+        html = vols.map(v => `<div class="card" onclick="renderVolume('${v.ISBN}')"><img src="${v.Image}"><h3>${v.系列} ${v.巻}</h3></div>`).join("");
+    } else {
+        const vols = DB.hkBooks.filter(b => b.Title === title).sort((a, b) => a.Volume - b.Volume);
+        html = vols.map(v => `<div class="card" onclick="renderVolume('${v.ISBN}')"><img src="${v.Image}"><h3>${v.Title} ${v.Volume}</h3></div>`).join("");
+    }
+    content.innerHTML = `<h2>${title}</h2><div class="grid">${html}</div>`;
+}
+
+function renderVolume(isbn) {
+    OPEN_ISBN = isbn;
+    const hk = DB.hkByISBN[isbn];
+    const jp = DB.jpByISBN[hk?.ISBN_JP];
+    const stories = DB.storiesByISBN[hk?.ISBN_JP] || [];
+    let storyHTML = '';
+    if (stories.length > 0) {
+        storyHTML = stories.map(s => `<div class="card">${s.巻} - ${s.収錄話} - ${s.收錄頁} - ${s.出版副題} - ${s.副題港譯}</div>`).join("");
+    }
+    content.innerHTML = `
+        <div class="editions">
+            ${hk ? `<div class="edition-card">
+                <img src="${hk.Image}" alt="HK Cover">
+                <div class="edition-info">
+                    <h3>${hk.Title} ${hk.Volume}</h3>
+                    <p>Author: ${hk.Author}</p>
+                    <p>Publisher: ${hk.Publisher}</p>
+                    <p>Publication Date: ${hk.IssueDate}</p>
+                </div>
+            </div>` : ''}
+            ${jp ? `<div class="edition-card">
+                <img src="${jp.Image}" alt="JP Cover">
+                <div class="edition-info">
+                    <h3>${jp.系列} ${jp.巻}</h3>
+                    <p>Author: ${jp.著}</p>
+                    <p>Publisher: ${jp.出版社}</p>
+                    <p>Publication Date: ${jp.初版発行日}</p>
+                </div>
+            </div>` : ''}
+        </div>
+        <h3>Stories in Volume</h3>
+        <div class="table-wrapper">
+            <div class="grid">${storyHTML}</div>
+        </div>
+    `;
+}
 
 loadDatabase();
 </script>

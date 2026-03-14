@@ -1,50 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>漫畫資料庫完整版</title>
-    <style>
-        body { font-family: Arial; background: #f4f4f4; padding: 30px; }
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; }
-        nav a { margin-right: 15px; text-decoration: none; color: #333; font-weight: bold; cursor: pointer; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
-        .card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); cursor: pointer; }
-        .card img { width: 100%; border-radius: 6px; }
-        .story { padding: 5px 0; border-bottom: 1px dotted #ddd; font-size: 13px; cursor: pointer; }
-        .story:last-child { border: none; }
-        .arrow-map { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 20px; justify-content: flex-start; }
-        .arrow-box { color: white; padding: 6px 12px; border-radius: 6px; min-width: 80px; text-align: center; cursor: pointer; }
-        .arrow { font-weight: bold; font-size: 18px; }
-        .legend { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; font-size: 12px; flex-wrap: wrap; }
-        .legend-box { width: 80px; height: 20px; border-radius: 4px; display: inline-block; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        table, th, td { border: 1px solid #ddd; }
-        th, td { padding: 8px 12px; text-align: left; }
-        th { background-color: #f1f1f1; }
-        .book-info { display: flex; gap: 20px; align-items: flex-start; margin-top: 20px; }
-        .book-info img { max-width: 150px; }
-        .book-info div { flex-grow: 1; }
-        .book-details { margin-top: 10px; }
-        @media (max-width: 768px) {
-            .arrow-map { flex-direction: column; align-items: flex-start; }
-            .arrow { transform: rotate(90deg); margin: 5px 0; }
-            .book-info { flex-direction: column; align-items: center; }
-            .book-info div { margin-top: 10px; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>漫畫資料庫完整版</title>
+<style>
+body { font-family: Arial; background: #f4f4f4; padding: 30px; }
+header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; }
+nav a { margin-right: 15px; text-decoration: none; color: #333; font-weight: bold; cursor: pointer; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 15px; }
+.card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); cursor: pointer; }
+.card img { width: 100%; border-radius: 6px; }
+.story { padding:5px 0; border-bottom:1px dotted #ddd; font-size:13px; cursor:pointer; }
+.story:last-child { border:none; }
+table { width:100%; border-collapse: collapse; margin-top: 20px; }
+table, th, td { border:1px solid #ddd; }
+th, td { padding: 8px 12px; text-align:left; }
+th { background-color:#f1f1f1; }
+.edition-row { display:flex; gap:20px; align-items:flex-start; margin-bottom:20px; }
+.edition-image { max-width:150px; flex-shrink:0; }
+.edition-info { flex-grow:1; }
+@media (max-width:768px){
+    .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
+    .edition-row{flex-direction:column; align-items:center;}
+    .edition-info{margin-top:10px;}
+}
+input#searchBar { margin-bottom: 20px; padding:8px; border-radius:5px; border:1px solid #ccc; width:100%; max-width:400px; }
+</style>
 </head>
 <body>
 
 <header>
-    <h1>漫畫資料庫完整版</h1>
-    <nav>
-        <a onclick="renderSeries()">系列瀏覽</a>
-    </nav>
+<h1>漫畫資料庫完整版</h1>
+<nav>
+<a onclick="renderSeries()">系列瀏覽</a>
+</nav>
 </header>
 
-<!-- Search Bar -->
-<input type="text" id="searchBar" placeholder="Search Series" oninput="searchSeries()" style="margin-bottom: 20px; padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+<input type="text" id="searchBar" placeholder="Search Series" oninput="searchSeries()">
 
 <div id="content"></div>
 
@@ -60,14 +53,13 @@ const DB = {};
 
 async function loadDatabase(){
     const [hk, jp, volStories, stories] = await Promise.all([
-        fetch(URLS.hk).then(r => r.json()),
-        fetch(URLS.jp).then(r => r.json()),
-        fetch(URLS.volumeStories).then(r => r.json()),
-        fetch(URLS.stories).then(r => r.json())
+        fetch(URLS.hk).then(r=>r.json()),
+        fetch(URLS.jp).then(r=>r.json()),
+        fetch(URLS.volumeStories).then(r=>r.json()),
+        fetch(URLS.stories).then(r=>r.json())
     ]);
-
-    DB.hkBooks = hk.filter(b => b.Active === "Yes");
-    DB.jpBooks = jp.filter(b => b.Active === "Yes");
+    DB.hkBooks = hk.filter(b=>b.Active==="Yes");
+    DB.jpBooks = jp.filter(b=>b.Active==="Yes");
     DB.volumeStories = volStories;
     DB.stories = stories;
     buildIndex();
@@ -80,50 +72,44 @@ function buildIndex(){
     DB.storiesByISBN = {};
     DB.storyMeta = {};
     DB.storyAppearances = {};
-
-    DB.hkBooks.forEach(b => DB.hkByISBN[b.ISBN] = b);
-    DB.jpBooks.forEach(b => DB.jpByISBN[b.ISBN] = b);
-
-    DB.volumeStories.forEach(v => {
-        if (!DB.storiesByISBN[v.ISBN]) DB.storiesByISBN[v.ISBN] = [];
+    DB.hkBooks.forEach(b=>DB.hkByISBN[b.ISBN]=b);
+    DB.jpBooks.forEach(b=>DB.jpByISBN[b.ISBN]=b);
+    DB.volumeStories.forEach(v=>{
+        if(!DB.storiesByISBN[v.ISBN]) DB.storiesByISBN[v.ISBN]=[];
         DB.storiesByISBN[v.ISBN].push(v);
-
-        if (!DB.storyAppearances[v.作品番]) DB.storyAppearances[v.作品番] = [];
+        if(!DB.storyAppearances[v.作品番]) DB.storyAppearances[v.作品番]=[];
         DB.storyAppearances[v.作品番].push(v);
     });
-
-    DB.stories.forEach(s => DB.storyMeta[s.作品番] = s);
+    DB.stories.forEach(s=>DB.storyMeta[s.作品番]=s);
 }
 
-function renderSeries() {
-    const titles = [...new Set(DB.hkBooks.map(b => b.Title))];
-    const html = titles.map(t => {
-        const count = DB.hkBooks.filter(b => b.Title === t).length;
+function renderSeries(){
+    const titles = [...new Set(DB.hkBooks.map(b=>b.Title))];
+    const html = titles.map(t=>{
+        const count = DB.hkBooks.filter(b=>b.Title===t).length;
         return `<div class="card" onclick="renderSeriesVolumes('${t}')">
             <h3>${t}</h3><div>${count} volumes</div>
         </div>`;
     }).join("");
-    document.getElementById("content").innerHTML = `<div class="grid">${html}</div>`;
+    document.getElementById("content").innerHTML=`<div class="grid">${html}</div>`;
 }
 
-function renderSeriesVolumes(title) {
-    const vols = DB.hkBooks.filter(b => b.Title === title)
-        .sort((a, b) => parseFloat(a.Volume) - parseFloat(b.Volume));
-    const html = vols.map(v => `<div class="card" onclick="renderVolume('${v.ISBN}')">
+function renderSeriesVolumes(title){
+    const vols = DB.hkBooks.filter(b=>b.Title===title).sort((a,b)=>parseFloat(a.Volume)-parseFloat(b.Volume));
+    const html = vols.map(v=>`<div class="card" onclick="renderVolume('${v.ISBN}')">
         <img src="${v.Image}">
         <h3>${v.Title} ${v.Volume}</h3>
         <div>${v.Subtitle || ""}</div>
     </div>`).join("");
-    document.getElementById("content").innerHTML = `<h2>${title}</h2><div class="grid">${html}</div>`;
+    document.getElementById("content").innerHTML=`<h2>${title}</h2><div class="grid">${html}</div>`;
 }
 
-function renderVolume(isbn) {
+function renderVolume(isbn){
     const hk = DB.hkByISBN[isbn];
     const jp = DB.jpByISBN[hk.ISBN_JP];
     const stories = DB.storiesByISBN[hk.ISBN_JP] || [];
 
-    // Story details table (only if there are stories)
-    const storyHTML = stories.map(s => `
+    const storyHTML = stories.map(s=>`
         <tr>
             <td>${s.巻}</td>
             <td>${s.收錄話}</td>
@@ -131,36 +117,8 @@ function renderVolume(isbn) {
             <td>${s.出版副題}</td>
             <td>${s.出版備考}</td>
             <td>${s.副題港譯 || ""}</td>
-        </tr>
-    `).join("");
+        </tr>`).join("");
 
-    // Add Japanese book details
-    const jpDetails = jp ? `
-        <h3>Japanese Edition</h3>
-        <img src="${jp.Image}" style="max-width: 150px;">
-        <div class="book-details">
-            <p><strong>Title:</strong> ${jp.標題}</p>
-            <p><strong>Author:</strong> ${jp.著}</p>
-            <p><strong>Publisher:</strong> ${jp.出版社}</p>
-            <p><strong>Publication Date:</strong> ${jp.初版発行日}</p>
-            <p><strong>Size:</strong> ${jp.判型}</p>
-            <p><strong>Price:</strong> ${jp.定価}</p>
-        </div>
-    ` : '';
-
-    // Add Hong Kong edition details
-    const hkDetails = hk ? `
-        <h3>Hong Kong Edition</h3>
-        <img src="${hk.Image}" style="max-width: 150px;">
-        <div class="book-details">
-            <p><strong>Title:</strong> ${hk.Title}</p>
-            <p><strong>Author:</strong> ${hk.Author}</p>
-            <p><strong>Publisher:</strong> ${hk.Publisher}</p>
-            <p><strong>Publication Date:</strong> ${hk.IssueDate}</p>
-        </div>
-    ` : '';
-
-    // Only show the stories table if there are stories
     const storyTable = stories.length > 0 ? `
         <h3>Included Stories</h3>
         <table>
@@ -177,36 +135,58 @@ function renderVolume(isbn) {
             <tbody>
                 ${storyHTML}
             </tbody>
-        </table>
-    ` : ''; // Empty if no stories
+        </table>` : '';
 
-    document.getElementById("content").innerHTML = `
+    // HK Edition
+    const hkHTML = hk ? `
+        <div class="edition-row">
+            <img src="${hk.Image}" class="edition-image">
+            <div class="edition-info">
+                <h3>Hong Kong Edition</h3>
+                <p><strong>Title:</strong> ${hk.Title}</p>
+                <p><strong>Author:</strong> ${hk.Author}</p>
+                <p><strong>Publisher:</strong> ${hk.Publisher}</p>
+                <p><strong>Publication Date:</strong> ${hk.IssueDate}</p>
+            </div>
+        </div>` : '';
+
+    // JP Edition
+    const jpHTML = jp ? `
+        <div class="edition-row">
+            <img src="${jp.Image}" class="edition-image">
+            <div class="edition-info">
+                <h3>Japanese Edition</h3>
+                <p><strong>Title:</strong> ${jp.標題}</p>
+                <p><strong>Author:</strong> ${jp.著}</p>
+                <p><strong>Publisher:</strong> ${jp.出版社}</p>
+                <p><strong>Publication Date:</strong> ${jp.初版発行日}</p>
+                <p><strong>Size:</strong> ${jp.判型}</p>
+                <p><strong>Price:</strong> ${jp.定価}</p>
+            </div>
+        </div>` : '';
+
+    document.getElementById("content").innerHTML=`
         <button onclick="renderSeriesVolumes('${hk.Title}')">Back to Volumes</button>
         <h2>${hk.Title} ${hk.Volume}</h2>
-        <div class="book-info">
-            <div>${hkDetails}</div>
-            <div>${jpDetails}</div>
-        </div>
-        ${storyTable}  <!-- Only shown if there are stories -->
+        ${hkHTML}
+        ${jpHTML}
+        ${storyTable}
     `;
 }
 
-function searchSeries() {
-    const query = document.getElementById("searchBar").value.toLowerCase();
-    const filteredTitles = DB.hkBooks.filter(b => b.Title.toLowerCase().includes(query));
-
-    const html = filteredTitles.map(t => {
-        const count = DB.hkBooks.filter(b => b.Title === t).length;
+function searchSeries(){
+    const query=document.getElementById("searchBar").value.toLowerCase();
+    const filteredTitles = DB.hkBooks.filter(b=>b.Title.toLowerCase().includes(query));
+    const html = filteredTitles.map(t=>{
+        const count=DB.hkBooks.filter(b=>b.Title===t).length;
         return `<div class="card" onclick="renderSeriesVolumes('${t}')">
             <h3>${t}</h3><div>${count} volumes</div>
         </div>`;
     }).join("");
-
-    document.getElementById("content").innerHTML = `<div class="grid">${html}</div>`;
+    document.getElementById("content").innerHTML=`<div class="grid">${html}</div>`;
 }
 
 loadDatabase();
 </script>
-
 </body>
 </html>

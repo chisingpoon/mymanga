@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <title>漫畫資料庫完整版</title>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
 body { font-family: Arial; background: #f4f4f4; padding: 30px; }
 header { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; }
@@ -15,7 +13,6 @@ nav a { margin-right:15px; text-decoration:none; color:#333; font-weight:bold; c
 .card img { width:100%; border-radius:6px; }
 .story { padding:5px 0; border-bottom:1px dotted #ddd; font-size:13px; cursor:pointer; }
 .story:last-child { border:none; }
-#timeline{margin-top:40px;}
 .matrix{display:grid; grid-template-columns:200px repeat(auto-fill,80px); gap:4px; margin-top:30px;}
 .cell{background:#eee; text-align:center; padding:6px; font-size:12px; border-radius:4px;}
 .hit{background:#4CAF50; color:white;}
@@ -28,12 +25,10 @@ nav a { margin-right:15px; text-decoration:none; color:#333; font-weight:bold; c
 <h1>漫畫資料庫完整版</h1>
 <nav>
 <a onclick="renderSeries()">系列瀏覽</a>
-<a onclick="renderTimeline()">出版時間線</a>
 </nav>
 </header>
 
 <div id="content"></div>
-<canvas id="timeline" height="150"></canvas>
 
 <script>
 const BASE = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8";
@@ -166,22 +161,6 @@ function renderStoryGraph(id){
         </div>`;
     });
     document.getElementById("content").innerHTML += html;
-}
-
-function renderTimeline(){
-    const stories = Object.values(DB.storyMeta).sort((a,b)=>parseInt(a.初出掲載号||0)-parseInt(b.初出掲載号||0));
-    const labels = stories.map(s=>s.初出掲載号);
-    const data = stories.map((s,i)=>i+1);
-    const ctx = document.getElementById("timeline");
-    new Chart(ctx,{
-        type:"line",
-        data:{
-            labels:labels,
-            datasets:[{label:"作品發表順序",data:data,borderColor:"blue",fill:false}]
-        },
-        options:{responsive:true,plugins:{legend:{display:true}}}
-    });
-    document.getElementById("content").innerHTML="<h2>作品發表時間線</h2>";
 }
 
 loadDatabase();

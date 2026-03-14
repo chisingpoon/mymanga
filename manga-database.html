@@ -21,16 +21,14 @@ thead th { position:sticky; top:0; background:#f8fafc; padding:12px; text-align:
 td { padding:12px; border-bottom:1px solid #eee; }
 tbody tr:nth-child(even) { background:#fafafa; }
 tbody tr:hover { background:#f1f5f9; }
+.back-link { margin-bottom:15px; display:inline-block; font-weight:bold; cursor:pointer; text-decoration:underline; }
 </style>
 </head>
 
 <body>
 <header>
 <h1>漫畫資料庫完整版</h1>
-<nav>
-<a onclick="switchMode('hk')">Hong Kong View</a>
-<a onclick="switchMode('jp')">Japanese View</a>
-</nav>
+<nav id="mode-nav"></nav>
 </header>
 
 <div id="content"></div>
@@ -43,8 +41,24 @@ let MODE=params.get("mode")||"hk";
 let OPEN_ISBN=params.get("isbn");
 const DB={};
 
+function updateNavLinks(){
+    const nav = document.getElementById("mode-nav");
+    let html = '';
+    if(MODE==='jp'){
+        html += `<a onclick="switchMode('hk')">Hong Kong View</a>`;
+    } else {
+        html += `<a onclick="switchMode('jp')">Japanese View</a>`;
+    }
+    if(OPEN_ISBN){
+        html += `<a class="back-link" onclick="renderSeries()">Back to Series List</a>`;
+    }
+    nav.innerHTML = html;
+}
+
 function switchMode(mode){
-    MODE=mode;
+    MODE = mode;
+    OPEN_ISBN = null; // going back to series page
+    updateNavLinks();
     renderSeries();
 }
 
@@ -60,6 +74,7 @@ async function loadDatabase(){
     DB.volumeStories=volStories;
     DB.stories=stories;
     buildIndex();
+    updateNavLinks();
     if(OPEN_ISBN){ renderVolume(OPEN_ISBN); }else{ renderSeries(); }
 }
 
@@ -75,6 +90,8 @@ function buildIndex(){
 }
 
 function renderSeries(){
+    OPEN_ISBN=null;
+    updateNavLinks();
     if(MODE==="jp"){
         const titles=[...new Set(DB.jpBooks.map(b=>b.系列))];
         const html=titles.map(t=>{
@@ -105,6 +122,8 @@ function renderSeriesVolumes(title){
 }
 
 function renderVolume(isbn){
+    OPEN_ISBN = isbn;
+    updateNavLinks();
     if(MODE==="jp"){
         const jp=DB.jpByISBN[isbn];
         const stories=DB.storiesByISBN[isbn]||[];
@@ -132,7 +151,6 @@ function renderHKVolume(hk,jp,stories){
 </tr>`;
     }).join("");
     content.innerHTML=`
-<h2>${hk.Title} ${hk.Volume}</h2>
 <div class="editions">
 <div class="edition">
 <img src="${hk.Image}">
@@ -172,7 +190,6 @@ function renderJPVolume(jp,stories){
 </tr>`;
     }).join("");
     content.innerHTML=`
-<h2>${jp.系列} ${jp.巻}</h2>
 <div class="editions">
 <div class="edition">
 <img src="${jp.Image}">

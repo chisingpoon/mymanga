@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Archive | Search & Filter</title>
+    <title>Master Archive | Dynamic Explorer</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -16,9 +16,10 @@
         }
         .filter-scroll::-webkit-scrollbar { width: 4px; }
         .filter-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        td, th { white-space: nowrap; }
     </style>
 </head>
-<body class="bg-grid text-slate-900 font-sans min-h-screen" oncontextmenu="return false;">
+<body class="bg-grid text-slate-900 font-sans min-h-screen relative overflow-x-hidden" oncontextmenu="return false;">
 
     <div id="app" v-cloak>
         <header class="bg-white/80 backdrop-blur-md border-b sticky top-0 z-40 shadow-sm">
@@ -36,34 +37,35 @@
             
             <div v-if="loading" class="flex flex-col items-center justify-center py-32">
                 <div class="w-12 h-12 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
-                <p class="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-widest tracking-widest">Loading Master Records...</p>
+                <p class="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Generating Dynamic Relations...</p>
             </div>
 
             <div v-else>
                 <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 p-6 mb-8">
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
                         
                         <div class="space-y-4">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Global Search</label>
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Search Keywords</label>
                             <div class="relative">
-                                <input type="text" v-model="searchQuery" placeholder="Search titles, IDs..." 
+                                <input type="text" v-model="searchQuery" placeholder="Title, ID, or Remarks..." 
                                     class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
                                 <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5"></path></svg>
                             </div>
-                            <button @click="resetFilters" class="text-[10px] font-black text-indigo-600 hover:underline uppercase">Reset All Filters</button>
+                            <button @click="resetFilters" class="text-[9px] font-black text-indigo-500 uppercase hover:text-indigo-700">Clear All Filters</button>
                         </div>
 
-                        <div class="lg:col-span-2 space-y-4">
+                        <div class="lg:col-span-3 space-y-4">
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center justify-between">
-                                Filter by Magazine (初出掲載誌)
-                                <span class="text-indigo-600 font-black">{{ activeMagazines.length }} selected</span>
+                                Filter by First Publication (初出掲載誌)
+                                <span class="bg-slate-100 px-2 py-0.5 rounded text-slate-500">{{ activeMagazines.length }} Active</span>
                             </label>
-                            <div class="flex flex-wrap gap-2 max-h-32 overflow-y-auto filter-scroll p-1">
-                                <button v-for="mag in magazineOptions" :key="mag" 
+                            <div class="flex flex-wrap gap-2 max-h-40 overflow-y-auto filter-scroll p-1">
+                                <button v-for="(count, mag) in magazineStats" :key="mag" 
                                     @click="toggleMagazine(mag)"
-                                    :class="activeMagazines.includes(mag) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-300'"
-                                    class="px-3 py-1.5 rounded-lg border text-[11px] font-bold transition-all shadow-sm">
+                                    :class="activeMagazines.includes(mag) ? 'bg-indigo-600 text-white border-indigo-600 ring-2 ring-indigo-200' : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'"
+                                    class="px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all shadow-sm flex items-center gap-2">
                                     {{ mag }}
+                                    <span :class="activeMagazines.includes(mag) ? 'bg-white/20' : 'bg-slate-100 text-slate-400'" class="px-1.5 py-0.5 rounded text-[9px]">{{ count }}</span>
                                 </button>
                             </div>
                         </div>
@@ -76,46 +78,54 @@
                             <thead class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b bg-slate-50">
                                 <tr>
                                     <th class="px-6 py-5 w-20">#</th>
-                                    <th class="px-6 py-5 w-80">Title</th>
+                                    <th class="px-6 py-5 w-80">Japanese Title / Record Name</th>
                                     <th class="px-6 py-5 w-40">Magazine</th>
-                                    <th v-for="col in mappingColumns" :key="col" class="px-6 py-5 bg-indigo-50/20 text-indigo-500 border-x border-slate-100/30 text-center">
+                                    <th v-for="col in mappingColumns" :key="col" class="px-6 py-5 bg-indigo-50/20 text-indigo-600 border-x border-slate-100/30 text-center">
                                         {{ col }}
                                     </th>
                                     <th class="px-6 py-5">Remarks</th>
                                 </tr>
                             </thead>
                             <tbody class="text-[13px] divide-y divide-slate-50">
-                                <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-slate-50/50 transition-colors">
-                                    <td class="px-6 py-5 font-black text-slate-300">{{ row.作品番 }}</td>
+                                <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-slate-50/50 transition-colors group">
+                                    <td class="px-6 py-5 font-black text-slate-300 group-hover:text-indigo-400 transition-colors">{{ row.作品番 }}</td>
                                     <td class="px-6 py-5">
                                         <div class="font-black text-slate-900 leading-tight">{{ row.初出副題 }}</div>
-                                        <div class="text-[11px] text-slate-400 font-bold mt-1 uppercase">{{ row.全集副題 }}</div>
+                                        <div class="text-[11px] text-slate-400 font-bold mt-1">{{ row.全集副題 }}</div>
                                     </td>
-                                    <td class="px-6 py-5 font-bold text-slate-600">
-                                        {{ row.初出掲載誌 }}
+                                    <td class="px-6 py-5">
+                                        <span class="bg-slate-100 text-slate-600 px-2 py-1 rounded-lg font-bold text-[11px]">{{ row.初出掲載誌 }}</span>
                                     </td>
                                     
-                                    <td v-for="col in mappingColumns" :key="col" class="px-6 py-5 border-x border-slate-50/50">
+                                    <td v-for="col in mappingColumns" :key="col" class="px-4 py-5 border-x border-slate-50/50">
                                         <template v-if="getMapping(row.作品番, col)">
                                             <a :href="'publishjp.html?isbn=' + getMapping(row.作品番, col).ISBN" 
-                                               class="flex items-center justify-center bg-white border border-indigo-100 px-3 py-1.5 rounded-xl shadow-sm hover:border-indigo-500 hover:bg-indigo-50 transition-all">
-                                                <span class="font-black text-indigo-600 text-[11px]">Vol. {{ getMapping(row.作品番, col).巻 }}</span>
+                                               class="flex items-center justify-between bg-white border border-indigo-100 px-3 py-1.5 rounded-xl shadow-sm hover:border-indigo-500 hover:bg-indigo-50 transition-all">
+                                                <span class="font-black text-indigo-600 text-[10px]">Vol. {{ getMapping(row.作品番, col).巻 }}</span>
+                                                <svg class="w-3 h-3 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3"></path></svg>
                                             </a>
                                         </template>
-                                        <div v-else class="text-center text-slate-200">-</div>
+                                        <div v-else class="text-center text-slate-100">-</div>
                                     </td>
 
-                                    <td class="px-6 py-5 text-slate-400 italic text-[11px]">{{ row.備考 }}</td>
+                                    <td class="px-6 py-5 text-slate-400 italic text-[11px] max-w-xs truncate">{{ row.備考 }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                     
                     <div class="p-6 border-t bg-slate-50/50 flex items-center justify-between">
-                        <button @click="currentPage--" :disabled="currentPage === 1" class="px-6 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black disabled:opacity-20">PREV</button>
-                        <span class="text-[10px] font-black text-slate-400 uppercase">Page {{ currentPage }} / {{ totalPages }} ({{ filteredData.length }} results)</span>
-                        <button @click="currentPage++" :disabled="currentPage === totalPages" class="px-6 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black disabled:opacity-20">NEXT</button>
+                        <button @click="currentPage--" :disabled="currentPage === 1" class="px-6 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black disabled:opacity-20 hover:shadow-sm">PREVIOUS</button>
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Page {{ currentPage }} / {{ totalPages }} ({{ filteredData.length }} Entries)</span>
+                        <button @click="currentPage++" :disabled="currentPage === totalPages" class="px-6 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black disabled:opacity-20 hover:shadow-sm">NEXT</button>
                     </div>
+                </div>
+
+                <div class="mt-8 text-center">
+                    <button @click="forceRefresh" class="inline-flex items-center gap-2 px-6 py-2 bg-white border border-slate-200 rounded-full text-[10px] font-black uppercase text-slate-400 hover:text-indigo-600 transition-all">
+                        <svg class="w-3 h-3" :class="refreshing ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="3"></path></svg>
+                        Resync Google Sheets
+                    </button>
                 </div>
             </div>
         </main>
@@ -126,17 +136,14 @@
         createApp({
             data() {
                 return {
-                    loading: true,
-                    searchQuery: '',
-                    activeMagazines: [],
-                    currentPage: 1,
-                    itemsPerPage: 50,
+                    loading: true, refreshing: false,
+                    searchQuery: '', activeMagazines: [],
+                    currentPage: 1, itemsPerPage: 50,
                     master: [], contents: [], books: [],
                     mappingColumns: ["単行本", "第0巻", "ドラミちゃん", "大全集"]
                 }
             },
             watch: {
-                // Keep URL updated with both Search and Magazine Filters
                 searchQuery() { this.updateURL(); },
                 activeMagazines: {
                     handler() { this.updateURL(); },
@@ -144,16 +151,24 @@
                 }
             },
             computed: {
+                magazineStats() {
+                    const stats = {};
+                    this.master.forEach(r => {
+                        if (r.初出掲載誌) {
+                            const name = r.初出掲載誌.trim();
+                            stats[name] = (stats[name] || 0) + 1;
+                        }
+                    });
+                    return stats;
+                },
                 magazineOptions() {
-                    const mags = this.master.map(r => r.初出掲載誌).filter(Boolean);
-                    return [...new Set(mags)].sort();
+                    return Object.keys(this.magazineStats).sort();
                 },
                 filteredData() {
                     let data = this.master;
                     
-                    // Filter 1: Text Search
                     if (this.searchQuery) {
-                        const q = this.searchQuery.toLowerCase();
+                        const q = this.searchQuery.toLowerCase().trim();
                         data = data.filter(r => 
                             (r.初出副題||'').toLowerCase().includes(q) || 
                             (r.全集副題||'').toLowerCase().includes(q) ||
@@ -161,9 +176,8 @@
                         );
                     }
 
-                    // Filter 2: Magazine Checkboxes
                     if (this.activeMagazines.length > 0) {
-                        data = data.filter(r => this.activeMagazines.includes(r.初出掲載誌));
+                        data = data.filter(r => r.初出掲載誌 && this.activeMagazines.includes(r.初出掲載誌.trim()));
                     }
 
                     return data;
@@ -176,6 +190,12 @@
             },
             methods: {
                 async init() {
+                    const cached = localStorage.getItem('master_dynamic_cache');
+                    if (cached) {
+                        const d = JSON.parse(cached);
+                        this.master = d.master; this.contents = d.contents; this.books = d.books;
+                        this.loading = false;
+                    }
                     try {
                         const [m, c, b] = await Promise.all([
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json()),
@@ -185,22 +205,24 @@
                         this.master = m.filter(r => r.作品番);
                         this.contents = c;
                         this.books = b;
-                    } catch (e) { console.error(e); } finally { this.loading = false; }
+                        localStorage.setItem('master_dynamic_cache', JSON.stringify({master:this.master, contents:this.contents, books:this.books}));
+                    } catch (e) { console.error("Database Sync Failed", e); } finally { this.loading = false; }
                 },
                 getMapping(id, cat) {
-                    const app = this.contents.find(c => {
+                    const appearance = this.contents.find(c => {
                         if (c.作品番?.toString().trim() !== id?.toString().trim()) return false;
                         const book = this.books.find(b => b.ISBN === c.ISBN);
                         return book && book.類 === cat;
                     });
-                    if (!app) return null;
-                    const bInfo = this.books.find(b => b.ISBN === app.ISBN);
-                    return { 巻: bInfo.巻, ISBN: bInfo.ISBN };
+                    if (!appearance) return null;
+                    const bookInfo = this.books.find(b => b.ISBN === appearance.ISBN);
+                    return { 巻: bookInfo.巻, ISBN: bookInfo.ISBN };
                 },
                 toggleMagazine(mag) {
-                    const index = this.activeMagazines.indexOf(mag);
-                    if (index > -1) this.activeMagazines.splice(index, 1);
-                    else this.activeMagazines.push(mag);
+                    const name = mag.trim();
+                    const idx = this.activeMagazines.indexOf(name);
+                    if (idx > -1) this.activeMagazines.splice(idx, 1);
+                    else this.activeMagazines.push(name);
                     this.currentPage = 1;
                 },
                 resetFilters() {
@@ -217,15 +239,25 @@
                     else url.searchParams.delete('mag');
                     
                     window.history.replaceState({}, '', url);
+                },
+                async forceRefresh() {
+                    this.refreshing = true;
+                    localStorage.removeItem('master_dynamic_cache');
+                    await this.init();
+                    this.refreshing = false;
                 }
             },
             mounted() {
                 this.init().then(() => {
                     const params = new URLSearchParams(window.location.search);
-                    // Load Text Search from URL
+                    // URL: ?q=keywords
                     if (params.get('q')) this.searchQuery = decodeURIComponent(params.get('q'));
-                    // Load Magazine Filter from URL (e.g. ?mag=小学一年生,小学二年生)
-                    if (params.get('mag')) this.activeMagazines = params.get('mag').split(',');
+                    // URL: ?mag=小学一年生,小学二年生
+                    if (params.get('mag')) {
+                        const requested = params.get('mag').split(',').map(m => decodeURIComponent(m).trim());
+                        // Cross-check with options to ensure they exist
+                        this.activeMagazines = requested.filter(m => this.magazineOptions.includes(m));
+                    }
                 });
             }
         }).mount('#app')

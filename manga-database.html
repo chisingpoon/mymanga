@@ -73,7 +73,7 @@
                 <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
                     <div>
                         <h2 class="text-3xl font-black text-slate-900 uppercase tracking-tight">{{ region === 'HK' ? '香港版系列' : '日本版系列' }}</h2>
-                        <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Select a series to browse volumes</p>
+                        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Select a series to browse volumes</p>
                     </div>
                     <div class="relative max-w-sm w-full">
                         <input type="text" v-model="seriesQuery" placeholder="Search series name..." 
@@ -84,7 +84,7 @@
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     <div v-for="s in searchedSeries" :key="s" @click="selectSeries(s)" 
                         class="bg-white/80 backdrop-blur-sm p-6 rounded-3xl border border-slate-200 cursor-pointer transition-all hover:border-blue-500 hover:shadow-xl hover:-translate-y-1 text-center group">
-                        <h3 class="font-black text-slate-700 group-hover:text-blue-600 transition-colors uppercase italic">{{ s }}</h3>
+                        <h3 class="font-black text-lg text-slate-700 group-hover:text-blue-600 transition-colors uppercase">{{ s }}</h3>
                     </div>
                 </div>
             </div>
@@ -116,7 +116,7 @@
                             <div v-else class="text-slate-200 font-black text-4xl">?</div>
                         </div>
                         <div class="p-5">
-                            <h3 class="font-black text-sm text-slate-800 line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors uppercase italic">{{ book.Title || book.標題 }}</h3>
+                            <h3 class="font-black text-sm text-slate-800 line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors uppercase">{{ book.Title || book.標題 }}</h3>
                         </div>
                     </div>
                 </div>
@@ -137,12 +137,12 @@
                         <div class="sm:w-1/2 p-8 flex flex-col justify-between">
                             <div>
                                 <span class="bg-blue-600 text-[10px] font-black text-white px-3 py-1 rounded-full uppercase tracking-tighter">HK Edition</span>
-                                <h2 class="text-2xl font-black text-slate-900 mt-6 leading-tight italic uppercase">{{ hkDetail.Title }}</h2>
+                                <h2 class="text-2xl font-black text-slate-900 mt-6 leading-tight uppercase">{{ hkDetail.Title }}</h2>
                             </div>
-                            <div class="space-y-2 text-xs border-t pt-6 mt-8">
-                                <p v-if="hkDetail.Publisher" class="flex justify-between border-b border-slate-50 pb-2"><span class="text-slate-400 font-bold uppercase">Publisher</span><span class="font-black">{{ hkDetail.Publisher }}</span></p>
-                                <p v-if="hkDetail.IssueDate" class="flex justify-between border-b border-slate-50 pb-2"><span class="text-slate-400 font-bold uppercase">Issue Date</span><span class="font-black">{{ hkDetail.IssueDate }}</span></p>
-                                <p v-if="hkDetail.ISBN" class="flex justify-between pt-2"><span class="text-slate-400 font-bold uppercase">ISBN</span><span class="font-mono font-black">{{ hkDetail.ISBN }}</span></p>
+                            <div class="space-y-3 text-[13px] border-t pt-6 mt-8">
+                                <p v-if="hkDetail.Publisher" class="flex justify-between border-b border-slate-50 pb-2"><span class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Publisher</span><span class="font-black text-slate-700">{{ hkDetail.Publisher }}</span></p>
+                                <p v-if="hkDetail.IssueDate" class="flex justify-between border-b border-slate-50 pb-2"><span class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Issue Date</span><span class="font-black text-slate-700">{{ hkDetail.IssueDate }}</span></p>
+                                <p v-if="hkDetail.ISBN" class="flex justify-between pt-2"><span class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">ISBN</span><span class="font-mono font-black text-blue-600">{{ hkDetail.ISBN }}</span></p>
                             </div>
                         </div>
                     </div>
@@ -154,12 +154,12 @@
                         <div class="sm:w-1/2 p-8 flex flex-col justify-between">
                             <div>
                                 <span class="bg-red-600 text-[10px] font-black text-white px-3 py-1 rounded-full uppercase tracking-tighter">JP Specs</span>
-                                <h2 class="text-2xl font-black text-slate-900 mt-6 leading-tight italic uppercase">{{ jpDetail.標題 }}</h2>
+                                <h2 class="text-2xl font-black text-slate-900 mt-6 leading-tight uppercase">{{ jpDetail.標題 }}</h2>
                             </div>
-                            <div class="space-y-2 text-xs border-t pt-6 mt-8">
-                                <p v-if="jpDetail.著" class="flex justify-between border-b border-slate-50 pb-2"><span class="text-slate-400 font-bold uppercase">著</span><span class="font-black">{{ jpDetail.著 }}</span></p>
-                                <p v-if="jpDetail.判型" class="flex justify-between border-b border-slate-50 pb-2"><span class="text-slate-400 font-bold uppercase">判型</span><span class="font-black">{{ jpDetail.判型 }}</span></p>
-                                <p v-if="jpDetail.ISBN" class="flex justify-between pt-2"><span class="text-slate-400 font-bold uppercase">ISBN</span><span class="font-mono font-black">{{ jpDetail.ISBN }}</span></p>
+                            <div class="space-y-3 text-[13px] border-t pt-6 mt-8">
+                                <p v-if="jpDetail.著" class="flex justify-between border-b border-slate-50 pb-2"><span class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Artist</span><span class="font-black text-slate-700">{{ jpDetail.著 }}</span></p>
+                                <p v-if="jpDetail.判型" class="flex justify-between border-b border-slate-50 pb-2"><span class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Format</span><span class="font-black text-slate-700">{{ jpDetail.判型 }}</span></p>
+                                <p v-if="jpDetail.ISBN" class="flex justify-between pt-2"><span class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">ISBN</span><span class="font-mono font-black text-red-600">{{ jpDetail.ISBN }}</span></p>
                             </div>
                         </div>
                     </div>
@@ -169,7 +169,7 @@
                     <div class="px-8 py-5 bg-slate-50 border-b flex justify-between items-center text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
                         <div class="flex items-center gap-4">
                             <span>Chapter Index</span>
-                            <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded italic">Total: {{ currentStories.length }}</span>
+                            <span class="bg-blue-600 text-white px-3 py-0.5 rounded-full text-[9px] tracking-normal">Total: {{ currentStories.length }}</span>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
@@ -182,18 +182,18 @@
                                     <th class="px-8 py-4 text-center">Page</th>
                                 </tr>
                             </thead>
-                            <tbody class="text-xs divide-y divide-slate-100 font-medium italic">
-                                <tr v-for="story in currentStories" :key="story.作品番" class="hover:bg-slate-50 transition-colors">
-                                    <td class="px-8 py-5 text-center text-slate-300 font-black">{{ story.收錄話 }}</td>
-                                    <td class="px-8 py-5 uppercase">
-                                        <div class="font-black text-slate-900 leading-tight">{{ story.出版副題 }}</div>
-                                        <div class="text-[10px] text-blue-600 font-black mt-1">{{ story.副題港譯 }}</div>
+                            <tbody class="text-[13px] divide-y divide-slate-100 font-medium">
+                                <tr v-for="story in currentStories" :key="story.作品番" class="hover:bg-slate-50/80 transition-colors">
+                                    <td class="px-8 py-6 text-center text-slate-300 font-black text-sm">{{ story.收錄話 }}</td>
+                                    <td class="px-8 py-6 uppercase">
+                                        <div class="font-black text-slate-900 leading-tight text-sm">{{ story.出版副題 }}</div>
+                                        <div class="text-[11px] text-blue-600 font-bold mt-1.5">{{ story.副題港譯 }}</div>
                                     </td>
-                                    <td class="px-8 py-5">
-                                        <div class="font-black text-slate-800">{{ story.master?.初出掲載誌 }}</div>
-                                        <div class="text-[10px] text-slate-400 font-bold">{{ story.master?.初出掲載号 }}</div>
+                                    <td class="px-8 py-6">
+                                        <div class="font-bold text-slate-700">{{ story.master?.初出掲載誌 }}</div>
+                                        <div class="text-[10px] text-slate-400 font-black mt-0.5 uppercase tracking-wider">{{ story.master?.初出掲載号 }}</div>
                                     </td>
-                                    <td class="px-8 py-5 text-center font-black text-slate-400">{{ story.收錄頁 }}</td>
+                                    <td class="px-8 py-6 text-center font-black text-slate-400">{{ story.收錄頁 }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -208,15 +208,9 @@
         createApp({
             data() {
                 return {
-                    region: 'HK', 
-                    view: 'series', 
-                    loading: true, 
-                    zoomImage: null,
-                    selectedSeries: null, 
-                    selectedBook: null, 
-                    searchQuery: '',
-                    seriesQuery: '',
-                    db: { hk: [], jp: [], contents: [], master: [] }
+                    region: 'HK', view: 'series', loading: true, zoomImage: null,
+                    selectedSeries: null, selectedBook: null, searchQuery: '',
+                    seriesQuery: '', db: { hk: [], jp: [], contents: [], master: [] }
                 }
             },
             computed: {
@@ -264,7 +258,6 @@
                     const urlParams = new URLSearchParams(window.location.search);
                     const rParam = urlParams.get('region');
                     if (rParam) this.region = rParam.toUpperCase();
-
                     try {
                         const [hk, jp, contents, master] = await Promise.all([
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json()),

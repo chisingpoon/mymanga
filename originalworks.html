@@ -3,37 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Archive | Large View</title>
+    <title>Master Archive | Optimized View</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         [v-cloak] { display: none; }
-        body { 
-            -webkit-user-select: none; 
-            user-select: none; 
-            font-size: 18px; 
-        }
+        body { -webkit-user-select: none; user-select: none; font-size: 18px; }
         .bg-grid {
             background-color: #f8fafc;
             background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
             background-size: 50px 50px;
         }
+        td, th { white-space: nowrap; padding: 1.5rem !important; }
         .filter-scroll::-webkit-scrollbar { width: 6px; }
         .filter-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        td, th { white-space: nowrap; padding: 1.5rem !important; }
-        input, button { font-size: 1.1rem !important; }
     </style>
 </head>
-<body class="bg-grid text-slate-900 font-sans min-h-screen relative overflow-x-hidden" oncontextmenu="return false;">
+<body class="bg-grid text-slate-900 min-h-screen relative overflow-x-hidden">
 
     <div id="app" v-cloak>
         <header class="bg-white/90 backdrop-blur-md border-b sticky top-0 z-40 shadow-md">
             <div class="max-w-[98%] mx-auto px-6 h-20 flex items-center justify-between">
                 <div class="flex items-center gap-6">
-                    <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg hover:scale-105 transition-all">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                    </a>
-                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Master Archive</h1>
+                    <div class="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </div>
+                    <h1 class="font-black text-2xl tracking-tighter uppercase">Master Archive</h1>
                 </div>
             </div>
         </header>
@@ -42,79 +37,73 @@
             
             <div v-if="loading" class="flex flex-col items-center justify-center py-40">
                 <div class="w-16 h-16 border-8 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
-                <p class="mt-6 text-xl font-black text-slate-400 uppercase tracking-widest">載入資料中...</p>
+                <p class="mt-6 text-xl font-black text-slate-400 uppercase tracking-widest">Matching Data...</p>
             </div>
 
             <div v-else>
                 <div class="bg-white rounded-[2.5rem] shadow-lg border border-slate-200 p-8 mb-6">
                     <div class="grid grid-cols-1 lg:grid-cols-4 gap-10">
                         <div class="space-y-4">
-                            <label class="text-sm font-black text-slate-400 uppercase tracking-widest">關鍵字搜尋</label>
-                            <input type="text" v-model="searchQuery" placeholder="搜尋副題或備註..." 
-                                class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl py-4 px-6 font-bold focus:ring-4 focus:ring-indigo-500/20 outline-none transition-all">
+                            <label class="text-sm font-black text-slate-400 uppercase tracking-widest">Search</label>
+                            <input type="text" v-model="searchQuery" placeholder="搜尋..." 
+                                class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl py-4 px-6 font-bold outline-none focus:ring-4 focus:ring-indigo-500/10">
                         </div>
-
                         <div class="lg:col-span-3 space-y-4">
-                            <label class="text-sm font-black text-slate-400 uppercase tracking-widest">初出掲載誌 篩選</label>
+                            <label class="text-sm font-black text-slate-400 uppercase tracking-widest">Magazine</label>
                             <div class="flex flex-wrap gap-3 max-h-48 overflow-y-auto filter-scroll p-1">
                                 <button v-for="(count, mag) in magazineStats" :key="mag" 
                                     @click="toggleMagazine(mag)"
-                                    :class="activeMagazines.includes(mag) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-400'"
-                                    class="px-5 py-2.5 rounded-2xl border-2 font-bold transition-all shadow-md flex items-center gap-3">
-                                    {{ mag }} <span class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-lg text-xs" :class="activeMagazines.includes(mag) ? 'bg-indigo-400 text-white' : ''">{{ count }}</span>
+                                    :class="activeMagazines.includes(mag) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200'"
+                                    class="px-5 py-2 rounded-2xl border-2 font-bold transition-all shadow-sm">
+                                    {{ mag }} ({{ count }})
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="px-8 py-5 mb-6 bg-indigo-50 border-2 border-indigo-100 rounded-[2rem] flex items-center justify-between">
-                    <span class="font-black text-indigo-900 uppercase tracking-widest">找到 {{ filteredData.length }} 筆記錄</span>
-                    <button @click="resetFilters" class="text-sm font-black text-indigo-500 uppercase">清除所有篩選</button>
-                </div>
-
                 <div class="bg-white rounded-[3rem] shadow-xl border border-slate-200 overflow-hidden">
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead class="text-xs font-black text-slate-400 uppercase tracking-widest border-b-2 bg-slate-50/50">
+                        <table class="w-full text-left">
+                            <thead class="text-xs font-black text-slate-400 uppercase tracking-widest border-b-2 bg-slate-50">
                                 <tr>
                                     <th class="px-8 py-6">掲載番</th>
                                     <th class="px-8 py-6">初出副題</th>
                                     <th class="px-8 py-6">初出掲載誌</th>
                                     <th class="px-8 py-6">初出掲載號</th>
                                     <th class="px-8 py-6">初出掲載頁</th>
-                                    <th class="px-8 py-6 text-center bg-indigo-50/50 text-indigo-600">大全集</th>
+                                    <th class="px-8 py-6 text-center bg-indigo-50 text-indigo-600">大全集</th>
                                     <th class="px-8 py-6">備考</th>
                                 </tr>
                             </thead>
                             <tbody class="text-[17px] divide-y-2 divide-slate-50">
-                                <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-slate-50/80 transition-colors">
+                                <tr v-for="row in paginatedData" :key="row.作品番">
                                     <td class="px-8 py-6 font-bold text-slate-400">{{ row.掲載番 }}</td>
                                     <td class="px-8 py-6 font-black text-slate-900">{{ row.初出副題 }}</td>
                                     <td class="px-8 py-6 font-bold text-slate-600">{{ row.初出掲載誌 }}</td>
-                                    <td class="px-8 py-6 text-slate-500 font-medium">{{ row.初出掲載号 }}</td>
-                                    <td class="px-8 py-6 text-slate-500 font-medium">{{ row.初出掲載頁 }}</td>
+                                    <td class="px-8 py-6 text-slate-500">{{ row.初出掲載号 }}</td>
+                                    <td class="px-8 py-6 text-slate-500">{{ row.初出掲載頁 }}</td>
                                     
-                                    <td class="px-8 py-6 text-center font-black">
+                                    <td class="px-8 py-6 text-center">
                                         <template v-if="getDQSMapping(row.作品番)">
-                                            <a :href="'publishjp.html?isbn=' + getDQSMapping(row.作品番).ISBN" 
-                                               class="inline-flex items-center justify-center bg-indigo-600 text-white px-6 py-2 rounded-2xl text-sm font-black hover:bg-indigo-700 hover:scale-105 transition-all shadow-lg">
-                                                Vol. {{ getDQSMapping(row.作品番).卷 }}
+                                            <a :href="'publishjp.html?isbn=' + getDQSMapping(row.作品番).isbn" 
+                                               class="inline-flex items-center justify-center bg-indigo-600 text-white px-6 py-2 rounded-2xl text-sm font-black hover:bg-indigo-700 shadow-lg">
+                                                Vol. {{ getDQSMapping(row.作品番).vol }}
                                             </a>
                                         </template>
                                         <span v-else class="text-slate-200">——</span>
                                     </td>
 
-                                    <td class="px-8 py-6 text-slate-400 italic font-medium truncate max-w-sm">{{ row.備考 }}</td>
+                                    <td class="px-8 py-6 text-slate-400 italic truncate max-w-sm">{{ row.備考 }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                     
-                    <div class="p-10 border-t-2 bg-slate-50/30 flex items-center justify-between">
-                        <button @click="currentPage--" :disabled="currentPage === 1" class="px-10 py-4 bg-white border-2 border-slate-200 rounded-2xl font-black disabled:opacity-20 hover:border-indigo-500 transition-all">PREV</button>
-                        <span class="font-black text-slate-400 uppercase tracking-widest text-sm">Page {{ currentPage }} / {{ totalPages }}</span>
-                        <button @click="currentPage++" :disabled="currentPage === totalPages" class="px-10 py-4 bg-white border-2 border-slate-200 rounded-2xl font-black disabled:opacity-20 hover:border-indigo-500 transition-all">NEXT</button>
+                    <div class="p-10 border-t-2 bg-slate-50 flex items-center justify-between">
+                        <button @click="currentPage--" :disabled="currentPage === 1" class="px-10 py-4 bg-white border-2 border-slate-200 rounded-2xl font-black disabled:opacity-20">PREV</button>
+                        <span class="font-black text-slate-400 uppercase text-sm">Page {{ currentPage }} / {{ totalPages }}</span>
+                        <button @click="currentPage++" :disabled="currentPage === totalPages" class="px-10 py-4 bg-white border-2 border-slate-200 rounded-2xl font-black disabled:opacity-20">NEXT</button>
                     </div>
                 </div>
             </div>
@@ -129,12 +118,8 @@
                     loading: true,
                     searchQuery: '', activeMagazines: [],
                     currentPage: 1, itemsPerPage: 50,
-                    master: [], contents: [], books: []
+                    master: [], contents: []
                 }
-            },
-            watch: {
-                searchQuery() { this.updateURL(); this.currentPage = 1; },
-                activeMagazines: { handler() { this.updateURL(); this.currentPage = 1; }, deep: true }
             },
             computed: {
                 magazineStats() {
@@ -151,9 +136,9 @@
                     const q = this.searchQuery.toLowerCase().trim();
                     const hasMags = this.activeMagazines.length > 0;
                     return this.master.filter(r => {
-                        const matchesText = !q || (r.初出副題||'').toLowerCase().includes(q) || (r.備考||'').toLowerCase().includes(q);
-                        const matchesMag = !hasMags || this.activeMagazines.includes(r.初出掲載誌?.trim());
-                        return matchesText && matchesMag;
+                        const mText = !q || (r.初出副題||'').toLowerCase().includes(q) || (r.備考||'').toLowerCase().includes(q);
+                        const mMag = !hasMags || this.activeMagazines.includes(r.初出掲載誌?.trim());
+                        return mText && mMag;
                     });
                 },
                 totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
@@ -165,54 +150,52 @@
             methods: {
                 async init() {
                     try {
-                        const [m, c, b] = await Promise.all([
+                        const [m, c] = await Promise.all([
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json()),
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP").then(r => r.json())
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json())
                         ]);
                         
-                        // 1. 僅保留有「作品番」的列
+                        // Filter out empty IDs immediately
                         this.master = m.filter(r => r.作品番 && r.作品番.toString().trim() !== "");
-                        this.contents = c; // 書籍收錄作品
-                        this.books = b; // 出版目録JP
-
-                        const p = new URLSearchParams(window.location.search);
-                        if (p.get('q')) this.searchQuery = decodeURIComponent(p.get('q'));
-                        if (p.get('mag')) {
-                            const requested = p.get('mag').split(',').map(m => decodeURIComponent(m).trim());
-                            this.activeMagazines = requested.filter(m => this.magazineStats[m]);
-                        }
-                    } catch (e) { console.error("載入失敗:", e); } finally { this.loading = false; }
+                        this.contents = c;
+                    } catch (e) { 
+                        console.error("Fetch Error:", e); 
+                    } finally { 
+                        this.loading = false; 
+                    }
                 },
                 getDQSMapping(workId) {
-                    if (!workId) return null;
+                    if (!workId || !this.contents.length) return null;
+                    
                     const cleanWorkId = workId.toString().trim();
+                    
+                    // Look for the match in "書籍收錄作品"
+                    const match = this.contents.find(c => {
+                        const cid = c.作品番 ? c.作品番.toString().trim() : '';
+                        const type = c.類 ? c.類.toString().trim() : '';
+                        return cid === cleanWorkId && (type === "大全集" || type === "大長編大全集");
+                    });
 
-                    // 直接搜尋「書籍收錄作品」中 作品番 相同的列
-                    // 並且該列的「類」必須是「大全集」或「大長編大全集」
-                    const record = this.contents.find(c => 
-                        c.作品番?.toString().trim() === cleanWorkId && 
-                        (c.類 === "大全集" || c.類 === "大長編大全集")
-                    );
-
-                    if (!record) return null;
-
-                    // 返回 卷 數值與 ISBN (供連結使用)
-                    return { 卷: record.卷, ISBN: record.ISBN };
+                    if (match) {
+                        // Use multiple fallback property names for "巻" and "ISBN" 
+                        // in case the API returns slightly different headers
+                        const volume = match.卷 || match.巻 || match['巻'] || match['卷'];
+                        const isbn = match.ISBN || match.isbn;
+                        
+                        if (volume) {
+                            return { vol: volume, isbn: isbn };
+                        }
+                    }
+                    return null;
                 },
                 toggleMagazine(mag) {
                     const idx = this.activeMagazines.indexOf(mag);
                     if (idx > -1) this.activeMagazines.splice(idx, 1);
                     else this.activeMagazines.push(mag);
+                    this.currentPage = 1;
                 },
                 resetFilters() {
                     this.searchQuery = ''; this.activeMagazines = []; this.currentPage = 1;
-                },
-                updateURL() {
-                    const url = new URL(window.location);
-                    if (this.searchQuery) url.searchParams.set('q', this.searchQuery); else url.searchParams.delete('q');
-                    if (this.activeMagazines.length > 0) url.searchParams.set('mag', this.activeMagazines.join(',')); else url.searchParams.delete('mag');
-                    window.history.replaceState({}, '', url);
                 }
             },
             mounted() { this.init(); }

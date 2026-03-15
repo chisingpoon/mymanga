@@ -19,7 +19,7 @@
         }
 
         .watermark {
-            position: fixed; bottom: -20px; right: -20px; font-size: 12rem;
+            position: fixed; bottom: -20px; right: -20px; font-size: 8rem;
             font-weight: 900; color: rgba(0, 0, 0, 0.03); pointer-events: none;
             z-index: -1; transform: rotate(-15deg);
         }
@@ -31,6 +31,37 @@
         .zoom-overlay-enter-from, .zoom-overlay-leave-to { opacity: 0; transform: scale(0.95); }
 
         .detail-card { width: 100%; max-width: 550px; }
+
+        /* --- MOBILE TABLE TRANSFORMATION --- */
+        @media (max-width: 768px) {
+            .responsive-table thead { display: none; } /* Hide headers */
+            .responsive-table tr { 
+                display: block; 
+                margin-bottom: 1.5rem; 
+                border: 1px solid #e2e8f0; 
+                border-radius: 1.5rem; 
+                background: white;
+                padding: 1rem;
+            }
+            .responsive-table td { 
+                display: block; 
+                width: 100% !important; 
+                padding: 0.5rem 0 !important;
+                border: none !important;
+                text-align: left !important;
+            }
+            .responsive-table td::before {
+                content: attr(data-label);
+                display: block;
+                font-size: 9px;
+                font-weight: 900;
+                color: #94a3b8;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-bottom: 2px;
+            }
+            .watermark { font-size: 5rem; }
+        }
     </style>
 </head>
 <body class="bg-grid text-slate-900 font-sans min-h-screen relative overflow-x-hidden" oncontextmenu="return false;">
@@ -60,9 +91,9 @@
                     </div>
                 </div>
 
-                <div class="flex bg-slate-200/50 p-1 rounded-xl border border-slate-200">
-                    <button @click="toggleRegion('HK')" :class="region === 'HK' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-800'" class="px-6 py-1.5 rounded-lg text-xs font-black transition-all uppercase tracking-widest">HK</button>
-                    <button @click="toggleRegion('JP')" :class="region === 'JP' ? 'bg-white shadow-sm text-red-600' : 'text-slate-500 hover:text-slate-800'" class="px-6 py-1.5 rounded-lg text-xs font-black transition-all uppercase tracking-widest">JP</button>
+                <div class="flex bg-slate-200/50 p-1 rounded-xl border border-slate-200 scale-90 md:scale-100">
+                    <button @click="toggleRegion('HK')" :class="region === 'HK' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-800'" class="px-4 md:px-6 py-1.5 rounded-lg text-xs font-black transition-all uppercase tracking-widest">HK</button>
+                    <button @click="toggleRegion('JP')" :class="region === 'JP' ? 'bg-white shadow-sm text-red-600' : 'text-slate-500 hover:text-slate-800'" class="px-4 md:px-6 py-1.5 rounded-lg text-xs font-black transition-all uppercase tracking-widest">JP</button>
                 </div>
             </div>
         </header>
@@ -163,14 +194,12 @@
                     </div>
                 </div>
 
-                <div v-if="currentStories.length > 0" class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden mx-auto">
+                <div v-if="currentStories.length > 0" class="bg-white md:rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden mx-auto">
                     <div class="px-8 py-5 bg-slate-50 border-b flex justify-between items-center text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
-                        <div class="flex items-center gap-4">
-                            <span>Chapter Archive Detail</span>
-                        </div>
+                        <span>Chapter Archive Detail</span>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left table-fixed min-w-[1200px]">
+                    <div class="overflow-x-auto md:overflow-visible p-4 md:p-0">
+                        <table class="w-full text-left table-fixed min-w-full md:min-w-[1200px] responsive-table">
                             <thead class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b">
                                 <tr>
                                     <th class="px-6 py-4 w-12 text-center">#</th>
@@ -183,25 +212,25 @@
                             </thead>
                             <tbody class="text-[12px] divide-y divide-slate-100 font-medium">
                                 <tr v-for="story in currentStories" :key="story.作品番" class="hover:bg-slate-50/80 transition-colors">
-                                    <td class="px-6 py-6 text-center text-slate-300 font-black">{{ story.收錄話 }}</td>
-                                    <td class="px-6 py-6">
+                                    <td data-label="Entry Index" class="px-6 py-6 text-center text-slate-300 font-black">{{ story.收錄話 }}</td>
+                                    <td data-label="Chapter Title" class="px-6 py-6">
                                         <div class="font-black text-slate-900 leading-tight uppercase text-sm">{{ story.出版副題 }}</div>
                                         <div class="text-[11px] text-blue-600 font-bold mt-1">{{ story.副題港譯 }}</div>
                                         <div v-if="story.出版備考" class="mt-2 text-[10px] text-orange-600 bg-orange-50 px-2 py-0.5 rounded inline-block font-bold">Note: {{ story.出版備考 }}</div>
                                     </td>
-                                    <td class="px-6 py-6 space-y-2">
+                                    <td data-label="History" class="px-6 py-6 space-y-2">
                                         <div v-if="story.master?.初出副題"><span class="text-[9px] block text-slate-400 font-black uppercase tracking-tighter">Original</span> <span class="text-slate-600">{{ story.master.初出副題 }}</span></div>
                                         <div v-if="story.master?.全集副題"><span class="text-[9px] block text-slate-400 font-black uppercase tracking-tighter">Complete Works</span> <span class="text-slate-600">{{ story.master.全集副題 }}</span></div>
                                     </td>
-                                    <td class="px-6 py-6">
+                                    <td data-label="Publication" class="px-6 py-6">
                                         <div class="font-bold text-slate-700">{{ story.master?.初出掲載誌 || '-' }}</div>
                                         <div class="text-[10px] text-slate-400 font-black mt-0.5 uppercase tracking-wider">{{ story.master?.初出掲載号 }}</div>
                                     </td>
-                                    <td class="px-6 py-6">
+                                    <td data-label="Reference" class="px-6 py-6">
                                         <div class="font-black text-slate-800">{{ story.master?.大全集 || '-' }}</div>
                                         <div v-if="story.master?.備考" class="text-[10px] text-slate-400 mt-2 leading-relaxed">{{ story.master.備考 }}</div>
                                     </td>
-                                    <td class="px-6 py-6 text-center font-black text-slate-400">{{ story.收錄頁 }}</td>
+                                    <td data-label="Page" class="px-6 py-6 text-center font-black text-slate-400">{{ story.收錄頁 }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -212,7 +241,6 @@
     </div>
 
     <script>
-        // JS logic remains identical to the "Strict Matching" version provided previously.
         const { createApp } = Vue;
         createApp({
             data() {
@@ -232,8 +260,7 @@
                 },
                 searchedSeries() {
                     if (!this.seriesQuery) return this.filteredSeries;
-                    const q = this.seriesQuery.toLowerCase();
-                    return this.filteredSeries.filter(s => s.toLowerCase().includes(q));
+                    return this.filteredSeries.filter(s => s.toLowerCase().includes(this.seriesQuery.toLowerCase()));
                 },
                 filteredBooks() {
                     const data = this.region === 'HK' ? this.activeHK : this.activeJP;
@@ -242,8 +269,7 @@
                 },
                 searchedBooks() {
                     if (!this.searchQuery) return this.filteredBooks;
-                    const q = this.searchQuery.toLowerCase();
-                    return this.filteredBooks.filter(b => (b.Title || b.標題 || "").toLowerCase().includes(q));
+                    return this.filteredBooks.filter(b => (b.Title || b.標題 || "").toLowerCase().includes(this.searchQuery.toLowerCase()));
                 },
                 hkDetail() {
                     if (!this.selectedBook) return null;

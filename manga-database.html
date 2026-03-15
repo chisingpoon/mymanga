@@ -8,41 +8,22 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         [v-cloak] { display: none; }
-        
-        /* Security: Disable Text Selection & Image Dragging */
-        body {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        img {
-            -webkit-user-drag: none;
-            -khtml-user-drag: none;
-            -moz-user-drag: none;
-            -o-user-drag: none;
-        }
-
+        body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+        img { -webkit-user-drag: none; -khtml-user-drag: none; -moz-user-drag: none; -o-user-drag: none; }
         .series-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1); }
         .book-card:hover .img-container img { transform: scale(1.02); }
-        
         .zoom-overlay-enter-active, .zoom-overlay-leave-active { transition: all 0.3s ease; }
         .zoom-overlay-enter-from, .zoom-overlay-leave-to { opacity: 0; transform: scale(0.95); }
-
         html { scroll-behavior: smooth; }
-        
         .detail-card { max-width: 600px; }
-        @media (min-width: 1024px) {
-            .detail-card { max-height: 500px; }
-        }
+        @media (min-width: 1024px) { .detail-card { min-height: 520px; } }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans" oncontextmenu="return false;">
     <div id="app" v-cloak class="min-h-screen pb-20">
         
         <transition name="zoom-overlay">
-            <div v-if="zoomImage" @click="zoomImage = null" 
-                 class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 cursor-zoom-out">
+            <div v-if="zoomImage" @click="zoomImage = null" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 cursor-zoom-out">
                 <img :src="zoomImage" class="max-w-full max-h-full rounded shadow-2xl object-contain">
                 <button class="absolute top-6 right-6 text-white text-4xl font-light">&times;</button>
             </div>
@@ -60,8 +41,8 @@
                     <span class="font-bold text-lg tracking-tight hidden sm:inline uppercase">Manga DB</span>
                 </div>
                 <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
-                    <button @click="toggleRegion('HK')" :class="region === 'HK' ? 'bg-white shadow text-blue-600' : 'text-slate-500'" class="px-4 py-1.5 rounded-md text-sm font-bold transition-all uppercase tracking-tighter">HK</button>
-                    <button @click="toggleRegion('JP')" :class="region === 'JP' ? 'bg-white shadow text-red-600' : 'text-slate-500'" class="px-4 py-1.5 rounded-md text-sm font-bold transition-all uppercase tracking-tighter">JP</button>
+                    <button @click="toggleRegion('HK')" :class="region === 'HK' ? 'bg-white shadow text-blue-600' : 'text-slate-500'" class="px-4 py-1.5 rounded-md text-sm font-bold transition-all uppercase">HK</button>
+                    <button @click="toggleRegion('JP')" :class="region === 'JP' ? 'bg-white shadow text-red-600' : 'text-slate-500'" class="px-4 py-1.5 rounded-md text-sm font-bold transition-all uppercase">JP</button>
                 </div>
             </div>
         </header>
@@ -79,8 +60,7 @@
 
             <div v-if="view === 'books'">
                 <div class="mb-8">
-                    <button @click="view = 'series'" class="mb-4 text-sm font-bold text-blue-600 flex items-center gap-2">← Back to Series List</button>
-                    
+                    <button @click="view = 'series'" class="mb-4 text-sm font-bold text-blue-600 flex items-center gap-2">← Back to Series</button>
                     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
                         <div class="space-y-1">
                             <h2 class="text-3xl font-black text-slate-900 tracking-tight">{{ selectedSeries }}</h2>
@@ -89,20 +69,16 @@
                                 <span v-if="seriesYearRange">• {{ seriesYearRange }}</span>
                             </div>
                         </div>
-
                         <div class="relative max-w-md w-full">
-                            <input type="text" v-model="searchQuery" placeholder="Search by volume title..." 
-                                   class="w-full bg-slate-100 border-none rounded-2xl py-3 pl-12 pr-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+                            <input type="text" v-model="searchQuery" placeholder="Search volumes..." class="w-full bg-slate-100 border-none rounded-2xl py-3 pl-12 pr-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none">
                             <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5" stroke-linecap="round"></path></svg>
                         </div>
                     </div>
                 </div>
-
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                     <div v-for="book in searchedBooks" @click="selectBook(book)" class="book-card bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 cursor-pointer group flex flex-col">
                         <div class="bg-slate-100 relative p-2 flex items-center justify-center img-container">
                             <img v-if="book.Image" :src="book.Image" class="w-full h-auto object-contain transition-all duration-500 shadow-sm rounded">
-                            <div v-else class="py-20 text-slate-400 italic text-xs uppercase">No Cover</div>
                         </div>
                         <div class="p-3 border-t">
                             <h3 class="font-bold text-sm text-slate-800 line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors">{{ book.Title || book.標題 }}</h3>
@@ -112,43 +88,46 @@
             </div>
 
             <div v-if="view === 'detail' && selectedBook" class="space-y-12 animate-in fade-in duration-500">
-                <button @click="view = 'books'" class="text-sm font-bold text-slate-500 hover:text-blue-600">← Back to Volume List</button>
+                <button @click="view = 'books'" class="text-sm font-bold text-slate-500 hover:text-blue-600">← Back to List</button>
 
                 <div class="flex flex-wrap gap-8 justify-center items-stretch">
+                    
                     <div v-if="region === 'HK' || hasHKData" class="detail-card flex-1 min-w-[320px] bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col sm:flex-row">
                         <div class="sm:w-1/2 p-4 bg-slate-50 flex items-center justify-center cursor-zoom-in group" @click="zoomImage = selectedBook.Image">
-                            <img :src="selectedBook.Image" class="w-full h-auto max-h-[400px] object-contain shadow-lg rounded group-hover:opacity-90 transition-opacity">
+                            <img :src="selectedBook.Image" class="w-full h-auto max-h-[400px] object-contain shadow-lg rounded">
                         </div>
                         <div class="sm:w-1/2 p-6 flex flex-col justify-between">
                             <div>
-                                <span class="bg-blue-600 text-[10px] font-black text-white px-2 py-1 rounded-full uppercase tracking-tighter">HK Version</span>
+                                <span class="bg-blue-600 text-[10px] font-black text-white px-2 py-1 rounded-full uppercase">HK INFO</span>
                                 <h2 class="text-lg font-black text-slate-800 mt-4 leading-tight">{{ selectedBook.Title }}</h2>
                                 <p class="text-slate-400 text-[10px] font-bold uppercase mt-1">{{ selectedBook.Subtitle }}</p>
                             </div>
-                            <div class="space-y-2 text-[11px] border-t pt-4 mt-4">
-                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400 uppercase">ISBN</span><span class="font-mono">{{ selectedBook.ISBN }}</span></p>
-                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400 uppercase">Price</span><span>{{ selectedBook.Price }}</span></p>
-                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400 uppercase">Page</span><span>{{ selectedBook.Page }}</span></p>
-                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400 uppercase">Size</span><span>{{ selectedBook.Size }}</span></p>
+                            <div class="space-y-1 text-[11px] border-t pt-4 mt-4">
+                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">Volume</span><span>{{ selectedBook.Volume }}</span></p>
+                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">Author</span><span>{{ selectedBook.Author }}</span></p>
+                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">Publisher</span><span>{{ selectedBook.Publisher }}</span></p>
+                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">Issue Date</span><span>{{ selectedBook.IssueDate }}</span></p>
+                                <p class="flex justify-between border-b border-slate-50 pb-1 pt-1"><span class="text-slate-400 uppercase">ISBN</span><span class="font-mono">{{ selectedBook.ISBN }}</span></p>
                             </div>
                         </div>
                     </div>
 
                     <div v-if="hasJPData" class="detail-card flex-1 min-w-[320px] bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col sm:flex-row">
                         <div class="sm:w-1/2 p-4 bg-slate-50 flex items-center justify-center cursor-zoom-in group" @click="zoomImage = (jpDetail.Image || selectedBook.Image)">
-                            <img :src="jpDetail.Image || selectedBook.Image" class="w-full h-auto max-h-[400px] object-contain shadow-lg rounded group-hover:opacity-90 transition-opacity">
+                            <img :src="jpDetail.Image || selectedBook.Image" class="w-full h-auto max-h-[400px] object-contain shadow-lg rounded">
                         </div>
                         <div class="sm:w-1/2 p-6 flex flex-col justify-between">
                             <div>
-                                <span class="bg-red-600 text-[10px] font-black text-white px-2 py-1 rounded-full uppercase tracking-tighter">JP Original</span>
+                                <span class="bg-red-600 text-[10px] font-black text-white px-2 py-1 rounded-full uppercase">JP SPECS</span>
                                 <h2 class="text-lg font-black text-slate-800 mt-4 leading-tight">{{ jpDetail.標題 }}</h2>
-                                <p class="text-slate-400 text-[10px] font-bold uppercase mt-1">{{ jpDetail.副標題 }}</p>
+                                <p class="text-slate-400 text-[10px] font-bold mt-1">{{ jpDetail.副標題 }}</p>
                             </div>
-                            <div class="space-y-2 text-[11px] border-t pt-4 mt-4">
-                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">著者</span><span>{{ jpDetail.著 }}</span></p>
+                            <div class="space-y-1 text-[11px] border-t pt-4 mt-4">
+                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">巻</span><span>{{ jpDetail.巻 }}</span></p>
+                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">著</span><span>{{ jpDetail.著 }}</span></p>
+                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">初版発行日</span><span>{{ jpDetail.初版発行日 }}</span></p>
                                 <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400 uppercase">ISBN</span><span class="font-mono">{{ jpDetail.ISBN }}</span></p>
-                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400 uppercase">判型</span><span>{{ jpDetail.判型 }}</span></p>
-                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400 uppercase">類</span><span class="text-red-600 font-black">{{ jpDetail.類 }}</span></p>
+                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">判型</span><span>{{ jpDetail.判型 }}</span></p>
                             </div>
                         </div>
                     </div>
@@ -164,33 +143,27 @@
                             <thead>
                                 <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b">
                                     <th class="px-6 py-4 w-12 text-center">#</th>
-                                    <th class="px-6 py-4">Title (Vol / Master / HK)</th>
+                                    <th class="px-6 py-4">Title</th>
                                     <th class="px-6 py-4">Original Publication</th>
                                     <th class="px-6 py-4 text-center">Page</th>
                                     <th class="px-6 py-4">大全集</th>
                                 </tr>
                             </thead>
                             <tbody class="text-xs divide-y divide-slate-100">
-                                <tr v-for="story in currentStories" :key="story.作品番" class="hover:bg-blue-50/50 transition-colors">
+                                <tr v-for="story in currentStories" :key="story.作品番" class="hover:bg-blue-50/50">
                                     <td class="px-6 py-4 text-center text-slate-300 font-mono">{{ story.收錄話 }}</td>
                                     <td class="px-6 py-4">
                                         <div class="font-bold text-slate-900 leading-tight">{{ story.出版副題 }}</div>
-                                        <div class="text-[10px] text-slate-400 italic mb-1">{{ story.master?.初出副題 }}</div>
-                                        <div class="text-[10px] text-blue-600 font-black uppercase tracking-tighter">{{ story.副題港譯 }}</div>
+                                        <div class="text-[10px] text-slate-400 italic">{{ story.master?.初出副題 }}</div>
+                                        <div class="text-[10px] text-blue-600 font-black uppercase">{{ story.副題港譯 }}</div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="text-slate-800 font-bold leading-tight">{{ story.master?.初出掲載誌 }}</div>
-                                        <div class="text-slate-400 text-[10px]">{{ story.master?.初出掲載号 }}</div>
+                                        <div class="font-bold text-slate-800">{{ story.master?.初出掲載誌 }}</div>
+                                        <div class="text-[10px] text-slate-400">{{ story.master?.初出掲載号 }}</div>
                                     </td>
-                                    <td class="px-6 py-4 text-center font-bold text-slate-700">{{ story.收錄頁 }}</td>
+                                    <td class="px-6 py-4 text-center font-bold">{{ story.收錄頁 }}</td>
                                     <td class="px-6 py-4">
-                                        <div v-if="story.master?.大全集" class="mb-1">
-                                            <span class="bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded text-[8px] font-black">{{ story.master?.大全集 }}</span>
-                                        </div>
-                                        <div class="flex flex-wrap gap-1">
-                                            <span v-if="story.master?.第0巻 === 'Yes'" class="bg-orange-100 text-orange-600 px-1 py-0.5 rounded text-[8px] font-black tracking-tighter uppercase">Plus</span>
-                                            <span v-if="story.master?.ドラミちゃん === 'Yes'" class="bg-yellow-100 text-yellow-700 px-1 py-0.5 rounded text-[8px] font-black tracking-tighter uppercase">Dorami</span>
-                                        </div>
+                                        <span v-if="story.master?.大全集" class="bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded text-[8px] font-black">{{ story.master?.大全集 }}</span>
                                     </td>
                                 </tr>
                             </tbody>
@@ -201,16 +174,13 @@
         </main>
         
         <button v-if="showTopBtn" @click="scrollToTop" class="fixed bottom-6 right-6 bg-slate-800 text-white p-3 rounded-full shadow-xl hover:bg-blue-600 transition-all z-40">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7" stroke-width="2.5" stroke-linecap="round"></path></svg>
         </button>
     </div>
 
     <script>
-        // Security: Prevent Copy / Save / Source
         window.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 's' || e.key === 'p' || e.key === 'u' || e.key === 'a')) {
-                e.preventDefault();
-            }
+            if ((e.ctrlKey || e.metaKey) && ['c','s','p','u','a'].includes(e.key)) e.preventDefault();
         });
 
         const { createApp } = Vue;
@@ -238,18 +208,11 @@
                 searchedBooks() {
                     if (!this.searchQuery) return this.filteredBooks;
                     const q = this.searchQuery.toLowerCase();
-                    return this.filteredBooks.filter(b => {
-                        const title = (b.Title || b.標題 || "").toLowerCase();
-                        return title.includes(q);
-                    });
+                    return this.filteredBooks.filter(b => (b.Title || b.標題 || "").toLowerCase().includes(q));
                 },
                 seriesYearRange() {
-                    if (!this.filteredBooks.length) return null;
-                    const dates = this.filteredBooks
-                        .map(b => parseInt((b.IssueDate || b.初版発行日 || "").split('/')[0]))
-                        .filter(y => !isNaN(y));
-                    if (!dates.length) return null;
-                    return `${Math.min(...dates)} – ${Math.max(...dates)}`;
+                    const dates = this.filteredBooks.map(b => parseInt((b.IssueDate || b.初版発行日 || "").split('/')[0])).filter(y => !isNaN(y));
+                    return dates.length ? `${Math.min(...dates)} – ${Math.max(...dates)}` : null;
                 },
                 jpDetail() {
                     if (!this.selectedBook) return null;
@@ -257,20 +220,13 @@
                     return this.db.jp.find(j => j.ISBN == targetISBN) || null;
                 },
                 hasJPData() { return !!this.jpDetail; },
-                hasHKData() {
-                    if (this.region === 'HK') return true;
-                    return this.db.hk.find(h => h.ISBN_JP == this.selectedBook.ISBN);
-                },
+                hasHKData() { return this.region === 'HK' ? true : this.db.hk.find(h => h.ISBN_JP == this.selectedBook.ISBN); },
                 currentStories() {
                     if (!this.selectedBook) return [];
                     const targetISBN = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
-                    return this.db.contents
-                        .filter(c => c.ISBN == targetISBN)
-                        .map(c => ({ 
-                            ...c, 
-                            master: this.db.master.find(m => m.作品番 == c.作品番) 
-                        }))
-                        .sort((a, b) => (parseInt(a.收錄話) || 0) - (parseInt(b.收錄話) || 0));
+                    return this.db.contents.filter(c => c.ISBN == targetISBN).map(c => ({ 
+                        ...c, master: this.db.master.find(m => m.作品番 == c.作品番) 
+                    })).sort((a, b) => (parseInt(a.收錄話) || 0) - (parseInt(b.收錄話) || 0));
                 }
             },
             methods: {
@@ -285,18 +241,14 @@
                         this.db = { hk, jp, contents, master };
                     } catch (e) { console.error(e); } finally { this.loading = false; }
                 },
-                toggleRegion(r) { this.region = r; this.view = 'series'; this.selectedSeries = null; this.searchQuery = ''; },
-                selectSeries(name) { this.selectedSeries = name; this.view = 'books'; this.searchQuery = ''; },
+                toggleRegion(r) { this.region = r; this.view = 'series'; this.selectedSeries = null; },
+                selectSeries(name) { this.selectedSeries = name; this.view = 'books'; },
                 selectBook(book) { this.selectedBook = book; this.view = 'detail'; window.scrollTo(0, 0); },
-                resetToSeries() { this.view = 'series'; this.selectedSeries = null; this.selectedBook = null; this.searchQuery = ''; },
+                resetToSeries() { this.view = 'series'; this.selectedSeries = null; this.selectedBook = null; },
                 scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },
                 handleScroll() { this.showTopBtn = window.scrollY > 500; }
             },
-            mounted() { 
-                this.init(); 
-                window.addEventListener('scroll', this.handleScroll);
-            },
-            unmounted() { window.removeEventListener('scroll', this.handleScroll); }
+            mounted() { this.init(); window.addEventListener('scroll', this.handleScroll); }
         }).mount('#app')
     </script>
 </body>

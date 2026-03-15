@@ -129,7 +129,6 @@
                 </button>
 
                 <div class="flex flex-col md:flex-row gap-8 items-center md:items-start justify-center">
-                    
                     <div v-if="region === 'HK' && hkDetail" class="detail-card bg-white rounded-[2.5rem] shadow-xl border border-slate-200 overflow-hidden flex flex-col sm:flex-row">
                         <div class="sm:w-1/2 p-6 bg-slate-50 flex items-center justify-center cursor-zoom-out" @click="zoomImage = hkDetail.Image">
                             <img :src="hkDetail.Image" class="w-full h-auto max-h-[450px] object-contain shadow-2xl rounded-xl">
@@ -165,7 +164,7 @@
                     </div>
                 </div>
 
-                <div v-if="currentStories.length > 0" class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden max-w-5xl mx-auto">
+                <div v-if="currentStories.length > 0" class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden max-w-7xl mx-auto">
                     <div class="px-8 py-5 bg-slate-50 border-b flex justify-between items-center text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
                         <div class="flex items-center gap-4">
                             <span>Chapter Index</span>
@@ -179,7 +178,8 @@
                                     <th class="px-8 py-4 w-16 text-center">#</th>
                                     <th class="px-8 py-4">Title Information</th>
                                     <th class="px-8 py-4">Publication</th>
-                                    <th class="px-8 py-4 text-center">Page</th>
+                                    <th class="px-8 py-4">大全集 Reference</th>
+                                    <th class="px-8 py-4 text-center w-24">Page</th>
                                 </tr>
                             </thead>
                             <tbody class="text-[13px] divide-y divide-slate-100 font-medium">
@@ -192,6 +192,9 @@
                                     <td class="px-8 py-6">
                                         <div class="font-bold text-slate-700">{{ story.master?.初出掲載誌 }}</div>
                                         <div class="text-[10px] text-slate-400 font-black mt-0.5 uppercase tracking-wider">{{ story.master?.初出掲載号 }}</div>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        <div class="text-slate-500 font-bold leading-relaxed">{{ story.master?.大全集 || '-' }}</div>
                                     </td>
                                     <td class="px-8 py-6 text-center font-black text-slate-400">{{ story.收錄頁 }}</td>
                                 </tr>

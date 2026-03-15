@@ -10,12 +10,8 @@
         [v-cloak] { display: none; }
         .series-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1); }
         .book-card:hover .img-container img { transform: scale(1.02); }
-        
-        /* Lightbox Animation */
         .zoom-overlay-enter-active, .zoom-overlay-leave-active { transition: all 0.3s ease; }
         .zoom-overlay-enter-from, .zoom-overlay-leave-to { opacity: 0; transform: scale(0.95); }
-
-        /* Ensure smooth scrolling */
         html { scroll-behavior: smooth; }
     </style>
 </head>
@@ -78,14 +74,13 @@
                 <button @click="view = 'books'" class="text-sm font-bold text-slate-500 hover:text-blue-600">← Back to Volume List</button>
 
                 <div class="flex flex-col lg:flex-row gap-8 items-stretch">
-                    
                     <div v-if="region === 'HK' || hasHKData" class="flex-1 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col sm:flex-row">
                         <div class="sm:w-1/2 p-4 bg-slate-50 flex items-center justify-center cursor-zoom-in group" @click="zoomImage = selectedBook.Image">
                             <img :src="selectedBook.Image" class="w-full h-auto object-contain shadow-lg rounded group-hover:opacity-90 transition-opacity">
                         </div>
                         <div class="sm:w-1/2 p-6 flex flex-col justify-between">
                             <div>
-                                <div class="bg-blue-600 inline-block px-3 py-1 rounded-full text-[10px] font-black text-white mb-4 uppercase">Hong Kong</div>
+                                <div class="bg-blue-600 inline-block px-3 py-1 rounded-full text-[10px] font-black text-white mb-4 uppercase tracking-wider">HK Publication</div>
                                 <h2 class="text-xl font-black text-slate-800 mb-2 leading-tight">{{ selectedBook.Title }}</h2>
                                 <p class="text-slate-400 text-xs font-bold mb-4 uppercase">{{ selectedBook.Subtitle }}</p>
                             </div>
@@ -104,7 +99,7 @@
                         </div>
                         <div class="sm:w-1/2 p-6 flex flex-col justify-between">
                             <div>
-                                <div class="bg-red-600 inline-block px-3 py-1 rounded-full text-[10px] font-black text-white mb-4 uppercase">Japan Specs</div>
+                                <div class="bg-red-600 inline-block px-3 py-1 rounded-full text-[10px] font-black text-white mb-4 uppercase tracking-wider">JP Edition</div>
                                 <h2 class="text-xl font-black text-slate-800 mb-2 leading-tight">{{ jpDetail.標題 }}</h2>
                                 <p class="text-slate-400 text-xs font-bold mb-4 uppercase">{{ jpDetail.副標題 }}</p>
                             </div>
@@ -120,24 +115,48 @@
 
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mt-8">
                     <div class="px-6 py-4 bg-slate-50 border-b flex justify-between items-center">
-                        <span class="font-black text-slate-700 text-xs uppercase tracking-widest">Story Collection</span>
+                        <span class="font-black text-slate-700 text-xs uppercase tracking-widest">Chapter Collection Mapping</span>
+                        <span class="text-[10px] bg-slate-200 px-2 py-0.5 rounded-full font-bold text-slate-500">ID MAPPED</span>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left">
                             <thead>
                                 <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b">
                                     <th class="px-6 py-4 w-12 text-center">#</th>
-                                    <th class="px-6 py-4">Title</th>
+                                    <th class="px-6 py-4">Title (Vol / Master / HK)</th>
                                     <th class="px-6 py-4">Magazine / Issue</th>
-                                    <th class="px-6 py-4 text-center">Page</th>
+                                    <th class="px-6 py-4 text-center">Page (Vol/Org)</th>
+                                    <th class="px-6 py-4">Reference</th>
                                 </tr>
                             </thead>
                             <tbody class="text-xs divide-y divide-slate-100">
-                                <tr v-for="story in currentStories" :key="story.作品番" class="hover:bg-blue-50/50">
-                                    <td class="px-6 py-4 text-center text-slate-300">{{ story.收錄話 }}</td>
-                                    <td class="px-6 py-4 font-bold text-slate-800">{{ story.出版副題 }}<br><span class="text-blue-600 font-bold text-[10px]">{{ story.副題港譯 }}</span></td>
-                                    <td class="px-6 py-4">{{ story.master?.初出掲載誌 }}<br><span class="text-slate-400 text-[10px]">{{ story.master?.初出掲載号 }}</span></td>
-                                    <td class="px-6 py-4 text-center font-bold">{{ story.收錄頁 }}</td>
+                                <tr v-for="story in currentStories" :key="story.作品番" class="hover:bg-blue-50/50 transition-colors">
+                                    <td class="px-6 py-4 text-center text-slate-300 font-mono">{{ story.收錄話 }}</td>
+                                    <td class="px-6 py-4">
+                                        <div class="font-bold text-slate-900 leading-tight mb-0.5">{{ story.出版副題 }}</div>
+                                        <div class="text-[10px] text-slate-400 italic mb-1">{{ story.master?.初出副題 }}</div>
+                                        <div class="text-[10px] text-blue-600 font-black uppercase tracking-tighter">{{ story.副題港譯 }}</div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="text-slate-800 font-bold">{{ story.master?.初出掲載誌 }}</div>
+                                        <div class="text-slate-400 text-[10px]">{{ story.master?.初出掲載号 }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="font-bold text-slate-700">{{ story.收錄頁 }}</div>
+                                        <div v-if="story.master?.初出掲載頁" class="text-[9px] text-slate-300">Org: {{ story.master?.初出掲載頁 }}</div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex flex-col gap-1">
+                                            <div v-if="story.master?.大全集" class="flex items-center gap-1">
+                                                <span class="bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded text-[9px] font-black">大全集</span>
+                                                <span class="text-slate-500 font-mono text-[10px]">{{ story.master?.大全集 }}</span>
+                                            </div>
+                                            <div class="flex flex-wrap gap-1">
+                                                <span v-if="story.master?.第0巻 === 'Yes'" class="bg-orange-100 text-orange-600 px-1 py-0.5 rounded text-[8px] font-black">PLUS</span>
+                                                <span v-if="story.master?.ドラミちゃん === 'Yes'" class="bg-yellow-100 text-yellow-700 px-1 py-0.5 rounded text-[8px] font-black">DORAMI</span>
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -189,7 +208,10 @@
                     const targetISBN = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
                     return this.db.contents
                         .filter(c => c.ISBN == targetISBN)
-                        .map(c => ({ ...c, master: this.db.master.find(m => m.作品番 == c.作品番) }))
+                        .map(c => ({ 
+                            ...c, 
+                            master: this.db.master.find(m => m.作品番 == c.作品番) 
+                        }))
                         .sort((a, b) => (parseInt(a.收錄話) || 0) - (parseInt(b.收錄話) || 0));
                 }
             },

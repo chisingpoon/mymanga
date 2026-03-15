@@ -129,7 +129,6 @@
                 </button>
 
                 <div class="flex flex-col md:flex-row gap-8 items-center md:items-start justify-center">
-                    
                     <div v-if="region === 'HK' && hkDetail" class="detail-card bg-white rounded-[2.5rem] shadow-xl border border-slate-200 overflow-hidden flex flex-col sm:flex-row">
                         <div class="sm:w-1/2 p-6 bg-slate-50 flex items-center justify-center cursor-zoom-out" @click="zoomImage = hkDetail.Image">
                             <img :src="hkDetail.Image" class="w-full h-auto max-h-[450px] object-contain shadow-2xl rounded-xl">
@@ -256,12 +255,10 @@
                     return this.db.contents
                         .filter(c => c.ISBN == targetISBN)
                         .map(c => {
-                            // Explicit mapping: if 作品番 not found in master, return null for master
-                            const masterRecord = this.db.master.find(m => m.作品番 == c.作品番);
-                            return { 
-                                ...c, 
-                                master: masterRecord || null 
-                            };
+                            // STRICT LOOKUP: Ensure 作品番 is not empty before finding
+                            const code = c.作品番?.toString().trim();
+                            const masterRecord = code ? this.db.master.find(m => m.作品番?.toString().trim() === code) : null;
+                            return { ...c, master: masterRecord };
                         })
                         .sort((a, b) => (parseInt(a.收錄話) || 0) - (parseInt(b.收錄話) || 0));
                 }

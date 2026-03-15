@@ -25,20 +25,24 @@
         <transition name="zoom-overlay">
             <div v-if="zoomImage" @click="zoomImage = null" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 cursor-zoom-out">
                 <img :src="zoomImage" class="max-w-full max-h-full rounded shadow-2xl object-contain">
-                <button class="absolute top-6 right-6 text-white text-4xl font-light">&times;</button>
             </div>
         </transition>
 
         <div v-if="loading" class="fixed inset-0 bg-white/90 z-50 flex flex-col items-center justify-center">
             <div class="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p class="text-slate-500 font-bold animate-pulse tracking-widest text-xs uppercase">Syncing Archive...</p>
+            <p class="text-slate-500 font-bold animate-pulse text-xs uppercase tracking-widest">Syncing Archive...</p>
         </div>
 
         <header class="bg-white border-b sticky top-0 z-40 shadow-sm">
             <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-                <div class="flex items-center gap-2 cursor-pointer" @click="resetToSeries">
-                    <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-black italic">M</div>
-                    <span class="font-bold text-lg tracking-tight hidden sm:inline uppercase">Manga DB</span>
+                <div class="flex items-center gap-4">
+                    <a href="index.html" class="w-8 h-8 bg-slate-800 rounded flex items-center justify-center text-white text-xs hover:bg-blue-600 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </a>
+                    <div class="flex items-center gap-2 cursor-pointer" @click="resetToSeries">
+                        <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-black italic">M</div>
+                        <span class="font-bold text-lg tracking-tight hidden sm:inline uppercase">Manga DB</span>
+                    </div>
                 </div>
                 <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
                     <button @click="toggleRegion('HK')" :class="region === 'HK' ? 'bg-white shadow text-blue-600' : 'text-slate-500'" class="px-4 py-1.5 rounded-md text-sm font-bold transition-all uppercase">HK</button>
@@ -92,29 +96,29 @@
 
                 <div class="flex flex-wrap gap-8 justify-center items-stretch">
                     
-                    <div v-if="region === 'HK' || hasHKData" class="detail-card flex-1 min-w-[320px] bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col sm:flex-row">
-                        <div class="sm:w-1/2 p-4 bg-slate-50 flex items-center justify-center cursor-zoom-in group" @click="zoomImage = selectedBook.Image">
-                            <img :src="selectedBook.Image" class="w-full h-auto max-h-[400px] object-contain shadow-lg rounded">
+                    <div v-if="hkDetail" class="detail-card flex-1 min-w-[320px] bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col sm:flex-row">
+                        <div class="sm:w-1/2 p-4 bg-slate-50 flex items-center justify-center cursor-zoom-in group" @click="zoomImage = hkDetail.Image">
+                            <img :src="hkDetail.Image" class="w-full h-auto max-h-[400px] object-contain shadow-lg rounded">
                         </div>
                         <div class="sm:w-1/2 p-6 flex flex-col justify-between">
                             <div>
                                 <span class="bg-blue-600 text-[10px] font-black text-white px-2 py-1 rounded-full uppercase">HK INFO</span>
-                                <h2 class="text-lg font-black text-slate-800 mt-4 leading-tight">{{ selectedBook.Title }}</h2>
-                                <p class="text-slate-400 text-[10px] font-bold uppercase mt-1">{{ selectedBook.Subtitle }}</p>
+                                <h2 class="text-lg font-black text-slate-800 mt-4 leading-tight">{{ hkDetail.Title }}</h2>
+                                <p class="text-slate-400 text-[10px] font-bold uppercase mt-1">{{ hkDetail.Subtitle }}</p>
                             </div>
                             <div class="space-y-1 text-[11px] border-t pt-4 mt-4">
-                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">Volume</span><span>{{ selectedBook.Volume }}</span></p>
-                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">Author</span><span>{{ selectedBook.Author }}</span></p>
-                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">Publisher</span><span>{{ selectedBook.Publisher }}</span></p>
-                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">Issue Date</span><span>{{ selectedBook.IssueDate }}</span></p>
-                                <p class="flex justify-between border-b border-slate-50 pb-1 pt-1"><span class="text-slate-400 uppercase">ISBN</span><span class="font-mono">{{ selectedBook.ISBN }}</span></p>
+                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">Volume</span><span>{{ hkDetail.Volume }}</span></p>
+                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">Author</span><span>{{ hkDetail.Author }}</span></p>
+                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">Publisher</span><span>{{ hkDetail.Publisher }}</span></p>
+                                <p class="flex justify-between border-b border-slate-50 pb-1"><span class="text-slate-400">Issue Date</span><span>{{ hkDetail.IssueDate }}</span></p>
+                                <p class="flex justify-between border-b border-slate-50 pb-1 pt-1"><span class="text-slate-400 uppercase">ISBN</span><span class="font-mono">{{ hkDetail.ISBN }}</span></p>
                             </div>
                         </div>
                     </div>
 
-                    <div v-if="hasJPData" class="detail-card flex-1 min-w-[320px] bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col sm:flex-row">
-                        <div class="sm:w-1/2 p-4 bg-slate-50 flex items-center justify-center cursor-zoom-in group" @click="zoomImage = (jpDetail.Image || selectedBook.Image)">
-                            <img :src="jpDetail.Image || selectedBook.Image" class="w-full h-auto max-h-[400px] object-contain shadow-lg rounded">
+                    <div v-if="jpDetail" class="detail-card flex-1 min-w-[320px] bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col sm:flex-row">
+                        <div class="sm:w-1/2 p-4 bg-slate-50 flex items-center justify-center cursor-zoom-in group" @click="zoomImage = jpDetail.Image">
+                            <img :src="jpDetail.Image" class="w-full h-auto max-h-[400px] object-contain shadow-lg rounded">
                         </div>
                         <div class="sm:w-1/2 p-6 flex flex-col justify-between">
                             <div>
@@ -172,10 +176,6 @@
                 </div>
             </div>
         </main>
-        
-        <button v-if="showTopBtn" @click="scrollToTop" class="fixed bottom-6 right-6 bg-slate-800 text-white p-3 rounded-full shadow-xl hover:bg-blue-600 transition-all z-40">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7" stroke-width="2.5" stroke-linecap="round"></path></svg>
-        </button>
     </div>
 
     <script>
@@ -188,7 +188,7 @@
             data() {
                 return {
                     region: 'HK', view: 'series', loading: true, zoomImage: null,
-                    selectedSeries: null, selectedBook: null, showTopBtn: false, searchQuery: '',
+                    selectedSeries: null, selectedBook: null, searchQuery: '',
                     db: { hk: [], jp: [], contents: [], master: [] }
                 }
             },
@@ -214,13 +214,20 @@
                     const dates = this.filteredBooks.map(b => parseInt((b.IssueDate || b.初版発行日 || "").split('/')[0])).filter(y => !isNaN(y));
                     return dates.length ? `${Math.min(...dates)} – ${Math.max(...dates)}` : null;
                 },
+                // NEW: Explicit HK Detail Lookup
+                hkDetail() {
+                    if (!this.selectedBook) return null;
+                    if (this.region === 'HK') return this.selectedBook;
+                    // If in JP mode, find the HK book that links to this JP ISBN
+                    return this.db.hk.find(h => h.ISBN_JP == this.selectedBook.ISBN) || null;
+                },
+                // NEW: Explicit JP Detail Lookup
                 jpDetail() {
                     if (!this.selectedBook) return null;
-                    const targetISBN = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
-                    return this.db.jp.find(j => j.ISBN == targetISBN) || null;
+                    if (this.region === 'JP') return this.selectedBook;
+                    // If in HK mode, find the JP book via ISBN_JP link
+                    return this.db.jp.find(j => j.ISBN == this.selectedBook.ISBN_JP) || null;
                 },
-                hasJPData() { return !!this.jpDetail; },
-                hasHKData() { return this.region === 'HK' ? true : this.db.hk.find(h => h.ISBN_JP == this.selectedBook.ISBN); },
                 currentStories() {
                     if (!this.selectedBook) return [];
                     const targetISBN = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
@@ -244,11 +251,9 @@
                 toggleRegion(r) { this.region = r; this.view = 'series'; this.selectedSeries = null; },
                 selectSeries(name) { this.selectedSeries = name; this.view = 'books'; },
                 selectBook(book) { this.selectedBook = book; this.view = 'detail'; window.scrollTo(0, 0); },
-                resetToSeries() { this.view = 'series'; this.selectedSeries = null; this.selectedBook = null; },
-                scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },
-                handleScroll() { this.showTopBtn = window.scrollY > 500; }
+                resetToSeries() { this.view = 'series'; this.selectedSeries = null; this.selectedBook = null; }
             },
-            mounted() { this.init(); window.addEventListener('scroll', this.handleScroll); }
+            mounted() { this.init(); }
         }).mount('#app')
     </script>
 </body>

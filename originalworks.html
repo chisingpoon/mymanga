@@ -17,7 +17,6 @@
             background-size: 50px 50px;
         }
 
-        /* Table styling */
         td, th { padding: 1rem 1.25rem !important; }
         .col-wrap {
             white-space: normal !important;
@@ -25,8 +24,7 @@
             line-height: 1.4;
         }
 
-        /* Custom Scrollbars */
-        .filter-scroll::-webkit-scrollbar { width: 4px; }
+        .filter-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
         .filter-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
         
         .glass-panel {
@@ -78,16 +76,17 @@
                         </div>
                         
                         <div class="flex-1 flex gap-2 overflow-x-auto pb-2 lg:pb-0 filter-scroll">
-                            <button v-for="(count, mag) in magazineStats" :key="mag" 
-                                @click="toggleMagazine(mag)" 
-                                :class="activeMagazines.includes(mag) ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'" 
+                            <button v-for="(count, magName) in magazineStats" :key="magName" 
+                                @click="toggleMagazine(magName)" 
+                                :class="activeMagazines.includes(magName) ? 'bg-indigo-600 text-white shadow-lg' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'" 
                                 class="px-4 py-2 rounded-lg text-xs font-black transition-all whitespace-nowrap uppercase tracking-widest">
-                                {{ mag }} ({{ count }})
+                                {{ magName }} ({{ count }})
                             </button>
                         </div>
 
                         <div class="flex items-center gap-3">
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Page Size</span>
+                            <button v-if="activeMagazines.length > 0 || searchQuery" @click="resetFilters" class="text-[10px] font-black text-rose-500 uppercase tracking-widest hover:underline mr-2">Reset</button>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Size</span>
                             <select v-model="itemsPerPage" @change="currentPage = 1" 
                                 class="bg-slate-100 border-none rounded-lg py-2 px-3 font-bold text-xs focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer">
                                 <option :value="20">20</option>
@@ -258,6 +257,13 @@
                         this.master = m.filter(r => r.作品番 && r.作品番.toString().trim() !== "");
                         this.contents = c;
                         this.publishHk = h;
+                        
+                        // 使用 ?mag= 參數進行篩選
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const magParam = urlParams.get('mag');
+                        if (magParam) {
+                            this.activeMagazines = [magParam];
+                        }
                     } catch (e) { console.error(e); } finally { this.loading = false; }
                 },
                 getHKMapping(workId, targetTypes) {
@@ -282,15 +288,17 @@
                     if (idx > -1) this.activeMagazines.splice(idx, 1); else this.activeMagazines.push(mag);
                     this.currentPage = 1;
                 },
+                resetFilters() {
+                    this.activeMagazines = [];
+                    this.searchQuery = '';
+                    this.currentPage = 1;
+                },
                 scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },
                 handleScroll() { this.showScrollBtn = window.scrollY > 300; }
             },
             mounted() { 
                 this.init();
                 window.addEventListener('scroll', this.handleScroll);
-            },
-            unmounted() {
-                window.removeEventListener('scroll', this.handleScroll);
             }
         }).mount('#app')
     </script>

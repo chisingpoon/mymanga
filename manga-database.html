@@ -34,19 +34,20 @@
 
         /* --- MOBILE TABLE TRANSFORMATION --- */
         @media (max-width: 768px) {
-            .responsive-table thead { display: none; } /* Hide headers */
+            .responsive-table thead { display: none; }
             .responsive-table tr { 
                 display: block; 
                 margin-bottom: 1.5rem; 
                 border: 1px solid #e2e8f0; 
                 border-radius: 1.5rem; 
                 background: white;
-                padding: 1rem;
+                padding: 1.25rem;
+                box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
             }
             .responsive-table td { 
                 display: block; 
                 width: 100% !important; 
-                padding: 0.5rem 0 !important;
+                padding: 0.6rem 0 !important;
                 border: none !important;
                 text-align: left !important;
             }
@@ -58,16 +59,27 @@
                 color: #94a3b8;
                 text-transform: uppercase;
                 letter-spacing: 0.1em;
-                margin-bottom: 2px;
+                margin-bottom: 4px;
             }
             .watermark { font-size: 5rem; }
         }
+
+        /* Floating Button Animation */
+        .fade-slide-enter-active, .fade-slide-leave-active { transition: all 0.4s ease; }
+        .fade-slide-enter-from, .fade-slide-leave-to { opacity: 0; transform: translateY(20px); }
     </style>
 </head>
 <body class="bg-grid text-slate-900 font-sans min-h-screen relative overflow-x-hidden" oncontextmenu="return false;">
 
     <div id="app" v-cloak>
         <div class="watermark">ARCHIVE</div>
+
+        <transition name="fade-slide">
+            <button v-if="showScrollTop" @click="scrollToTop" 
+                class="fixed bottom-6 right-6 z-50 w-12 h-12 bg-slate-900 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:bg-blue-600 active:scale-90 transition-all border border-white/20">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </button>
+        </transition>
 
         <transition name="zoom-overlay">
             <div v-if="zoomImage" @click="zoomImage = null" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 cursor-zoom-out">
@@ -172,7 +184,7 @@
                             <div class="space-y-3 text-[13px] border-t pt-6 mt-8">
                                 <p v-if="hkDetail.Publisher" class="flex justify-between border-b border-slate-50 pb-2"><span class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Publisher</span><span class="font-black text-slate-700">{{ hkDetail.Publisher }}</span></p>
                                 <p v-if="hkDetail.IssueDate" class="flex justify-between border-b border-slate-50 pb-2"><span class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Issue Date</span><span class="font-black text-slate-700">{{ hkDetail.IssueDate }}</span></p>
-                                <p v-if="hkDetail.ISBN" class="flex justify-between pt-2"><span class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">ISBN</span><span class="font-mono font-black text-blue-600">{{ hkDetail.ISBN }}</span></p>
+                                <p v-if="hkDetail.ISBN" class="flex justify-between pt-2"><span class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">ISBN</span><span class="font-mono font-black text-blue-600 text-xs">{{ hkDetail.ISBN }}</span></p>
                             </div>
                         </div>
                     </div>
@@ -188,7 +200,7 @@
                             <div class="space-y-3 text-[13px] border-t pt-6 mt-8">
                                 <p v-if="jpDetail.著" class="flex justify-between border-b border-slate-50 pb-2"><span class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Artist</span><span class="font-black text-slate-700">{{ jpDetail.著 }}</span></p>
                                 <p v-if="jpDetail.判型" class="flex justify-between border-b border-slate-50 pb-2"><span class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Format</span><span class="font-black text-slate-700">{{ jpDetail.判型 }}</span></p>
-                                <p v-if="jpDetail.ISBN" class="flex justify-between pt-2"><span class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">ISBN</span><span class="font-mono font-black text-red-600">{{ jpDetail.ISBN }}</span></p>
+                                <p v-if="jpDetail.ISBN" class="flex justify-between pt-2"><span class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">ISBN</span><span class="font-mono font-black text-red-600 text-xs">{{ jpDetail.ISBN }}</span></p>
                             </div>
                         </div>
                     </div>
@@ -198,7 +210,7 @@
                     <div class="px-8 py-5 bg-slate-50 border-b flex justify-between items-center text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
                         <span>Chapter Archive Detail</span>
                     </div>
-                    <div class="overflow-x-auto md:overflow-visible p-4 md:p-0">
+                    <div class="p-4 md:p-0">
                         <table class="w-full text-left table-fixed min-w-full md:min-w-[1200px] responsive-table">
                             <thead class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b">
                                 <tr>
@@ -247,7 +259,8 @@
                 return {
                     region: 'HK', view: 'series', loading: true, zoomImage: null,
                     selectedSeries: null, selectedBook: null, searchQuery: '',
-                    seriesQuery: '', db: { hk: [], jp: [], contents: [], master: [] }
+                    seriesQuery: '', showScrollTop: false,
+                    db: { hk: [], jp: [], contents: [], master: [] }
                 }
             },
             computed: {
@@ -305,6 +318,8 @@
                         this.db = { hk, jp, contents, master };
                     } catch (e) { console.error(e); } finally { this.loading = false; }
                 },
+                handleScroll() { this.showScrollTop = window.scrollY > 300; },
+                scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },
                 toggleRegion(r) { 
                     this.region = r; this.view = 'series'; this.selectedSeries = null; this.selectedBook = null;
                     const newUrl = new URL(window.location);
@@ -315,7 +330,13 @@
                 selectBook(book) { this.selectedBook = book; this.view = 'detail'; window.scrollTo(0,0); },
                 resetToSeries() { this.view = 'series'; this.selectedSeries = null; this.seriesQuery = ''; }
             },
-            mounted() { this.init(); }
+            mounted() { 
+                this.init(); 
+                window.addEventListener('scroll', this.handleScroll);
+            },
+            unmounted() {
+                window.removeEventListener('scroll', this.handleScroll);
+            }
         }).mount('#app')
     </script>
 </body>

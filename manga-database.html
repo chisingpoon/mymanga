@@ -332,26 +332,27 @@ createApp({
             if (!workId || !this.db.contents || !this.db.hk) return null;
             const id = workId.toString().trim();
             
-            // 1. 「書籍收錄作品」シートから、作品番が一致し、かつ大全集系のレコードを検索
+            // 1. FILTER specifically for 大全集 or 大長編大全集 FIRST
+            // This prevents picking up standard tankobon ISBNs
             const contentsMatch = this.db.contents.find(c => 
                 c.作品番?.toString().trim() === id && 
                 (c.類 === '大全集' || c.類 === '大長編大全集')
             );
             
+            // If no Great Collection record exists for this story, return null
             if (!contentsMatch) return null;
         
             const targetIsbnJp = contentsMatch.ISBN?.trim();
         
-            // 2. 「出版目録HK」シートの中から、ISBN_JP が上記で見つかった ISBN と一致するものを検索
+            // 2. Map that specific Great Collection ISBN to the HK Edition list
             const hkMatch = this.db.hk.find(h => 
                 h.ISBN_JP?.toString().trim() === targetIsbnJp
             );
         
-            // 3. HK版のレコードが見つかった場合のみ、その情報を返す
             if (hkMatch) {
                 return {
-                    vol: hkMatch.Volume, // リンクのラベルに使用
-                    isbn: hkMatch.ISBN    // jumpToBook で使用する最終的な ISBN
+                    vol: hkMatch.Volume,
+                    isbn: hkMatch.ISBN
                 };
             }
         

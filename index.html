@@ -8,10 +8,7 @@
     <style>
         /* Security: Disable Selection */
         body {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
+            -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
         }
 
         .bg-grid {
@@ -23,31 +20,29 @@
         }
 
         .watermark {
-            position: fixed;
-            bottom: -20px;
-            right: -20px;
-            font-size: 12rem;
-            font-weight: 900;
-            color: rgba(0, 0, 0, 0.03);
-            pointer-events: none;
-            z-index: -1;
-            transform: rotate(-15deg);
+            position: fixed; bottom: -20px; right: -20px; font-size: 12rem; font-weight: 900;
+            color: rgba(0, 0, 0, 0.03); pointer-events: none; z-index: -1; transform: rotate(-15deg);
         }
 
-        .hover-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .hover-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .hover-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 12px 24px -10px rgba(0,0,0,0.1);
-            border-color: #3b82f6;
-            background-color: #ffffff;
+            border-color: #3b82f6; background-color: #ffffff;
         }
         
-        /* Tab Transition */
-        .tab-content { display: none; animation: fadeIn 0.3s ease-out; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Slide Animation Logic */
+        .viewport-container {
+            width: 100%; overflow: hidden; position: relative;
+        }
+        .tab-slider {
+            display: flex; transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+            width: 200%;
+        }
+        .tab-pane {
+            width: 50%;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 <body class="bg-grid text-slate-900 font-sans min-h-screen py-12 px-4 relative overflow-x-hidden" oncontextmenu="return false;">
@@ -74,85 +69,91 @@
             </button>
         </div>
 
-        <div id="manga-content" class="tab-content active space-y-8">
-            <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <span class="w-2 h-8 bg-blue-600 rounded-full"></span>
-                        <h2 class="text-xl font-black text-slate-800">香港版漫畫資訊記錄</h2>
-                    </div>
-                    <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase">HK</span>
-                </div>
-                <a href="manga-database.html?region=HK" class="group flex items-center justify-between bg-blue-600 p-5 rounded-2xl text-white font-black transition-all hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-200">
-                    <span class="tracking-tight text-lg">所有香港版漫畫資訊記錄</span>
-                    <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
-                </a>
-            </section>
+        <div class="viewport-container">
+            <div id="tab-slider" class="tab-slider">
+                
+                <div class="tab-pane space-y-8 pr-2">
+                    <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="w-2 h-8 bg-blue-600 rounded-full"></span>
+                                <h2 class="text-xl font-black text-slate-800">香港版漫畫資訊記錄</h2>
+                            </div>
+                            <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase">HK</span>
+                        </div>
+                        <a href="manga-database.html?region=HK" class="group flex items-center justify-between bg-blue-600 p-5 rounded-2xl text-white font-black transition-all hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-200">
+                            <span class="tracking-tight text-lg">所有香港版漫畫資訊記錄</span>
+                            <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
+                        </a>
+                    </section>
 
-            <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <span class="w-2 h-8 bg-red-600 rounded-full"></span>
-                        <h2 class="text-xl font-black text-slate-800">日本版漫畫資訊記錄</h2>
-                    </div>
-                    <span class="text-[10px] font-black text-red-600 bg-red-50 px-3 py-1 rounded-full uppercase">JP</span>
-                </div>
-                <a href="manga-database.html?region=JP" class="group flex items-center justify-between bg-red-600 p-5 rounded-2xl text-white font-black transition-all hover:bg-red-700 hover:shadow-lg hover:shadow-red-200">
-                    <span class="tracking-tight text-lg">所有日本版漫畫資訊記錄</span>
-                    <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
-                </a>
-            </section>
+                    <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="w-2 h-8 bg-red-600 rounded-full"></span>
+                                <h2 class="text-xl font-black text-slate-800">日本版漫畫資訊記錄</h2>
+                            </div>
+                            <span class="text-[10px] font-black text-red-600 bg-red-50 px-3 py-1 rounded-full uppercase">JP</span>
+                        </div>
+                        <a href="manga-database.html?region=JP" class="group flex items-center justify-between bg-red-600 p-5 rounded-2xl text-white font-black transition-all hover:bg-red-700 hover:shadow-lg hover:shadow-red-200">
+                            <span class="tracking-tight text-lg">所有日本版漫畫資訊記錄</span>
+                            <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
+                        </a>
+                    </section>
 
-            <section class="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-8">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <span class="w-2 h-8 bg-slate-800 rounded-full"></span>
-                        <h2 class="text-xl font-black text-slate-800">日本原作記錄</h2>
-                    </div>
-                    <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase">ALL WORKS</span>
+                    <section class="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-8">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="w-2 h-8 bg-slate-800 rounded-full"></span>
+                                <h2 class="text-xl font-black text-slate-800">日本原作記錄</h2>
+                            </div>
+                            <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase">ALL WORKS</span>
+                        </div>
+                        <a href="originalworks.html" class="group flex items-center justify-between bg-slate-800 p-5 rounded-2xl text-white font-black transition-all hover:bg-slate-900 hover:shadow-lg hover:shadow-slate-200">
+                            <span class="tracking-tight text-lg">所有原作資訊記錄</span>
+                            <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
+                        </a>
+            
+                        <div class="space-y-4 pt-4 border-t border-slate-100">
+                            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M12.59 13.59L18.59 7.59 20 9l-7.41 7.41-4-4 1.41-1.41 2.59 2.59zM0 9l2.59-2.59L10 13.82l-2.59 2.59L0 9zm10 0l2.59-2.59L20 13.82l-2.59 2.59L10 9z"/></svg>
+                                Magazine Shortcuts / 捷徑
+                            </h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <a href="originalworks.html?mag=よいこ" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>よいこ</span><span class="text-slate-300">→</span></a>
+                                <a href="originalworks.html?mag=幼稚園" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>幼稚園</span><span class="text-slate-300">→</span></a>
+                                <a href="originalworks.html?mag=小学一年生" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>小学一年生</span><span class="text-slate-300">→</span></a>
+                                <a href="originalworks.html?mag=小学二年生" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>小学二年生</span><span class="text-slate-300">→</span></a>
+                                <a href="originalworks.html?mag=小学三年生" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>小学三年生</span><span class="text-slate-300">→</span></a>
+                                <a href="originalworks.html?mag=小学四年生" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>小学四年生</span><span class="text-slate-300">→</span></a>
+                                <a href="originalworks.html?mag=小学五年生" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>小学五年生</span><span class="text-slate-300">→</span></a>
+                                <a href="originalworks.html?mag=小学六年生" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>小学六年生</span><span class="text-slate-300">→</span></a>
+                                <a href="originalworks.html?mag=てれびくん" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>てれびくん</span><span class="text-slate-300">→</span></a>
+                                <a href="originalworks.html?mag=小学館BOOK" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>小学館BOOK</span><span class="text-slate-300">→</span></a>
+                                <a href="originalworks.html?mag=週刊少年サンデー" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>週刊少年サンデー</span><span class="text-slate-300">→</span></a>
+                                <a href="originalworks.html?mag=コロコロコミック" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>コロコロコミック</span><span class="text-slate-300">→</span></a>
+                            </div>
+                        </div>
+                    </section>
                 </div>
-                <a href="originalworks.html" class="group flex items-center justify-between bg-slate-800 p-5 rounded-2xl text-white font-black transition-all hover:bg-slate-900 hover:shadow-lg hover:shadow-slate-200">
-                    <span class="tracking-tight text-lg">所有原作資訊記錄</span>
-                    <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
-                </a>
-    
-                <div class="space-y-4 pt-4 border-t border-slate-100">
-                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M12.59 13.59L18.59 7.59 20 9l-7.41 7.41-4-4 1.41-1.41 2.59 2.59zM0 9l2.59-2.59L10 13.82l-2.59 2.59L0 9zm10 0l2.59-2.59L20 13.82l-2.59 2.59L10 9z"/></svg>
-                        Magazine Shortcuts / 捷徑
-                    </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <a href="originalworks.html?mag=よいこ" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>よいこ</span><span class="text-slate-300">→</span></a>
-                        <a href="originalworks.html?mag=幼稚園" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>幼稚園</span><span class="text-slate-300">→</span></a>
-                        <a href="originalworks.html?mag=小学一年生" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>小学一年生</span><span class="text-slate-300">→</span></a>
-                        <a href="originalworks.html?mag=小学二年生" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>小学二年生</span><span class="text-slate-300">→</span></a>
-                        <a href="originalworks.html?mag=小学三年生" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>小学三年生</span><span class="text-slate-300">→</span></a>
-                        <a href="originalworks.html?mag=小学四年生" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>小学四年生</span><span class="text-slate-300">→</span></a>
-                        <a href="originalworks.html?mag=小学五年生" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>小学五年生</span><span class="text-slate-300">→</span></a>
-                        <a href="originalworks.html?mag=小学六年生" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>小学六年生</span><span class="text-slate-300">→</span></a>
-                        <a href="originalworks.html?mag=てれびくん" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>てれびくん</span><span class="text-slate-300">→</span></a>
-                        <a href="originalworks.html?mag=小学館BOOK" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>小学館BOOK</span><span class="text-slate-300">→</span></a>
-                        <a href="originalworks.html?mag=週刊少年サンデー" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>週刊少年サンデー</span><span class="text-slate-300">→</span></a>
-                        <a href="originalworks.html?mag=コロコロコミック" class="hover-card flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"><span>コロコロコミック</span><span class="text-slate-300">→</span></a>
-                    </div>
-                </div>
-            </section>
-        </div>
 
-        <div id="gadgets-content" class="tab-content space-y-8">
-            <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <span class="w-2 h-8 bg-indigo-600 rounded-full"></span>
-                        <h2 class="text-xl font-black text-slate-800">法寶記錄</h2>
-                    </div>
-                    <span class="text-[10px] font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full uppercase">Gadget</span>
+                <div class="tab-pane space-y-8 pl-2">
+                    <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="w-2 h-8 bg-indigo-600 rounded-full"></span>
+                                <h2 class="text-xl font-black text-slate-800">法寶記錄</h2>
+                            </div>
+                            <span class="text-[10px] font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full uppercase">Gadget</span>
+                        </div>
+                        <a href="gadgets.html" class="group flex items-center justify-between bg-indigo-600 p-5 rounded-2xl text-white font-black transition-all hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-200">
+                            <span class="tracking-tight text-lg">所有法寶記錄</span>
+                            <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
+                        </a>
+                    </section>
                 </div>
-                <a href="gadgets.html" class="group flex items-center justify-between bg-indigo-600 p-5 rounded-2xl text-white font-black transition-all hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-200">
-                    <span class="tracking-tight text-lg">所有法寶記錄</span>
-                    <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
-                </a>
-            </section>
+
+            </div>
         </div>
 
         <footer class="text-center space-y-4 pt-8 pb-12">
@@ -163,30 +164,24 @@
     </div>
 
     <script>
-        // Tab Switcher Logic
         function switchTab(tab) {
             const mangaBtn = document.getElementById('btn-manga');
             const gadgetsBtn = document.getElementById('btn-gadgets');
-            const mangaContent = document.getElementById('manga-content');
-            const gadgetsContent = document.getElementById('gadgets-content');
+            const slider = document.getElementById('tab-slider');
 
             if (tab === 'manga') {
-                mangaContent.classList.add('active');
-                gadgetsContent.classList.remove('active');
+                slider.style.transform = 'translateX(0%)';
                 mangaBtn.className = 'flex-1 py-3 text-sm font-black uppercase tracking-widest rounded-xl transition-all bg-blue-600 text-white shadow-md';
                 gadgetsBtn.className = 'flex-1 py-3 text-sm font-black uppercase tracking-widest rounded-xl transition-all text-slate-500 hover:text-slate-700';
             } else {
-                gadgetsContent.classList.add('active');
-                mangaContent.classList.remove('active');
+                slider.style.transform = 'translateX(-50%)';
                 gadgetsBtn.className = 'flex-1 py-3 text-sm font-black uppercase tracking-widest rounded-xl transition-all bg-indigo-600 text-white shadow-md';
                 mangaBtn.className = 'flex-1 py-3 text-sm font-black uppercase tracking-widest rounded-xl transition-all text-slate-500 hover:text-slate-700';
             }
         }
 
-        // Set dynamic date
         document.getElementById('current-date').innerText = new Date().toLocaleDateString('zh-HK', { year: 'numeric', month: 'long', day: 'numeric' });
 
-        // Security
         window.addEventListener('keydown', function(e) {
             if ((e.ctrlKey || e.metaKey) && ['c','s','p','u','a'].includes(e.key)) e.preventDefault();
         });

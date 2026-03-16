@@ -11,7 +11,7 @@
         html { scroll-behavior: smooth; }
         body { -webkit-user-select: none; user-select: none; font-size: 16px; }
         
-        /* Matching Background from manga-database.html */
+        /* Consistent Grid Background */
         .bg-grid {
             background-color: #f8fafc;
             background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), 
@@ -19,24 +19,26 @@
             background-size: 40px 40px;
         }
 
-        #table-header th {
-            position: sticky;
-            top: var(--header-offset, 112px); 
-            z-index: 30;
-            background-color: #f1f5f9; 
-            border-bottom: 2px solid #cbd5e1;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .main-nav { position: sticky; top: 0; z-index: 50; background: white; height: 56px; }
+        /* Fixed Navigation Heights */
+        .main-nav { position: sticky; top: 0; z-index: 100; background: white; height: 56px; border-bottom: 1px solid #e2e8f0; }
 
         .sticky-controls {
             position: sticky;
             top: 56px;
-            z-index: 40;
+            z-index: 90;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(12px);
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid #cbd5e1;
+        }
+
+        /* Fixed Header Fix: Removing transforms and setting solid background */
+        #table-header th {
+            position: sticky;
+            top: var(--header-offset, 112px); 
+            z-index: 80;
+            background-color: #f1f5f9;
+            border-bottom: 2px solid #94a3b8;
+            transform: none !important; /* Prevents sticky positioning glitches */
         }
 
         table { border-collapse: separate; border-spacing: 0; width: 100%; }
@@ -52,88 +54,84 @@
             border-radius: 6px;
             font-size: 9px;
             font-weight: 900;
-            min-width: 70px;
+            min-width: 72px;
             color: white;
-            transition: transform 0.1s;
+            text-decoration: none;
         }
-        .vol-btn:hover { transform: scale(1.05); }
     </style>
 </head>
 <body class="bg-grid text-slate-900 min-h-screen">
 
     <div id="app" v-cloak>
-        <header class="main-nav border-b flex items-center">
+        <header class="main-nav flex items-center">
             <div class="max-w-[99%] mx-auto px-6 w-full flex items-center justify-between">
-                <a href="index.html" class="flex items-center gap-2 group">
+                <a href="index.html" class="flex items-center gap-2">
                     <div class="w-9 h-9 bg-slate-900 rounded-lg flex items-center justify-center text-white">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </div>
                     <span class="font-black text-lg tracking-tighter uppercase">Master Archive</span>
                 </a>
-                <div v-if="loading" class="text-[10px] font-bold text-indigo-600 animate-pulse">SYNCING DATA...</div>
+                <div v-if="loading" class="text-[10px] font-bold text-indigo-600 animate-pulse uppercase">Syncing...</div>
             </div>
         </header>
 
         <div class="sticky-controls py-3" id="control-panel">
             <div class="max-w-[99%] mx-auto px-6">
                 <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
-                    <div class="w-full lg:w-1/4 relative">
-                        <input type="text" v-model="searchQuery" placeholder="搜尋作品副題、備註..." 
-                            class="w-full bg-slate-100 border-none rounded-lg py-2 px-4 font-bold outline-none text-sm focus:ring-2 ring-indigo-500">
+                    <div class="w-full lg:w-1/4">
+                        <input type="text" v-model="searchQuery" placeholder="搜尋作品、號數..." 
+                            class="w-full bg-slate-100 border-none rounded-lg py-2 px-4 font-bold text-sm focus:ring-2 ring-indigo-500 outline-none">
                     </div>
                     
                     <div class="flex-1 flex flex-wrap gap-2">
                         <button v-for="(count, mName) in magazineStats" :key="mName" 
                             @click="toggleMagazine(mName)" 
-                            :class="activeMagazines.includes(mName) ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white text-slate-500 hover:bg-slate-200 border border-slate-200'" 
-                            class="px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all">
+                            :class="activeMagazines.includes(mName) ? 'bg-indigo-600 text-white' : 'bg-white text-slate-500 border border-slate-200'" 
+                            class="px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-tight transition-all">
                             {{ mName }} ({{ count }})
                         </button>
                     </div>
 
-                    <div class="flex items-center gap-3">
-                        <select v-model="itemsPerPage" @change="currentPage = 1" class="bg-slate-100 border-none rounded-md py-1.5 px-3 font-bold text-xs">
-                            <option :value="20">20 / Page</option>
-                            <option :value="50">50 / Page</option>
-                            <option :value="100">100 / Page</option>
-                        </select>
-                    </div>
+                    <select v-model="itemsPerPage" @change="currentPage = 1" class="bg-slate-100 rounded-md py-1.5 px-3 font-bold text-xs">
+                        <option :value="20">20 / 頁</option>
+                        <option :value="50">50 / 頁</option>
+                        <option :value="100">100 / 頁</option>
+                    </select>
                 </div>
             </div>
         </div>
 
         <main class="max-w-[99%] mx-auto py-6 px-4">
-            <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table id="main-table">
-                        <thead id="table-header" class="text-[11px] font-black text-slate-900 uppercase">
+            <div class="bg-white rounded-xl shadow-2xl border border-slate-200 overflow-visible"> <div class="overflow-x-auto">
+                    <table>
+                        <thead id="table-header" class="text-[11px] font-black text-slate-900 uppercase text-left">
                             <tr>
-                                <th>掲載番</th>
+                                <th class="w-16">掲載番</th>
                                 <th>初出副題</th>
-                                <th class="bg-indigo-50/50">大全集副題 (HK)</th>
+                                <th class="bg-indigo-50/30">大全集副題</th>
                                 <th>掲載誌 / 號</th>
-                                <th class="text-center bg-emerald-50/50">單行本</th>
-                                <th class="text-center bg-indigo-50/50">大全集</th>
-                                <th class="text-center bg-slate-100/50">第0卷</th>
-                                <th class="text-center bg-amber-50/50">ドラミ</th>
-                                <th class="text-center bg-blue-50/50">文庫</th>
-                                <th class="text-center bg-pink-50/50">兒童版</th>
-                                <th class="text-center bg-rose-50/50">特選</th>
+                                <th class="text-center bg-emerald-50/30">單行本</th>
+                                <th class="text-center bg-indigo-50/30">大全集</th>
+                                <th class="text-center bg-slate-100/30">第0卷</th>
+                                <th class="text-center bg-amber-50/30">ドラミ</th>
+                                <th class="text-center bg-blue-50/30">文庫</th>
+                                <th class="text-center bg-pink-50/30">兒童版</th>
+                                <th class="text-center bg-rose-50/30">特選</th>
                                 <th>備考</th>
                             </tr>
                         </thead>
                         <tbody class="text-[14px]">
-                            <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-slate-50 transition-colors">
+                            <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-slate-50 border-b">
                                 <td class="text-slate-400 text-xs font-mono">{{ row.掲載番 }}</td>
                                 <td class="font-black text-slate-800 col-wrap">{{ row.初出副題 }}</td>
-                                <td class="col-wrap border-x border-slate-50 bg-slate-50/30">
+                                <td class="col-wrap bg-slate-50/20 px-4">
                                     <div class="font-bold text-slate-700">{{ getSubtitleInfo(row.作品番).pubSub || '—' }}</div>
                                     <div class="text-indigo-500 text-[11px] font-medium">{{ getSubtitleInfo(row.作品番).hkSub }}</div>
                                 </td>
                                 <td class="whitespace-nowrap">
                                     <div class="font-bold text-slate-700">{{ row.初出掲載誌 }}</div>
                                     <div class="text-[11px] text-blue-600 font-black mt-0.5">
-                                        {{ row.初出掲載號 || '—' }}
+                                        {{ row.初出掲載号 || '—' }}
                                     </div>
                                 </td>
                                 <td class="text-center"><div v-if="m = getMapping(row.作品番, ['45卷', 'カラー作品集', 'プラス'])" class="flex justify-center"><a :href="'manga-database.html?region=HK&isbn=' + m.hkIsbn" class="vol-btn bg-emerald-600"><span>{{m.type}}</span><span>Vol. {{m.vol}}</span></a></div></td>
@@ -143,19 +141,18 @@
                                 <td class="text-center"><div v-if="m = getMapping(row.作品番, ['文庫版', '大長編文庫版'])" class="flex justify-center"><a :href="'manga-database.html?region=HK&isbn=' + m.hkIsbn" class="vol-btn bg-blue-600"><span>文庫</span><span>Vol. {{m.vol}}</span></a></div></td>
                                 <td class="text-center"><div v-if="m = getMappingPrefix(row.作品番, 'ぴっかぴかコミックス')" class="flex justify-center"><a :href="'manga-database.html?region=HK&isbn=' + m.hkIsbn" class="vol-btn bg-pink-500"><span>兒童版</span><span>Vol. {{m.vol}}</span></a></div></td>
                                 <td class="text-center"><div v-if="m = getMapping(row.作品番, ['とっておき'])" class="flex justify-center"><a :href="'manga-database.html?region=HK&isbn=' + m.hkIsbn" class="vol-btn bg-rose-500"><span>特選</span><span>Vol. {{m.vol}}</span></a></div></td>
-                                <td class="text-slate-400 italic text-xs col-wrap">{{ row.備考 }}</td>
+                                <td class="text-slate-400 italic text-[11px] col-wrap">{{ row.備考 }}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <div class="px-6 py-6 border-t bg-slate-50 flex items-center justify-between">
-                    <div class="text-xs text-slate-500 font-bold">Showing {{filteredData.length}} entries</div>
+                <div class="px-6 py-6 bg-slate-50 border-t flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-400">Total: {{filteredData.length}}</span>
                     <div class="flex items-center gap-1">
-                        <button v-for="p in paginationRange" :key="p" 
-                            @click="p !== '...' ? changePage(p) : null" 
-                            :class="p === currentPage ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-600 hover:border-slate-900'"
-                            class="w-9 h-9 flex items-center justify-center border rounded-lg text-xs font-black transition-all">
+                        <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" 
+                            :class="p === currentPage ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border'"
+                            class="w-8 h-8 flex items-center justify-center rounded font-black text-xs">
                             {{ p }}
                         </button>
                     </div>
@@ -172,7 +169,7 @@
                     loading: true, searchQuery: '', activeMagazines: [],
                     currentPage: 1, itemsPerPage: 20,
                     master: [], contents: [], publishHk: [],
-                    cacheKey: 'master_archive_cache'
+                    cacheKey: 'original_works_v3'
                 }
             },
             computed: {
@@ -186,7 +183,7 @@
                     const hasM = this.activeMagazines.length > 0;
                     return this.master.filter(r => {
                         const sub = this.getSubtitleInfo(r.作品番);
-                        const mText = !q || [r.初出副題, sub.pubSub, sub.hkSub, r.備考, r.初出掲載誌, r.初出掲載號].some(t => (t||'').toLowerCase().includes(q));
+                        const mText = !q || [r.初出副題, sub.pubSub, sub.hkSub, r.備考, r.初出掲載誌, r.初出掲載号].some(t => (t||'').toLowerCase().includes(q));
                         const mMag = !hasM || this.activeMagazines.includes(r.初出掲載誌?.trim());
                         return mText && mMag;
                     });
@@ -194,8 +191,8 @@
                 totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
                 paginatedData() { return this.filteredData.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage); },
                 paginationRange() {
-                    const current = this.currentPage, last = this.totalPages, delta = 2, range = [];
-                    for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= current - delta && i <= current + delta)) range.push(i); }
+                    const current = this.currentPage, last = this.totalPages, range = [];
+                    for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i); }
                     const res = []; let l;
                     for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
                     return res;
@@ -210,7 +207,7 @@
                     }
                 },
                 async init() {
-                    // 1. Load from Cache for speed
+                    // Cache logic for performance
                     const cached = localStorage.getItem(this.cacheKey);
                     if (cached) {
                         const p = JSON.parse(cached);
@@ -219,7 +216,6 @@
                         this.$nextTick(() => this.updateOffsets());
                     }
 
-                    // 2. Refresh from source in background
                     try {
                         const [m, c, h] = await Promise.all([
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json()),
@@ -228,9 +224,7 @@
                         ]);
                         this.master = m.filter(r => r.作品番?.toString().trim());
                         this.contents = c; this.publishHk = h;
-                        
                         localStorage.setItem(this.cacheKey, JSON.stringify({m:this.master, c:this.contents, h:this.publishHk}));
-                        
                         this.$nextTick(() => {
                             this.updateOffsets();
                             new ResizeObserver(() => this.updateOffsets()).observe(document.getElementById('control-panel'));

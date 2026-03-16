@@ -50,21 +50,14 @@
             position: sticky; top: 0; z-index: 100;
         }
 
-        /* Desktop Sticky Columns (Mobile Disabled) */
+        /* Desktop Sticky Columns */
         @media (min-width: 769px) {
             .sticky-col-1 { position: sticky; left: 0; z-index: 20; background: inherit; }
             .sticky-col-2 {
                 position: sticky; left: 80px; z-index: 20; background: inherit;
                 box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.05);
-                /* Border Removed Here */
             }
             th.sticky-col-1, th.sticky-col-2 { background: #f8fafc; z-index: 30; }
-        }
-
-        /* Mobile Optimization */
-        @media (max-width: 768px) {
-            .mobile-hide { display: none; }
-            .vol-btn { min-width: 60px; padding: 8px 4px !important; }
         }
 
         /* Focused Row Styles */
@@ -73,7 +66,6 @@
 
         tr:not(.row-focused):hover { background-color: #f8fafc; cursor: pointer; }
 
-        /* Card & Table */
         .main-card {
             background: white; border-radius: 16px;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
@@ -87,11 +79,12 @@
         }
         td { padding: 16px 10px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; transition: background 0.2s; }
 
+        /* Button Styling */
         .vol-btn {
             display: flex; flex-direction: column; font-size: 9px; font-weight: 800;
-            color: white; padding: 6px 4px; border-radius: 8px; text-decoration: none;
+            color: white; padding: 6px 4px; border-radius: 8px;
             line-height: 1.1; transition: all 0.2s; text-align: center;
-            position: relative; z-index: 50; /* Ensure clickability */
+            width: 100%; border: none; cursor: pointer;
         }
         .vol-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
         .col-wrap { word-break: break-word; white-space: normal; line-height: 1.5; }
@@ -106,6 +99,10 @@
             transition: all 0.3s ease; opacity: 0; pointer-events: none; z-index: 100;
         }
         .scroll-top-btn.visible { opacity: 1; pointer-events: auto; }
+
+        @media (max-width: 768px) {
+            .mobile-hide { display: none; }
+        }
     </style>
 </head>
 <body class="bg-grid" oncontextmenu="return false;">
@@ -113,28 +110,20 @@
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-xs font-black uppercase tracking-widest text-slate-400">Syncing Master Archive</p>
+            <p class="mt-4 text-xs font-black uppercase tracking-widest text-slate-400">Syncing Master Archive...</p>
         </div>
 
         <div id="scrollToTop" class="scroll-top-btn" @click="backToTop">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
-            </svg>
+            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
         </div>
 
         <nav class="top-nav">
             <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     <a href="index.html" class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg hover:scale-105 transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                        </svg>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </a>
                     <h1 class="font-black text-xl tracking-tighter text-slate-800 uppercase">Master Archive</h1>
-                </div>
-                <div v-if="!loading" class="hidden md:flex items-center gap-2 px-3 py-1 bg-emerald-50 rounded-full border border-emerald-100">
-                    <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
-                    <span class="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Database Live</span>
                 </div>
             </div>
         </nav>
@@ -146,10 +135,7 @@
                         <h2 class="text-3xl font-black text-slate-900 mb-2">Original Works</h2>
                         <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Chronological Publication Record</p>
                     </div>
-                    <button v-if="searchQuery || activeMagazines.length > 0 || activeRow" @click="resetFilters" 
-                        class="text-[10px] font-black text-rose-500 uppercase hover:underline">
-                        ✕ Clear All Filters
-                    </button>
+                    <button v-if="searchQuery || activeMagazines.length > 0 || activeRow" @click="resetFilters" class="text-[10px] font-black text-rose-500 uppercase hover:underline">✕ Clear All Filters</button>
                 </div>
 
                 <div class="flex flex-wrap gap-2">
@@ -165,19 +151,8 @@
             <div class="main-card">
                 <div class="p-6 border-b border-slate-100">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div class="relative flex-1 max-w-lg">
-                            <input type="text" v-model="searchQuery" placeholder="Search works..." 
-                                class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-3 pr-12 text-sm font-semibold outline-none focus:border-indigo-500 focus:bg-white transition-all">
-                            <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="text-right">
-                            <span class="block text-[10px] font-black text-slate-400 uppercase">Found Matches</span>
-                            <span class="text-sm font-black text-slate-800">{{ filteredData.length }} Entries</span>
-                        </div>
+                        <input type="text" v-model="searchQuery" placeholder="Search works..." class="w-full md:max-w-lg bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-3 text-sm font-semibold outline-none focus:border-indigo-500 transition-all">
+                        <div class="text-right"><span class="block text-[10px] font-black text-slate-400 uppercase">Found Matches</span><span class="text-sm font-black text-slate-800">{{ filteredData.length }} Entries</span></div>
                     </div>
                 </div>
 
@@ -191,17 +166,13 @@
                                 <th style="width: 180px">掲載誌 / 號</th>
                                 <th style="width: 75px">單行本</th>
                                 <th style="width: 75px">大全集</th>
-                                <th style="width: 75px" class="mobile-hide">第0卷</th>
-                                <th style="width: 75px" class="mobile-hide">ドラミ</th>
-                                <th style="width: 75px" class="mobile-hide">文庫</th>
-                                <th style="width: 75px" class="mobile-hide">兒童</th>
-                                <th style="width: 75px" class="mobile-hide">特選</th>
+                                <th style="width: 75px" class="mobile-hide">其他</th>
                                 <th>備考</th>
                             </tr>
                         </thead>
                         <tbody>
                             <template v-for="row in paginatedData" :key="row.作品番">
-                                <tr @click="setFocus(row.作品番)" :class="{'row-focused': activeRow === row.作品番}">
+                                <tr @click="setFocus(row.作品番)" :class="{'row-focused': activeRow === row.作品番}" :id="'row-' + row.作品番">
                                     <td class="sticky-col-1 font-mono text-slate-400 text-xs pl-4">{{ row.掲載番 }}</td>
                                     <td class="sticky-col-2 font-extrabold text-slate-800 col-wrap">{{ row.初出副題 }}</td>
                                     <td class="col-wrap">
@@ -212,32 +183,19 @@
                                         <div class="font-bold text-slate-700 leading-tight">{{ row.初出掲載誌 }}</div>
                                         <div class="text-[11px] text-blue-500 font-black mt-1">{{ row.初出掲載號 }}</div>
                                     </td>
-                                    <td><a v-if="m = getMapping(row.作品番, ['45卷', 'カラー作品集', 'プラス'])" @click.stop :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-emerald-500"><span>{{m.type}}</span><span>V{{m.vol}}</span></a></td>
-                                    <td><a v-if="m = getMapping(row.作品番, ['大全集', '大長編大全集'])" @click.stop :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-indigo-500"><span>大全集</span><span>V{{m.vol}}</span></a></td>
-                                    
-                                    <td class="mobile-hide"><a v-if="m = getMapping(row.作品番, ['0卷'])" @click.stop :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-slate-600"><span>第0卷</span><span>V{{m.vol}}</span></a></td>
-                                    <td class="mobile-hide"><a v-if="m = getMapping(row.作品番, ['ドラミちゃん'])" @click.stop :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-amber-500"><span>ドラミ</span><span>V{{m.vol}}</span></a></td>
-                                    <td class="mobile-hide"><a v-if="m = getMapping(row.作品番, ['文庫版', '大長編文庫版'])" @click.stop :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-blue-500"><span>文庫</span><span>V{{m.vol}}</span></a></td>
-                                    <td class="mobile-hide"><a v-if="m = getMappingPrefix(row.作品番, 'ぴっかぴかコミックス')" @click.stop :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-pink-500"><span>兒童</span><span>V{{m.vol}}</span></a></td>
-                                    <td class="mobile-hide"><a v-if="m = getMapping(row.作品番, ['とっておき'])" @click.stop :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-rose-500"><span>特選</span><span>V{{m.vol}}</span></a></td>
-                                    
+                                    <td><button v-if="m = getMapping(row.作品番, ['45卷', 'カラー作品集', 'プラス'])" @click.stop="navigateToDB(m.hkIsbn)" class="vol-btn bg-emerald-500"><span>{{m.type}}</span><span>V{{m.vol}}</span></button></td>
+                                    <td><button v-if="m = getMapping(row.作品番, ['大全集', '大長編大全集'])" @click.stop="navigateToDB(m.hkIsbn)" class="vol-btn bg-indigo-500"><span>大全集</span><span>V{{m.vol}}</span></button></td>
+                                    <td class="mobile-hide"><button v-if="m = getMapping(row.作品番, ['0卷', 'ドラミちゃん', '文庫版'])" @click.stop="navigateToDB(m.hkIsbn)" class="vol-btn bg-slate-600"><span>{{m.type}}</span><span>V{{m.vol}}</span></button></td>
                                     <td class="text-slate-400 italic text-[11px] col-wrap pr-4">{{ row.備考 }}</td>
                                 </tr>
                                 <tr v-if="activeRow === row.作品番" class="md:hidden bg-indigo-50/30">
-                                    <td colspan="6" class="p-4 border-b border-indigo-100">
-                                        <div class="grid grid-cols-3 gap-3">
-                                            <div v-if="m = getMapping(row.作品番, ['0卷'])" class="flex flex-col">
-                                                <span class="text-[9px] font-black text-slate-400 uppercase mb-1">第0卷</span>
-                                                <a :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-slate-600">V{{m.vol}}</a>
-                                            </div>
-                                            <div v-if="m = getMapping(row.作品番, ['ドラミちゃん'])" class="flex flex-col">
-                                                <span class="text-[9px] font-black text-slate-400 uppercase mb-1">ドラミ</span>
-                                                <a :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-amber-500">V{{m.vol}}</a>
-                                            </div>
-                                            <div v-if="m = getMapping(row.作品番, ['文庫版'])" class="flex flex-col">
-                                                <span class="text-[9px] font-black text-slate-400 uppercase mb-1">文庫</span>
-                                                <a :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-blue-500">V{{m.vol}}</a>
-                                            </div>
+                                    <td colspan="5" class="p-4 border-b border-indigo-100">
+                                        <div class="flex flex-wrap gap-2">
+                                            <button v-for="type in ['0卷', 'ドラミちゃん', '文庫版', 'とっておき', 'ぴっかぴかコミックス']" 
+                                                v-if="m = (type === 'ぴっかぴかコミックス' ? getMappingPrefix(row.作品番, type) : getMapping(row.作品番, [type]))"
+                                                @click="navigateToDB(m.hkIsbn)" class="px-3 py-2 bg-white border border-slate-200 rounded-lg text-[10px] font-black uppercase">
+                                                {{type}} V{{m.vol}}
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -248,11 +206,7 @@
 
                 <div class="bg-slate-50 p-8 flex justify-center border-t border-slate-100">
                     <div class="flex gap-2">
-                        <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" 
-                            :class="p === currentPage ? 'bg-slate-900 text-white shadow-lg scale-105' : 'bg-white text-slate-500 border border-slate-200'"
-                            class="w-10 h-10 flex items-center justify-center rounded-xl font-black text-xs transition-all">
-                            {{ p }}
-                        </button>
+                        <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" :class="p === currentPage ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-500'" class="w-10 h-10 flex items-center justify-center rounded-xl font-black text-xs">{{ p }}</button>
                     </div>
                 </div>
             </div>
@@ -260,20 +214,6 @@
     </div>
 
     <script>
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.onselectstart = () => false;
-
-        window.onscroll = function() {
-            const btn = document.getElementById("scrollToTop");
-            if (btn) {
-                if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
-                    btn.classList.add("visible");
-                } else {
-                    btn.classList.remove("visible");
-                }
-            }
-        };
-
         const { createApp } = Vue;
         createApp({
             data() {
@@ -290,16 +230,14 @@
                     return stats;
                 },
                 sortedMagazines() {
-                    // Fix 3: Sort by traditional Chinese stroke order
                     return Object.keys(this.magazineStats).sort((a, b) => a.localeCompare(b, 'zh-Hant'));
                 },
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
-                    const searchTerms = q.split(/\s+/).filter(t => t.length > 0);
                     return this.master.filter(r => {
                         const sub = this.getSubtitleInfo(r.作品番);
-                        const combinedText = [r.掲載番, r.初出副題, sub.pubSub, sub.hkSub, r.初出掲載誌, r.初出掲載號, r.備考].join(' ').toLowerCase();
-                        const matchesSearch = searchTerms.every(term => combinedText.includes(term));
+                        const combinedText = [r.掲載番, r.初出副題, sub.pubSub, sub.hkSub, r.初出掲載誌, r.初出掲載號].join(' ').toLowerCase();
+                        const matchesSearch = q === '' || combinedText.includes(q);
                         const matchesMag = this.activeMagazines.length === 0 || this.activeMagazines.includes(r.初出掲載誌?.trim());
                         return matchesSearch && matchesMag;
                     });
@@ -324,7 +262,42 @@
                         ]);
                         this.master = m.filter(r => r.作品番);
                         this.contents = c; this.publishHk = h;
-                    } catch (e) { console.error(e); } finally { setTimeout(() => { this.loading = false; }, 300); }
+                        this.checkUrlParameters();
+                    } catch (e) { console.error(e); } finally { this.loading = false; }
+                },
+                checkUrlParameters() {
+                    const params = new URLSearchParams(window.location.search);
+                    const mag = params.get('mag');
+                    const isbn = params.get('isbn');
+
+                    if (mag) this.activeMagazines = [mag];
+                    if (isbn) {
+                        // Find work associated with this ISBN to focus the row
+                        const content = this.contents.find(c => c.ISBN === isbn);
+                        if (content) {
+                            this.activeRow = content.作品番;
+                            this.searchQuery = content.出版副題; // Search for it to make sure it's on page 1
+                        }
+                    }
+                },
+                toggleMagazine(m) {
+                    const i = this.activeMagazines.indexOf(m);
+                    if (i > -1) this.activeMagazines = []; 
+                    else this.activeMagazines = [m];
+                    
+                    // Update URL
+                    const url = new URL(window.location);
+                    if (this.activeMagazines.length) url.searchParams.set('mag', m);
+                    else url.searchParams.delete('mag');
+                    window.history.pushState({}, '', url);
+
+                    this.currentPage = 1;
+                },
+                navigateToDB(isbn) {
+                    if (!isbn) return;
+                    // Force the full URL to ensure parameters are respected on mobile
+                    const target = `${window.location.origin}/manga-database.html?isbn=${isbn}&region=HK`;
+                    window.location.href = target;
                 },
                 getMapping(workId, types) {
                     const id = workId?.toString().trim();
@@ -338,25 +311,18 @@
                 },
                 processMatch(match) {
                     if (!match) return null;
-                    const hk = this.publishHk.find(h => h.ISBN_JP?.toString().trim() === match.ISBN?.toString().trim() || h.ISBN?.toString().trim() === match.ISBN?.toString().trim());
-                    if (!hk) return null;
-                    return { vol: match.卷 || match.巻, hkIsbn: hk.ISBN, type: match.類 };
+                    const hk = this.publishHk.find(h => h.ISBN_JP === match.ISBN || h.ISBN === match.ISBN);
+                    return hk ? { vol: match.卷 || match.巻, hkIsbn: hk.ISBN, type: match.類 } : null;
                 },
                 getSubtitleInfo(workId) {
                     const id = workId?.toString().trim();
                     const match = this.contents.find(c => c.作品番?.toString().trim() === id && (c.類 === '大全集' || c.類 === '大長編大全集'));
                     return match ? { pubSub: match.出版副題, hkSub: match.副題港譯 } : { pubSub: '', hkSub: '' };
                 },
-                toggleMagazine(m) {
-                    const i = this.activeMagazines.indexOf(m);
-                    if (i > -1) this.activeMagazines.splice(i, 1); else this.activeMagazines.push(m);
-                    this.currentPage = 1;
-                },
-                setFocus(id) {
-                    this.activeRow = (this.activeRow === id) ? null : id;
-                },
-                resetFilters() {
-                    this.searchQuery = ''; this.activeMagazines = []; this.activeRow = null; this.currentPage = 1;
+                setFocus(id) { this.activeRow = (this.activeRow === id) ? null : id; },
+                resetFilters() { 
+                    this.searchQuery = ''; this.activeMagazines = []; this.activeRow = null; 
+                    window.history.pushState({}, '', window.location.pathname);
                 },
                 changePage(p) { this.currentPage = p; window.scrollTo({ top: 0, behavior: 'smooth' }); },
                 backToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }

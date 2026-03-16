@@ -42,12 +42,11 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Restored Navigation Button Style */
+        /* Navigation - Aligned to manga-database.html */
         .top-nav {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid #e2e8f0;
-            padding: 0.75rem 2rem;
             position: sticky; top: 0; z-index: 100;
         }
 
@@ -67,7 +66,6 @@
             box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.05);
             border-right: 1px solid #e2e8f0 !important;
         }
-
         th.sticky-col-1, th.sticky-col-2 { background: #f8fafc; z-index: 30; }
 
         /* Focused Row Styles */
@@ -126,22 +124,24 @@
             </svg>
         </div>
 
-        <nav class="top-nav flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <a href="index.html" class="home-btn shadow-sm" title="Back to Home">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                    </svg>
-                </a>
-                <div class="h-6 w-px bg-slate-200 mx-2"></div>
-                <div class="flex items-center gap-3">
-                    <div class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg font-bold">M</div>
-                    <h1 class="font-black text-lg tracking-tighter uppercase text-slate-800">Master Archive</h1>
+        <nav class="top-nav">
+            <div class="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <a href="index.html" class="home-btn shadow-sm" title="Back to Home">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                        </svg>
+                    </a>
+                    <div class="h-6 w-px bg-slate-200 mx-2"></div>
+                    <div class="flex items-center gap-3">
+                        <div class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg font-bold">M</div>
+                        <h1 class="font-black text-lg tracking-tighter uppercase text-slate-800">Master Archive</h1>
+                    </div>
                 </div>
-            </div>
-            <div v-if="!loading" class="hidden md:flex items-center gap-2 px-3 py-1 bg-emerald-50 rounded-full border border-emerald-100">
-                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
-                <span class="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Database Live</span>
+                <div v-if="!loading" class="hidden md:flex items-center gap-2 px-3 py-1 bg-emerald-50 rounded-full border border-emerald-100">
+                    <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                    <span class="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Database Live</span>
+                </div>
             </div>
         </nav>
 
@@ -173,7 +173,12 @@
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div class="relative flex-1 max-w-lg">
                             <input type="text" v-model="searchQuery" placeholder="Fuzzy Search..." 
-                                class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-3 text-sm font-semibold outline-none focus:border-indigo-500 focus:bg-white transition-all">
+                                class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-3 pr-12 text-sm font-semibold outline-none focus:border-indigo-500 focus:bg-white transition-all">
+                            <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
                         </div>
                         <div class="text-right">
                             <span class="block text-[10px] font-black text-slate-400 uppercase">Found Matches</span>
@@ -201,9 +206,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="row in paginatedData" :key="row.作品番" 
-                                @click="setFocus(row.作品番)"
-                                :class="{'row-focused': activeRow === row.作品番}">
+                            <tr v-for="row in paginatedData" :key="row.作品番" @click="setFocus(row.作品番)" :class="{'row-focused': activeRow === row.作品番}">
                                 <td class="sticky-col-1 font-mono text-slate-400 text-xs pl-4">{{ row.掲載番 }}</td>
                                 <td class="sticky-col-2 font-extrabold text-slate-800 col-wrap">{{ row.初出副題 }}</td>
                                 <td class="col-wrap">

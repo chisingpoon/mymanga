@@ -3,42 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Archive | Detailed View</title>
+    <title>Master Archive | Original Works</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         [v-cloak] { display: none; }
         html { scroll-behavior: smooth; }
-        body { -webkit-user-select: none; user-select: none; font-size: 16px; background-color: #f8fafc; }
+        body { -webkit-user-select: none; user-select: none; font-size: 16px; }
         
-        /* Sticky Header Fix */
+        /* Matching Background from manga-database.html */
+        .bg-grid {
+            background-color: #f8fafc;
+            background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), 
+                              linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
         #table-header th {
             position: sticky;
             top: var(--header-offset, 112px); 
             z-index: 30;
-            background-color: #f1f5f9; /* Solid background to prevent overlap transparency */
+            background-color: #f1f5f9; 
             border-bottom: 2px solid #cbd5e1;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        .main-nav {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            background: white;
-            height: 56px;
-        }
+        .main-nav { position: sticky; top: 0; z-index: 50; background: white; height: 56px; }
 
         .sticky-controls {
             position: sticky;
             top: 56px;
             z-index: 40;
-            background: rgba(255, 255, 255, 0.98);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid #e2e8f0;
         }
 
-        /* Essential Table Styling */
         table { border-collapse: separate; border-spacing: 0; width: 100%; }
         td, th { padding: 12px 16px; border-bottom: 1px solid #e2e8f0; }
         .col-wrap { white-space: normal !important; word-break: break-word; }
@@ -48,21 +48,15 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 6px 10px;
-            border-radius: 8px;
-            font-size: 10px;
+            padding: 6px 4px;
+            border-radius: 6px;
+            font-size: 9px;
             font-weight: 900;
-            min-width: 80px;
+            min-width: 70px;
             color: white;
-            text-decoration: none;
+            transition: transform 0.1s;
         }
-
-        .bg-grid {
-            background-color: #f8fafc;
-            background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), 
-                              linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
+        .vol-btn:hover { transform: scale(1.05); }
     </style>
 </head>
 <body class="bg-grid text-slate-900 min-h-screen">
@@ -76,6 +70,7 @@
                     </div>
                     <span class="font-black text-lg tracking-tighter uppercase">Master Archive</span>
                 </a>
+                <div v-if="loading" class="text-[10px] font-bold text-indigo-600 animate-pulse">SYNCING DATA...</div>
             </div>
         </header>
 
@@ -83,22 +78,24 @@
             <div class="max-w-[99%] mx-auto px-6">
                 <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
                     <div class="w-full lg:w-1/4 relative">
-                        <input type="text" v-model="searchQuery" placeholder="搜尋..." 
-                            class="w-full bg-slate-100 border-none rounded-lg py-2 px-4 font-bold outline-none text-sm">
+                        <input type="text" v-model="searchQuery" placeholder="搜尋作品副題、備註..." 
+                            class="w-full bg-slate-100 border-none rounded-lg py-2 px-4 font-bold outline-none text-sm focus:ring-2 ring-indigo-500">
                     </div>
                     
                     <div class="flex-1 flex flex-wrap gap-2">
                         <button v-for="(count, mName) in magazineStats" :key="mName" 
                             @click="toggleMagazine(mName)" 
-                            :class="activeMagazines.includes(mName) ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'" 
-                            class="px-3 py-1.5 rounded-md text-[11px] font-black uppercase tracking-widest">
+                            :class="activeMagazines.includes(mName) ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white text-slate-500 hover:bg-slate-200 border border-slate-200'" 
+                            class="px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all">
                             {{ mName }} ({{ count }})
                         </button>
                     </div>
 
                     <div class="flex items-center gap-3">
                         <select v-model="itemsPerPage" @change="currentPage = 1" class="bg-slate-100 border-none rounded-md py-1.5 px-3 font-bold text-xs">
-                            <option :value="20">20</option><option :value="50">50</option><option :value="100">100</option>
+                            <option :value="20">20 / Page</option>
+                            <option :value="50">50 / Page</option>
+                            <option :value="100">100 / Page</option>
                         </select>
                     </div>
                 </div>
@@ -106,35 +103,38 @@
         </div>
 
         <main class="max-w-[99%] mx-auto py-6 px-4">
-            <div class="bg-white rounded-2xl shadow-xl border border-slate-200">
-                <div class="overflow-visible"> <table id="main-table">
-                        <thead id="table-header" class="text-[12px] font-black text-slate-900 uppercase">
+            <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table id="main-table">
+                        <thead id="table-header" class="text-[11px] font-black text-slate-900 uppercase">
                             <tr>
                                 <th>掲載番</th>
                                 <th>初出副題</th>
-                                <th class="bg-indigo-50">大全集收錄副題</th>
+                                <th class="bg-indigo-50/50">大全集副題 (HK)</th>
                                 <th>掲載誌 / 號</th>
-                                <th class="text-center bg-emerald-50">單行本</th>
-                                <th class="text-center bg-indigo-50">大全集</th>
-                                <th class="text-center bg-slate-100">第0卷</th>
-                                <th class="text-center bg-amber-50">ドラミ</th>
-                                <th class="text-center bg-blue-50">文庫</th>
-                                <th class="text-center bg-pink-50">兒童版</th>
-                                <th class="text-center bg-rose-50">特選</th>
+                                <th class="text-center bg-emerald-50/50">單行本</th>
+                                <th class="text-center bg-indigo-50/50">大全集</th>
+                                <th class="text-center bg-slate-100/50">第0卷</th>
+                                <th class="text-center bg-amber-50/50">ドラミ</th>
+                                <th class="text-center bg-blue-50/50">文庫</th>
+                                <th class="text-center bg-pink-50/50">兒童版</th>
+                                <th class="text-center bg-rose-50/50">特選</th>
                                 <th>備考</th>
                             </tr>
                         </thead>
                         <tbody class="text-[14px]">
-                            <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-slate-50">
-                                <td class="text-slate-400 text-xs">{{ row.掲載番 }}</td>
+                            <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-slate-50 transition-colors">
+                                <td class="text-slate-400 text-xs font-mono">{{ row.掲載番 }}</td>
                                 <td class="font-black text-slate-800 col-wrap">{{ row.初出副題 }}</td>
-                                <td class="col-wrap border-x border-slate-50">
-                                    <div class="font-bold">{{ getSubtitleInfo(row.作品番).pubSub || '—' }}</div>
-                                    <div class="text-slate-400 text-[11px]">{{ getSubtitleInfo(row.作品番).hkSub }}</div>
+                                <td class="col-wrap border-x border-slate-50 bg-slate-50/30">
+                                    <div class="font-bold text-slate-700">{{ getSubtitleInfo(row.作品番).pubSub || '—' }}</div>
+                                    <div class="text-indigo-500 text-[11px] font-medium">{{ getSubtitleInfo(row.作品番).hkSub }}</div>
                                 </td>
-                                <td>
-                                    <div class="font-bold text-slate-600">{{ row.初出掲載誌 }}</div>
-                                    <div class="text-[10px] text-slate-400">{{ row.初出掲載號 }}</div>
+                                <td class="whitespace-nowrap">
+                                    <div class="font-bold text-slate-700">{{ row.初出掲載誌 }}</div>
+                                    <div class="text-[11px] text-blue-600 font-black mt-0.5">
+                                        {{ row.初出掲載號 || '—' }}
+                                    </div>
                                 </td>
                                 <td class="text-center"><div v-if="m = getMapping(row.作品番, ['45卷', 'カラー作品集', 'プラス'])" class="flex justify-center"><a :href="'manga-database.html?region=HK&isbn=' + m.hkIsbn" class="vol-btn bg-emerald-600"><span>{{m.type}}</span><span>Vol. {{m.vol}}</span></a></div></td>
                                 <td class="text-center"><div v-if="m = getMapping(row.作品番, ['大全集', '大長編大全集'])" class="flex justify-center"><a :href="'manga-database.html?region=HK&isbn=' + m.hkIsbn" class="vol-btn bg-indigo-600"><span>大全集</span><span>Vol. {{m.vol}}</span></a></div></td>
@@ -150,10 +150,11 @@
                 </div>
 
                 <div class="px-6 py-6 border-t bg-slate-50 flex items-center justify-between">
+                    <div class="text-xs text-slate-500 font-bold">Showing {{filteredData.length}} entries</div>
                     <div class="flex items-center gap-1">
                         <button v-for="p in paginationRange" :key="p" 
                             @click="p !== '...' ? changePage(p) : null" 
-                            :class="p === currentPage ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:border-slate-900'"
+                            :class="p === currentPage ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-600 hover:border-slate-900'"
                             class="w-9 h-9 flex items-center justify-center border rounded-lg text-xs font-black transition-all">
                             {{ p }}
                         </button>
@@ -170,7 +171,8 @@
                 return {
                     loading: true, searchQuery: '', activeMagazines: [],
                     currentPage: 1, itemsPerPage: 20,
-                    master: [], contents: [], publishHk: []
+                    master: [], contents: [], publishHk: [],
+                    cacheKey: 'master_archive_cache'
                 }
             },
             computed: {
@@ -184,7 +186,7 @@
                     const hasM = this.activeMagazines.length > 0;
                     return this.master.filter(r => {
                         const sub = this.getSubtitleInfo(r.作品番);
-                        const mText = !q || [r.初出副題, sub.pubSub, sub.hkSub, r.備考].some(t => (t||'').toLowerCase().includes(q));
+                        const mText = !q || [r.初出副題, sub.pubSub, sub.hkSub, r.備考, r.初出掲載誌, r.初出掲載號].some(t => (t||'').toLowerCase().includes(q));
                         const mMag = !hasM || this.activeMagazines.includes(r.初出掲載誌?.trim());
                         return mText && mMag;
                     });
@@ -192,11 +194,11 @@
                 totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
                 paginatedData() { return this.filteredData.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage); },
                 paginationRange() {
-                    const current = this.currentPage, last = this.totalPages, delta = 2, left = current - delta, right = current + delta + 1, range = [], rangeWithDots = [];
-                    let l;
-                    for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= left && i < right)) range.push(i); }
-                    for (let i of range) { if (l) { if (i - l === 2) rangeWithDots.push(l + 1); else if (i - l !== 1) rangeWithDots.push('...'); } rangeWithDots.push(i); l = i; }
-                    return rangeWithDots;
+                    const current = this.currentPage, last = this.totalPages, delta = 2, range = [];
+                    for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= current - delta && i <= current + delta)) range.push(i); }
+                    const res = []; let l;
+                    for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
+                    return res;
                 }
             },
             methods: {
@@ -208,6 +210,16 @@
                     }
                 },
                 async init() {
+                    // 1. Load from Cache for speed
+                    const cached = localStorage.getItem(this.cacheKey);
+                    if (cached) {
+                        const p = JSON.parse(cached);
+                        this.master = p.m; this.contents = p.c; this.publishHk = p.h;
+                        this.loading = false;
+                        this.$nextTick(() => this.updateOffsets());
+                    }
+
+                    // 2. Refresh from source in background
                     try {
                         const [m, c, h] = await Promise.all([
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json()),
@@ -216,6 +228,9 @@
                         ]);
                         this.master = m.filter(r => r.作品番?.toString().trim());
                         this.contents = c; this.publishHk = h;
+                        
+                        localStorage.setItem(this.cacheKey, JSON.stringify({m:this.master, c:this.contents, h:this.publishHk}));
+                        
                         this.$nextTick(() => {
                             this.updateOffsets();
                             new ResizeObserver(() => this.updateOffsets()).observe(document.getElementById('control-panel'));
@@ -234,7 +249,7 @@
                 },
                 processMatch(match) {
                     if (!match) return null;
-                    const hk = this.publishHk.find(h => h.ISBN_JP?.toString().trim() === match.ISBN?.toString().trim());
+                    const hk = this.publishHk.find(h => h.ISBN_JP?.toString().trim() === match.ISBN?.toString().trim() || h.ISBN?.toString().trim() === match.ISBN?.toString().trim());
                     if (!hk) return null;
                     return { vol: match.卷 || match.巻, hkIsbn: hk.ISBN, type: match.類 };
                 },

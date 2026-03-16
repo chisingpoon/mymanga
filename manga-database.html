@@ -207,96 +207,115 @@
     </div>
 
     <script>
-        const { createApp } = Vue;
-        createApp({
-            data() {
-                return {
-                    region: 'HK', view: 'series', loading: true, refreshing: false,
-                    selectedSeries: null, selectedBook: null,
-                    seriesSearchQuery: '', tableQuery: '', 
-                    db: { hk: [], jp: [], contents: [], master: [] }
-                }
-            },
-            computed: {
-                activeHK() { return this.db.hk.filter(item => item.Active?.toString().toLowerCase().trim() === 'yes'); },
-                activeJP() { return this.db.jp.filter(item => item.Active?.toString().toLowerCase().trim() === 'yes'); },
-                filteredSeries() {
-                    const data = this.region === 'HK' ? this.activeHK : this.activeJP;
-                    const key = this.region === 'HK' ? 'Title' : '類';
-                    return [...new Set(data.map(item => item[key]))].filter(Boolean).sort();
-                },
-                searchedSeries() {
-                    const q = this.seriesSearchQuery.toLowerCase();
-                    return this.filteredSeries.filter(s => s.toLowerCase().includes(q));
-                },
-                filteredBooks() {
-                    const data = this.region === 'HK' ? this.activeHK : this.activeJP;
-                    const key = this.region === 'HK' ? 'Title' : '類';
-                    return data.filter(b => b[key] === this.selectedSeries);
-                },
-                hkDetail() { 
-                    if (!this.selectedBook) return null;
-                    return this.region === 'HK' ? this.selectedBook : this.db.hk.find(h => h.ISBN_JP == this.selectedBook.ISBN); 
-                },
-                jpDetail() { 
-                    if (!this.selectedBook) return null;
-                    return this.region === 'JP' ? this.selectedBook : this.db.jp.find(j => j.ISBN == (this.selectedBook.ISBN_JP || this.selectedBook.ISBN)); 
-                },
-                currentStories() {
-                    if (!this.selectedBook) return [];
-                    const isbn = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
-                    return this.db.contents.filter(c => c.ISBN == isbn).map(c => ({
-                        ...c, master: this.db.master.find(m => m.作品番?.toString().trim() === c.作品番?.toString().trim())
-                    })).sort((a,b) => (parseInt(a.收錄話)||0) - (parseInt(b.收錄話)||0));
-                },
-                searchedTableStories() {
-                    const q = this.tableQuery.toLowerCase();
-                    return this.currentStories.filter(s => (s.出版副題||'').toLowerCase().includes(q));
-                }
-            },
-            methods: {
-                async init() {
-                    // 1. Try Cache
-                    const cached = localStorage.getItem('manga_db_v3');
-                    if (cached) {
-                        this.db = JSON.parse(cached);
-                        this.loading = false;
-                    }
-
-                    // 2. Fetch Fresh Data
-                    try {
-                        const [hk, jp, contents, master] = await Promise.all([
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json()),
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP").then(r => r.json()),
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json())
-                        ]);
-                        this.db = { hk, jp, contents, master };
-                        localStorage.setItem('manga_db_v3', JSON.stringify(this.db));
-                    } catch (e) { console.error(e); } finally { this.loading = false; }
-                },
-                async forceRefresh() {
-                    this.refreshing = true;
-                    localStorage.removeItem('manga_db_v3');
-                    await this.init();
-                    this.refreshing = false;
-                },
-                toggleRegion(r) { 
-                    this.region = r; 
-                    this.view = 'series';
-                    this.selectedSeries = null;
-                    this.selectedBook = null;
-                },
-                selectSeries(name) { this.selectedSeries = name; this.view = 'books'; window.scrollTo(0,0); },
-                selectBook(book) { this.selectedBook = book; this.view = 'detail'; this.tableQuery = ''; window.scrollTo(0,0); }
-            },
-            mounted() {
-                this.init();
-                const urlParams = new URLSearchParams(window.location.search);
-                const urlRegion = urlParams.get('region')?.toUpperCase();
-                if (urlRegion === 'JP' || urlRegion === 'HK') this.region = urlRegion;
+const { createApp } = Vue;
+createApp({
+    data() {
+        return {
+            region: 'HK', view: 'series', loading: true, refreshing: false,
+            selectedSeries: null, selectedBook: null,
+            seriesSearchQuery: '', tableQuery: '', 
+            db: { hk: [], jp: [], contents: [], master: [] }
+        }
+    },
+    computed: {
+        activeHK() { return this.db.hk.filter(item => item.Active?.toString().toLowerCase().trim() === 'yes'); },
+        activeJP() { return this.db.jp.filter(item => item.Active?.toString().toLowerCase().trim() === 'yes'); },
+        filteredSeries() {
+            const data = this.region === 'HK' ? this.activeHK : this.activeJP;
+            const key = this.region === 'HK' ? 'Title' : '類';
+            return [...new Set(data.map(item => item[key]))].filter(Boolean).sort();
+        },
+        searchedSeries() {
+            const q = this.seriesSearchQuery.toLowerCase();
+            return this.filteredSeries.filter(s => s.toLowerCase().includes(q));
+        },
+        filteredBooks() {
+            const data = this.region === 'HK' ? this.activeHK : this.activeJP;
+            const key = this.region === 'HK' ? 'Title' : '類';
+            return data.filter(b => b[key] === this.selectedSeries);
+        },
+        hkDetail() { 
+            if (!this.selectedBook) return null;
+            return this.region === 'HK' ? this.selectedBook : this.db.hk.find(h => h.ISBN_JP == this.selectedBook.ISBN); 
+        },
+        jpDetail() { 
+            if (!this.selectedBook) return null;
+            return this.region === 'JP' ? this.selectedBook : this.db.jp.find(j => j.ISBN == (this.selectedBook.ISBN_JP || this.selectedBook.ISBN)); 
+        },
+        currentStories() {
+            if (!this.selectedBook) return [];
+            const isbn = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
+            return this.db.contents.filter(c => c.ISBN == isbn).map(c => ({
+                ...c, master: this.db.master.find(m => m.作品番?.toString().trim() === c.作品番?.toString().trim())
+            })).sort((a,b) => (parseInt(a.收錄話)||0) - (parseInt(b.收錄話)||0));
+        },
+        searchedTableStories() {
+            const q = this.tableQuery.toLowerCase();
+            return this.currentStories.filter(s => (s.出版副題||'').toLowerCase().includes(q));
+        }
+    },
+    methods: {
+        async init() {
+            const cached = localStorage.getItem('manga_db_v3');
+            if (cached) {
+                this.db = JSON.parse(cached);
+                this.loading = false;
+                this.checkUrlParameters(); // Check URL even if using cache
             }
-        }).mount('#app')
+
+            try {
+                const [hk, jp, contents, master] = await Promise.all([
+                    fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json()),
+                    fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP").then(r => r.json()),
+                    fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
+                    fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json())
+                ]);
+                this.db = { hk, jp, contents, master };
+                localStorage.setItem('manga_db_v3', JSON.stringify(this.db));
+                this.checkUrlParameters(); // Check URL after fresh fetch
+            } catch (e) { console.error(e); } finally { this.loading = false; }
+        },
+        checkUrlParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlRegion = urlParams.get('region')?.toUpperCase();
+            const urlIsbn = urlParams.get('isbn');
+
+            if (urlRegion === 'JP' || urlRegion === 'HK') {
+                this.region = urlRegion;
+            }
+
+            if (urlIsbn) {
+                // Search in both HK and JP databases for the ISBN
+                const book = this.db.hk.find(b => b.ISBN === urlIsbn) || 
+                             this.db.jp.find(b => b.ISBN === urlIsbn);
+                
+                if (book) {
+                    this.selectedBook = book;
+                    // Determine which series name to use based on the region of the found book
+                    this.selectedSeries = book.Title || book.類;
+                    this.view = 'detail';
+                }
+            }
+        },
+        async forceRefresh() {
+            this.refreshing = true;
+            localStorage.removeItem('manga_db_v3');
+            await this.init();
+            this.refreshing = false;
+        },
+        toggleRegion(r) { 
+            this.region = r; 
+            this.view = 'series';
+            this.selectedSeries = null;
+            this.selectedBook = null;
+        },
+        selectSeries(name) { this.selectedSeries = name; this.view = 'books'; window.scrollTo(0,0); },
+        selectBook(book) { this.selectedBook = book; this.view = 'detail'; this.tableQuery = ''; window.scrollTo(0,0); }
+    },
+    mounted() {
+        this.init();
+    }
+}).mount('#app')
     </script>
 </body>
 </html>

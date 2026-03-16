@@ -107,7 +107,13 @@
 
         <main class="max-w-[1920px] mx-auto px-6 pt-10">
             <div class="mb-10">
-                <h2 class="text-4xl font-black text-slate-900 mb-6">Original Works</h2>
+                <div class="flex items-center gap-5 mb-6">
+                    <h2 class="text-4xl font-black text-slate-900">Original Works</h2>
+                    <button @click="toggleAllMagazines" class="mt-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-4 py-1.5 rounded-full text-[11px] font-black uppercase transition-all shadow-sm">
+                        {{ activeMagazines.length === sortedMagazines.length ? 'Deselect All' : 'Select All Magazines' }}
+                    </button>
+                </div>
+                
                 <div class="flex flex-wrap gap-3">
                     <button v-for="mName in sortedMagazines" :key="mName" 
                         @click="toggleMagazine(mName)" 
@@ -287,6 +293,14 @@
                     const i = this.activeMagazines.indexOf(m);
                     if (i > -1) this.activeMagazines.splice(i, 1);
                     else this.activeMagazines.push(m);
+                    this.currentPage = 1;
+                },
+                toggleAllMagazines() {
+                    if (this.activeMagazines.length === this.sortedMagazines.length) {
+                        this.activeMagazines = [];
+                    } else {
+                        this.activeMagazines = [...this.sortedMagazines];
+                    }
                     this.currentPage = 1;
                 },
                 changePage(p) { this.currentPage = p; window.scrollTo({ top: 0, behavior: 'smooth' }); },

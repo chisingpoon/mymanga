@@ -189,21 +189,7 @@
                                             <div class="font-black text-slate-900 uppercase text-[15px]">{{ story.master?.初出掲載誌 || '-' }}</div>
                                             <div class="text-[12px] text-blue-600 font-bold mt-2">{{ story.master?.初出掲載号 || '-' }}</div>
                                         </td>
-                                        <!-- <td class="px-8 py-8 font-black text-slate-800 text-[13px]">{{ story.master?.大全集 || '-' }}</td> -->
-                                        <td class="px-8 py-8 font-black text-slate-800 text-[13px]" data-label="大全集 Ref">
-                                            <template v-if="getDCSMapping(story.作品番)">
-                                                <a :href="'manga-database.html?isbn=' + getDCSMapping(story.作品番).targetIsbn + '&region=HK'" 
-                                                   class="inline-flex items-center gap-2 text-blue-600 hover:underline decoration-2 underline-offset-4 transition-all group">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
-                                                    </svg>
-                                                    {{ getDCSMapping(story.作品番).label }}
-                                                </a>
-                                            </template>
-                                            <template v-else>
-                                                <span class="text-slate-300 font-normal">-</span>
-                                            </template>
-                                        </td>
+                                        <td class="px-8 py-8 font-black text-slate-800 text-[13px]">{{ story.master?.大全集 || '-' }}</td>
                                         <td class="px-8 py-8 text-center font-black text-slate-400">{{ story.收錄頁 }}</td>
                                     </tr>
                                 </tbody>
@@ -263,10 +249,7 @@ createApp({
             if (!this.selectedBook) return [];
             const isbn = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
             return this.db.contents.filter(c => c.ISBN == isbn).map(c => ({
-                ...c, 
-                master: this.db.master.find(m => 
-                    m.作品番?.toString().trim() === c.作品番?.toString().trim()
-                )
+                ...c, master: this.db.master.find(m => m.作品番?.toString().trim() === c.作品番?.toString().trim())
             })).sort((a,b) => (parseInt(a.收錄話)||0) - (parseInt(b.收錄話)||0));
         },
         searchedTableStories() {
@@ -331,35 +314,6 @@ createApp({
         },
         selectSeries(name) { this.selectedSeries = name; this.view = 'books'; window.scrollTo(0,0); },
         selectBook(book) { this.selectedBook = book; this.view = 'detail'; this.tableQuery = ''; window.scrollTo(0,0); }
-    },
-    getDCSMapping(workId) {
-        if (!workId || !this.db.contents || !this.db.hk) return null;
-        const id = workId.toString().trim();
-        
-        // 1 & 2. Find unique record where 作品番 matches and 類 is 大長編大全集 or 大全集
-        const contentsMatch = this.db.contents.find(c => 
-            c.作品番?.toString().trim() === id && 
-            (c.類 === '大長編大全集' || c.類 === '大全集')
-        );
-        
-        if (!contentsMatch) return null;
-    
-        // 3. Get ISBN from the Great Collection record
-        const targetIsbnJp = contentsMatch.ISBN?.trim();
-    
-        // 4 & 5. Map to 出版目録HK using ISBN_JP to get the HK ISBN
-        const hkMatch = this.db.hk.find(h => 
-            h.ISBN_JP?.toString().trim() === targetIsbnJp
-        );
-    
-        // 6. Return the data needed for the link and label
-        if (hkMatch) {
-            return {
-                label: `[${contentsMatch.類} vol. ${contentsMatch.巻}]`,
-                targetIsbn: hkMatch.ISBN
-            };
-        }
-        return null;
     },
     mounted() {
         this.init();

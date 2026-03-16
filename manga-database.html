@@ -332,7 +332,7 @@ createApp({
             if (!workId || !this.db.contents || !this.db.hk) return null;
             const id = workId.toString().trim();
             
-            // 1. Find the Great Collection record in the contents sheet
+            // 1. 「書籍收錄作品」シートから、作品番が一致し、かつ大全集系のレコードを検索
             const contentsMatch = this.db.contents.find(c => 
                 c.作品番?.toString().trim() === id && 
                 (c.類 === '大全集' || c.類 === '大長編大全集')
@@ -342,16 +342,16 @@ createApp({
         
             const targetIsbnJp = contentsMatch.ISBN?.trim();
         
-            // 2. Cross-reference with the HK list using ISBN_JP
+            // 2. 「出版目録HK」シートの中から、ISBN_JP が上記で見つかった ISBN と一致するものを検索
             const hkMatch = this.db.hk.find(h => 
                 h.ISBN_JP?.toString().trim() === targetIsbnJp
             );
         
-            // 3. Return HK-specific Volume and ISBN
+            // 3. HK版のレコードが見つかった場合のみ、その情報を返す
             if (hkMatch) {
                 return {
-                    vol: hkMatch.Volume,
-                    isbn: hkMatch.ISBN
+                    vol: hkMatch.Volume, // リンクのラベルに使用
+                    isbn: hkMatch.ISBN    // jumpToBook で使用する最終的な ISBN
                 };
             }
         
@@ -360,23 +360,23 @@ createApp({
     
         jumpToBook(isbn) {
             if (!isbn) return;
-        
-            const targetBook = this.db.hk.find(b => b.ISBN === isbn) || 
-                               this.db.jp.find(b => b.ISBN === isbn);
-        
+            // 1. Find the book object in either HK or JP database
+            const targetBook = this.db.hk.find(b => b.ISBN === isbn) || this.db.jp.find(b => b.ISBN === isbn);
+
             if (targetBook) {
-                // Save history for the "Back to Previous" button
-                if (this.selectedBook) this.previousBook = this.selectedBook;
-        
+                // 2. Determine region based on which array the book belongs to
                 this.region = this.db.hk.includes(targetBook) ? 'HK' : 'JP';
+                // 3. Update the selected series name so the "Back" button works correctly
                 this.selectedSeries = targetBook.Title || targetBook.類;
+                // 4. Trigger your existing selectBook logic
                 this.selectBook(targetBook);
-                
-                // Sync URL
+                // 5. Update URL so users can refresh or share the specific book view
                 const url = new URL(window.location);
                 url.searchParams.set('isbn', isbn);
                 url.searchParams.set('region', this.region);
                 window.history.pushState({}, '', url);
+            } else {
+                console.warn("Reference book with ISBN " + isbn + " not found in databases.");
             }
         },
     },

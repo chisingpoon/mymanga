@@ -63,18 +63,16 @@
             position: sticky; top: 0; z-index: 100;
         }
 
-        /* Responsive Table Adjustments */
         .main-card { position: relative; background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); margin-bottom: 3rem; overflow: hidden; border: 1px solid #e2e8f0; }
         
-        /* Auto-sizing table based on text content */
         table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: auto; }
-        th { font-size: 11px; font-weight: 800; padding: 14px 15px; text-align: left; color: #64748b; background: #f8fafc; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
+        th { font-size: 11px; font-weight: 800; padding: 14px 15px; text-align: left; color: #64748b; background: #f8fafc; border-bottom: 2px solid #e2e8f0; white-space: nowrap; position: sticky; top: 0; z-index: 10; }
         td { padding: 16px 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; }
 
         @media (min-width: 769px) {
             .sticky-col-1 { position: sticky; left: 0; z-index: 20; background: inherit; border-right: 1px solid #f1f5f9; }
             .sticky-col-2 { position: sticky; left: 80px; z-index: 20; background: inherit; border-right: 1px solid #f1f5f9; }
-            th.sticky-col-1, th.sticky-col-2 { background: #f8fafc; z-index: 30; }
+            th.sticky-col-1, th.sticky-col-2 { z-index: 40; }
         }
 
         .row-focused { background-color: #eef2ff !important; }
@@ -194,6 +192,7 @@
                                     <td>
                                         <a v-if="m = getMapping(row.作品番, ['45卷', 'カラー作品集', 'プラス'])" 
                                            :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'"
+                                           target="_blank"
                                            @click.stop
                                            class="vol-link bg-emerald-500">
                                             <span>{{m.type}}</span><span>V{{m.vol}}</span>
@@ -202,6 +201,7 @@
                                     <td>
                                         <a v-if="m = getMapping(row.作品番, ['大全集', '大長編大全集'])" 
                                            :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'"
+                                           target="_blank"
                                            @click.stop
                                            class="vol-link bg-indigo-500">
                                             <span>大全集</span><span>V{{m.vol}}</span>
@@ -210,6 +210,7 @@
                                     <td class="mobile-hide">
                                         <a v-if="m = getMapping(row.作品番, ['0卷', 'ドラミちゃん', '文庫版'])" 
                                            :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'"
+                                           target="_blank"
                                            @click.stop
                                            class="vol-link bg-slate-600">
                                             <span>{{m.type}}</span><span>V{{m.vol}}</span>
@@ -223,6 +224,7 @@
                                             <a v-for="type in ['0卷', 'ドラミちゃん', '文庫版', 'とっておき', 'ぴっかぴかコミックス']" 
                                                 v-if="m = (type === 'ぴっかぴかコミックス' ? getMappingPrefix(row.作品番, type) : getMapping(row.作品番, [type]))"
                                                 :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'"
+                                                target="_blank"
                                                 @click.stop
                                                 class="px-3 py-2 bg-white border border-slate-200 rounded-lg text-[10px] font-black uppercase shadow-sm text-slate-700">
                                                 {{type}} V{{m.vol}}

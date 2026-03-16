@@ -189,7 +189,16 @@
                                             <div class="font-black text-slate-900 uppercase text-[15px]">{{ story.master?.初出掲載誌 || '-' }}</div>
                                             <div class="text-[12px] text-blue-600 font-bold mt-2">{{ story.master?.初出掲載号 || '-' }}</div>
                                         </td>
-                                        <td class="px-8 py-8 font-black text-slate-800 text-[13px]">{{ story.master?.大全集 || '-' }}</td>
+                                  <!--      <td class="px-8 py-8 font-black text-slate-800 text-[13px]">{{ story.master?.大全集 || '-' }}</td> -->
+                                        <td class="px-8 py-8 font-black text-slate-800 text-[13px]" data-label="Note / Ref">
+                                            <div v-if="ref = getDCSMapping(story.作品番)">
+                                                <button @click="jumpToBook(ref.isbn)" 
+                                                    class="group flex flex-col items-start bg-blue-50 hover:bg-blue-600 border border-blue-100 px-4 py-2 rounded-2xl transition-all shadow-sm">
+                                                    <span class="text-[9px] font-black text-blue-400 group-hover:text-blue-100 uppercase leading-none mb-1">大全集 Ref</span>
+                                                    <span class="text-[13px] font-black text-blue-800 group-hover:text-white leading-none">Vol. {{ ref.vol }}</span>
+                                                </button>
+                                            </div>
+                                        </td>
                                         <td class="px-8 py-8 text-center font-black text-slate-400">{{ story.收錄頁 }}</td>
                                     </tr>
                                 </tbody>
@@ -314,6 +323,52 @@ createApp({
         },
         selectSeries(name) { this.selectedSeries = name; this.view = 'books'; window.scrollTo(0,0); },
         selectBook(book) { this.selectedBook = book; this.view = 'detail'; this.tableQuery = ''; window.scrollTo(0,0); }
+        getDCSMapping(workId) {
+            if (!workId || !this.db.contents) return null;
+            const id = workId.toString().trim();
+            
+            // Filter the contents sheet specifically for this story ID
+            // and ensure the category is '大全集' or '大長編大全集'
+            const match = this.db.contents.find(c => 
+                c.作品番?.toString().trim() === id && 
+                (c.類 === '大全集' || c.類 === '大長編大全集')
+            );
+            
+            if (!match) return null;
+    
+            // Return the unique volume and ISBN for this specific story
+            return {
+                vol: match.卷 || match.巻,
+                isbn: match.ISBN?.trim()
+            };
+        },
+    
+        jumpToBook(isbn) {
+            if (!isbn) return;
+    
+            // 1. Find the book object in either HK or JP database
+            const targetBook = this.db.hk.find(b => b.ISBN === isbn) || 
+                               this.db.jp.find(b => b.ISBN === isbn);
+    
+            if (targetBook) {
+                // 2. Determine region based on which array the book belongs to
+                this.region = this.db.hk.includes(targetBook) ? 'HK' : 'JP';
+                
+                // 3. Update the selected series name so the "Back" button works correctly
+                this.selectedSeries = targetBook.Title || targetBook.類;
+                
+                // 4. Trigger your existing selectBook logic
+                this.selectBook(targetBook);
+                
+                // 5. Update URL so users can refresh or share the specific book view
+                const url = new URL(window.location);
+                url.searchParams.set('isbn', isbn);
+                url.searchParams.set('region', this.region);
+                window.history.pushState({}, '', url);
+            } else {
+                console.warn("Reference book with ISBN " + isbn + " not found in databases.");
+            }
+        }
     },
     mounted() {
         this.init();

@@ -151,3 +151,114 @@
                                 <div class="font-bold text-slate-700 leading-tight">{{ row.初出掲載誌 }}</div>
                                 <div class="text-[11px] text-blue-500 font-black mt-1">{{ row.初出掲載号 }}</div>
                             </td>
+                            <td class="col-btn"><a v-if="m = getMapping(row.作品番, ['45卷', 'カラー作品集', 'プラス'])" :href="'manga-database.html?isbn=' + m.hkIsbn" target="_blank" rel="noopener noreferrer" class="vol-btn bg-emerald-500"><span>{{m.type}}</span><span>V{{m.vol}}</span></a></td>
+                            <td class="col-btn"><a v-if="m = getMapping(row.作品番, ['大全集', '大長編大全集'])" :href="'manga-database.html?isbn=' + m.hkIsbn" target="_blank" rel="noopener noreferrer" class="vol-btn bg-indigo-500"><span>大全集</span><span>V{{m.vol}}</span></a></td>
+                            <td class="col-btn"><a v-if="m = getMapping(row.作品番, ['0卷'])" :href="'manga-database.html?isbn=' + m.hkIsbn" target="_blank" rel="noopener noreferrer" class="vol-btn bg-slate-500"><span>第0卷</span><span>V{{m.vol}}</span></a></td>
+                            <td class="col-btn"><a v-if="m = getMapping(row.作品番, ['ドラミちゃん'])" :href="'manga-database.html?isbn=' + m.hkIsbn" target="_blank" rel="noopener noreferrer" class="vol-btn bg-amber-500"><span>ドラミ</span><span>V{{m.vol}}</span></a></td>
+                            <td class="col-btn"><a v-if="m = getMapping(row.作品番, ['文庫版', '大長編文庫版'])" :href="'manga-database.html?isbn=' + m.hkIsbn" target="_blank" rel="noopener noreferrer" class="vol-btn bg-blue-500"><span>文庫</span><span>V{{m.vol}}</span></a></td>
+                            <td class="col-btn"><a v-if="m = getMappingPrefix(row.作品番, 'ぴっかぴかコミックス')" :href="'manga-database.html?isbn=' + m.hkIsbn" target="_blank" rel="noopener noreferrer" class="vol-btn bg-pink-500"><span>兒童</span><span>V{{m.vol}}</span></a></td>
+                            <td class="col-btn"><a v-if="m = getMapping(row.作品番, ['とっておき'])" :href="'manga-database.html?isbn=' + m.hkIsbn" target="_blank" rel="noopener noreferrer" class="vol-btn bg-rose-500"><span>特選</span><span>V{{m.vol}}</span></a></td>
+                            <td class="col-last text-slate-400 italic text-[11px] col-wrap">{{ row.備考 }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-10 flex justify-center items-center gap-2">
+                <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" 
+                    :class="p === currentPage ? 'bg-indigo-600 text-white scale-110' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'"
+                    class="w-10 h-10 flex items-center justify-center rounded-xl font-black text-xs transition-all shadow-sm">
+                    {{ p }}
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Security: Prevent Right-Click and Text Selection
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.onselectstart = function() { return false; }; // IE backup
+
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    loading: true, searchQuery: '', activeMagazines: [],
+                    currentPage: 1, itemsPerPage: 40,
+                    master: [], contents: [], publishHk: []
+                }
+            },
+            computed: {
+                magazineStats() {
+                    const stats = {};
+                    this.master.forEach(r => { if (r.初出掲載誌) { const n = r.初出掲載誌.trim(); stats[n] = (stats[n] || 0) + 1; } });
+                    return stats;
+                },
+                filteredData() {
+                    const q = this.searchQuery.toLowerCase().trim();
+                    const hasM = this.activeMagazines.length > 0;
+                    return this.master.filter(r => {
+                        const sub = this.getSubtitleInfo(r.作品番);
+                        const mText = !q || [r.初出副題, sub.pubSub, sub.hkSub, r.備考, r.初出掲載誌, r.初出掲載号].some(t => (t||'').toLowerCase().includes(q));
+                        const mMag = !hasM || this.activeMagazines.includes(r.初出掲載誌?.trim());
+                        return mText && mMag;
+                    });
+                },
+                totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
+                paginatedData() { return this.filteredData.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage); },
+                paginationRange() {
+                    const current = this.currentPage, last = this.totalPages, range = [];
+                    for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i); }
+                    const res = []; let l;
+                    for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
+                    return res;
+                }
+            },
+            methods: {
+                async init() {
+                    try {
+                        const [m, c, h] = await Promise.all([
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json()),
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
+                        ]);
+                        this.master = m.filter(r => r.作品番);
+                        this.contents = c; this.publishHk = h;
+                    } catch (e) { console.error(e); } finally { this.loading = false; }
+                },
+                getMapping(workId, types) {
+                    const id = workId?.toString().trim();
+                    const match = this.contents.find(c => c.作品番?.toString().trim() === id && types.includes(c.類));
+                    return this.processMatch(match);
+                },
+                getMappingPrefix(workId, prefix) {
+                    const id = workId?.toString().trim();
+                    const match = this.contents.find(c => c.作品番?.toString().trim() === id && c.類?.startsWith(prefix));
+                    return this.processMatch(match);
+                },
+                processMatch(match) {
+                    if (!match) return null;
+                    const hk = this.publishHk.find(h => h.ISBN_JP?.toString().trim() === match.ISBN?.toString().trim() || h.ISBN?.toString().trim() === match.ISBN?.toString().trim());
+                    if (!hk) return null;
+                    return { vol: match.卷 || match.巻, hkIsbn: hk.ISBN, type: match.類 };
+                },
+                getSubtitleInfo(workId) {
+                    const id = workId?.toString().trim();
+                    const match = this.contents.find(c => c.作品番?.toString().trim() === id && (c.類 === '大全集' || c.類 === '大長編大全集'));
+                    return match ? { pubSub: match.出版副題, hkSub: match.副題港譯 } : { pubSub: '', hkSub: '' };
+                },
+                toggleMagazine(m) {
+                    const i = this.activeMagazines.indexOf(m);
+                    if (i > -1) this.activeMagazines.splice(i, 1); else this.activeMagazines.push(m);
+                    this.currentPage = 1;
+                },
+                changePage(p) {
+                    this.currentPage = p;
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+                }
+            },
+            mounted() { this.init(); }
+        }).mount('#app')
+    </script>
+</body>
+</html>

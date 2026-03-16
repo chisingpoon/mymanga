@@ -42,7 +42,7 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Navigation - Aligned to manga-database.html */
+        /* Navigation Header */
         .top-nav {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(12px);
@@ -50,31 +50,22 @@
             position: sticky; top: 0; z-index: 100;
         }
 
-        .home-btn {
-            width: 40px; height: 40px;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; background: white;
-            border: 1px solid #e2e8f0; color: #64748b;
-            transition: all 0.2s;
+        /* Frozen Column Logic - DISABLED ON MOBILE */
+        @media (min-width: 769px) {
+            .sticky-col-1 { position: sticky; left: 0; z-index: 20; background: inherit; }
+            .sticky-col-2 {
+                position: sticky; left: 80px; z-index: 20; background: inherit;
+                box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.05);
+                border-right: 1px solid #e2e8f0 !important;
+            }
+            th.sticky-col-1, th.sticky-col-2 { background: #f8fafc; z-index: 30; }
         }
-        .home-btn:hover { background: #f1f5f9; color: #1e293b; border-color: #cbd5e1; }
-
-        /* Frozen Column Logic */
-        .sticky-col-1 { position: sticky; left: 0; z-index: 20; background: inherit; }
-        .sticky-col-2 {
-            position: sticky; left: 80px; z-index: 20; background: inherit;
-            box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.05);
-            border-right: 1px solid #e2e8f0 !important;
-        }
-        th.sticky-col-1, th.sticky-col-2 { background: #f8fafc; z-index: 30; }
 
         /* Focused Row Styles */
         .row-focused { background-color: #eef2ff !important; }
         .row-focused td { border-bottom: 1px solid #c7d2fe !important; color: #312e81 !important; }
-        .row-focused .sticky-col-1, .row-focused .sticky-col-2 { background-color: #eef2ff !important; }
 
         tr:not(.row-focused):hover { background-color: #f8fafc; cursor: pointer; }
-        tr:not(.row-focused):hover .sticky-col-1, tr:not(.row-focused):hover .sticky-col-2 { background-color: #f8fafc; }
 
         /* Card & Table */
         .main-card {
@@ -125,18 +116,14 @@
         </div>
 
         <nav class="top-nav">
-            <div class="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <a href="index.html" class="home-btn shadow-sm" title="Back to Home">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                    <a href="index.html" class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg hover:scale-105 transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
                         </svg>
                     </a>
-                    <div class="h-6 w-px bg-slate-200 mx-2"></div>
-                    <div class="flex items-center gap-3">
-                        <div class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg font-bold">M</div>
-                        <h1 class="font-black text-lg tracking-tighter uppercase text-slate-800">Master Archive</h1>
-                    </div>
+                    <h1 class="font-black text-xl tracking-tighter text-slate-800 uppercase">Master Archive</h1>
                 </div>
                 <div v-if="!loading" class="hidden md:flex items-center gap-2 px-3 py-1 bg-emerald-50 rounded-full border border-emerald-100">
                     <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
@@ -154,7 +141,7 @@
                     </div>
                     <button v-if="searchQuery || activeMagazines.length > 0 || activeRow" @click="resetFilters" 
                         class="text-[10px] font-black text-rose-500 uppercase hover:underline">
-                        ✕ Clear All Filters & Focus
+                        ✕ Clear All Filters
                     </button>
                 </div>
 
@@ -172,7 +159,7 @@
                 <div class="p-6 border-b border-slate-100">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div class="relative flex-1 max-w-lg">
-                            <input type="text" v-model="searchQuery" placeholder="Fuzzy Search..." 
+                            <input type="text" v-model="searchQuery" placeholder="Search works..." 
                                 class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-3 pr-12 text-sm font-semibold outline-none focus:border-indigo-500 focus:bg-white transition-all">
                             <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -339,10 +326,7 @@
                     this.activeRow = (this.activeRow === id) ? null : id;
                 },
                 resetFilters() {
-                    this.searchQuery = '';
-                    this.activeMagazines = [];
-                    this.activeRow = null;
-                    this.currentPage = 1;
+                    this.searchQuery = ''; this.activeMagazines = []; this.activeRow = null; this.currentPage = 1;
                 },
                 changePage(p) { this.currentPage = p; window.scrollTo({ top: 0, behavior: 'smooth' }); },
                 backToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }

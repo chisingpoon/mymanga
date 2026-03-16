@@ -8,7 +8,21 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         [v-cloak] { display: none; }
-        body { background-color: #f8fafc; margin: 0; padding: 0; font-family: sans-serif; }
+        
+        /* Global UI Locks */
+        html, body { 
+            background-color: #f1f5f9; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Inter', system-ui, sans-serif; 
+            color: #1e293b;
+            /* Prevent Text Selection */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none; /* Disable long-press on mobile */
+        }
         
         /* Fixed Header Section */
         .fixed-top-area {
@@ -17,70 +31,84 @@
             left: 0;
             right: 0;
             z-index: 1000;
-            background: white;
-            border-bottom: 2px solid #cbd5e1;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
-        .nav-bar { height: 50px; display: flex; items-center; padding: 0 20px; border-bottom: 1px solid #e2e8f0; }
-        .filter-bar { padding: 10px 20px; background: #fff; }
+        .nav-bar { height: 60px; display: flex; align-items: center; padding: 0 24px; border-bottom: 1px solid #f1f5f9; }
+        .filter-bar { padding: 12px 24px; background: #fff; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 
-        /* The specific fix: A header that never moves */
         .header-wrapper {
-            background: #f1f5f9;
-            border-bottom: 2px solid #64748b;
-            padding: 0 20px;
+            background: #f8fafc;
+            border-bottom: 2px solid #cbd5e1;
+            padding: 0 24px;
         }
 
-        /* Column Width Syncing */
-        .col-1 { width: 60px; }
-        .col-2 { width: 20%; }
-        .col-3 { width: 15%; }
-        .col-4 { width: 12%; }
-        .col-btn { width: 65px; text-align: center; }
+        /* Column Logic */
+        .col-1 { width: 70px; }
+        .col-2 { width: 22%; }
+        .col-3 { width: 18%; }
+        .col-4 { width: 14%; }
+        .col-btn { width: 72px; text-align: center; }
         .col-last { width: auto; }
 
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        th { font-size: 10px; font-weight: 900; text-transform: uppercase; padding: 12px 8px; text-align: left; }
-        td { padding: 12px 8px; border-bottom: 1px solid #e2e8f0; font-size: 13px; vertical-align: top; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 1000px; }
+        th { font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 14px 8px; text-align: left; color: #64748b; letter-spacing: 0.05em; }
+        td { padding: 14px 8px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; }
 
-        /* Content Area Padding to prevent overlapping */
-        .content-main { padding-top: 180px; padding-left: 20px; padding-right: 20px; padding-bottom: 50px; }
+        /* Highlight Hover Effect */
+        tbody tr { transition: all 0.2s; border-left: 3px solid transparent; }
+        tbody tr:hover { background-color: #eef2ff; border-left: 3px solid #6366f1; }
 
+        .content-main { padding-top: 195px; padding-bottom: 60px; }
+        .table-card { background: white; border-radius: 12px; margin: 0 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow-x: auto; }
+
+        /* Buttons with scale effect */
         .vol-btn {
             display: flex;
             flex-direction: column;
             font-size: 9px;
-            font-weight: bold;
+            font-weight: 800;
             color: white;
-            padding: 3px;
-            border-radius: 4px;
+            padding: 4px 2px;
+            border-radius: 6px;
             text-decoration: none;
-            line-height: 1;
+            line-height: 1.1;
+            transition: transform 0.1s;
         }
-        .col-wrap { word-break: break-word; white-space: normal; }
+        .vol-btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
+        .vol-btn:active { transform: scale(0.95); }
+        
+        .col-wrap { word-break: break-word; white-space: normal; line-height: 1.4; }
+
+        /* Custom Scrollbar for the table card */
+        .table-card::-webkit-scrollbar { height: 6px; }
+        .table-card::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
-<body>
-
-    <div id="app" v-cloak>
+<body oncontextmenu="return false;"> <div id="app" v-cloak>
         <div class="fixed-top-area">
             <div class="nav-bar flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <div class="bg-slate-900 text-white w-7 h-7 flex items-center justify-center rounded font-bold">M</div>
-                    <span class="font-black tracking-tighter">MASTER ARCHIVE</span>
+                <div class="flex items-center gap-3">
+                    <div class="bg-indigo-600 text-white w-9 h-9 flex items-center justify-center rounded-lg font-bold shadow-lg shadow-indigo-200">M</div>
+                    <span class="font-black text-xl tracking-tighter text-slate-800 uppercase">Master Archive</span>
                 </div>
-                <div v-if="loading" class="text-[10px] font-bold text-blue-600 animate-pulse">SYNCING DATA...</div>
+                <div v-if="loading" class="text-xs font-black text-indigo-500 flex items-center gap-2">
+                    <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    SYNCING
+                </div>
             </div>
 
-            <div class="filter-bar flex flex-wrap gap-4 items-center">
-                <input type="text" v-model="searchQuery" placeholder="搜尋作品或號數..." 
-                    class="bg-slate-100 border-none rounded-md px-3 py-2 text-sm font-bold outline-none flex-1 max-w-sm">
+            <div class="filter-bar">
+                <input type="text" v-model="searchQuery" placeholder="搜尋標題、號數..." 
+                    class="bg-slate-100 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-xl px-4 py-2 text-sm font-bold outline-none flex-1 max-w-md transition-all">
                 
-                <div class="flex flex-wrap gap-1">
+                <div class="flex flex-wrap gap-2">
                     <button v-for="(count, mName) in magazineStats" :key="mName" 
                         @click="toggleMagazine(mName)" 
-                        :class="activeMagazines.includes(mName) ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600'" 
-                        class="px-2 py-1 rounded text-[10px] font-bold uppercase">
+                        :class="activeMagazines.includes(mName) ? 'bg-slate-800 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'" 
+                        class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all">
                         {{ mName }}
                     </button>
                 </div>
@@ -92,14 +120,14 @@
                         <tr>
                             <th class="col-1">掲載番</th>
                             <th class="col-2">初出副題</th>
-                            <th class="col-3">大全集副題</th>
-                            <th class="col-4">掲載誌/號</th>
+                            <th class="col-3">大全集副題 (HK)</th>
+                            <th class="col-4">掲載誌 / 號</th>
                             <th class="col-btn">單行本</th>
                             <th class="col-btn">大全集</th>
                             <th class="col-btn">第0卷</th>
                             <th class="col-btn">ドラミ</th>
                             <th class="col-btn">文庫</th>
-                            <th class="col-btn">兒童版</th>
+                            <th class="col-btn">兒童</th>
                             <th class="col-btn">特選</th>
                             <th class="col-last">備考</th>
                         </tr>
@@ -109,124 +137,17 @@
         </div>
 
         <main class="content-main">
-            <div class="bg-white rounded-b-lg shadow-sm border border-slate-200 overflow-hidden">
+            <div class="table-card border border-slate-200">
                 <table>
                     <tbody>
-                        <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-slate-50">
-                            <td class="col-1 font-mono text-slate-400">{{ row.掲載番 }}</td>
-                            <td class="col-2 font-bold text-slate-900 col-wrap">{{ row.初出副題 }}</td>
+                        <tr v-for="row in paginatedData" :key="row.作品番">
+                            <td class="col-1 font-mono text-slate-400 text-xs px-2">{{ row.掲載番 }}</td>
+                            <td class="col-2 font-extrabold text-slate-800 col-wrap">{{ row.初出副題 }}</td>
                             <td class="col-3 col-wrap">
-                                <div class="font-bold text-slate-700">{{ getSubtitleInfo(row.作品番).pubSub }}</div>
-                                <div class="text-blue-500 text-[10px] font-bold">{{ getSubtitleInfo(row.作品番).hkSub }}</div>
+                                <div class="font-bold text-slate-600">{{ getSubtitleInfo(row.作品番).pubSub }}</div>
+                                <div class="text-indigo-600 text-[11px] font-bold">{{ getSubtitleInfo(row.作品番).hkSub }}</div>
                             </td>
                             <td class="col-4">
                                 <div class="font-bold text-slate-700 leading-tight">{{ row.初出掲載誌 }}</div>
-                                <div class="text-[11px] text-blue-600 font-black">{{ row.初出掲載号 }}</div>
+                                <div class="text-[11px] text-blue-500 font-black mt-1">{{ row.初出掲載号 }}</div>
                             </td>
-                            <td class="col-btn"><a v-if="m = getMapping(row.作品番, ['45卷', 'カラー作品集', 'プラス'])" :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-emerald-600"><span>{{m.type}}</span><span>V{{m.vol}}</span></a></td>
-                            <td class="col-btn"><a v-if="m = getMapping(row.作品番, ['大全集', '大長編大全集'])" :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-indigo-600"><span>大全集</span><span>V{{m.vol}}</span></a></td>
-                            <td class="col-btn"><a v-if="m = getMapping(row.作品番, ['0卷'])" :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-slate-600"><span>第0卷</span><span>V{{m.vol}}</span></a></td>
-                            <td class="col-btn"><a v-if="m = getMapping(row.作品番, ['ドラミちゃん'])" :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-amber-500"><span>ドラミ</span><span>V{{m.vol}}</span></a></td>
-                            <td class="col-btn"><a v-if="m = getMapping(row.作品番, ['文庫版', '大長編文庫版'])" :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-blue-600"><span>文庫</span><span>V{{m.vol}}</span></a></td>
-                            <td class="col-btn"><a v-if="m = getMappingPrefix(row.作品番, 'ぴっかぴかコミックス')" :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-pink-500"><span>兒童</span><span>V{{m.vol}}</span></a></td>
-                            <td class="col-btn"><a v-if="m = getMapping(row.作品番, ['とっておき'])" :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-rose-500"><span>特選</span><span>V{{m.vol}}</span></a></td>
-                            <td class="col-last text-slate-400 italic text-[10px] col-wrap">{{ row.備考 }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="mt-8 flex justify-center gap-1">
-                <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" 
-                    :class="p === currentPage ? 'bg-slate-900 text-white' : 'bg-white text-slate-500 border'"
-                    class="w-10 h-10 flex items-center justify-center rounded font-black text-xs">
-                    {{ p }}
-                </button>
-            </div>
-        </main>
-    </div>
-
-    <script>
-        const { createApp } = Vue;
-        createApp({
-            data() {
-                return {
-                    loading: true, searchQuery: '', activeMagazines: [],
-                    currentPage: 1, itemsPerPage: 50,
-                    master: [], contents: [], publishHk: []
-                }
-            },
-            computed: {
-                magazineStats() {
-                    const stats = {};
-                    this.master.forEach(r => { if (r.初出掲載誌) { const n = r.初出掲載誌.trim(); stats[n] = (stats[n] || 0) + 1; } });
-                    return stats;
-                },
-                filteredData() {
-                    const q = this.searchQuery.toLowerCase().trim();
-                    const hasM = this.activeMagazines.length > 0;
-                    return this.master.filter(r => {
-                        const sub = this.getSubtitleInfo(r.作品番);
-                        const mText = !q || [r.初出副題, sub.pubSub, sub.hkSub, r.備考, r.初出掲載誌, r.初出掲載号].some(t => (t||'').toLowerCase().includes(q));
-                        const mMag = !hasM || this.activeMagazines.includes(r.初出掲載誌?.trim());
-                        return mText && mMag;
-                    });
-                },
-                totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
-                paginatedData() { return this.filteredData.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage); },
-                paginationRange() {
-                    const current = this.currentPage, last = this.totalPages, range = [];
-                    for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i); }
-                    const res = []; let l;
-                    for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
-                    return res;
-                }
-            },
-            methods: {
-                async init() {
-                    try {
-                        const [m, c, h] = await Promise.all([
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json()),
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
-                        ]);
-                        this.master = m.filter(r => r.作品番);
-                        this.contents = c; this.publishHk = h;
-                    } catch (e) { console.error(e); } finally { this.loading = false; }
-                },
-                getMapping(workId, types) {
-                    const id = workId?.toString().trim();
-                    const match = this.contents.find(c => c.作品番?.toString().trim() === id && types.includes(c.類));
-                    return this.processMatch(match);
-                },
-                getMappingPrefix(workId, prefix) {
-                    const id = workId?.toString().trim();
-                    const match = this.contents.find(c => c.作品番?.toString().trim() === id && c.類?.startsWith(prefix));
-                    return this.processMatch(match);
-                },
-                processMatch(match) {
-                    if (!match) return null;
-                    const hk = this.publishHk.find(h => h.ISBN_JP?.toString().trim() === match.ISBN?.toString().trim() || h.ISBN?.toString().trim() === match.ISBN?.toString().trim());
-                    if (!hk) return null;
-                    return { vol: match.卷 || match.巻, hkIsbn: hk.ISBN, type: match.類 };
-                },
-                getSubtitleInfo(workId) {
-                    const id = workId?.toString().trim();
-                    const match = this.contents.find(c => c.作品番?.toString().trim() === id && (c.類 === '大全集' || c.類 === '大長編大全集'));
-                    return match ? { pubSub: match.出版副題, hkSub: match.副題港譯 } : { pubSub: '', hkSub: '' };
-                },
-                toggleMagazine(m) {
-                    const i = this.activeMagazines.indexOf(m);
-                    if (i > -1) this.activeMagazines.splice(i, 1); else this.activeMagazines.push(m);
-                    this.currentPage = 1;
-                },
-                changePage(p) {
-                    this.currentPage = p;
-                    window.scrollTo({ top: 0, behavior: 'instant' });
-                }
-            },
-            mounted() { this.init(); }
-        }).mount('#app')
-    </script>
-</body>
-</html>

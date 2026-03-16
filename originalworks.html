@@ -9,12 +9,10 @@
     <style>
         [v-cloak] { display: none; }
         
-        /* Consistent Background & Security */
         html, body { 
             min-height: 100vh;
             background-color: #f8fafc; 
-            margin: 0; 
-            padding: 0; 
+            margin: 0; padding: 0; 
             font-family: 'Inter', system-ui, sans-serif; 
             color: #1e293b;
             -webkit-user-select: none;
@@ -28,130 +26,209 @@
             background-size: 40px 40px;
         }
 
+        /* Loading Overlay */
+        .loader-wrapper {
+            position: fixed; inset: 0;
+            background: rgba(248, 250, 252, 0.9);
+            backdrop-filter: blur(8px);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 9999;
+        }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid #e2e8f0; border-top: 4px solid #4f46e5;
+            border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Navigation */
         .top-nav {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid #e2e8f0;
-            padding: 1rem 2rem;
+            padding: 0.75rem 2rem;
+            position: sticky; top: 0; z-index: 100;
+        }
+
+        .home-btn {
+            width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; background: white;
+            border: 1px solid #e2e8f0; color: #64748b;
+            transition: all 0.2s;
+        }
+        .home-btn:hover { background: #f1f5f9; color: #1e293b; border-color: #cbd5e1; }
+
+        /* Frozen Column Logic */
+        .sticky-col-1 {
             position: sticky;
-            top: 0;
-            z-index: 50;
+            left: 0;
+            z-index: 20;
+            background: white; /* Matches row color */
+        }
+        .sticky-col-2 {
+            position: sticky;
+            left: 80px; /* Width of Col 1 */
+            z-index: 20;
+            background: white;
+            border-right: 2px solid #e2e8f0 !important;
         }
 
-        /* Scroll to Top Button */
-        .scroll-top-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 50px;
-            height: 50px;
-            background: #1e293b;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 100;
-        }
-
-        .scroll-top-btn.visible {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateY(0);
-        }
-
-        .scroll-top-btn:hover {
-            background: #4f46e5;
-            transform: translateY(-5px);
-        }
-
-        /* Table Styling */
-        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
-        th { 
-            font-size: 11px; 
-            font-weight: 800; 
-            text-transform: uppercase; 
-            padding: 14px 10px; 
-            text-align: left; 
-            color: #64748b; 
+        /* Header logic for sticky columns */
+        th.sticky-col-1, th.sticky-col-2 {
             background: #f8fafc;
-            border-bottom: 2px solid #e2e8f0;
+            z-index: 30;
+        }
+
+        /* Change background on hover for sticky cells too */
+        tr:hover td.sticky-col-1, 
+        tr:hover td.sticky-col-2 {
+            background-color: #f1f5f9;
+        }
+
+        /* Card & Table */
+        .main-card {
+            background: white; border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 3rem; overflow: hidden; border: 1px solid #e2e8f0;
+        }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1200px; }
+        th { 
+            font-size: 11px; font-weight: 800; text-transform: uppercase; 
+            padding: 14px 10px; text-align: left; color: #64748b; 
+            background: #f8fafc; border-bottom: 2px solid #e2e8f0;
         }
         td { padding: 16px 10px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; }
 
-        .main-card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-            margin-bottom: 3rem;
-            overflow: hidden;
-            border: 1px solid #e2e8f0;
-        }
-
         .vol-btn {
-            display: flex;
-            flex-direction: column;
-            font-size: 9px;
-            font-weight: 800;
-            color: white;
-            padding: 6px 4px;
-            border-radius: 8px;
-            text-decoration: none;
-            line-height: 1.1;
-            transition: all 0.2s;
+            display: flex; flex-direction: column; font-size: 9px; font-weight: 800;
+            color: white; padding: 6px 4px; border-radius: 8px; text-decoration: none;
+            line-height: 1.1; transition: all 0.2s; text-align: center;
         }
         .vol-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
         .col-wrap { word-break: break-word; white-space: normal; line-height: 1.5; }
+
+        .scroll-top-btn {
+            position: fixed; bottom: 30px; right: 30px;
+            width: 50px; height: 50px;
+            background: #1e293b; color: white;
+            border-radius: 50%; display: flex;
+            align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease; opacity: 0; pointer-events: none; z-index: 100;
+        }
+        .scroll-top-btn.visible { opacity: 1; pointer-events: auto; }
+
+        /* Frozen Column Logic with Shadow */
+        .sticky-col-1 {
+            position: sticky;
+            left: 0;
+            z-index: 20;
+            background: white;
+        }
+    
+        .sticky-col-2 {
+            position: sticky;
+            left: 80px; /* Adjust if Col 1 width changes */
+            z-index: 20;
+            background: white;
+            /* The Shadow Effect */
+            box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.05);
+            border-right: 1px solid #e2e8f0 !important;
+        }
+    
+        /* Ensure headers also have the shadow to match */
+        th.sticky-col-2 {
+            box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.05);
+            background: #f8fafc;
+            z-index: 30;
+        }
+    
+        /* Clean up borders for the frozen area */
+        .sticky-col-1, .sticky-col-2 {
+            border-bottom: 1px solid #f1f5f9;
+        }
+    
+        /* Hover state for sticky cells */
+        tr:hover td.sticky-col-1, 
+        tr:hover td.sticky-col-2 {
+            background-color: #f8fafc !important;
+        }
+        
+        /* Extra refinement for the table container to handle the shadow overflow */
+        .overflow-x-auto {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
     </style>
 </head>
 <body class="bg-grid" oncontextmenu="return false;">
 
     <div id="app" v-cloak>
+        <div v-if="loading" class="loader-wrapper">
+            <div class="spinner"></div>
+            <p class="mt-4 text-xs font-black uppercase tracking-widest text-slate-400">Syncing Master Archive</p>
+        </div>
+
         <div id="scrollToTop" class="scroll-top-btn" @click="backToTop">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7" />
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
             </svg>
         </div>
 
         <nav class="top-nav flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg font-bold">M</div>
-                <h1 class="font-black text-lg tracking-tighter uppercase text-slate-800">Master Archive</h1>
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="home-btn shadow-sm" title="Back to Home">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                    </svg>
+                </a>
+                <div class="h-6 w-px bg-slate-200 mx-2"></div>
+                <div class="flex items-center gap-3">
+                    <div class="bg-slate-900 text-white w-8 h-8 flex items-center justify-center rounded-lg font-bold">M</div>
+                    <h1 class="font-black text-lg tracking-tighter uppercase text-slate-800">Master Archive</h1>
+                </div>
             </div>
-            <div v-if="loading" class="text-[10px] font-black text-indigo-500 uppercase flex items-center gap-2">
-                <div class="w-2 h-2 bg-indigo-500 rounded-full animate-ping"></div>
-                Loading Records
+            <div v-if="!loading" class="hidden md:flex items-center gap-2 px-3 py-1 bg-emerald-50 rounded-full border border-emerald-100">
+                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                <span class="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Database Live</span>
             </div>
         </nav>
 
         <main class="max-w-[1440px] mx-auto px-6 pt-8">
             <div class="mb-8">
-                <h2 class="text-3xl font-black text-slate-900 mb-2">Original Works</h2>
-                <div class="flex flex-wrap gap-2 mt-6">
+                <div class="flex items-end justify-between mb-6">
+                    <div>
+                        <h2 class="text-3xl font-black text-slate-900 mb-2">Original Works</h2>
+                        <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Chronological Publication Record</p>
+                    </div>
+                    <button v-if="searchQuery || activeMagazines.length > 0" @click="resetFilters" 
+                        class="text-[10px] font-black text-rose-500 uppercase hover:underline">
+                        ✕ Clear All Filters
+                    </button>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
                     <button v-for="(count, mName) in magazineStats" :key="mName" 
                         @click="toggleMagazine(mName)" 
-                        :class="activeMagazines.includes(mName) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'" 
-                        class="px-3 py-2 rounded-xl text-[10px] font-black uppercase border-2 transition-all shadow-sm">
-                        {{ mName }} <span class="ml-1 opacity-60">({{ count }})</span>
+                        :class="activeMagazines.includes(mName) ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-slate-500 border-slate-200'" 
+                        class="px-3 py-2 rounded-xl text-[10px] font-black uppercase border-2 transition-all">
+                        {{ mName }} <span class="ml-1 opacity-50">{{ count }}</span>
                     </button>
                 </div>
             </div>
 
             <div class="main-card">
-                <div class="card-header p-6 border-bottom">
+                <div class="p-6 border-b border-slate-100">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div class="relative flex-1 max-w-lg">
-                            <input type="text" v-model="searchQuery" placeholder="搜尋標題、附題、備註..." 
+                            <input type="text" v-model="searchQuery" placeholder="Fuzzy Search..." 
                                 class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-3 text-sm font-semibold outline-none focus:border-indigo-500 focus:bg-white transition-all">
                         </div>
-                        <div class="flex items-center gap-4 text-right">
-                             <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Showing</span>
-                             <span class="text-sm font-black text-slate-800">{{ filteredData.length }} Results</span>
+                        <div class="text-right">
+                            <span class="block text-[10px] font-black text-slate-400 uppercase">Found Matches</span>
+                            <span class="text-sm font-black text-slate-800">{{ filteredData.length }} Entries</span>
                         </div>
                     </div>
                 </div>
@@ -160,10 +237,10 @@
                     <table>
                         <thead>
                             <tr>
-                                <th style="width: 80px">掲載番</th>
-                                <th style="width: 22%">初出副題</th>
-                                <th style="width: 18%">大全集副題 (HK)</th>
-                                <th style="width: 15%">掲載誌 / 號</th>
+                                <th class="sticky-col-1" style="width: 80px">掲載番</th>
+                                <th class="sticky-col-2" style="width: 280px">初出副題</th>
+                                <th style="width: 200px">大全集副題 (HK)</th>
+                                <th style="width: 180px">掲載誌 / 號</th>
                                 <th style="width: 75px">單行本</th>
                                 <th style="width: 75px">大全集</th>
                                 <th style="width: 75px">第0卷</th>
@@ -175,9 +252,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-indigo-50/30 transition-colors">
-                                <td class="font-mono text-slate-400 text-xs pl-4">{{ row.掲載番 }}</td>
-                                <td class="font-extrabold text-slate-800 col-wrap">{{ row.初出副題 }}</td>
+                            <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-slate-50 transition-colors">
+                                <td class="sticky-col-1 font-mono text-slate-400 text-xs pl-4">{{ row.掲載番 }}</td>
+                                <td class="sticky-col-2 font-extrabold text-slate-800 col-wrap">{{ row.初出副題 }}</td>
                                 <td class="col-wrap">
                                     <div class="font-bold text-slate-600">{{ getSubtitleInfo(row.作品番).pubSub }}</div>
                                     <div class="text-indigo-600 text-[11px] font-bold">{{ getSubtitleInfo(row.作品番).hkSub }}</div>
@@ -202,7 +279,7 @@
                 <div class="bg-slate-50 p-8 flex justify-center border-t border-slate-100">
                     <div class="flex gap-2">
                         <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" 
-                            :class="p === currentPage ? 'bg-slate-900 text-white' : 'bg-white text-slate-500 border border-slate-200'"
+                            :class="p === currentPage ? 'bg-slate-900 text-white shadow-lg scale-105' : 'bg-white text-slate-500 border border-slate-200'"
                             class="w-10 h-10 flex items-center justify-center rounded-xl font-black text-xs transition-all">
                             {{ p }}
                         </button>
@@ -216,13 +293,14 @@
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onselectstart = () => false;
 
-        // Scroll logic
         window.onscroll = function() {
             const btn = document.getElementById("scrollToTop");
-            if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
-                btn.classList.add("visible");
-            } else {
-                btn.classList.remove("visible");
+            if (btn) {
+                if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
+                    btn.classList.add("visible");
+                } else {
+                    btn.classList.remove("visible");
+                }
             }
         };
 
@@ -241,37 +319,17 @@
                     this.master.forEach(r => { if (r.初出掲載誌) { const n = r.初出掲載誌.trim(); stats[n] = (stats[n] || 0) + 1; } });
                     return stats;
                 },
-filteredData() {
-        const q = this.searchQuery.toLowerCase().trim();
-        if (!q && this.activeMagazines.length === 0) return this.master;
-
-        // Split search into individual terms for fuzzy matching
-        const searchTerms = q.split(/\s+/); 
-
-        return this.master.filter(r => {
-            const sub = this.getSubtitleInfo(r.作品番);
-            
-            // Combine all searchable text into one string
-            const combinedText = [
-                r.掲載番,
-                r.初出副題,
-                sub.pubSub,
-                sub.hkSub,
-                r.初出掲載誌,
-                r.初出掲載號,
-                r.備考
-            ].join(' ').toLowerCase();
-
-            // Check if every search term exists somewhere in the combined text
-            const matchesSearch = searchTerms.every(term => combinedText.includes(term));
-            
-            // Check if matches active magazine filters
-            const matchesMag = this.activeMagazines.length === 0 || 
-                               this.activeMagazines.includes(r.初出掲載誌?.trim());
-
-            return matchesSearch && matchesMag;
-        });
-    },
+                filteredData() {
+                    const q = this.searchQuery.toLowerCase().trim();
+                    const searchTerms = q.split(/\s+/).filter(t => t.length > 0);
+                    return this.master.filter(r => {
+                        const sub = this.getSubtitleInfo(r.作品番);
+                        const combinedText = [r.掲載番, r.初出副題, sub.pubSub, sub.hkSub, r.初出掲載誌, r.初出掲載號, r.備考].join(' ').toLowerCase();
+                        const matchesSearch = searchTerms.every(term => combinedText.includes(term));
+                        const matchesMag = this.activeMagazines.length === 0 || this.activeMagazines.includes(r.初出掲載誌?.trim());
+                        return matchesSearch && matchesMag;
+                    });
+                },
                 totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
                 paginatedData() { return this.filteredData.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage); },
                 paginationRange() {
@@ -292,7 +350,7 @@ filteredData() {
                         ]);
                         this.master = m.filter(r => r.作品番);
                         this.contents = c; this.publishHk = h;
-                    } catch (e) { console.error(e); } finally { this.loading = false; }
+                    } catch (e) { console.error(e); } finally { setTimeout(() => { this.loading = false; }, 300); }
                 },
                 getMapping(workId, types) {
                     const id = workId?.toString().trim();
@@ -320,13 +378,13 @@ filteredData() {
                     if (i > -1) this.activeMagazines.splice(i, 1); else this.activeMagazines.push(m);
                     this.currentPage = 1;
                 },
-                changePage(p) {
-                    this.currentPage = p;
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                resetFilters() {
+                    this.searchQuery = '';
+                    this.activeMagazines = [];
+                    this.currentPage = 1;
                 },
-                backToTop() {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
+                changePage(p) { this.currentPage = p; window.scrollTo({ top: 0, behavior: 'smooth' }); },
+                backToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
             },
             mounted() { this.init(); }
         }).mount('#app')

@@ -8,151 +8,137 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         [v-cloak] { display: none; }
-        html, body { height: 100%; margin: 0; }
-        body { -webkit-user-select: none; user-select: none; font-size: 16px; background-color: #f8fafc; }
+        body { background-color: #f8fafc; margin: 0; padding: 0; font-family: sans-serif; }
         
-        /* Grid Background */
-        .bg-grid {
-            background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), 
-                              linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
-
-        /* 1. Main Navigation (Top Level) */
-        .main-nav { 
-            position: sticky; 
-            top: 0; 
-            z-index: 1000; 
-            background: #ffffff !important; 
-            height: 56px; 
-            border-bottom: 1px solid #e2e8f0; 
-        }
-
-        /* 2. Search & Filter Bar (Second Level) */
-        .sticky-controls {
-            position: sticky;
-            top: 56px; /* Sits exactly below main-nav */
-            z-index: 900;
-            background: #ffffff !important;
+        /* Fixed Header Section */
+        .fixed-top-area {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: white;
             border-bottom: 2px solid #cbd5e1;
-            padding: 12px 0;
         }
 
-        /* 3. Table Header (Third Level) */
-        #table-header th {
-            position: sticky;
-            top: 112px; /* 56px (Nav) + 56px (Controls) */
-            z-index: 800;
-            background-color: #f1f5f9 !important;
-            color: #1e293b;
-            border-bottom: 2px solid #475569;
-            padding: 12px 16px;
-            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+        .nav-bar { height: 50px; display: flex; items-center; padding: 0 20px; border-bottom: 1px solid #e2e8f0; }
+        .filter-bar { padding: 10px 20px; background: #fff; }
+
+        /* The specific fix: A header that never moves */
+        .header-wrapper {
+            background: #f1f5f9;
+            border-bottom: 2px solid #64748b;
+            padding: 0 20px;
         }
 
-        /* Table structural reset to ensure sticky works */
-        table { border-collapse: separate; border-spacing: 0; width: 100%; }
-        .master-wrapper { overflow: visible !important; }
-        
-        .col-wrap { white-space: normal !important; word-break: break-word; }
+        /* Column Width Syncing */
+        .col-1 { width: 60px; }
+        .col-2 { width: 20%; }
+        .col-3 { width: 15%; }
+        .col-4 { width: 12%; }
+        .col-btn { width: 65px; text-align: center; }
+        .col-last { width: auto; }
+
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th { font-size: 10px; font-weight: 900; text-transform: uppercase; padding: 12px 8px; text-align: left; }
+        td { padding: 12px 8px; border-bottom: 1px solid #e2e8f0; font-size: 13px; vertical-align: top; }
+
+        /* Content Area Padding to prevent overlapping */
+        .content-main { padding-top: 180px; padding-left: 20px; padding-right: 20px; padding-bottom: 50px; }
+
         .vol-btn {
-            display: inline-flex;
+            display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 4px;
-            border-radius: 4px;
             font-size: 9px;
-            font-weight: 900;
-            min-width: 65px;
+            font-weight: bold;
             color: white;
+            padding: 3px;
+            border-radius: 4px;
             text-decoration: none;
+            line-height: 1;
         }
+        .col-wrap { word-break: break-word; white-space: normal; }
     </style>
 </head>
-<body class="bg-grid text-slate-900">
+<body>
 
     <div id="app" v-cloak>
-        <header class="main-nav">
-            <div class="max-w-[98%] mx-auto px-4 h-full flex items-center justify-between">
-                <a href="index.html" class="flex items-center gap-2">
-                    <div class="w-8 h-8 bg-slate-900 rounded text-white flex items-center justify-center font-bold">M</div>
-                    <span class="font-black text-lg uppercase tracking-tighter">Master Archive</span>
-                </a>
-                <div v-if="loading" class="text-xs font-bold text-blue-600 animate-pulse">LOADING...</div>
+        <div class="fixed-top-area">
+            <div class="nav-bar flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="bg-slate-900 text-white w-7 h-7 flex items-center justify-center rounded font-bold">M</div>
+                    <span class="font-black tracking-tighter">MASTER ARCHIVE</span>
+                </div>
+                <div v-if="loading" class="text-[10px] font-bold text-blue-600 animate-pulse">SYNCING DATA...</div>
             </div>
-        </header>
 
-        <section class="sticky-controls">
-            <div class="max-w-[98%] mx-auto px-4 flex flex-wrap gap-4 items-center">
+            <div class="filter-bar flex flex-wrap gap-4 items-center">
                 <input type="text" v-model="searchQuery" placeholder="搜尋作品或號數..." 
-                    class="flex-1 min-w-[200px] bg-slate-100 border-none rounded-lg py-2 px-4 text-sm font-bold outline-none focus:ring-2 ring-blue-500">
+                    class="bg-slate-100 border-none rounded-md px-3 py-2 text-sm font-bold outline-none flex-1 max-w-sm">
                 
                 <div class="flex flex-wrap gap-1">
                     <button v-for="(count, mName) in magazineStats" :key="mName" 
                         @click="toggleMagazine(mName)" 
-                        :class="activeMagazines.includes(mName) ? 'bg-blue-600 text-white' : 'bg-white text-slate-500 border border-slate-200'" 
-                        class="px-2 py-1 rounded text-[10px] font-bold uppercase transition-none">
+                        :class="activeMagazines.includes(mName) ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600'" 
+                        class="px-2 py-1 rounded text-[10px] font-bold uppercase">
                         {{ mName }}
                     </button>
                 </div>
-
-                <select v-model="itemsPerPage" class="bg-slate-100 rounded py-2 px-2 text-xs font-bold">
-                    <option :value="20">20/頁</option>
-                    <option :value="50">50/頁</option>
-                    <option :value="100">100/頁</option>
-                </select>
             </div>
-        </section>
 
-        <main class="max-w-[98%] mx-auto py-4 px-2 master-wrapper">
-            <div class="bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto"> <table>
-                        <thead id="table-header">
-                            <tr class="text-[10px] font-black uppercase text-left">
-                                <th class="w-16">掲載番</th>
-                                <th>初出副題</th>
-                                <th class="bg-blue-50/50">大全集副題</th>
-                                <th>掲載誌 / 號</th>
-                                <th class="text-center bg-emerald-50/50">單行本</th>
-                                <th class="text-center bg-indigo-50/50">大全集</th>
-                                <th class="text-center bg-slate-100/50">第0卷</th>
-                                <th class="text-center bg-amber-50/50">ドラミ</th>
-                                <th class="text-center bg-blue-50/50">文庫</th>
-                                <th class="text-center bg-pink-50/50">兒童版</th>
-                                <th class="text-center bg-rose-50/50">特選</th>
-                                <th>備考</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-[13px]">
-                            <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-slate-50 border-b">
-                                <td class="font-mono text-slate-400 px-4">{{ row.掲載番 }}</td>
-                                <td class="font-bold text-slate-900 col-wrap px-4">{{ row.初出副題 }}</td>
-                                <td class="col-wrap bg-slate-50/30 px-4">
-                                    <div class="font-bold text-slate-700">{{ getSubtitleInfo(row.作品番).pubSub || '—' }}</div>
-                                    <div class="text-blue-500 text-[10px] font-bold">{{ getSubtitleInfo(row.作品番).hkSub }}</div>
-                                </td>
-                                <td class="whitespace-nowrap px-4">
-                                    <div class="font-bold">{{ row.初出掲載誌 }}</div>
-                                    <div class="text-[11px] text-blue-600 font-black">{{ row.初出掲載号 }}</div>
-                                </td>
-                                <td class="text-center p-2"><div v-if="m = getMapping(row.作品番, ['45卷', 'カラー作品集', 'プラス'])" class="flex justify-center"><a :href="'manga-database.html?region=HK&isbn=' + m.hkIsbn" class="vol-btn bg-emerald-600"><span>{{m.type}}</span><span>Vol.{{m.vol}}</span></a></div></td>
-                                <td class="text-center p-2"><div v-if="m = getMapping(row.作品番, ['大全集', '大長編大全集'])" class="flex justify-center"><a :href="'manga-database.html?region=HK&isbn=' + m.hkIsbn" class="vol-btn bg-indigo-600"><span>大全集</span><span>Vol.{{m.vol}}</span></a></div></td>
-                                <td class="text-center p-2"><div v-if="m = getMapping(row.作品番, ['0卷'])" class="flex justify-center"><a :href="'manga-database.html?region=HK&isbn=' + m.hkIsbn" class="vol-btn bg-slate-600"><span>第0卷</span><span>Vol.{{m.vol}}</span></a></div></td>
-                                <td class="text-center p-2"><div v-if="m = getMapping(row.作品番, ['ドラミちゃん'])" class="flex justify-center"><a :href="'manga-database.html?region=HK&isbn=' + m.hkIsbn" class="vol-btn bg-amber-500"><span>ドラミ</span><span>Vol.{{m.vol}}</span></a></div></td>
-                                <td class="text-center p-2"><div v-if="m = getMapping(row.作品番, ['文庫版', '大長編文庫版'])" class="flex justify-center"><a :href="'manga-database.html?region=HK&isbn=' + m.hkIsbn" class="vol-btn bg-blue-600"><span>文庫</span><span>Vol.{{m.vol}}</span></a></div></td>
-                                <td class="text-center p-2"><div v-if="m = getMappingPrefix(row.作品番, 'ぴっかぴかコミックス')" class="flex justify-center"><a :href="'manga-database.html?region=HK&isbn=' + m.hkIsbn" class="vol-btn bg-pink-500"><span>兒童版</span><span>Vol.{{m.vol}}</span></a></div></td>
-                                <td class="text-center p-2"><div v-if="m = getMapping(row.作品番, ['とっておき'])" class="flex justify-center"><a :href="'manga-database.html?region=HK&isbn=' + m.hkIsbn" class="vol-btn bg-rose-500"><span>特選</span><span>Vol.{{m.vol}}</span></a></div></td>
-                                <td class="text-slate-400 italic text-[10px] col-wrap px-4">{{ row.備考 }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="header-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="col-1">掲載番</th>
+                            <th class="col-2">初出副題</th>
+                            <th class="col-3">大全集副題</th>
+                            <th class="col-4">掲載誌/號</th>
+                            <th class="col-btn">單行本</th>
+                            <th class="col-btn">大全集</th>
+                            <th class="col-btn">第0卷</th>
+                            <th class="col-btn">ドラミ</th>
+                            <th class="col-btn">文庫</th>
+                            <th class="col-btn">兒童版</th>
+                            <th class="col-btn">特選</th>
+                            <th class="col-last">備考</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+
+        <main class="content-main">
+            <div class="bg-white rounded-b-lg shadow-sm border border-slate-200 overflow-hidden">
+                <table>
+                    <tbody>
+                        <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-slate-50">
+                            <td class="col-1 font-mono text-slate-400">{{ row.掲載番 }}</td>
+                            <td class="col-2 font-bold text-slate-900 col-wrap">{{ row.初出副題 }}</td>
+                            <td class="col-3 col-wrap">
+                                <div class="font-bold text-slate-700">{{ getSubtitleInfo(row.作品番).pubSub }}</div>
+                                <div class="text-blue-500 text-[10px] font-bold">{{ getSubtitleInfo(row.作品番).hkSub }}</div>
+                            </td>
+                            <td class="col-4">
+                                <div class="font-bold text-slate-700 leading-tight">{{ row.初出掲載誌 }}</div>
+                                <div class="text-[11px] text-blue-600 font-black">{{ row.初出掲載号 }}</div>
+                            </td>
+                            <td class="col-btn"><a v-if="m = getMapping(row.作品番, ['45卷', 'カラー作品集', 'プラス'])" :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-emerald-600"><span>{{m.type}}</span><span>V{{m.vol}}</span></a></td>
+                            <td class="col-btn"><a v-if="m = getMapping(row.作品番, ['大全集', '大長編大全集'])" :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-indigo-600"><span>大全集</span><span>V{{m.vol}}</span></a></td>
+                            <td class="col-btn"><a v-if="m = getMapping(row.作品番, ['0卷'])" :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-slate-600"><span>第0卷</span><span>V{{m.vol}}</span></a></td>
+                            <td class="col-btn"><a v-if="m = getMapping(row.作品番, ['ドラミちゃん'])" :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-amber-500"><span>ドラミ</span><span>V{{m.vol}}</span></a></td>
+                            <td class="col-btn"><a v-if="m = getMapping(row.作品番, ['文庫版', '大長編文庫版'])" :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-blue-600"><span>文庫</span><span>V{{m.vol}}</span></a></td>
+                            <td class="col-btn"><a v-if="m = getMappingPrefix(row.作品番, 'ぴっかぴかコミックス')" :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-pink-500"><span>兒童</span><span>V{{m.vol}}</span></a></td>
+                            <td class="col-btn"><a v-if="m = getMapping(row.作品番, ['とっておき'])" :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-rose-500"><span>特選</span><span>V{{m.vol}}</span></a></td>
+                            <td class="col-last text-slate-400 italic text-[10px] col-wrap">{{ row.備考 }}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
             <div class="mt-8 flex justify-center gap-1">
                 <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" 
-                    :class="p === currentPage ? 'bg-slate-900 text-white' : 'bg-white text-slate-500 border border-slate-200'"
+                    :class="p === currentPage ? 'bg-slate-900 text-white' : 'bg-white text-slate-500 border'"
                     class="w-10 h-10 flex items-center justify-center rounded font-black text-xs">
                     {{ p }}
                 </button>
@@ -166,7 +152,7 @@
             data() {
                 return {
                     loading: true, searchQuery: '', activeMagazines: [],
-                    currentPage: 1, itemsPerPage: 20,
+                    currentPage: 1, itemsPerPage: 50,
                     master: [], contents: [], publishHk: []
                 }
             },
@@ -206,7 +192,7 @@
                         ]);
                         this.master = m.filter(r => r.作品番);
                         this.contents = c; this.publishHk = h;
-                    } catch (e) { console.error("Error loading data:", e); } finally { this.loading = false; }
+                    } catch (e) { console.error(e); } finally { this.loading = false; }
                 },
                 getMapping(workId, types) {
                     const id = workId?.toString().trim();

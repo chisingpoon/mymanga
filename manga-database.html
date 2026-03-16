@@ -324,23 +324,33 @@ createApp({
         selectSeries(name) { this.selectedSeries = name; this.view = 'books'; window.scrollTo(0,0); },
         selectBook(book) { this.selectedBook = book; this.view = 'detail'; this.tableQuery = ''; window.scrollTo(0,0); },
         getDCSMapping(workId) {
-            if (!workId || !this.db.contents) return null;
+            if (!workId || !this.db.contents || !this.db.hk) return null;
             const id = workId.toString().trim();
             
-            // Filter the contents sheet specifically for this story ID
-            // and ensure the category is '大全集' or '大長編大全集'
-            const match = this.db.contents.find(c => 
+            // 1. 「書籍收錄作品」シートから、作品番が一致し、かつ大全集系のレコードを検索
+            const contentsMatch = this.db.contents.find(c => 
                 c.作品番?.toString().trim() === id && 
                 (c.類 === '大全集' || c.類 === '大長編大全集')
             );
             
-            if (!match) return null;
-    
-            // Return the unique volume and ISBN for this specific story
-            return {
-                vol: match.卷 || match.巻,
-                isbn: match.ISBN?.trim()
-            };
+            if (!contentsMatch) return null;
+        
+            const targetIsbnJp = contentsMatch.ISBN?.trim();
+        
+            // 2. 「出版目録HK」シートの中から、ISBN_JP が上記で見つかった ISBN と一致するものを検索
+            const hkMatch = this.db.hk.find(h => 
+                h.ISBN_JP?.toString().trim() === targetIsbnJp
+            );
+        
+            // 3. HK版のレコードが見つかった場合のみ、その情報を返す
+            if (hkMatch) {
+                return {
+                    vol: hkMatch.Volume, // リンクのラベルに使用
+                    isbn: hkMatch.ISBN    // jumpToBook で使用する最終的な ISBN
+                };
+            }
+        
+            return null;
         },
     
         jumpToBook(isbn) {

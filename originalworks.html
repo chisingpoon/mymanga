@@ -13,7 +13,7 @@
             min-height: 100vh;
             background-color: #f8fafc; 
             margin: 0; padding: 0; 
-            font-family: 'Inter', 'Noto Sans JP', system-ui, sans-serif; 
+            font-family: 'Inter', 'Noto Sans TC', 'Noto Sans JP', system-ui, sans-serif; 
             color: #1e293b;
             -webkit-user-select: none;
             user-select: none;
@@ -50,15 +50,21 @@
             position: sticky; top: 0; z-index: 100;
         }
 
-        /* Frozen Column Logic - DISABLED ON MOBILE */
+        /* Desktop Sticky Columns (Mobile Disabled) */
         @media (min-width: 769px) {
             .sticky-col-1 { position: sticky; left: 0; z-index: 20; background: inherit; }
             .sticky-col-2 {
                 position: sticky; left: 80px; z-index: 20; background: inherit;
                 box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.05);
-                border-right: 1px solid #e2e8f0 !important;
+                /* Border Removed Here */
             }
             th.sticky-col-1, th.sticky-col-2 { background: #f8fafc; z-index: 30; }
+        }
+
+        /* Mobile Optimization */
+        @media (max-width: 768px) {
+            .mobile-hide { display: none; }
+            .vol-btn { min-width: 60px; padding: 8px 4px !important; }
         }
 
         /* Focused Row Styles */
@@ -73,7 +79,7 @@
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
             margin-bottom: 3rem; overflow: hidden; border: 1px solid #e2e8f0;
         }
-        table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1200px; background: white; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1000px; background: white; }
         th { 
             font-size: 11px; font-weight: 800; text-transform: uppercase; 
             padding: 14px 10px; text-align: left; color: #64748b; 
@@ -85,6 +91,7 @@
             display: flex; flex-direction: column; font-size: 9px; font-weight: 800;
             color: white; padding: 6px 4px; border-radius: 8px; text-decoration: none;
             line-height: 1.1; transition: all 0.2s; text-align: center;
+            position: relative; z-index: 50; /* Ensure clickability */
         }
         .vol-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
         .col-wrap { word-break: break-word; white-space: normal; line-height: 1.5; }
@@ -184,35 +191,57 @@
                                 <th style="width: 180px">掲載誌 / 號</th>
                                 <th style="width: 75px">單行本</th>
                                 <th style="width: 75px">大全集</th>
-                                <th style="width: 75px">第0卷</th>
-                                <th style="width: 75px">ドラミ</th>
-                                <th style="width: 75px">文庫</th>
-                                <th style="width: 75px">兒童</th>
-                                <th style="width: 75px">特選</th>
+                                <th style="width: 75px" class="mobile-hide">第0卷</th>
+                                <th style="width: 75px" class="mobile-hide">ドラミ</th>
+                                <th style="width: 75px" class="mobile-hide">文庫</th>
+                                <th style="width: 75px" class="mobile-hide">兒童</th>
+                                <th style="width: 75px" class="mobile-hide">特選</th>
                                 <th>備考</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="row in paginatedData" :key="row.作品番" @click="setFocus(row.作品番)" :class="{'row-focused': activeRow === row.作品番}">
-                                <td class="sticky-col-1 font-mono text-slate-400 text-xs pl-4">{{ row.掲載番 }}</td>
-                                <td class="sticky-col-2 font-extrabold text-slate-800 col-wrap">{{ row.初出副題 }}</td>
-                                <td class="col-wrap">
-                                    <div class="font-bold text-slate-600">{{ getSubtitleInfo(row.作品番).pubSub }}</div>
-                                    <div class="text-indigo-600 text-[11px] font-bold">{{ getSubtitleInfo(row.作品番).hkSub }}</div>
-                                </td>
-                                <td>
-                                    <div class="font-bold text-slate-700 leading-tight">{{ row.初出掲載誌 }}</div>
-                                    <div class="text-[11px] text-blue-500 font-black mt-1">{{ row.初出掲載號 }}</div>
-                                </td>
-                                <td><a v-if="m = getMapping(row.作品番, ['45卷', 'カラー作品集', 'プラス'])" :href="'manga-database.html?isbn=' + m.hkIsbn" target="_blank" class="vol-btn bg-emerald-500"><span>{{m.type}}</span><span>V{{m.vol}}</span></a></td>
-                                <td><a v-if="m = getMapping(row.作品番, ['大全集', '大長編大全集'])" :href="'manga-database.html?isbn=' + m.hkIsbn" target="_blank" class="vol-btn bg-indigo-500"><span>大全集</span><span>V{{m.vol}}</span></a></td>
-                                <td><a v-if="m = getMapping(row.作品番, ['0卷'])" :href="'manga-database.html?isbn=' + m.hkIsbn" target="_blank" class="vol-btn bg-slate-600"><span>第0卷</span><span>V{{m.vol}}</span></a></td>
-                                <td><a v-if="m = getMapping(row.作品番, ['ドラミちゃん'])" :href="'manga-database.html?isbn=' + m.hkIsbn" target="_blank" class="vol-btn bg-amber-500"><span>ドラミ</span><span>V{{m.vol}}</span></a></td>
-                                <td><a v-if="m = getMapping(row.作品番, ['文庫版', '大長編文庫版'])" :href="'manga-database.html?isbn=' + m.hkIsbn" target="_blank" class="vol-btn bg-blue-500"><span>文庫</span><span>V{{m.vol}}</span></a></td>
-                                <td><a v-if="m = getMappingPrefix(row.作品番, 'ぴっかぴかコミックス')" :href="'manga-database.html?isbn=' + m.hkIsbn" target="_blank" class="vol-btn bg-pink-500"><span>兒童</span><span>V{{m.vol}}</span></a></td>
-                                <td><a v-if="m = getMapping(row.作品番, ['とっておき'])" :href="'manga-database.html?isbn=' + m.hkIsbn" target="_blank" class="vol-btn bg-rose-500"><span>特選</span><span>V{{m.vol}}</span></a></td>
-                                <td class="text-slate-400 italic text-[11px] col-wrap pr-4">{{ row.備考 }}</td>
-                            </tr>
+                            <template v-for="row in paginatedData" :key="row.作品番">
+                                <tr @click="setFocus(row.作品番)" :class="{'row-focused': activeRow === row.作品番}">
+                                    <td class="sticky-col-1 font-mono text-slate-400 text-xs pl-4">{{ row.掲載番 }}</td>
+                                    <td class="sticky-col-2 font-extrabold text-slate-800 col-wrap">{{ row.初出副題 }}</td>
+                                    <td class="col-wrap">
+                                        <div class="font-bold text-slate-600">{{ getSubtitleInfo(row.作品番).pubSub }}</div>
+                                        <div class="text-indigo-600 text-[11px] font-bold">{{ getSubtitleInfo(row.作品番).hkSub }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="font-bold text-slate-700 leading-tight">{{ row.初出掲載誌 }}</div>
+                                        <div class="text-[11px] text-blue-500 font-black mt-1">{{ row.初出掲載號 }}</div>
+                                    </td>
+                                    <td><a v-if="m = getMapping(row.作品番, ['45卷', 'カラー作品集', 'プラス'])" @click.stop :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-emerald-500"><span>{{m.type}}</span><span>V{{m.vol}}</span></a></td>
+                                    <td><a v-if="m = getMapping(row.作品番, ['大全集', '大長編大全集'])" @click.stop :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-indigo-500"><span>大全集</span><span>V{{m.vol}}</span></a></td>
+                                    
+                                    <td class="mobile-hide"><a v-if="m = getMapping(row.作品番, ['0卷'])" @click.stop :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-slate-600"><span>第0卷</span><span>V{{m.vol}}</span></a></td>
+                                    <td class="mobile-hide"><a v-if="m = getMapping(row.作品番, ['ドラミちゃん'])" @click.stop :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-amber-500"><span>ドラミ</span><span>V{{m.vol}}</span></a></td>
+                                    <td class="mobile-hide"><a v-if="m = getMapping(row.作品番, ['文庫版', '大長編文庫版'])" @click.stop :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-blue-500"><span>文庫</span><span>V{{m.vol}}</span></a></td>
+                                    <td class="mobile-hide"><a v-if="m = getMappingPrefix(row.作品番, 'ぴっかぴかコミックス')" @click.stop :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-pink-500"><span>兒童</span><span>V{{m.vol}}</span></a></td>
+                                    <td class="mobile-hide"><a v-if="m = getMapping(row.作品番, ['とっておき'])" @click.stop :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-rose-500"><span>特選</span><span>V{{m.vol}}</span></a></td>
+                                    
+                                    <td class="text-slate-400 italic text-[11px] col-wrap pr-4">{{ row.備考 }}</td>
+                                </tr>
+                                <tr v-if="activeRow === row.作品番" class="md:hidden bg-indigo-50/30">
+                                    <td colspan="6" class="p-4 border-b border-indigo-100">
+                                        <div class="grid grid-cols-3 gap-3">
+                                            <div v-if="m = getMapping(row.作品番, ['0卷'])" class="flex flex-col">
+                                                <span class="text-[9px] font-black text-slate-400 uppercase mb-1">第0卷</span>
+                                                <a :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-slate-600">V{{m.vol}}</a>
+                                            </div>
+                                            <div v-if="m = getMapping(row.作品番, ['ドラミちゃん'])" class="flex flex-col">
+                                                <span class="text-[9px] font-black text-slate-400 uppercase mb-1">ドラミ</span>
+                                                <a :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-amber-500">V{{m.vol}}</a>
+                                            </div>
+                                            <div v-if="m = getMapping(row.作品番, ['文庫版'])" class="flex flex-col">
+                                                <span class="text-[9px] font-black text-slate-400 uppercase mb-1">文庫</span>
+                                                <a :href="'manga-database.html?isbn=' + m.hkIsbn" class="vol-btn bg-blue-500">V{{m.vol}}</a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
                         </tbody>
                     </table>
                 </div>
@@ -261,7 +290,8 @@
                     return stats;
                 },
                 sortedMagazines() {
-                    return Object.keys(this.magazineStats).sort((a, b) => a.localeCompare(b, 'ja'));
+                    // Fix 3: Sort by traditional Chinese stroke order
+                    return Object.keys(this.magazineStats).sort((a, b) => a.localeCompare(b, 'zh-Hant'));
                 },
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();

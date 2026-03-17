@@ -189,18 +189,23 @@
                                             <div class="font-black text-slate-900 uppercase text-[15px]">{{ story.master?.初出掲載誌 || '-' }}</div>
                                             <div class="text-[12px] text-blue-600 font-bold mt-2">{{ story.master?.初出掲載号 || '-' }}</div>
                                         </td>
-                                        <td class="px-8 py-8 font-black text-[13px]">
+                                        <td class="px-8 py-8 font-black text-[12px]">
                                             <template v-if="story.collectionLink">
                                                 <a :href="story.collectionLink" 
-                                                   class="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1">
-                                                    {{ story.collectionVol }}
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                   target="_blank" 
+                                                   rel="noopener noreferrer"
+                                                   class="text-blue-600 hover:text-blue-800 flex items-center gap-2 group whitespace-nowrap">
+                                                    <span class="bg-blue-50 px-2 py-0.5 rounded text-[10px] uppercase border border-blue-100 group-hover:bg-blue-100 transition-colors">
+                                                        {{ story.collectionCategory }}
+                                                    </span>
+                                                    <span>Vol. {{ story.collectionVol }}</span>
+                                                    <svg class="w-3 h-3 opacity-40 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
                                                     </svg>
                                                 </a>
                                             </template>
                                             <template v-else>
-                                                <span class="text-slate-400">{{ story.collectionVol }}</span>
+                                                <span class="text-slate-300">{{ story.collectionVol }}</span>
                                             </template>
                                         </td>
                                         <td class="px-8 py-8 text-center font-black text-slate-400">{{ story.收錄頁 }}</td>
@@ -263,7 +268,7 @@ createApp({
             const isbn = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
             
             return this.db.contents.filter(c => c.ISBN == isbn).map(c => {
-                // 1. Find the "Complete Works" record in the contents sheet
+                // Find the "Complete Works" record
                 const collectionRecord = this.db.contents.find(item => 
                     item.作品番 === c.作品番 && 
                     (item.類 === '大長編大全集' || item.類 === '大全集')
@@ -271,13 +276,14 @@ createApp({
         
                 let collectionLink = null;
                 let collectionVol = '-';
+                let collectionCategory = ''; // Store the category (類)
         
                 if (collectionRecord) {
                     collectionVol = collectionRecord.巻;
-                    // 2. Match the collection's ISBN to the HK Publication list's ISBN_JP column
+                    collectionCategory = collectionRecord.類; // Grab "大長編大全集" or "大全集"
+                    
                     const hkMatch = this.db.hk.find(h => h.ISBN_JP === collectionRecord.ISBN);
                     if (hkMatch) {
-                        // 3. Use the HK record's primary ISBN for the link
                         collectionLink = `manga-database.html?region=HK&isbn=${hkMatch.ISBN}`;
                     }
                 }
@@ -286,6 +292,7 @@ createApp({
                     ...c, 
                     master: this.db.master.find(m => m.作品番?.toString().trim() === c.作品番?.toString().trim()),
                     collectionVol,
+                    collectionCategory,
                     collectionLink
                 };
             }).sort((a,b) => (parseInt(a.收錄話)||0) - (parseInt(b.收錄話)||0));

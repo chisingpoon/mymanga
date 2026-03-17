@@ -37,10 +37,10 @@
         }
         .tab-slider {
             display: flex; transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
-            width: 200%;
+            width: 300%;
         }
         .tab-pane {
-            width: 50%;
+            width: 33.333%;
             flex-shrink: 0;
         }
     </style>
@@ -60,12 +60,15 @@
             <p class="text-slate-400 font-bold text-xs uppercase tracking-[0.2em]">叮噹多啦A夢漫畫資訊</p>
         </header>
 
-        <div class="flex p-1 bg-slate-200/50 backdrop-blur-md rounded-2xl mb-8">
-            <button onclick="switchTab('manga')" id="btn-manga" class="flex-1 py-3 text-sm font-black uppercase tracking-widest rounded-xl transition-all bg-blue-600 text-white shadow-md">
+        <div class="flex p-1 bg-slate-200/50 backdrop-blur-md rounded-2xl mb-8 gap-1">
+            <button onclick="switchTab('manga')" id="btn-manga" class="flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-blue-600 text-white shadow-md">
                 Manga / 漫畫
             </button>
-            <button onclick="switchTab('gadgets')" id="btn-gadgets" class="flex-1 py-3 text-sm font-black uppercase tracking-widest rounded-xl transition-all text-slate-500 hover:text-slate-700">
+            <button onclick="switchTab('gadgets')" id="btn-gadgets" class="flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all text-slate-500 hover:text-slate-700">
                 Gadgets / 法寶
+            </button>
+            <button onclick="switchTab('animate')" id="btn-animate" class="flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all text-slate-500 hover:text-slate-700">
+                Animate / 電影動畫
             </button>
         </div>
 
@@ -137,7 +140,7 @@
                     </section>
                 </div>
 
-                <div class="tab-pane space-y-8 pl-2">
+                <div class="tab-pane space-y-8 px-2">
                     <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
@@ -148,6 +151,22 @@
                         </div>
                         <a href="gadgets.html" class="group flex items-center justify-between bg-indigo-600 p-5 rounded-2xl text-white font-black transition-all hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-200">
                             <span class="tracking-tight text-lg">所有法寶記錄</span>
+                            <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
+                        </a>
+                    </section>
+                </div>
+
+                <div class="tab-pane space-y-8 pl-2">
+                    <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="w-2 h-8 bg-purple-600 rounded-full"></span>
+                                <h2 class="text-xl font-black text-slate-800">電影動畫作品記錄</h2>
+                            </div>
+                            <span class="text-[10px] font-black text-purple-600 bg-purple-50 px-3 py-1 rounded-full uppercase">Animate</span>
+                        </div>
+                        <a href="animate.html" class="group flex items-center justify-between bg-purple-600 p-5 rounded-2xl text-white font-black transition-all hover:bg-purple-700 hover:shadow-lg hover:shadow-purple-200">
+                            <span class="tracking-tight text-lg">所有電影動畫作品記錄</span>
                             <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
                         </a>
                     </section>
@@ -167,16 +186,23 @@
         function switchTab(tab) {
             const mangaBtn = document.getElementById('btn-manga');
             const gadgetsBtn = document.getElementById('btn-gadgets');
+            const animateBtn = document.getElementById('btn-animate');
             const slider = document.getElementById('tab-slider');
+
+            // Reset all buttons
+            [mangaBtn, gadgetsBtn, animateBtn].forEach(btn => {
+                btn.className = 'flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all text-slate-500 hover:text-slate-700';
+            });
 
             if (tab === 'manga') {
                 slider.style.transform = 'translateX(0%)';
-                mangaBtn.className = 'flex-1 py-3 text-sm font-black uppercase tracking-widest rounded-xl transition-all bg-blue-600 text-white shadow-md';
-                gadgetsBtn.className = 'flex-1 py-3 text-sm font-black uppercase tracking-widest rounded-xl transition-all text-slate-500 hover:text-slate-700';
-            } else {
-                slider.style.transform = 'translateX(-50%)';
-                gadgetsBtn.className = 'flex-1 py-3 text-sm font-black uppercase tracking-widest rounded-xl transition-all bg-indigo-600 text-white shadow-md';
-                mangaBtn.className = 'flex-1 py-3 text-sm font-black uppercase tracking-widest rounded-xl transition-all text-slate-500 hover:text-slate-700';
+                mangaBtn.className = 'flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-blue-600 text-white shadow-md';
+            } else if (tab === 'gadgets') {
+                slider.style.transform = 'translateX(-33.333%)';
+                gadgetsBtn.className = 'flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-indigo-600 text-white shadow-md';
+            } else if (tab === 'animate') {
+                slider.style.transform = 'translateX(-66.666%)';
+                animateBtn.className = 'flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-purple-600 text-white shadow-md';
             }
         }
 

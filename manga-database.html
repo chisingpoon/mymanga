@@ -8,15 +8,23 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         [v-cloak] { display: none; }
-        body { -webkit-user-select: none; user-select: none; }
+        body { -webkit-user-select: none; user-select: none; scroll-behavior: smooth; }
         .bg-grid {
             background-color: #f8fafc;
             background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
             background-size: 40px 40px;
         }
-        .animate-spin-slow { animation: spin 3s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         
+        /* Sticky Header Styling */
+        .responsive-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background-color: #f8fafc; /* Matches card header bg */
+            box-shadow: inset 0 -1px 0 #e2e8f0;
+        }
+
+        /* Mobile Responsive Table */
         @media (max-width: 768px) {
             .responsive-table thead { display: none; }
             .responsive-table tr { display: block; margin-bottom: 1.5rem; border: 1px solid #e2e8f0; border-radius: 1.5rem; background: white; padding: 1.25rem; }
@@ -24,13 +32,9 @@
             .responsive-table td::before { content: attr(data-label); display: block; font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
         }
 
-        .responsive-table thead th {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            background-color: #ffffff; /* Matches your card bg */
-            box-shadow: inset 0 -1px 0 #e2e8f0; /* Maintains the border-b look while scrolling */
-        }
+        /* Back to Top Animation */
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease, transform 0.3s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(20px); }
     </style>
 </head>
 <body class="bg-grid text-slate-900 font-sans min-h-screen relative overflow-x-hidden" oncontextmenu="return false;">
@@ -42,12 +46,12 @@
                     <a href="index.html" class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg hover:scale-105 transition-all">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </a>
-                    <h1 @click="view = 'series'; selectedSeries = null; selectedBook = null;" class="font-black text-xl tracking-tighter text-slate-800 uppercase cursor-pointer">Manga DB</h1>
+                    <h1 @click="resetToSeries" class="font-black text-xl tracking-tighter text-slate-800 uppercase cursor-pointer text-nowrap">Manga DB</h1>
                 </div>
 
-                <div class="flex bg-slate-200/50 p-1 rounded-xl border border-slate-200">
-                    <button @click="toggleRegion('HK')" :class="region === 'HK' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'" class="px-6 py-1.5 rounded-lg text-xs font-black transition-all uppercase">HK</button>
-                    <button @click="toggleRegion('JP')" :class="region === 'JP' ? 'bg-white shadow-sm text-red-600' : 'text-slate-500'" class="px-6 py-1.5 rounded-lg text-xs font-black transition-all uppercase">JP</button>
+                <div class="flex bg-slate-200/50 p-1 rounded-xl border border-slate-200 scale-90 sm:scale-100">
+                    <button @click="toggleRegion('HK')" :class="region === 'HK' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'" class="px-4 sm:px-6 py-1.5 rounded-lg text-xs font-black transition-all uppercase">HK</button>
+                    <button @click="toggleRegion('JP')" :class="region === 'JP' ? 'bg-white shadow-sm text-red-600' : 'text-slate-500'" class="px-4 sm:px-6 py-1.5 rounded-lg text-xs font-black transition-all uppercase">JP</button>
                 </div>
             </div>
         </header>
@@ -120,7 +124,7 @@
                     </button>
 
                     <div class="flex flex-col lg:flex-row gap-8 items-stretch justify-center">
-                        <div v-if="region === 'HK' && hkDetail" class="bg-white rounded-[2.5rem] shadow-xl border border-slate-200 overflow-hidden flex flex-col md:flex-row w-full max-w-4xl">
+                        <div v-if="hkDetail" class="bg-white rounded-[2.5rem] shadow-xl border border-slate-200 overflow-hidden flex flex-col md:flex-row w-full max-w-4xl">
                             <div class="md:w-2/5 p-10 bg-slate-50 flex items-center justify-center">
                                 <img :src="hkDetail.Image" class="w-full h-auto object-contain shadow-2xl rounded-xl">
                             </div>
@@ -171,9 +175,9 @@
                                 <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3"></path></svg>
                             </div>
                         </div>
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto overflow-y-auto max-h-[70vh] relative">
                             <table class="w-full text-left table-fixed min-w-[1000px] responsive-table">
-                                <thead class="text-[11px] font-black text-slate-400 uppercase tracking-widest border-b bg-white">
+                                <thead class="text-[11px] font-black text-slate-400 uppercase tracking-widest bg-white">
                                     <tr>
                                         <th class="px-6 py-5 w-16 text-center">#</th>
                                         <th class="px-6 py-5 w-80">Title / Translation</th>
@@ -203,14 +207,14 @@
                                         
                                         <td class="px-6 py-6" data-label="Collection">
                                             <template v-if="story.collectionLink">
-                                                <a :href="story.collectionLink" target="_blank" rel="noopener noreferrer" 
-                                                   class="inline-flex items-center gap-2 group p-1 -ml-1 rounded-lg hover:bg-blue-50 transition-all">
+                                                <a @click.prevent="navigateToCollection(story)" :href="story.collectionLink" 
+                                                   class="inline-flex items-center gap-2 group p-1 -ml-1 rounded-lg hover:bg-blue-50 transition-all cursor-pointer">
                                                     <span class="bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded font-black uppercase tracking-tighter">
                                                         {{ story.collectionCategory }}
                                                     </span>
                                                     <span class="font-black text-blue-600 text-[13px]">Vol. {{ story.collectionVol }}</span>
                                                     <svg class="w-3 h-3 text-blue-400 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                        <path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
                                                     </svg>
                                                 </a>
                                             </template>
@@ -236,9 +240,19 @@
                 </footer>
             </div>
         </main>
+
+        <transition name="fade">
+            <button v-show="view === 'detail'" 
+                    @click="scrollToTop"
+                    class="fixed bottom-8 right-8 w-12 h-12 bg-slate-900 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50 border border-white/20">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M5 15l7-7 7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+            </button>
+        </transition>
     </div>
 
-    <script>
+<script>
 const { createApp } = Vue;
 createApp({
     data() {
@@ -287,12 +301,14 @@ createApp({
                 let collectionLink = null;
                 let collectionVol = '-';
                 let collectionCategory = '';
+                let targetIsbn = null;
         
                 if (collectionRecord) {
                     collectionVol = collectionRecord.巻;
                     collectionCategory = collectionRecord.類;
                     const hkMatch = this.db.hk.find(h => h.ISBN_JP === collectionRecord.ISBN);
                     if (hkMatch) {
+                        targetIsbn = hkMatch.ISBN;
                         collectionLink = `manga-database.html?region=HK&isbn=${hkMatch.ISBN}`;
                     }
                 }
@@ -302,7 +318,8 @@ createApp({
                     master: this.db.master.find(m => m.作品番?.toString().trim() === c.作品番?.toString().trim()),
                     collectionVol,
                     collectionCategory,
-                    collectionLink
+                    collectionLink,
+                    targetIsbn
                 };
             }).sort((a,b) => (parseInt(a.收錄話)||0) - (parseInt(b.收錄話)||0));
         },
@@ -331,6 +348,9 @@ createApp({
                 localStorage.setItem('manga_db_v3', JSON.stringify(this.db));
                 this.checkUrlParameters();
             } catch (e) { console.error(e); } finally { this.loading = false; }
+            
+            // Listen for browser back/forward buttons
+            window.addEventListener('popstate', this.checkUrlParameters);
         },
         checkUrlParameters() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -349,7 +369,14 @@ createApp({
                     this.selectedBook = book;
                     this.selectedSeries = book.Title || book.類;
                     this.view = 'detail';
+                    return;
                 }
+            }
+            // If no valid ISBN, but we have a series selected, stay in book list
+            if (!urlIsbn && this.selectedSeries) {
+                this.view = 'books';
+            } else if (!urlIsbn) {
+                this.view = 'series';
             }
         },
         async forceRefresh() {
@@ -363,14 +390,49 @@ createApp({
             this.view = 'series';
             this.selectedSeries = null;
             this.selectedBook = null;
+            // Clear URL
+            window.history.pushState({}, '', 'manga-database.html');
         },
-        selectSeries(name) { this.selectedSeries = name; this.view = 'books'; window.scrollTo(0,0); },
-        selectBook(book) { this.selectedBook = book; this.view = 'detail'; this.tableQuery = ''; window.scrollTo(0,0); }
+        selectSeries(name) { 
+            this.selectedSeries = name; 
+            this.view = 'books'; 
+            window.scrollTo(0,0); 
+        },
+        selectBook(book) { 
+            this.selectedBook = book; 
+            this.view = 'detail'; 
+            this.tableQuery = ''; 
+            
+            // Sync URL for Bookmarked state
+            const isbn = book.ISBN || book.ISBN_JP;
+            const newUrl = `?region=${this.region}&isbn=${isbn}`;
+            window.history.pushState({path: newUrl}, '', newUrl);
+            
+            window.scrollTo({top: 0, behavior: 'smooth'}); 
+        },
+        navigateToCollection(story) {
+            // Find the actual HK book object based on the target ISBN
+            const targetBook = this.db.hk.find(b => b.ISBN === story.targetIsbn);
+            if (targetBook) {
+                this.region = 'HK'; // Force HK region since collection refs are HK links
+                this.selectBook(targetBook);
+            }
+        },
+        resetToSeries() {
+            this.view = 'series';
+            this.selectedSeries = null;
+            this.selectedBook = null;
+            window.history.pushState({}, '', 'manga-database.html');
+            window.scrollTo(0,0);
+        },
+        scrollToTop() {
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
     },
     mounted() {
         this.init();
     }
 }).mount('#app')
-    </script>
+</script>
 </body>
 </html>

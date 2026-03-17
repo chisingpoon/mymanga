@@ -14,18 +14,25 @@
             background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
             background-size: 40px 40px;
         }
+
+        /* RESTORED STICKY HEADER LOGIC */
         .responsive-table thead th {
             position: sticky;
             top: 0;
-            z-index: 20;
-            background-color: #f8fafc;
-            box-shadow: inset 0 -1px 0 #e2e8f0;
+            z-index: 30;
+            background-color: #f8fafc; /* Matches table header bg */
+            box-shadow: inset 0 -1px 0 #e2e8f0; /* Bottom border effect */
         }
+
         .highlight { background-color: #fde047; color: #000; padding: 0 2px; border-radius: 2px; font-weight: 900; }
-        @media (max-width: 768px) {
+        
+        /* Table Auto-Fit Logic */
+        .auto-table { width: 100%; border-collapse: collapse; table-layout: auto; }
+        
+        @media (max-width: 1024px) {
             .responsive-table thead { display: none; }
             .responsive-table tr { display: block; margin-bottom: 1.5rem; border: 1px solid #e2e8f0; border-radius: 1.5rem; background: white; padding: 1.25rem; }
-            .responsive-table td { display: block; width: 100% !important; padding: 0.75rem 0 !important; border: none !important; text-align: left !important; }
+            .responsive-table td { display: block; width: 100% !important; padding: 0.5rem 0 !important; border: none !important; text-align: left !important; }
             .responsive-table td::before { content: attr(data-label); display: block; font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
         }
         .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease, transform 0.3s ease; }
@@ -51,7 +58,7 @@
             </div>
         </header>
 
-        <main class="max-w-[95%] mx-auto py-8 relative z-10">
+        <main class="max-w-[98%] mx-auto py-8 relative z-10">
             <div v-if="loading" class="flex flex-col items-center justify-center py-32 animate-pulse">
                 <div class="w-12 h-12 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
                 <p class="mt-4 font-black text-slate-400 uppercase tracking-widest text-[10px]">Syncing Database...</p>
@@ -59,7 +66,7 @@
 
             <div v-else>
                 <div v-if="view === 'series'" class="animate-in fade-in duration-500">
-                    <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6 px-4">
                         <div>
                             <h2 class="text-3xl font-black text-slate-900 uppercase tracking-tight">{{ region === 'HK' ? '香港版系列' : '日本版分類' }}</h2>
                             <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Total {{ filteredSeries.length }} groups</p>
@@ -72,14 +79,14 @@
                             </button>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 px-4">
                         <div v-for="s in searchedSeries" :key="s" @click="selectSeries(s)" class="bg-white/80 p-6 rounded-3xl border border-slate-200 cursor-pointer transition-all hover:border-blue-500 hover:shadow-xl text-center group">
                             <h3 class="font-black text-lg text-slate-700 group-hover:text-blue-600 uppercase">{{ s }}</h3>
                         </div>
                     </div>
                 </div>
 
-                <div v-if="view === 'books'" class="animate-in fade-in duration-500">
+                <div v-if="view === 'books'" class="animate-in fade-in duration-500 px-4">
                     <div class="mb-8 flex items-center justify-between">
                         <div>
                             <button @click="view = 'series'" class="mb-2 text-[10px] font-black uppercase text-blue-600 flex items-center gap-2 hover:gap-3 transition-all">
@@ -90,7 +97,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                         <div v-for="book in filteredBooks" :key="book.ISBN || book.ISBN_JP" @click="selectBook(book)" class="book-card bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-200 cursor-pointer group transition-all hover:shadow-2xl flex flex-col h-full">
                             <div class="bg-slate-50 p-4 aspect-[3/4] flex items-center justify-center overflow-hidden">
                                 <img v-if="book.Image" :src="book.Image" class="w-full h-full object-contain rounded-lg shadow-md group-hover:scale-105 transition-transform duration-500">
@@ -109,7 +116,7 @@
                     </div>
                 </div>
 
-                <div v-if="view === 'detail' && selectedBook" class="space-y-8 animate-in fade-in duration-700">
+                <div v-if="view === 'detail' && selectedBook" class="space-y-8 animate-in fade-in duration-700 px-2 md:px-4">
                     <button @click="view = 'books'" class="text-[10px] font-black text-slate-400 hover:text-blue-600 uppercase flex items-center gap-2">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="3"></path></svg>
                         Back to Volume List
@@ -125,13 +132,11 @@
                                 <h2 class="text-3xl font-black text-slate-900 mt-4 uppercase leading-tight">{{ hkDetail.Title }}</h2>
                                 <p class="text-blue-600 font-black mt-2 text-lg">Vol. {{ hkDetail.Volume }}</p>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mt-8 border-t pt-6 text-sm">
-                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">Author</span><span class="font-bold text-slate-700">{{ hkDetail.Author }}</span></div>
-                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">ISBN</span><span class="font-mono font-black text-blue-600">{{ hkDetail.ISBN }}</span></div>
-                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">First Release</span><span class="font-bold text-slate-700">{{ hkDetail.IssueDate }}</span></div>
+                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase whitespace-nowrap">Author</span><span class="font-bold text-slate-700">{{ hkDetail.Author }}</span></div>
+                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase whitespace-nowrap">ISBN</span><span class="font-mono font-black text-blue-600">{{ hkDetail.ISBN }}</span></div>
                                 </div>
                             </div>
                         </div>
-
                         <div v-if="jpDetail" class="bg-white rounded-[2.5rem] shadow-xl border border-slate-200 overflow-hidden flex flex-col md:flex-row w-full max-w-4xl">
                             <div class="md:w-2/5 p-10 bg-slate-50 flex items-center justify-center">
                                 <img :src="jpDetail.Image" class="w-full h-auto object-contain shadow-2xl rounded-xl">
@@ -141,9 +146,8 @@
                                 <h2 class="text-3xl font-black text-slate-900 mt-4 uppercase leading-tight">{{ jpDetail.標題 }}</h2>
                                 <p class="text-red-600 font-black mt-2 text-lg">巻 {{ jpDetail.巻 }}</p>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mt-8 border-t pt-6 text-sm">
-                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">Author</span><span class="font-bold text-slate-700">{{ jpDetail.著 }}</span></div>
-                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">ISBN</span><span class="font-mono font-black text-red-600">{{ jpDetail.ISBN }}</span></div>
-                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">First Release</span><span class="font-bold text-slate-700">{{ jpDetail.初版発行日 }}</span></div>
+                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase whitespace-nowrap">Author</span><span class="font-bold text-slate-700">{{ jpDetail.著 }}</span></div>
+                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase whitespace-nowrap">ISBN</span><span class="font-mono font-black text-red-600">{{ jpDetail.ISBN }}</span></div>
                                 </div>
                             </div>
                         </div>
@@ -157,15 +161,12 @@
                             </div>
                             
                             <div class="flex flex-col sm:flex-row gap-3 w-full max-w-xl">
-                                <div class="relative min-w-[120px]">
-                                    <select v-model="pageSize" @change="currentPage = 1" class="w-full bg-white border border-slate-200 rounded-xl py-2 pl-4 pr-8 text-xs font-bold outline-none appearance-none focus:ring-2 focus:ring-blue-500 shadow-sm">
-                                        <option :value="20">20 Rows</option>
-                                        <option :value="50">50 Rows</option>
-                                        <option :value="100">100 Rows</option>
-                                        <option :value="9999">Show All</option>
-                                    </select>
-                                    <svg class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5"></path></svg>
-                                </div>
+                                <select v-model="pageSize" @change="currentPage = 1" class="bg-white border border-slate-200 rounded-xl py-2 px-4 text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                                    <option :value="20">20 Rows</option>
+                                    <option :value="50">50 Rows</option>
+                                    <option :value="100">100 Rows</option>
+                                    <option :value="9999">Show All</option>
+                                </select>
 
                                 <div class="relative flex-grow">
                                     <input type="text" v-model="tableQuery" @input="currentPage = 1" placeholder="Find chapter..." class="w-full bg-white border border-slate-200 rounded-xl py-2 pl-10 pr-10 text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
@@ -178,31 +179,31 @@
                         </div>
                         
                         <div class="overflow-x-auto relative">
-                            <table class="w-full text-left table-fixed min-w-[1200px] responsive-table">
-                                <thead class="text-[11px] font-black text-slate-400 uppercase tracking-widest bg-white">
+                            <table class="auto-table text-left responsive-table">
+                                <thead class="text-[11px] font-black text-slate-400 uppercase tracking-widest">
                                     <tr>
-                                        <th class="px-6 py-5 w-16 text-center">#</th>
-                                        <th class="px-6 py-5 w-80">Title / Translation</th>
-                                        <th class="px-6 py-5 w-60">Original Title</th>
-                                        <th class="px-6 py-5 w-52">Magazine / Issue</th>
-                                        <th class="px-6 py-5 w-72">Collection Reference</th>
-                                        <th class="px-6 py-5 w-20 text-center">Pages</th>
-                                        <th class="px-6 py-5 w-64">出版備考</th>
+                                        <th class="px-6 py-5 whitespace-nowrap text-center">#</th>
+                                        <th class="px-6 py-5">Title / Translation</th>
+                                        <th class="px-6 py-5">Original Title</th>
+                                        <th class="px-6 py-5">Magazine / Issue</th>
+                                        <th class="px-6 py-5 whitespace-nowrap">Collection Reference</th>
+                                        <th class="px-6 py-5 whitespace-nowrap text-center">Pages</th>
+                                        <th class="px-6 py-5 min-w-[200px]">出版備考</th>
                                     </tr>
                                 </thead>
                                 <tbody class="text-[14px] divide-y divide-slate-100">
                                     <tr v-for="story in paginatedStories" :key="story.UniqueKey" class="hover:bg-blue-50/30 transition-colors">
-                                        <td class="px-6 py-6 text-center text-slate-300 font-black" data-label="#">{{ story.收錄話 }}</td>
+                                        <td class="px-6 py-6 text-center text-slate-300 font-black whitespace-nowrap" data-label="#">{{ story.收錄話 }}</td>
                                         <td class="px-6 py-6" data-label="Title">
                                             <div class="font-black text-slate-900 uppercase text-[14px] leading-tight" v-html="highlight(story.出版副題)"></div>
                                             <div class="text-[11px] text-blue-600 font-bold mt-1" v-html="highlight(story.副題港譯)"></div>
                                         </td>
-                                        <td class="px-6 py-6" data-label="Original"><div class="font-bold text-slate-600 text-[13px]">{{ story.master?.初出副題 || '-' }}</div></td>
+                                        <td class="px-6 py-6" data-label="Original"><div class="font-bold text-slate-600 text-[13px] whitespace-normal">{{ story.master?.初出副題 || '-' }}</div></td>
                                         <td class="px-6 py-6" data-label="Source">
                                             <div class="font-black text-slate-800 uppercase text-[13px]">{{ story.master?.初出掲載誌 || '-' }}</div>
                                             <div class="text-[11px] text-slate-400 font-bold mt-1">{{ story.master?.初出掲載号 || '-' }}</div>
                                         </td>
-                                        <td class="px-6 py-6" data-label="Collection">
+                                        <td class="px-6 py-6 whitespace-nowrap" data-label="Collection">
                                             <template v-if="story.collectionLink">
                                                 <a @click.prevent="navigateToCollection(story)" :href="story.collectionLink" class="inline-flex items-center gap-2 group p-1 -ml-1 rounded-lg hover:bg-blue-50 transition-all cursor-pointer">
                                                     <span class="bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded font-black uppercase tracking-tighter">{{ story.collectionCategory }}</span>
@@ -210,9 +211,9 @@
                                                     <svg class="w-3 h-3 text-blue-400 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round"></path></svg>
                                                 </a>
                                             </template>
-                                            <template v-else><span class="text-slate-300 font-bold italic">No reference found</span></template>
+                                            <template v-else><span class="text-slate-300 font-bold italic">No reference</span></template>
                                         </td>
-                                        <td class="px-6 py-6 text-center font-black text-slate-400" data-label="Pages">{{ story.收錄頁 }}</td>
+                                        <td class="px-6 py-6 text-center font-black text-slate-400 whitespace-nowrap" data-label="Pages">{{ story.收錄頁 || '-' }}</td>
                                         <td class="px-6 py-6" data-label="出版備考"><div class="text-[12px] text-slate-500 font-medium leading-relaxed">{{ story.出版備考 || '-' }}</div></td>
                                     </tr>
                                 </tbody>
@@ -298,7 +299,6 @@ createApp({
                 let collectionCategory = '';
                 let targetIsbn = null;
 
-                // Only map if workId is valid (bug fix)
                 if (workId && workId !== "") {
                     masterData = this.db.master.find(m => m.作品番?.toString().trim() === workId);
                     
@@ -320,7 +320,7 @@ createApp({
 
                 return { 
                     ...c, 
-                    UniqueKey: `${c.ISBN}-${c.收錄話}-${index}`, // Unique key for rendering
+                    UniqueKey: `${c.ISBN}-${c.收錄話}-${index}`,
                     master: masterData, 
                     collectionVol, 
                     collectionCategory, 

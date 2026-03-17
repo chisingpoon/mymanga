@@ -157,7 +157,7 @@
                                 <th class="sticky-col-2">初出副題</th>
                                 <th>初出掲載誌</th>
                                 <th>大全集副題 (HK)</th>
-                                <th>45卷/P+</th>
+                                <th>45卷/プラス/カラー</th>
                                 <th>大全集</th>
                                 <th>0卷</th>
                                 <th>ドラミ</th>
@@ -179,7 +179,7 @@
                                     <div class="font-bold text-slate-600 text-[14px]">{{ getSubtitleInfo(row.作品番).pubSub }}</div>
                                     <div class="text-indigo-600 text-[12px] font-black">{{ getSubtitleInfo(row.作品番).hkSub }}</div>
                                 </td>
-                                <td><a v-if="m = getMapping(row.作品番, ['45卷', 'カラー作品集', 'プラス'])" :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" target="_blank" class="vol-link bg-emerald-500"><span>{{m.type}}/カラー</span><span>{{m.vol}}</span></a></td>
+                                <td><a v-if="m = getMapping(row.作品番, ['45卷', 'カラー作品集', 'プラス'])" :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" target="_blank" class="vol-link bg-emerald-500"><span>{{m.type}}</span><span>{{m.vol}}</span></a></td>
                                 <td><a v-if="m = getMapping(row.作品番, ['大全集', '大長編大全集'])" :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" target="_blank" class="vol-link bg-indigo-500"><!--<span>大全集</span>--><span>{{m.vol}}</span></a></td>
                                 <td><a v-if="m = getMapping(row.作品番, ['0卷'])" :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" target="_blank" class="vol-link bg-slate-600"><!--<span>0卷</span>--><span>{{m.vol}}</span></a></td>
                                 <td><a v-if="m = getMapping(row.作品番, ['ドラミちゃん'])" :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" target="_blank" class="vol-link bg-rose-400"><!--<span>ドラミ</span>--><span>{{m.vol}}</span></a></td>

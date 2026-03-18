@@ -127,7 +127,8 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div class="flex flex-col relative">
                                 <a v-if="mappedManga" 
-                                   :href="'manga-database.html?region=JP&ISBN=' + mappedManga.isbnValue + '&series=' + encodeURIComponent(mappedManga.series)" 
+                                   :href="'manga-database.html?region=JP&isbn=' + mappedManga.isbnParam + '&series=' + encodeURIComponent(mappedManga.series)" 
+                                   target="_blank"
                                    class="data-card block bg-slate-50 rounded-[2.5rem] border border-slate-100 overflow-hidden h-full">
                                     <div class="badge">原作/改編漫畫</div>
                                     <div class="aspect-[16/9] bg-slate-200">
@@ -177,25 +178,28 @@
                     if (q) filtered = this.movies.filter(m => m.searchStr.includes(q));
 
                     return [...filtered].sort((a, b) => {
-                        // Strict Year Comparison (Converting to Numbers)
                         const yearA = parseInt(a.jpYear) || 0;
                         const yearB = parseInt(b.jpYear) || 0;
-                        
                         return this.sortOrder === 'asc' ? yearA - yearB : yearB - yearA;
                     });
                 },
                 mappedManga() {
                     if (!this.selectedMovie || !this.selectedMovie.mangaRaw) return null;
                     const searchISBN = this.selectedMovie.mangaRaw.toString().replace(/[-\s]/g, '');
+                    
                     const found = this.mangaCatalog.find(item => {
                         const itemISBN = (this.getVal(item, 'ISBN') || '').toString().replace(/[-\s]/g, '');
                         return itemISBN === searchISBN && itemISBN !== "";
                     });
+
                     if (found) {
                         return {
-                            title: this.getVal(found, '標題'), subtitle: this.getVal(found, '副標題'),
-                            author: this.getVal(found, '著'), series: this.getVal(found, '類'),
-                            image: this.getVal(found, 'image'), isbnValue: searchISBN
+                            title: this.getVal(found, '標題'),
+                            subtitle: this.getVal(found, '副標題'),
+                            author: this.getVal(found, '著'),
+                            series: this.getVal(found, '類'),
+                            image: this.getVal(found, 'image'),
+                            isbnParam: this.getVal(found, 'ISBN').trim() // Use the sheet's exact ISBN for URL
                         };
                     }
                     return null;
@@ -222,17 +226,14 @@
 
                         this.movies = movieData.map(item => {
                             const fullDate = this.getVal(item, 'JP Release Date');
-                            // Extract only the digits for the year
                             const yearMatch = fullDate.match(/\d{4}/);
-                            const year = yearMatch ? yearMatch[0] : '';
-                            
                             return {
                                 id: this.getVal(item, 'Media ID'),
                                 jpTitle: this.getVal(item, 'JP Title'),
                                 hkTitle: this.getVal(item, 'HK Title'),
                                 enTitle: this.getVal(item, 'EN Title'),
                                 jpDate: fullDate,
-                                jpYear: year,
+                                jpYear: yearMatch ? yearMatch[0] : '',
                                 hkDate: this.getVal(item, 'HK Release Date'),
                                 jpImage: this.getVal(item, 'JP Image'),
                                 hkImage: this.getVal(item, 'HK Image'),

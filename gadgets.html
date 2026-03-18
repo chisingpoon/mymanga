@@ -103,7 +103,7 @@
                                 <td class="font-mono text-[13px] text-slate-500">{{ getDisplayWork(item) }}</td>
                                 <td>
                                     <div class="flex flex-wrap items-center">
-                                        <a v-for="link in getBookLinks(item.初出)" 
+                                        <a v-for="link in getBookLinks(item.初出作品番)" 
                                            :key="link.isbn"
                                            :href="'manga-database.html?isbn=' + link.isbn"
                                            target="_blank"
@@ -111,7 +111,7 @@
                                            :class="getLinkColor(link.type)">
                                             {{ link.label }}
                                         </a>
-                                        <span v-if="getBookLinks(item.初出).length === 0" class="text-slate-300 text-xs italic">無紀錄</span>
+                                        <span v-if="getBookLinks(item.初出作品番).length === 0" class="text-slate-300 text-xs italic">無紀錄</span>
                                     </div>
                                 </td>
                             </tr>
@@ -145,7 +145,7 @@
                     gadgets: [],
                     contents: [],
                     publishHk: [],
-                    fullWorksList: [] 
+                    fullWorksList: [] // Merged correctly here
                 }
             },
             watch: {
@@ -192,9 +192,21 @@
                         this.gadgets = g;
                         this.contents = c;
                         this.publishHk = h;
-                        this.fullWorksList = w; // Store the works list
+                        this.fullWorksList = w;
                         this.loading = false;
                     } catch (e) { console.error("Data Load Error:", e); }
+                },
+                getDisplayWork(item) {
+                    if (item.初出作品類 === 'manga') {
+                        const workId = item.初出作品番?.toString().trim();
+                        const workMatch = this.fullWorksList.find(w => w.初出作品番?.toString().trim() === workId);
+                        if (workMatch) {
+                            const magazine = workMatch.初出掲載誌 || '';
+                            const issue = workMatch.初出掲載号 || '';
+                            return `${magazine} ${issue}`.trim();
+                        }
+                    }
+                    return item.初出;
                 },
                 getBookLinks(workId) {
                     if (!workId) return [];
@@ -227,23 +239,7 @@
                     if (type.includes('とっておき')) return 'bg-cyan-600';
                     return 'bg-slate-400';
                 },
-                changePage(p) { this.currentPage = p; window.scrollTo({ top: 0, behavior: 'smooth' }); },
-                getDisplayWork(item) {
-                // Check if the type is manga
-                    if (item.初出作品類 === 'manga') {
-                        const workId = item.初出作品番?.toString().trim();
-                        // Find matching record in the Works List
-                        const workMatch = this.fullWorksList.find(w => w.初出作品番?.toString().trim() === workId);
-                        
-                        if (workMatch) {
-                            const magazine = workMatch.初出掲載誌 || '';
-                            const issue = workMatch.初出掲載号 || '';
-                            return `${magazine} ${issue}`.trim();
-                        }
-                    }
-                    // Return original value if not manga or no match found
-                    return item.初出;
-                },
+                changePage(p) { this.currentPage = p; window.scrollTo({ top: 0, behavior: 'smooth' }); }
             },
             mounted() { this.init(); }
         }).mount('#app')

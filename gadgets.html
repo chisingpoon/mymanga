@@ -90,15 +90,15 @@
                                 <td class="sticky-col-2 font-black text-slate-900 col-wrap">{{ item.名 }}</td>
                                 <td class="font-bold text-indigo-600">{{ item.港譯名 }}</td>
                                 
-                                <td class="text-[13px] text-slate-700 font-medium">
+                                <td class="text-[13px] text-slate-700 font-medium col-wrap">
                                     {{ getMappedWork(item).subTitleJp }}
                                 </td>
                                 
-                                <td class="text-[13px] text-indigo-600 font-bold">
+                                <td class="text-[13px] text-indigo-600 font-bold col-wrap">
                                     {{ getMappedWork(item).subTitleHk }}
                                 </td>
                             
-                                <td class="font-mono text-[12px] text-slate-500 bg-slate-50/50">
+                                <td class="font-mono text-[11px] text-slate-500 bg-slate-50/50 p-2 rounded">
                                     {{ getMappedWork(item).magazineInfo }}
                                 </td>
                             
@@ -194,71 +194,65 @@
                 },
                 // Core mapping function with data type safety
                 getMappedWork(item) {
-                    // 1. Get the ID from '法寶' sheet and normalize it
-                    const workId = item.初出作品番 ? item.初出作品番.toString().trim() : '';
-                    
-                    // 2. If no ID exists, return the original '初出' text as a fallback
-                    if (!workId) {
-                        return { subTitleJp: '', subTitleHk: '', magazineInfo: item.初出 || '-' };
-                    }
+                        // 1. Get the ID (作品番 / 初出作品番) from the '法寶' sheet record
+                        const workId = (item.初出作品番 || '').toString().trim();
+                        
+                        if (!workId) {
+                            return { subTitleJp: '', subTitleHk: '', magazineInfo: item.初出 || '-' };
+                        }
                 
-                    // 3. Search for the matching record in '作品完整列表'
-                    const match = this.fullWorksList.find(w => {
-                        const targetId = w.初出作品番 ? w.初出作品番.toString().trim() : '';
-                        return targetId === workId;
-                    });
-                
-                    if (match) {
-                        // 4. Create the 'Magazine + Issue' string
-                        const mag = match.初出掲載誌 || '';
-                        const issue = match.初出掲載号 || '';
-                        const combinedInfo = `${mag} ${issue}`.trim();
-                
-                        return {
-                            subTitleJp: match.全集副題 || '',
-                            subTitleHk: match.全集副題香港譯名 || '',
-                            magazineInfo: combinedInfo || '-' // This will be displayed in the '初出作品番' column
-                        };
-                    }
-                    
-                    // 5. Fallback if the ID doesn't find a match in the Works List
-                    return { 
-                        subTitleJp: '', 
-                        subTitleHk: '', 
-                        magazineInfo: item.初出 || `ID: ${workId} (未匹配)` 
-                    };
-                },
-                
-                getBookLinks(workId) {
-                    if (!workId) return [];
-                    const idStr = workId.toString().trim();
-                    
-                    // Match against '作品番' in the '書籍收錄作品' sheet
-                    const matches = this.contents.filter(c => {
-                        const contentId = c.作品番 ? c.作品番.toString().trim() : '';
-                        return contentId === idStr;
-                    });
-                    
-                    const links = [];
-                    matches.forEach(m => {
-                        if (!m.ISBN) return;
-                        const isbnJp = m.ISBN.toString().trim();
-                        const hkInfo = this.publishHk.find(h => {
-                            const h_isbn_jp = h.ISBN_JP ? h.ISBN_JP.toString().trim() : '';
-                            const h_isbn = h.ISBN ? h.ISBN.toString().trim() : '';
-                            return h_isbn_jp === isbnJp || h_isbn === isbnJp;
+                        // 2. Find match in '作品完整列表' by comparing against their '作品番' column
+                        // Note: Check if your sheet uses '作品番' or '初出作品番' as the header
+                        const match = this.fullWorksList.find(w => {
+                            const targetId = (w.作品番 || w.初出作品番 || '').toString().trim();
+                            return targetId === workId;
                         });
                 
-                        if (hkInfo) {
-                            links.push({
-                                label: `${m.類}${m.卷 || m.巻 || ''}`,
-                                isbn: hkInfo.ISBN,
-                                type: m.類
-                            });
+                        if (match) {
+                            return {
+                                // Mapping the specific subtitle columns you requested
+                                subTitleJp: match.全集副題 || '',
+                                subTitleHk: match.全集副題香港譯名 || '',
+                                // Concatenating Magazine + Issue for the '初出作品番' column
+                                magazineInfo: `${match.初出掲載誌 || ''} ${match.初出掲載号 || ''}`.trim() || '-'
+                            };
                         }
-                    });
-                    return links;
-                },         
+                        
+                        // Fallback if no match is found in the Works List
+                        return { 
+                            subTitleJp: '', 
+                            subTitleHk: '', 
+                            magazineInfo: item.初出 || `ID: ${workId} (Not Found)` 
+                        };
+                    },
+                
+                    getBookLinks(workId) {
+                        if (!workId) return [];
+                        const idStr = workId.toString().trim();
+                        
+                        // Ensure we are filtering the '書籍收錄作品' sheet by the '作品番' column
+                        const matches = this.contents.filter(c => (c.作品番 || '').toString().trim() === idStr);
+                        
+                        const links = [];
+                        matches.forEach(m => {
+                            if (!m.ISBN) return;
+                            const isbnJp = m.ISBN.toString().trim();
+                            const hkInfo = this.publishHk.find(h => {
+                                const h_isbn_jp = (h.ISBN_JP || '').toString().trim();
+                                const h_isbn = (h.ISBN || '').toString().trim();
+                                return h_isbn_jp === isbnJp || h_isbn === isbnJp;
+                            });
+                
+                            if (hkInfo) {
+                                links.push({
+                                    label: `${m.類}${m.卷 || m.巻 || ''}`,
+                                    isbn: hkInfo.ISBN,
+                                    type: m.類
+                                });
+                            }
+                        });
+                        return links;
+                    },        
                 getLinkColor(type) {
                     if (!type) return 'bg-slate-400';
                     const t = type.toString();

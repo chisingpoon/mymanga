@@ -47,7 +47,6 @@
         </header>
 
         <main class="max-w-[95%] mx-auto py-8 relative z-10">
-            
             <div v-if="loading" class="flex flex-col items-center justify-center py-32 animate-pulse">
                 <div class="w-12 h-12 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
                 <p class="mt-4 font-black text-slate-400 uppercase tracking-widest text-[10px]">Syncing Database...</p>
@@ -126,6 +125,7 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mt-8 border-t pt-6 text-sm">
                                     <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">ISBN</span><span class="font-mono font-black text-blue-600">{{ hkDetail.ISBN }}</span></div>
                                     <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">Publisher</span><span class="font-bold text-slate-700">{{ hkDetail.Publisher }}</span></div>
+                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">Date</span><span class="font-bold text-slate-700">{{ hkDetail.Date }}</span></div>
                                 </div>
                             </div>
                         </div>
@@ -141,6 +141,7 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mt-8 border-t pt-6 text-sm">
                                     <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">ISBN</span><span class="font-mono font-black text-red-600">{{ jpDetail.ISBN }}</span></div>
                                     <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">Price</span><span class="font-bold text-slate-700">{{ jpDetail.定価 }}</span></div>
+                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px] uppercase">Date</span><span class="font-bold text-slate-700">{{ jpDetail.初版発行日 }}</span></div>
                                 </div>
                             </div>
                         </div>
@@ -206,7 +207,7 @@
                     </div>
                 </div>
 
-                <footer class="mt-20 py-10 border-t border-slate-200 text-center space-y-4">
+                <footer class="mt-20 py-10 border-t border-slate-200 text-center">
                     <button @click="forceRefresh" class="inline-flex items-center gap-2 px-6 py-2 bg-white border border-slate-200 rounded-full text-[10px] font-black uppercase text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
                         <svg class="w-3 h-3" :class="refreshing ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                         {{ refreshing ? 'Syncing...' : 'Force Data Refresh' }}
@@ -267,7 +268,6 @@ createApp({
                     collectionVol = collectionRecord.巻;
                     collectionCategory = collectionRecord.類;
                     const hkMatch = this.db.hk.find(h => h.ISBN_JP === collectionRecord.ISBN);
-                    // Point 2 Restored: Inherit current region dynamically
                     if (hkMatch) collectionLink = `?region=${this.region}&isbn=${hkMatch.ISBN}`;
                 }
                 return {
@@ -304,9 +304,7 @@ createApp({
             const urlRegion = urlParams.get('region')?.toUpperCase();
             const urlIsbn = urlParams.get('isbn');
             const urlSeries = urlParams.get('series');
-            
             if (urlRegion === 'JP' || urlRegion === 'HK') this.region = urlRegion;
-            
             if (urlIsbn) {
                 const book = this.db.hk.find(b => b.ISBN === urlIsbn) || this.db.jp.find(b => b.ISBN === urlIsbn);
                 if (book) {
@@ -316,7 +314,6 @@ createApp({
                     return;
                 }
             } 
-            
             if (urlSeries) {
                 this.selectedSeries = urlSeries;
                 this.view = 'books';
@@ -329,10 +326,8 @@ createApp({
         updateView(newView, params = {}) {
             const searchParams = new URLSearchParams();
             searchParams.set('region', this.region);
-            
             if (params.isbn) searchParams.set('isbn', params.isbn);
             if (params.series) searchParams.set('series', params.series);
-            
             window.history.pushState({}, '', '?' + searchParams.toString());
             this.checkUrlParameters();
             window.scrollTo(0,0);

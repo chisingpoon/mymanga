@@ -90,7 +90,7 @@
                     <div class="mb-8">
                         <button @click="updateView('series')" class="mb-2 text-[10px] font-black uppercase text-blue-600 flex items-center gap-2 hover:gap-3 transition-all">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="3"></path></svg>
-                            Back to Categories
+                            Back to Series
                         </button>
                         <h2 class="text-4xl font-black text-slate-900 uppercase tracking-tighter">{{ selectedSeries }}</h2>
                     </div>
@@ -108,7 +108,7 @@
                                 </template>
                                 <template v-else>
                                     <h3 class="font-black text-lg text-slate-900 uppercase leading-tight line-clamp-2">{{ book.標題 }}</h3>
-                                    <div class="text-[11px] font-black text-red-600 uppercase tracking-widest">Vol. {{ book.巻 }}</div>
+                                    <div class="text-[11px] font-black text-red-600 uppercase tracking-widest">Vol. {{ book.巻 }} {{ book.副標題 }}</div>
                                 </template>
                             </div>
                         </div>

@@ -89,6 +89,7 @@
                                 <td class="sticky-col-1 font-mono text-slate-400 text-[13px]">{{ item.法寶編號 }}</td>
                                 <td class="sticky-col-2 font-black text-slate-900 col-wrap">{{ item.名 }}</td>
                                 <td class="font-bold text-indigo-600">{{ item.港譯名 }}</td>
+                                
                                 <td class="text-[13px] text-slate-700 font-medium">
                                     {{ getMappedWork(item).subTitleJp }}
                                 </td>
@@ -96,10 +97,11 @@
                                 <td class="text-[13px] text-indigo-600 font-bold">
                                     {{ getMappedWork(item).subTitleHk }}
                                 </td>
-                                
+                            
                                 <td class="font-mono text-[12px] text-slate-500 bg-slate-50/50">
                                     {{ getMappedWork(item).magazineInfo }}
                                 </td>
+                            
                                 <td>
                                     <div class="flex flex-wrap items-center">
                                         <a v-for="link in getBookLinks(item.初出作品番)" 
@@ -192,35 +194,38 @@
                 },
                 // Core mapping function with data type safety
                 getMappedWork(item) {
-                    // 1. Force the ID to a string and trim it
+                    // 1. Get the ID from '法寶' sheet and normalize it
                     const workId = item.初出作品番 ? item.初出作品番.toString().trim() : '';
                     
+                    // 2. If no ID exists, return the original '初出' text as a fallback
                     if (!workId) {
                         return { subTitleJp: '', subTitleHk: '', magazineInfo: item.初出 || '-' };
                     }
                 
-                    // 2. Find match in 作品完整列表 using strict string comparison
+                    // 3. Search for the matching record in '作品完整列表'
                     const match = this.fullWorksList.find(w => {
                         const targetId = w.初出作品番 ? w.初出作品番.toString().trim() : '';
                         return targetId === workId;
                     });
                 
                     if (match) {
-                        // 3. Concat Magazine and Issue
+                        // 4. Create the 'Magazine + Issue' string
                         const mag = match.初出掲載誌 || '';
                         const issue = match.初出掲載号 || '';
+                        const combinedInfo = `${mag} ${issue}`.trim();
+                
                         return {
                             subTitleJp: match.全集副題 || '',
                             subTitleHk: match.全集副題香港譯名 || '',
-                            magazineInfo: `${mag} ${issue}`.trim() || '-'
+                            magazineInfo: combinedInfo || '-' // This will be displayed in the '初出作品番' column
                         };
                     }
                     
-                    // 4. Fallback: If no match found, show the ID so we know why it failed
+                    // 5. Fallback if the ID doesn't find a match in the Works List
                     return { 
-                        subTitleJp: 'ID未匹配', 
-                        subTitleHk: 'ID未匹配', 
-                        magazineInfo: `ID: ${workId}` 
+                        subTitleJp: '', 
+                        subTitleHk: '', 
+                        magazineInfo: item.初出 || `ID: ${workId} (未匹配)` 
                     };
                 },
                 

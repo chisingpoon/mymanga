@@ -45,7 +45,7 @@
                     <a href="index.html" class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg hover:scale-105 transition-all">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </a>
-                    <h1 @click="view = 'series'; selectedSeries = null; selectedBook = null;" class="font-black text-xl tracking-tighter text-slate-800 uppercase cursor-pointer">Manga DB</h1>
+                    <h1 @click="updateView('series')" class="font-black text-xl tracking-tighter text-slate-800 uppercase cursor-pointer">Manga DB</h1>
                 </div>
 
                 <div class="flex bg-slate-200/50 p-1 rounded-xl border border-slate-200">
@@ -71,8 +71,11 @@
                         </div>
                         <div class="relative max-w-sm w-full">
                             <input type="text" v-model="seriesSearchQuery" placeholder="Search series..." 
-                                class="w-full bg-white border border-slate-200 rounded-2xl py-3 pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none shadow-sm transition-all">
+                                class="w-full bg-white border border-slate-200 rounded-2xl py-3 pl-12 pr-10 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none shadow-sm transition-all">
                             <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5"></path></svg>
+                            <button v-if="seriesSearchQuery" @click="seriesSearchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                            </button>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -86,7 +89,7 @@
                 <div v-if="view === 'books'" class="animate-in fade-in duration-500">
                     <div class="mb-8 flex items-center justify-between">
                         <div>
-                            <button @click="view = 'series'" class="mb-2 text-[10px] font-black uppercase text-blue-600 flex items-center gap-2 hover:gap-3 transition-all">
+                            <button @click="updateView('series')" class="mb-2 text-[10px] font-black uppercase text-blue-600 flex items-center gap-2 hover:gap-3 transition-all">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="3"></path></svg>
                                 Back
                             </button>
@@ -117,7 +120,7 @@
                 </div>
 
                 <div v-if="view === 'detail' && selectedBook" class="space-y-8 animate-in fade-in duration-700">
-                    <button @click="view = 'books'" class="text-[10px] font-black text-slate-400 hover:text-blue-600 uppercase flex items-center gap-2">
+                    <button @click="updateView('books')" class="text-[10px] font-black text-slate-400 hover:text-blue-600 uppercase flex items-center gap-2">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="3"></path></svg>
                         Back to Volume List
                     </button>
@@ -206,7 +209,7 @@
                                         </td>
                                         <td class="px-6 py-6" data-label="Collection">
                                             <template v-if="story.collectionLink">
-                                                <a :href="story.collectionLink" target="_blank" rel="noopener noreferrer" 
+                                                <a :href="story.collectionLink" target="_self" 
                                                    class="inline-flex items-center gap-2 group p-1 -ml-1 rounded-lg hover:bg-blue-50 transition-all">
                                                      <span class="bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded font-black uppercase tracking-tighter">{{ story.collectionCategory }}</span>
                                                      <span class="font-black text-blue-600 text-[13px]">Vol. {{ story.collectionVol }}</span>
@@ -291,7 +294,8 @@ createApp({
                     collectionVol = collectionRecord.巻;
                     collectionCategory = collectionRecord.類;
                     const hkMatch = this.db.hk.find(h => h.ISBN_JP === collectionRecord.ISBN);
-                    if (hkMatch) collectionLink = `manga-database.html?region=HK&isbn=${hkMatch.ISBN}`;
+                    // Updated link structure
+                    if (hkMatch) collectionLink = `?region=HK&isbn=${hkMatch.ISBN}`;
                 }
                 return {
                     ...c, 
@@ -332,7 +336,9 @@ createApp({
             const urlParams = new URLSearchParams(window.location.search);
             const urlRegion = urlParams.get('region')?.toUpperCase();
             const urlIsbn = urlParams.get('isbn');
+            
             if (urlRegion === 'JP' || urlRegion === 'HK') this.region = urlRegion;
+            
             if (urlIsbn) {
                 const book = this.db.hk.find(b => b.ISBN === urlIsbn) || this.db.jp.find(b => b.ISBN === urlIsbn);
                 if (book) {
@@ -340,7 +346,25 @@ createApp({
                     this.selectedSeries = book.Title || book.類;
                     this.view = 'detail';
                 }
+            } else {
+                this.view = 'series';
+                this.selectedBook = null;
+                this.selectedSeries = null;
             }
+        },
+        // Centralized view update with browser history support
+        updateView(newView, params = null) {
+            let url = window.location.pathname;
+            if (params) {
+                const searchParams = new URLSearchParams(params);
+                url += '?' + searchParams.toString();
+            }
+            
+            // Push to history so back button works
+            window.history.pushState({}, '', url);
+            
+            // Manually trigger the param check to update local state
+            this.checkUrlParameters();
         },
         async forceRefresh() {
             this.refreshing = true;
@@ -350,14 +374,27 @@ createApp({
         },
         toggleRegion(r) { 
             this.region = r; 
-            this.view = 'series';
-            this.selectedSeries = null;
-            this.selectedBook = null;
+            this.updateView('series', { region: r });
         },
-        selectSeries(name) { this.selectedSeries = name; this.view = 'books'; window.scrollTo(0,0); },
-        selectBook(book) { this.selectedBook = book; this.view = 'detail'; this.tableQuery = ''; window.scrollTo(0,0); }
+        selectSeries(name) { 
+            this.selectedSeries = name; 
+            this.view = 'books'; 
+            window.scrollTo(0,0); 
+        },
+        selectBook(book) { 
+            const isbn = book.ISBN || book.ISBN_JP;
+            this.updateView('detail', { region: this.region, isbn: isbn });
+            this.tableQuery = ''; 
+            window.scrollTo(0,0); 
+        }
     },
-    mounted() { this.init(); }
+    mounted() { 
+        this.init();
+        // Handle physical back button or browser back button
+        window.addEventListener('popstate', () => {
+            this.checkUrlParameters();
+        });
+    }
 }).mount('#app')
 </script>
 </body>

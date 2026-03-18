@@ -100,7 +100,7 @@
                                 <td class="sticky-col-1 font-mono text-slate-400 text-[13px]">{{ item.法寶編號 }}</td>
                                 <td class="sticky-col-2 font-black text-slate-900 col-wrap">{{ item.名 }}</td>
                                 <td class="font-bold text-indigo-600">{{ item.港譯名 }}</td>
-                                <td class="font-mono text-[13px] text-slate-500">{{ item.初出 }}</td>
+                                <td class="font-mono text-[13px] text-slate-500">{{ getDisplayWork(item) }}</td>
                                 <td>
                                     <div class="flex flex-wrap items-center">
                                         <a v-for="link in getBookLinks(item.初出)" 
@@ -179,17 +179,25 @@
                     return res;
                 }
             },
+            data() {
+                return {
+                    // ... existing data ...
+                    fullWorksList: [] // New data source
+                }
+            },
             methods: {
                 async init() {
                     try {
-                        const [g, c, h] = await Promise.all([
+                        const [g, c, h, w] = await Promise.all([
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/法寶").then(r => r.json()),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json()),
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json())
                         ]);
                         this.gadgets = g;
                         this.contents = c;
                         this.publishHk = h;
+                        this.fullWorksList = w; // Store the works list
                         this.loading = false;
                     } catch (e) { console.error("Data Load Error:", e); }
                 },
@@ -224,7 +232,23 @@
                     if (type.includes('とっておき')) return 'bg-cyan-600';
                     return 'bg-slate-400';
                 },
-                changePage(p) { this.currentPage = p; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+                changePage(p) { this.currentPage = p; window.scrollTo({ top: 0, behavior: 'smooth' }); },
+                getDisplayWork(item) {
+                // Check if the type is manga
+                    if (item.初出作品類 === 'manga') {
+                        const workId = item.初出作品番?.toString().trim();
+                        // Find matching record in the Works List
+                        const workMatch = this.fullWorksList.find(w => w.初出作品番?.toString().trim() === workId);
+                        
+                        if (workMatch) {
+                            const magazine = workMatch.初出掲載誌 || '';
+                            const issue = workMatch.初出掲載号 || '';
+                            return `${magazine} ${issue}`.trim();
+                        }
+                    }
+                    // Return original value if not manga or no match found
+                    return item.初出;
+                },
             },
             mounted() { this.init(); }
         }).mount('#app')

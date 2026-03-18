@@ -92,17 +92,17 @@
                                 <td class="font-bold text-indigo-600">{{ item.港譯名 }}</td>
                                 
                                 <td class="col-wrap">
-                                    <div v-if="getWorkData(item).title" class="text-[13px] font-bold text-slate-700 leading-tight">
+                                    <div v-if="getWorkData(item).title" class="text-[14px] font-black text-slate-800 leading-tight">
                                         {{ getWorkData(item).title }}
                                     </div>
-                                    <div v-if="getWorkData(item).extra" class="text-[11px] text-slate-400 font-medium mt-1">
+                                    <div v-if="getWorkData(item).extra" class="text-[11px] text-slate-400 font-bold uppercase mt-1 tracking-tight">
                                         {{ getWorkData(item).extra }}
                                     </div>
-                                    <div v-if="!getWorkData(item).title" class="text-[13px] text-slate-500">
-                                        {{ item.初出 }}
+                                    <div v-if="!getWorkData(item).title && !getWorkData(item).extra" class="text-slate-400 italic text-xs">
+                                        資料缺失
                                     </div>
                                 </td>
-
+                                
                                 <td>
                                     <div class="flex flex-wrap items-center">
                                         <a v-for="link in getBookLinks(item.初出作品番)" 
@@ -157,12 +157,21 @@
                     if (!q) return this.gadgets;
                     return this.gadgets.filter(g => 
                         (g.名 || '').toLowerCase().includes(q) || 
-                        (g.港譯名 || '').toLowerCase().includes(q)
+                        (g.港譯名 || '').toLowerCase().includes(q) ||
+                        (g.法寶編號 || '').toString().includes(q)
                     );
                 },
+                totalPages() { return Math.ceil(this.filteredGadgets.length / this.itemsPerPage) || 1; },
                 paginatedData() {
                     const start = (this.currentPage - 1) * this.itemsPerPage;
                     return this.filteredGadgets.slice(start, start + this.itemsPerPage);
+                },
+                paginationRange() {
+                    const current = this.currentPage, last = this.totalPages, range = [];
+                    for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i); }
+                    const res = []; let l;
+                    for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
+                    return res;
                 }
             },
             methods: {
@@ -174,33 +183,44 @@
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json()),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json())
                         ]);
+                        
                         this.gadgets = g;
                         this.contents = c;
                         this.publishHk = h;
                         this.fullWorksList = w;
+        
+                        // Log to console so you can check column names if it still fails
+                        console.log("Sample Gadget:", g[0]);
+                        console.log("Sample Work Match:", w[0]);
+        
                         this.loading = false;
                     } catch (e) { 
-                        console.error("Data Load Error:", e);
-                        this.loading = false; // Stop loading even if there's an error
+                        console.error("Data Load Error:", e); 
+                        this.loading = false;
                     }
                 },
+                // Correctly retrieves Title and Magazine Info
                 getWorkData(item) {
-                    if (item.初出作品類 === 'manga') {
-                        const workId = item.初出作品番?.toString().trim();
-                        const match = this.fullWorksList.find(w => w.初出作品番?.toString().trim() === workId);
-                        if (match) {
-                            return {
-                                title: match.初出作品名 || '',
-                                extra: `${match.初出掲載誌 || ''} ${match.初出掲載号 || ''}`.trim()
-                            };
-                        }
+                    // Mapping ID based on the '初出作品番' column in the '法寶' sheet
+                    const workId = (item.初出作品番 || '').toString().trim();
+                    if (!workId) return { title: null, extra: item.初出 };
+        
+                    const match = this.fullWorksList.find(w => (w.初出作品番 || '').toString().trim() === workId);
+                    
+                    if (match) {
+                        return {
+                            title: match.初出作品名 || '',
+                            extra: `${match.初出掲載誌 || ''} ${match.初出掲載号 || ''}`.trim()
+                        };
                     }
-                    return { title: null, extra: null };
+                    return { title: null, extra: item.初出 };
                 },
                 getBookLinks(workId) {
                     if (!workId) return [];
                     const idStr = workId.toString().trim();
+                    // Match against '作品番' in the '書籍收錄作品' sheet
                     const matches = this.contents.filter(c => (c.作品番 || '').toString().trim() === idStr);
+                    
                     const links = [];
                     matches.forEach(m => {
                         if (!m.ISBN) return;
@@ -217,9 +237,18 @@
                     return links;
                 },
                 getLinkColor(type) {
-                    if (type?.includes('45卷')) return 'bg-emerald-500';
+                    if (!type) return 'bg-slate-400';
+                    const t = type.toString();
+                    if (t.includes('45卷') || t.includes('カラー') || t.includes('プラス')) return 'bg-emerald-500';
+                    if (t.includes('大全集')) return 'bg-indigo-600';
+                    if (t.includes('0卷')) return 'bg-slate-700';
+                    if (t.includes('ドラミ')) return 'bg-rose-400';
+                    if (t.includes('文庫')) return 'bg-amber-500';
+                    if (t.includes('ぴっか')) return 'bg-purple-500';
+                    if (t.includes('とっておき')) return 'bg-cyan-600';
                     return 'bg-slate-400';
-                }
+                },
+                changePage(p) { this.currentPage = p; window.scrollTo({ top: 0, behavior: 'smooth' }); }
             },
             mounted() { this.init(); }
         }).mount('#app')

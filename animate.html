@@ -74,8 +74,8 @@
                     <div v-for="movie in filteredMovies" :key="movie.id" @click="selectMovie(movie)" class="movie-card bg-white rounded-[1.5rem] overflow-hidden border border-slate-200 flex flex-col shadow-sm">
                         <div class="aspect-[3/4] bg-slate-100 relative">
                             <img :src="movie.jpImage || movie.hkImage || 'https://placehold.co/600x800?text=No+Poster'" class="w-full h-full object-cover">
-                            <div class="absolute top-4 left-4 bg-black/50 text-white text-[10px] font-black px-2 py-1 rounded-md tracking-widest">
-                                {{ movie.jpYear || 'TBA' }}
+                            <div class="absolute top-4 left-4 bg-indigo-600/90 text-white text-[10px] font-black px-2.5 py-1 rounded-md tracking-widest shadow-lg">
+                                YEAR {{ movie.jpYear || 'TBA' }}
                             </div>
                         </div>
                         <div class="p-6">
@@ -110,7 +110,7 @@
 
                     <div class="flex-1 bg-white rounded-[2.5rem] p-10 md:p-16 border border-slate-200 shadow-sm relative">
                         <div class="mb-12">
-                            <span class="text-indigo-600 font-black text-sm uppercase tracking-[0.3em] mb-4 block">{{ selectedMovie.id }}</span>
+                            <span class="text-indigo-600 font-black text-sm uppercase tracking-[0.3em] mb-4 block">Year {{ selectedMovie.jpYear || 'TBA' }}</span>
                             <h2 class="text-5xl font-black text-slate-900 mb-6 leading-tight">{{ selectedMovie.hkTitle || selectedMovie.jpTitle }}</h2>
                             <div class="flex flex-wrap gap-x-8 gap-y-2">
                                 <p class="text-xl text-slate-400 font-bold italic">{{ selectedMovie.jpTitle }}</p>
@@ -179,7 +179,6 @@
                             };
                             
                             const fullDate = get('JP Release Date');
-                            // Extract just the 4-digit year from the date string
                             const yearMatch = fullDate.match(/\d{4}/);
                             
                             const obj = {

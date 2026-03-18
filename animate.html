@@ -18,10 +18,8 @@
                               linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
             background-size: 40px 40px;
         }
-        /* Match Gadget Archive Nav */
         .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
         
-        /* Loader Style */
         .loader-wrapper {
             position: fixed; inset: 0; background: #f8fafc;
             display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;
@@ -32,7 +30,6 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Movie Card Specifics */
         .movie-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
         .movie-card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         
@@ -51,20 +48,14 @@
         <nav class="top-nav">
             <div class="max-w-[1920px] mx-auto px-6 h-20 flex items-center justify-between">
                 <div class="flex items-center gap-6">
-                    <button v-if="selectedMovie" @click="selectedMovie = null" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl hover:bg-black transition-all">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
-                        </svg>
-                    </button>
-                    
-                    <a v-else href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl hover:bg-black transition-all">
+                    <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl hover:bg-black transition-all">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
                         </svg>
                     </a>
 
                     <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">
-                        {{ selectedMovie ? 'Animate Record' : 'Animate Archive' }}
+                        Animate Archive
                     </h1>
                 </div>
             </div>
@@ -95,7 +86,16 @@
                 </div>
             </main>
 
-            <main v-else key="detail" class="max-w-[1920px] mx-auto px-6 pt-12 pb-20">
+            <main v-else key="detail" class="max-w-[1920px] mx-auto px-6 pt-8 pb-20">
+                <div class="mb-6">
+                    <button @click="selectedMovie = null" class="group flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-indigo-600 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        Back to Animate Archive
+                    </button>
+                </div>
+
                 <div class="flex flex-col lg:flex-row gap-16">
                     <div class="w-full lg:w-[400px] space-y-10">
                         <div class="space-y-3">

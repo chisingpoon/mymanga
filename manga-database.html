@@ -264,10 +264,11 @@ createApp({
             if (!this.selectedBook) return [];
             const isbn = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
             
-            return this.db.contents.filter(c => c.ISBN == isbn && c.作品番).map((c, index) => {
-                const collectionRecord = this.db.contents.find(item => 
+            return this.db.contents.filter(c => c.ISBN == isbn).map((c, index) => {
+                // Find reference in collection series
+                const collectionRecord = c.作品番 ? this.db.contents.find(item => 
                     item.作品番 === c.作品番 && (item.類 === '大長編大全集' || item.類 === '大全集')
-                );
+                ) : null;
                 
                 let collectionLink = null;
                 let collectionVol = '-';
@@ -278,11 +279,9 @@ createApp({
                     collectionCategory = collectionRecord.類;
                     
                     if (this.region === 'HK') {
-                        // Find HK ISBN based on the JP ISBN found in collectionRecord
                         const hkMatch = this.db.hk.find(h => h.ISBN_JP === collectionRecord.ISBN);
                         if (hkMatch) collectionLink = `?region=HK&isbn=${hkMatch.ISBN}`;
                     } else {
-                        // Region is JP, use JP ISBN directly
                         collectionLink = `?region=JP&isbn=${collectionRecord.ISBN}`;
                     }
                 }
@@ -290,7 +289,8 @@ createApp({
                 return {
                     ...c, 
                     UniqueKey: `${c.ISBN}-${index}`,
-                    master: this.db.master.find(m => m.作品番?.toString().trim() === c.作品番?.toString().trim()),
+                    // master stays null if c.作品番 is missing, leading to '-' in template
+                    master: c.作品番 ? this.db.master.find(m => m.作品番?.toString().trim() === c.作品番?.toString().trim()) : null,
                     collectionVol, collectionCategory, collectionLink
                 };
             }).sort((a,b) => (parseInt(a.收錄話)||0) - (parseInt(b.收錄話)||0));

@@ -104,11 +104,11 @@
                             <div class="p-5 flex-grow space-y-2 text-center">
                                 <template v-if="region === 'HK'">
                                     <h3 class="font-black text-lg text-slate-900 uppercase leading-tight line-clamp-2">{{ book.Title }}</h3>
-                                    <div class="text-[11px] font-black text-blue-600 uppercase tracking-widest">Volume {{ book.Volume }}</div>
+                                    <div class="text-[11px] font-black text-blue-600 uppercase tracking-widest">Vol. {{ book.Volume }} {{ book.Subtitle }}</div>
                                 </template>
                                 <template v-else>
                                     <h3 class="font-black text-lg text-slate-900 uppercase leading-tight line-clamp-2">{{ book.標題 }}</h3>
-                                    <div class="text-[11px] font-black text-red-600 uppercase tracking-widest">巻 {{ book.巻 }}</div>
+                                    <div class="text-[11px] font-black text-red-600 uppercase tracking-widest">Vol. {{ book.巻 }}</div>
                                 </template>
                             </div>
                         </div>

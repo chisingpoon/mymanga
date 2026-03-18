@@ -3,283 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manga Database | Archive Portal</title>
+    <title>Master Archive | 電影動畫作品</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         [v-cloak] { display: none; }
-        body { -webkit-user-select: none; user-select: none; }
+        body { 
+            -webkit-user-select: none; user-select: none;
+            min-height: 100vh; background-color: #f8fafc; margin: 0; padding: 0; 
+            font-family: 'Inter', 'Noto Sans TC', 'Noto Sans JP', system-ui, sans-serif; color: #1e293b;
+        }
         .bg-grid {
-            background-color: #f8fafc;
-            background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+            background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), 
+                              linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
             background-size: 40px 40px;
         }
+        /* Match Gadget Archive Nav */
+        .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
         
-        @media (max-width: 768px) {
-            .responsive-table thead { display: none; }
-            .responsive-table tr { display: block; margin-bottom: 1.5rem; border: 1px solid #e2e8f0; border-radius: 1.5rem; background: white; padding: 1.25rem; }
-            .responsive-table td { display: block; width: 100% !important; padding: 0.75rem 0 !important; border: none !important; text-align: left !important; }
-            .responsive-table td::before { content: attr(data-label); display: block; font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
+        /* Loader Style */
+        .loader-wrapper {
+            position: fixed; inset: 0; background: #f8fafc;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;
         }
+        .spinner {
+            width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid #4f46e5;
+            border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .responsive-table { border-collapse: separate; border-spacing: 0; }
-        .overflow-x-auto { overflow-x: auto; overflow-y: visible !important; }
-        .table-auto { table-layout: auto; }
+        /* Movie Card Specifics */
+        .movie-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+        .movie-card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; }
     </style>
 </head>
-<body class="bg-grid text-slate-900 font-sans min-h-screen relative overflow-x-hidden" oncontextmenu="return false;">
-
+<body class="bg-grid">
     <div id="app" v-cloak>
-        <header class="bg-white/80 backdrop-blur-md border-b sticky top-0 z-40 shadow-sm">
+        
+        <div v-if="loading" class="loader-wrapper">
+            <div class="spinner"></div>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Loading Animate Database...</p>
+        </div>
+
+        <nav class="top-nav">
             <div class="max-w-[1920px] mx-auto px-6 h-20 flex items-center justify-between">
                 <div class="flex items-center gap-6">
-                    <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl hover:bg-indigo-600 transition-colors">
+                    <button v-if="selectedMovie" @click="selectedMovie = null" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl hover:bg-black transition-all">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                    
+                    <a v-else href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl hover:bg-black transition-all">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
                         </svg>
                     </a>
-                    <h1 @click="updateView('series')" class="font-black text-2xl tracking-tighter text-slate-800 uppercase cursor-pointer">Manga Database</h1>
-                </div>
 
-                <div class="flex bg-slate-200/50 p-1 rounded-xl border border-slate-200">
-                    <button @click="toggleRegion('HK')" :class="region === 'HK' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'" class="px-6 py-1.5 rounded-lg text-xs font-black transition-all uppercase">HK</button>
-                    <button @click="toggleRegion('JP')" :class="region === 'JP' ? 'bg-white shadow-sm text-red-600' : 'text-slate-500'" class="px-6 py-1.5 rounded-lg text-xs font-black transition-all uppercase">JP</button>
+                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">
+                        {{ selectedMovie ? 'Animate Record' : 'Animate Archive' }}
+                    </h1>
                 </div>
             </div>
-        </header>
+        </nav>
 
-        <main class="max-w-[95%] mx-auto py-8 relative z-10">
-            <div v-if="loading" class="flex flex-col items-center justify-center py-32 animate-pulse">
-                <div class="w-12 h-12 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
-                <p class="mt-4 font-black text-slate-400 uppercase tracking-widest text-[10px]">Syncing Database...</p>
-            </div>
-
-            <div v-else>
-                <div v-if="view === 'series'" class="animate-in fade-in duration-500">
-                    <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-                        <div>
-                            <h2 class="text-3xl font-black text-slate-900 uppercase tracking-tight">{{ region === 'HK' ? '香港版系列' : '日本版分類' }}</h2>
-                            <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Total {{ filteredSeries.length }} groups</p>
-                        </div>
-                        <div class="relative max-w-sm w-full">
-                            <input type="text" v-model="seriesSearchQuery" placeholder="Search series..." 
-                                class="w-full bg-white border border-slate-200 rounded-2xl py-3 pl-12 pr-10 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none shadow-sm transition-all">
-                            <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5"></path></svg>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        <div v-for="s in searchedSeries" :key="s.name" @click="selectSeries(s.name)" 
-                            class="bg-white/80 p-5 rounded-3xl border border-slate-200 cursor-pointer transition-all hover:border-blue-500 hover:shadow-xl text-center group flex flex-col items-center justify-center">
-                            <h3 class="font-black text-lg text-slate-700 group-hover:text-blue-600 uppercase transition-colors leading-tight">{{ s.name }}</h3>
-                            <div class="mt-3 inline-flex items-center bg-slate-100 group-hover:bg-blue-600 group-hover:text-white transition-all px-4 py-1.5 rounded-full text-[11px] font-black tracking-widest uppercase">{{ s.count }} Items</div>
-                        </div>
+        <transition name="fade" mode="out-in">
+            <main v-if="!selectedMovie" key="grid" class="max-w-[1920px] mx-auto px-6 pt-10">
+                <div class="mb-10 flex items-center justify-between">
+                    <h2 class="text-4xl font-black text-slate-900">電影動畫作品</h2>
+                    
+                    <div class="relative w-full max-w-md">
+                        <input type="text" v-model="searchQuery" placeholder="搜尋作品名稱 (中/日)..." 
+                               class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-3 text-base font-bold focus:border-indigo-500 outline-none shadow-sm">
                     </div>
                 </div>
 
-                <div v-if="view === 'books'" class="animate-in fade-in duration-500">
-                    <div class="mb-8">
-                        <button @click="updateView('series')" class="mb-2 text-[10px] font-black uppercase text-blue-600 flex items-center gap-2 hover:gap-3 transition-all">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="3"></path></svg>
-                            Back to Series
-                        </button>
-                        <h2 class="text-4xl font-black text-slate-900 uppercase tracking-tighter">{{ selectedSeries }}</h2>
-                    </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                        <div v-for="book in filteredBooks" :key="book.ISBN || book.ISBN_JP" @click="selectBook(book)" 
-                            class="book-card bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-200 cursor-pointer group transition-all hover:shadow-2xl flex flex-col h-full">
-                            <div class="bg-slate-50 p-4 aspect-[3/4] flex items-center justify-center overflow-hidden">
-                                <img v-if="book.Image" :src="book.Image" class="w-full h-full object-contain rounded-lg shadow-md group-hover:scale-105 transition-transform duration-500">
-                            </div>
-                            <div class="p-5 flex-grow space-y-2 text-center">
-                                <template v-if="region === 'HK'">
-                                    <h3 class="font-black text-lg text-slate-900 uppercase leading-tight line-clamp-2">{{ book.Title }}</h3>
-                                    <div v-if="book.Volume" class="text-[13px] font-black text-blue-600 uppercase">Vol. {{ book.Volume }}</div>
-                                </template>
-                                <template v-else>
-                                    <h3 class="font-black text-lg text-slate-900 uppercase leading-tight line-clamp-2">{{ book.標題 }}</h3>
-                                    <div v-if="book.巻" class="text-[13px] font-black text-red-600 uppercase">{{ book.巻 }} 巻</div>
-                                </template>
-                            </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+                    <div v-for="movie in filteredMovies" :key="movie.id" @click="selectMovie(movie)" class="movie-card bg-white rounded-[1.5rem] overflow-hidden border border-slate-200 flex flex-col shadow-sm">
+                        <div class="aspect-[3/4] bg-slate-100 relative">
+                            <img :src="movie.jpImage || movie.hkImage || 'https://placehold.co/600x800?text=No+Poster'" class="w-full h-full object-cover">
+                            <div class="absolute top-4 left-4 bg-black/50 text-white text-[10px] font-black px-2 py-1 rounded-md tracking-widest">{{ movie.id }}</div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="font-black text-slate-900 line-clamp-2 mb-2 leading-tight min-h-[3rem]">{{ movie.jpTitle }}</h3>
+                            <p class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">{{ movie.jpDate || 'Coming Soon' }}</p>
                         </div>
                     </div>
                 </div>
+            </main>
 
-                <div v-if="view === 'detail' && selectedBook" class="space-y-8 animate-in fade-in duration-700">
-                    <div>
-                        <button @click="updateView('books', { series: selectedSeries })" class="text-[10px] font-black text-blue-600 hover:text-indigo-600 uppercase flex items-center gap-2 transition-all">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="3"></path></svg>
-                            Back to Volume List
-                        </button>
-                        <button @click="updateView('series')" class="mt-2 text-[10px] font-black text-slate-400 hover:text-slate-600 uppercase flex items-center gap-2 transition-all">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                            Back to All Series
-                        </button>
+            <main v-else key="detail" class="max-w-[1920px] mx-auto px-6 pt-12 pb-20">
+                <div class="flex flex-col lg:flex-row gap-16">
+                    <div class="w-full lg:w-[400px] space-y-10">
+                        <div class="space-y-3">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Japan Poster</p>
+                            <img :src="selectedMovie.jpImage" class="w-full rounded-[2rem] shadow-2xl border-[12px] border-white">
+                        </div>
+                        <div v-if="selectedMovie.hkImage" class="space-y-3">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Hong Kong Poster</p>
+                            <img :src="selectedMovie.hkImage" class="w-full rounded-[2rem] shadow-2xl border-[12px] border-white">
+                        </div>
                     </div>
 
-                    <div class="flex flex-col lg:flex-row gap-8 items-stretch justify-center">
-                        <div v-if="hkDetail && region === 'HK'" class="bg-white rounded-[2.5rem] shadow-xl border border-slate-200 overflow-hidden flex flex-col md:flex-row w-full max-w-4xl">
-                            <div class="md:w-2/5 p-10 bg-slate-50 flex items-center justify-center">
-                                <img :src="hkDetail.Image" class="w-full h-auto object-contain shadow-2xl rounded-xl">
-                            </div>
-                            <div class="md:w-3/5 p-8 flex flex-col justify-center">
-                                <span class="bg-blue-600 text-[10px] font-black text-white px-3 py-1 rounded-full uppercase w-fit">HK Edition Details</span>
-                                <h2 class="text-3xl font-black text-slate-900 mt-4 uppercase leading-tight">{{ hkDetail.Title }}</h2>
-                                <p v-if="hkDetail.Volume" class="text-blue-600 font-black mt-2 text-lg">Vol. {{ hkDetail.Volume }}</p>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mt-8 border-t pt-6 text-sm">
-                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px]">Author</span><span class="font-bold text-slate-700">{{ hkDetail.Author }}</span></div>
-                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px]">Publisher</span><span class="font-bold text-slate-700">{{ hkDetail.Publisher }}</span></div>
-                                    <div class="flex justify-between border-b pb-1 md:col-span-2"><span class="text-slate-400 font-black text-[10px]">ISBN</span><span class="font-mono font-black text-blue-600">{{ hkDetail.ISBN }}</span></div>
-                                </div>
+                    <div class="flex-1 bg-white rounded-[2.5rem] p-10 md:p-16 border border-slate-200 shadow-sm relative">
+                        <div class="mb-12">
+                            <span class="text-indigo-600 font-black text-sm uppercase tracking-[0.3em] mb-4 block">{{ selectedMovie.id }}</span>
+                            <h2 class="text-5xl font-black text-slate-900 mb-6 leading-tight">{{ selectedMovie.hkTitle || selectedMovie.jpTitle }}</h2>
+                            <div class="flex flex-wrap gap-x-8 gap-y-2">
+                                <p class="text-xl text-slate-400 font-bold italic">{{ selectedMovie.jpTitle }}</p>
+                                <p class="text-xl text-slate-300 font-medium">{{ selectedMovie.enTitle }}</p>
                             </div>
                         </div>
 
-                        <div v-if="jpDetail" class="bg-white rounded-[2.5rem] shadow-xl border border-slate-200 overflow-hidden flex flex-col md:flex-row w-full max-w-4xl">
-                            <div class="md:w-2/5 p-10 bg-slate-50 flex items-center justify-center">
-                                <img :src="jpDetail.Image" class="w-full h-auto object-contain shadow-2xl rounded-xl">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 py-12 border-y border-slate-100 mb-12">
+                            <div>
+                                <h4 class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-2">日本公映日期</h4>
+                                <p class="text-2xl font-black text-slate-700">{{ selectedMovie.jpDate || '-' }}</p>
                             </div>
-                            <div class="md:w-3/5 p-8 flex flex-col justify-center">
-                                <span class="bg-red-600 text-[10px] font-black text-white px-3 py-1 rounded-full uppercase w-fit">JP Spec Details</span>
-                                <h2 class="text-3xl font-black text-slate-900 mt-4 uppercase leading-tight">{{ jpDetail.標題 }}</h2>
-                                <p v-if="jpDetail.巻" class="text-red-600 font-black mt-2 text-lg">Vol. {{ jpDetail.巻 }}</p>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 mt-8 border-t pt-6 text-sm">
-                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px]">Author</span><span class="font-bold text-slate-700">{{ jpDetail.著 }}</span></div>
-                                    <div class="flex justify-between border-b pb-1"><span class="text-slate-400 font-black text-[10px]">Series</span><span class="font-bold text-slate-700">{{ jpDetail.類 }}</span></div>
-                                    <div class="flex justify-between border-b pb-1 md:col-span-2"><span class="text-slate-400 font-black text-[10px]">ISBN</span><span class="font-mono font-black text-red-600">{{ jpDetail.ISBN }}</span></div>
-                                </div>
+                            <div>
+                                <h4 class="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em] mb-2">香港公映日期</h4>
+                                <p class="text-2xl font-black text-indigo-600">{{ selectedMovie.hkDate || '-' }}</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="p-8 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 text-center">
+                                <h5 class="text-xs font-black uppercase text-slate-400 mb-2">Manga Record</h5>
+                                <p class="text-[10px] text-slate-300 font-bold italic">Liking Logic Coming Soon...</p>
+                            </div>
+                            <div class="p-8 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 text-center">
+                                <h5 class="text-xs font-black uppercase text-slate-400 mb-2">Film Comic Record</h5>
+                                <p class="text-[10px] text-slate-300 font-bold italic">Liking Logic Coming Soon...</p>
                             </div>
                         </div>
                     </div>
                 </div>
+            </main>
+        </transition>
 
-                <footer class="mt-20 py-10 border-t border-slate-200 text-center">
-                    <button @click="forceRefresh" class="inline-flex items-center gap-2 px-6 py-2 bg-white border border-slate-200 rounded-full text-[10px] font-black uppercase text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
-                        <svg class="w-3 h-3" :class="refreshing ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                        {{ refreshing ? 'Syncing...' : 'Force Data Refresh' }}
-                    </button>
-                </footer>
-            </div>
-        </main>
     </div>
 
-<script>
-const { createApp } = Vue;
-createApp({
-    data() {
-        return {
-            region: 'HK', 
-            view: 'series', 
-            loading: true, 
-            refreshing: false,
-            selectedSeries: null, 
-            selectedBook: null,
-            seriesSearchQuery: '', 
-            tableQuery: '', 
-            db: { hk: [], jp: [], contents: [], master: [] }
-        }
-    },
-    computed: {
-        activeHK() { return this.db.hk.filter(item => item.Active?.toString().toLowerCase().trim() === 'yes'); },
-        activeJP() { return this.db.jp.filter(item => item.Active?.toString().toLowerCase().trim() === 'yes'); },
-        filteredSeries() {
-            const data = this.region === 'HK' ? this.activeHK : this.activeJP;
-            const key = this.region === 'HK' ? 'Title' : '類';
-            const counts = data.reduce((acc, item) => {
-                const name = item[key];
-                if (name) acc[name] = (acc[name] || 0) + 1;
-                return acc;
-            }, {});
-            return Object.keys(counts).sort().map(name => ({ name: name, count: counts[name] }));
-        },
-        searchedSeries() {
-            const q = this.seriesSearchQuery.toLowerCase();
-            return this.filteredSeries.filter(s => s.name.toLowerCase().includes(q));
-        },
-        filteredBooks() {
-            const data = this.region === 'HK' ? this.activeHK : this.activeJP;
-            const key = this.region === 'HK' ? 'Title' : '類';
-            return data.filter(b => b[key] === this.selectedSeries);
-        },
-        hkDetail() { 
-            if (!this.selectedBook) return null;
-            return this.region === 'HK' ? this.selectedBook : this.db.hk.find(h => h.ISBN_JP == this.selectedBook.ISBN); 
-        },
-        jpDetail() { 
-            if (!this.selectedBook) return null;
-            return this.region === 'JP' ? this.selectedBook : this.db.jp.find(j => j.ISBN == (this.selectedBook.ISBN_JP || this.selectedBook.ISBN)); 
-        }
-    },
-    methods: {
-        async init() {
-            const cached = localStorage.getItem('manga_db_v3');
-            if (cached) { this.db = JSON.parse(cached); this.loading = false; this.checkUrlParameters(); }
-            try {
-                const [hk, jp, contents, master] = await Promise.all([
-                    fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json()),
-                    fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP").then(r => r.json()),
-                    fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
-                    fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json())
-                ]);
-                this.db = { hk, jp, contents, master };
-                localStorage.setItem('manga_db_v3', JSON.stringify(this.db));
-                this.checkUrlParameters();
-            } catch (e) { console.error("Sync Error:", e); } finally { this.loading = false; }
-        },
-        checkUrlParameters() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlRegion = urlParams.get('region')?.toUpperCase();
-            const urlIsbn = urlParams.get('isbn');
-            const urlSeries = urlParams.get('series');
-            if (urlRegion === 'JP' || urlRegion === 'HK') this.region = urlRegion;
-            if (urlIsbn) {
-                const book = this.db.hk.find(b => b.ISBN === urlIsbn) || this.db.jp.find(b => b.ISBN === urlIsbn);
-                if (book) {
-                    this.selectedBook = book;
-                    this.selectedSeries = book.Title || book.類;
-                    this.view = 'detail';
-                    return;
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    loading: true,
+                    searchQuery: '',
+                    movies: [],
+                    selectedMovie: null
                 }
-            } 
-            if (urlSeries) {
-                this.selectedSeries = urlSeries;
-                this.view = 'books';
-            } else {
-                this.view = 'series';
-                this.selectedBook = null;
-                this.selectedSeries = null;
-            }
-        },
-        updateView(newView, params = {}) {
-            const searchParams = new URLSearchParams();
-            searchParams.set('region', this.region);
-            if (params.isbn) searchParams.set('isbn', params.isbn);
-            if (params.series) searchParams.set('series', params.series);
-            const newUrl = params.series || params.isbn ? '?' + searchParams.toString() : window.location.pathname;
-            window.history.pushState({}, '', newUrl);
-            this.checkUrlParameters();
-            window.scrollTo(0,0);
-        },
-        async forceRefresh() {
-            this.refreshing = true;
-            localStorage.removeItem('manga_db_v3');
-            await this.init();
-            this.refreshing = false;
-        },
-        toggleRegion(r) { 
-            this.region = r; 
-            this.updateView('series');
-        },
-        selectSeries(name) { 
-            this.updateView('books', { series: name }); 
-        },
-        selectBook(book) { 
-            this.updateView('detail', { isbn: (book.ISBN || book.ISBN_JP), series: this.selectedSeries });
-        }
-    },
-    mounted() { 
-        this.init();
-        window.addEventListener('popstate', () => this.checkUrlParameters());
-    }
-}).mount('#app')
-</script>
+            },
+            computed: {
+                filteredMovies() {
+                    const q = this.searchQuery.toLowerCase().trim();
+                    if (!q) return this.movies;
+                    return this.movies.filter(m => m.searchStr.includes(q));
+                }
+            },
+            methods: {
+                selectMovie(movie) {
+                    this.selectedMovie = movie;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+                async init() {
+                    try {
+                        const res = await fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/電影動畫");
+                        const data = await res.json();
+                        this.movies = data.map(item => {
+                            const get = (key) => {
+                                const k = Object.keys(item).find(x => x.trim() === key);
+                                return k ? item[k] : '';
+                            };
+                            const obj = {
+                                id: get('Media ID'),
+                                jpTitle: get('JP Title'),
+                                hkTitle: get('HK Title'),
+                                enTitle: get('EN Title'),
+                                jpDate: get('JP Release Date'),
+                                hkDate: get('HK Release Date'),
+                                jpImage: get('JP Image'),
+                                hkImage: get('HK Image')
+                            };
+                            obj.searchStr = `${obj.jpTitle} ${obj.hkTitle} ${obj.enTitle} ${obj.id}`.toLowerCase();
+                            return obj;
+                        });
+                    } catch (e) { console.error(e); }
+                    finally { this.loading = false; }
+                }
+            },
+            mounted() { this.init(); }
+        }).mount('#app')
+    </script>
 </body>
 </html>

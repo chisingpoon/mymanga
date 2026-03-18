@@ -144,7 +144,8 @@
                     activeRow: null,
                     gadgets: [],
                     contents: [],
-                    publishHk: []
+                    publishHk: [],
+                    fullWorksList: [] 
                 }
             },
             watch: {
@@ -177,12 +178,6 @@
                     const res = []; let l;
                     for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
                     return res;
-                }
-            },
-            data() {
-                return {
-                    // ... existing data ...
-                    fullWorksList: [] // New data source
                 }
             },
             methods: {

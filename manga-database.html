@@ -280,7 +280,7 @@ createApp({
         filteredBooks() {
             const data = this.region === 'HK' ? this.activeHK : this.activeJP;
             const key = this.region === 'HK' ? 'Title' : '類';
-            return data.filter(b => b[key] === this.selectedSeries);
+            return data.filter(b => (b[key] || '').toString().trim() === this.selectedSeries);
         },
         hkDetail() { 
             if (!this.selectedBook) return null;
@@ -347,7 +347,7 @@ createApp({
             const urlParams = new URLSearchParams(window.location.search);
             const urlRegion = urlParams.get('region')?.toUpperCase();
             const urlIsbn = urlParams.get('isbn');
-            const urlSeries = urlParams.get('series');
+            const urlSeries = urlParams.get('series')?.trim();
             if (urlRegion === 'JP' || urlRegion === 'HK') this.region = urlRegion;
             if (urlIsbn) {
                 const book = this.db.hk.find(b => b.ISBN === urlIsbn) || this.db.jp.find(b => b.ISBN === urlIsbn);

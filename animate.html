@@ -1,279 +1,51 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Archive | 電影動畫作品</title>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        [v-cloak] { display: none; }
-        body { 
-            -webkit-user-select: none; user-select: none;
-            min-height: 100vh; background-color: #f8fafc; margin: 0; padding: 0; 
-            font-family: 'Inter', 'Noto Sans TC', 'Noto Sans JP', system-ui, sans-serif; color: #1e293b;
-        }
-        .bg-grid {
-            background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), 
-                              linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
-        .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    
+    <div class="flex flex-col relative group min-h-[400px]">
+        <div class="badge">原作/改編漫畫</div>
         
-        .loader-wrapper {
-            position: fixed; inset: 0; background: #f8fafc;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;
-        }
-        .spinner {
-            width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid #4f46e5;
-            border-radius: 50%; animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .movie-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
-        .movie-card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-        
-        .data-card { transition: all 0.2s ease; border: 2px solid transparent; text-align: left; position: relative; overflow: hidden; height: 100%; }
-        .data-card:hover { border-color: #4f46e5; background-color: #ffffff; transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-
-        .badge {
-            position: absolute; top: 12px; left: 12px;
-            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px);
-            color: white; font-size: 10px; font-weight: 900; padding: 4px 10px;
-            border-radius: 6px; letter-spacing: 0.05em; z-index: 10;
-        }
-
-        .hover-hint {
-            position: absolute; bottom: 12px; right: 12px;
-            background: #4f46e5; color: white;
-            font-size: 10px; font-weight: 900; padding: 4px 12px;
-            border-radius: 99px; text-transform: uppercase; letter-spacing: 0.1em;
-            opacity: 0; transform: translateY(10px);
-            transition: all 0.3s ease; pointer-events: none; z-index: 20;
-        }
-        .data-card:hover .hover-hint { opacity: 1; transform: translateY(0); }
-
-        .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
-        .fade-enter-from, .fade-leave-to { opacity: 0; }
-    </style>
-</head>
-<body class="bg-grid">
-    <div id="app" v-cloak>
-        
-        <div v-if="loading" class="loader-wrapper">
-            <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Syncing Master Archive...</p>
-        </div>
-
-        <nav class="top-nav">
-            <div class="max-w-[1920px] mx-auto px-6 h-20 flex items-center justify-between">
-                <div class="flex items-center gap-6">
-                    <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl hover:bg-black transition-all">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                    </a>
-                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Animate Archive</h1>
-                </div>
+        <a v-if="mappedManga" 
+           :href="'manga-database.html?region=JP&isbn=' + mappedManga.isbnParam + '&series=' + encodeURIComponent(mappedManga.series)" 
+           target="_blank"
+           class="data-card block bg-slate-50 rounded-[2.5rem] border border-slate-100 overflow-hidden">
+            <div class="aspect-[16/9] bg-slate-200">
+                <img :src="mappedManga.image || 'https://placehold.co/600x400?text=No+Cover'" class="w-full h-full object-cover">
             </div>
-        </nav>
+            <div class="p-8">
+                <p class="font-black text-slate-900 text-xl leading-tight mb-2">{{ mappedManga.title }}</p>
+                <p v-if="mappedManga.subtitle" class="text-sm text-slate-500 font-bold mb-4 italic">{{ mappedManga.subtitle }}</p>
+                <p class="text-[11px] font-black text-indigo-600 uppercase tracking-widest">{{ mappedManga.author }}</p>
+            </div>
+            <div class="hover-hint">Click for Details</div>
+        </a>
 
-        <transition name="fade" mode="out-in">
-            <main v-if="!selectedMovie" key="grid" class="max-w-[1920px] mx-auto px-6 pt-10">
-                <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <h2 class="text-4xl font-black text-slate-900">電影動畫作品</h2>
-                    <div class="flex flex-col sm:flex-row gap-4 w-full max-w-2xl">
-                        <input type="text" v-model="searchQuery" placeholder="搜尋作品名稱..." class="flex-1 bg-white border-2 border-slate-200 rounded-2xl px-6 py-3 text-base font-bold outline-none focus:border-indigo-500 shadow-sm">
-                        <select v-model="sortOrder" class="bg-white border-2 border-slate-200 rounded-2xl px-6 py-3 text-sm font-black uppercase outline-none cursor-pointer focus:border-indigo-500 shadow-sm">
-                            <option value="desc">最新優先 (Year Desc)</option>
-                            <option value="asc">年代順 (Year Asc)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-                    <div v-for="movie in sortedMovies" :key="movie.id" @click="selectMovie(movie)" class="movie-card bg-white rounded-[1.5rem] overflow-hidden border border-slate-200 flex flex-col shadow-sm">
-                        <div class="aspect-[3/4] bg-slate-100 relative">
-                            <img :src="movie.jpImage || 'https://placehold.co/600x800?text=No+Poster'" class="w-full h-full object-cover">
-                            <div class="absolute top-4 left-4 bg-indigo-600 text-white text-[10px] font-black px-2.5 py-1 rounded-md tracking-widest shadow-lg">
-                                YEAR {{ movie.jpYear || 'TBA' }}
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="font-black text-slate-900 line-clamp-2 mb-2 leading-tight min-h-[3rem]">{{ movie.jpTitle }}</h3>
-                            <p class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">{{ movie.jpDate || 'Coming Soon' }}</p>
-                        </div>
-                    </div>
-                </div>
-            </main>
-
-            <main v-else key="detail" class="max-w-[1920px] mx-auto px-6 pt-6 pb-20">
-                <div class="mb-8">
-                    <button @click="selectedMovie = null" class="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-indigo-600 transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg>
-                        Back to Animates and Movies Listing
-                    </button>
-                </div>
-
-                <div class="flex flex-col lg:flex-row gap-16">
-                    <div class="w-full lg:w-[400px] space-y-10">
-                        <img :src="selectedMovie.jpImage" class="w-full rounded-[2rem] shadow-2xl border-[12px] border-white">
-                        <img v-if="selectedMovie.hkImage" :src="selectedMovie.hkImage" class="w-full rounded-[2rem] shadow-2xl border-[12px] border-white">
-                    </div>
-
-                    <div class="flex-1 bg-white rounded-[2.5rem] p-10 md:p-16 border border-slate-200 shadow-sm relative">
-                        <div class="mb-12">
-                            <span class="text-indigo-600 font-black text-sm uppercase tracking-[0.3em] mb-4 block">Year {{ selectedMovie.jpYear || 'TBA' }}</span>
-                            <h2 class="text-5xl font-black text-slate-900 mb-6 leading-tight">{{ selectedMovie.jpTitle }}</h2>
-                            <div class="space-y-3">
-                                <p class="text-3xl font-black text-slate-600 leading-tight">{{ selectedMovie.hkTitle }}</p>
-                                <p class="text-xl font-bold text-slate-300 tracking-tight">{{ selectedMovie.enTitle }}</p>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 py-12 border-y border-slate-100 mb-12">
-                            <div><h4 class="text-[11px] font-black text-slate-300 uppercase tracking-widest mb-2">日本公映日期</h4><p class="text-2xl font-black text-slate-700">{{ selectedMovie.jpDate || '-' }}</p></div>
-                            <div><h4 class="text-[11px] font-black text-slate-300 uppercase tracking-widest mb-2">香港公映日期</h4><p class="text-2xl font-black text-indigo-600">{{ selectedMovie.hkDate || '-' }}</p></div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            
-                            <div class="flex flex-col relative min-h-[400px]">
-                                <div class="badge">原作/改編漫畫</div>
-                                <a v-if="mappedManga" 
-                                   :href="'manga-database.html?region=JP&isbn=' + mappedManga.isbnParam + '&series=' + encodeURIComponent(mappedManga.series)" 
-                                   target="_blank"
-                                   class="data-card block bg-slate-50 rounded-[2.5rem] border border-slate-100 overflow-hidden">
-                                    <div class="aspect-[16/9] bg-slate-200">
-                                        <img :src="mappedManga.image || 'https://placehold.co/600x400?text=No+Cover'" class="w-full h-full object-cover">
-                                    </div>
-                                    <div class="p-8">
-                                        <p class="font-black text-slate-900 text-xl leading-tight mb-2">{{ mappedManga.title }}</p>
-                                        <p v-if="mappedManga.subtitle" class="text-sm text-slate-500 font-bold mb-4 italic">{{ mappedManga.subtitle }}</p>
-                                        <p class="text-[11px] font-black text-indigo-600 uppercase tracking-widest">{{ mappedManga.author }}</p>
-                                    </div>
-                                    <div class="hover-hint">Click for Details</div>
-                                </a>
-                                <div v-else class="flex-1 p-10 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center flex flex-col items-center justify-center opacity-50">
-                                    <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-4">No Linked Manga</p>
-                                </div>
-                            </div>
-
-                            <div class="flex flex-col relative min-h-[400px]">
-                                <div class="badge">電影漫畫</div>
-                                <a v-if="mappedFilmComic" 
-                                   :href="'manga-database.html?region=JP&isbn=' + mappedFilmComic.isbnParam + '&series=' + encodeURIComponent(mappedFilmComic.series)" 
-                                   target="_blank"
-                                   class="data-card block bg-slate-50 rounded-[2.5rem] border border-slate-100 overflow-hidden">
-                                    <div class="aspect-[16/9] bg-slate-200">
-                                        <img :src="mappedFilmComic.image || 'https://placehold.co/600x400?text=No+Cover'" class="w-full h-full object-cover">
-                                    </div>
-                                    <div class="p-8">
-                                        <p class="font-black text-slate-900 text-xl leading-tight mb-2">{{ mappedFilmComic.title }}</p>
-                                        <p v-if="mappedFilmComic.subtitle" class="text-sm text-slate-500 font-bold mb-4 italic">{{ mappedFilmComic.subtitle }}</p>
-                                        <p class="text-[11px] font-black text-indigo-600 uppercase tracking-widest">{{ mappedFilmComic.author }}</p>
-                                    </div>
-                                    <div class="hover-hint">Click for Details</div>
-                                </a>
-                                <div v-else class="flex-1 p-10 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center flex flex-col items-center justify-center opacity-50">
-                                    <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-4">No Linked Film Comic</p>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </transition>
+        <div v-else class="data-card flex-1 p-10 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center flex flex-col items-center justify-center opacity-60">
+            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-4">No Linked Manga</p>
+            <div class="hover-hint">No Record Found</div>
+        </div>
     </div>
 
-    <script>
-        const { createApp } = Vue;
-        createApp({
-            data() {
-                return {
-                    loading: true,
-                    searchQuery: '',
-                    sortOrder: 'desc',
-                    movies: [],
-                    mangaCatalog: [],
-                    selectedMovie: null
-                }
-            },
-            computed: {
-                sortedMovies() {
-                    const q = this.searchQuery.toLowerCase().trim();
-                    let filtered = this.movies;
-                    if (q) filtered = this.movies.filter(m => m.searchStr.includes(q));
-                    return [...filtered].sort((a, b) => {
-                        const yearA = parseInt(a.jpYear) || 0;
-                        const yearB = parseInt(b.jpYear) || 0;
-                        return this.sortOrder === 'asc' ? yearA - yearB : yearB - yearA;
-                    });
-                },
-                mappedManga() {
-                    return this.lookupInCatalog(this.selectedMovie?.mangaRaw);
-                },
-                mappedFilmComic() {
-                    return this.lookupInCatalog(this.selectedMovie?.filmComicRaw);
-                }
-            },
-            methods: {
-                getVal(obj, keyName) {
-                    if (!obj) return '';
-                    const key = Object.keys(obj).find(k => k.trim().toLowerCase() === keyName.trim().toLowerCase());
-                    return key ? obj[key] : '';
-                },
-                lookupInCatalog(rawIsbn) {
-                    if (!rawIsbn) return null;
-                    const searchISBN = rawIsbn.toString().replace(/[-\s]/g, '');
-                    const found = this.mangaCatalog.find(item => {
-                        const itemISBN = (this.getVal(item, 'ISBN') || '').toString().replace(/[-\s]/g, '');
-                        return itemISBN === searchISBN && itemISBN !== "";
-                    });
-                    if (found) {
-                        return {
-                            title: this.getVal(found, '標題'), subtitle: this.getVal(found, '副標題'),
-                            author: this.getVal(found, '著'), series: this.getVal(found, '類'),
-                            image: this.getVal(found, 'image'), isbnParam: this.getVal(found, 'ISBN').trim()
-                        };
-                    }
-                    return null;
-                },
-                selectMovie(movie) {
-                    this.selectedMovie = movie;
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                },
-                async init() {
-                    try {
-                        const [movieRes, mangaRes] = await Promise.all([
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/電影動畫"),
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP")
-                        ]);
-                        this.mangaCatalog = await mangaRes.json();
-                        const movieData = await movieRes.json();
-                        this.movies = movieData.map(item => {
-                            const fullDate = this.getVal(item, 'JP Release Date');
-                            const yearMatch = fullDate.match(/\d{4}/);
-                            return {
-                                id: this.getVal(item, 'Media ID'),
-                                jpTitle: this.getVal(item, 'JP Title'),
-                                hkTitle: this.getVal(item, 'HK Title'),
-                                enTitle: this.getVal(item, 'EN Title'),
-                                jpDate: fullDate,
-                                jpYear: yearMatch ? yearMatch[0] : '',
-                                hkDate: this.getVal(item, 'HK Release Date'),
-                                jpImage: this.getVal(item, 'JP Image'),
-                                hkImage: this.getVal(item, 'HK Image'),
-                                mangaRaw: this.getVal(item, 'Manga ISBN'),
-                                filmComicRaw: this.getVal(item, 'Film Comics'), // New mapping
-                                searchStr: `${this.getVal(item, 'JP Title')} ${this.getVal(item, 'HK Title')} ${this.getVal(item, 'Media ID')}`.toLowerCase()
-                            };
-                        });
-                    } catch (e) { console.error(e); }
-                    finally { this.loading = false; }
-                }
-            },
-            mounted() { this.init(); }
-        }).mount('#app')
-    </script>
-</body>
-</html>
+    <div class="flex flex-col relative group min-h-[400px]">
+        <div class="badge">電影漫畫</div>
+        
+        <a v-if="mappedFilmComic" 
+           :href="'manga-database.html?region=JP&isbn=' + mappedFilmComic.isbnParam + '&series=' + encodeURIComponent(mappedFilmComic.series)" 
+           target="_blank"
+           class="data-card block bg-slate-50 rounded-[2.5rem] border border-slate-100 overflow-hidden">
+            <div class="aspect-[16/9] bg-slate-200">
+                <img :src="mappedFilmComic.image || 'https://placehold.co/600x400?text=No+Cover'" class="w-full h-full object-cover">
+            </div>
+            <div class="p-8">
+                <p class="font-black text-slate-900 text-xl leading-tight mb-2">{{ mappedFilmComic.title }}</p>
+                <p v-if="mappedFilmComic.subtitle" class="text-sm text-slate-500 font-bold mb-4 italic">{{ mappedFilmComic.subtitle }}</p>
+                <p class="text-[11px] font-black text-indigo-600 uppercase tracking-widest">{{ mappedFilmComic.author }}</p>
+            </div>
+            <div class="hover-hint">Click for Details</div>
+        </a>
+
+        <div v-else class="data-card flex-1 p-10 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center flex flex-col items-center justify-center opacity-60">
+            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-4">No Linked Film Comic</p>
+            <div class="hover-hint">No Record Found</div>
+        </div>
+    </div>
+
+</div>

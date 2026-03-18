@@ -62,16 +62,30 @@
 
         <transition name="fade" mode="out-in">
             <main v-if="!selectedMovie" key="grid" class="max-w-[1920px] mx-auto px-6 pt-10">
-                <div class="mb-10 flex items-center justify-between">
+                <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <h2 class="text-4xl font-black text-slate-900">電影動畫作品</h2>
-                    <div class="relative w-full max-w-md">
-                        <input type="text" v-model="searchQuery" placeholder="搜尋作品名稱 (中/日)..." 
-                               class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-3 text-base font-bold focus:border-indigo-500 outline-none shadow-sm">
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 w-full max-w-2xl">
+                        <div class="relative flex-1">
+                            <input type="text" v-model="searchQuery" placeholder="搜尋作品名稱 (中/日)..." 
+                                   class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-3 text-base font-bold focus:border-indigo-500 outline-none shadow-sm">
+                        </div>
+
+                        <div class="relative min-w-[180px]">
+                            <select v-model="sortOrder" 
+                                    class="w-full appearance-none bg-white border-2 border-slate-200 rounded-2xl px-6 py-3 text-sm font-black uppercase tracking-wider text-slate-600 focus:border-indigo-500 outline-none shadow-sm cursor-pointer">
+                                <option value="desc">最新優先 (Newest)</option>
+                                <option value="asc">年份由舊到新 (Oldest)</option>
+                            </select>
+                            <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-                    <div v-for="movie in filteredMovies" :key="movie.id" @click="selectMovie(movie)" class="movie-card bg-white rounded-[1.5rem] overflow-hidden border border-slate-200 flex flex-col shadow-sm">
+                    <div v-for="movie in sortedMovies" :key="movie.id" @click="selectMovie(movie)" class="movie-card bg-white rounded-[1.5rem] overflow-hidden border border-slate-200 flex flex-col shadow-sm">
                         <div class="aspect-[3/4] bg-slate-100 relative">
                             <img :src="movie.jpImage || movie.hkImage || 'https://placehold.co/600x800?text=No+Poster'" class="w-full h-full object-cover">
                             <div class="absolute top-4 left-4 bg-indigo-600/90 text-white text-[10px] font-black px-2.5 py-1 rounded-md tracking-widest shadow-lg">
@@ -152,15 +166,31 @@
                 return {
                     loading: true,
                     searchQuery: '',
+                    sortOrder: 'desc', // Default to newest
                     movies: [],
                     selectedMovie: null
                 }
             },
             computed: {
-                filteredMovies() {
+                sortedMovies() {
+                    // First filter by search
                     const q = this.searchQuery.toLowerCase().trim();
-                    if (!q) return this.movies;
-                    return this.movies.filter(m => m.searchStr.includes(q));
+                    let filtered = this.movies;
+                    if (q) {
+                        filtered = this.movies.filter(m => m.searchStr.includes(q));
+                    }
+
+                    // Then sort by JP Date
+                    return [...filtered].sort((a, b) => {
+                        const dateA = a.jpDate || '0000-00-00';
+                        const dateB = b.jpDate || '0000-00-00';
+                        
+                        if (this.sortOrder === 'asc') {
+                            return dateA.localeCompare(dateB);
+                        } else {
+                            return dateB.localeCompare(dateA);
+                        }
+                    });
                 }
             },
             methods: {

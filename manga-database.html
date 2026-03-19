@@ -352,69 +352,69 @@ createApp({
                     fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json())
                 ]);
         
-                // Assign data
                 this.db = { hk, jp, contents, master };
-                
-                // Save to cache
                 localStorage.setItem('manga_db_v3', JSON.stringify(this.db));
-
-                // FORCE mobile to wait a millisecond for Vue to react
+        
+                // CRITICAL FOR MOBILE: Wait for data to settle, then check URL
                 setTimeout(() => {
                     this.checkUrlParameters();
                     this.loading = false;
-                }, 100);
-                // Use nextTick to ensure Vue has finished mapping the data to the UI
-                this.$nextTick(() => {
-                    this.checkUrlParameters();
-                    this.loading = false;
-                });
-                
+                }, 300); // 300ms is usually enough for mobile browsers to sync
+        
             } catch (e) {
-                console.error("Fetch failed", e);
+                console.error("Fetch Error:", e);
                 this.loading = false;
             }
         },
         checkUrlParameters() {
-            // 1. Get the raw URL string directly from the browser window
-            const search = window.location.search || (window.location.hash.includes('?') ? window.location.hash.split('?')[1] : '');
-            const params = new URLSearchParams(search);
-        
-            // 2. Extract and Force Clean
-            const urlRegion = (params.get('region') || '').toUpperCase().trim();
-            const urlIsbn = (params.get('isbn') || '').toString().trim();
-            const urlSeries = (params.get('series') || '').trim();
-        
-            // Debugging (Update these so you can see them)
-            this.debugInfo.urlRegion = urlRegion || 'Empty';
-            this.debugInfo.urlIsbn = urlIsbn || 'Empty';
-            this.debugInfo.urlSeries = urlSeries || 'Empty';
-        
-            // 3. Set the app state (Region must come first)
-            if (urlRegion === 'JP' || urlRegion === 'HK') {
-                this.region = urlRegion;
+            // 1. Get the raw URL string directly
+            const fullUrl = window.location.href;
+            
+            // 2. Find the part after the '?'
+            if (!fullUrl.includes('?')) {
+                this.debugInfo.urlIsbn = 'NO QUERY';
+                this.view = 'series';
+                return;
             }
         
-            // 4. Search the database (The exact same way your table does it)
-            if (urlIsbn && (this.db.hk.length > 0 || this.db.jp.length > 0)) {
-                const cleanTarget = urlIsbn.replace(/\D/g, '');
-                
-                // Match logic that ignores dashes and spaces
+            const queryString = fullUrl.split('?')[1].split('#')[0]; // Ignore anything after #
+            const pairs = queryString.split('&');
+            const params = {};
+        
+            // 3. Manually map the keys and values
+            pairs.forEach(pair => {
+                const [key, value] = pair.split('=');
+                if (key) {
+                    params[key.toLowerCase()] = decodeURIComponent(value || '').replace(/\+/g, ' ');
+                }
+            });
+        
+            // 4. Update Debugger with the manual findings
+            this.debugInfo.urlRegion = (params.region || '').toUpperCase().trim();
+            this.debugInfo.urlIsbn = (params.isbn || '').toString().trim();
+            this.debugInfo.urlSeries = (params.series || '').trim();
+        
+            // 5. Logic to switch views
+            if (this.debugInfo.urlRegion === 'JP' || this.debugInfo.urlRegion === 'HK') {
+                this.region = this.debugInfo.urlRegion;
+            }
+        
+            const cleanTarget = this.debugInfo.urlIsbn.replace(/\D/g, '');
+        
+            if (cleanTarget && (this.db.hk.length > 0 || this.db.jp.length > 0)) {
                 const book = this.db.hk.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanTarget) || 
                              this.db.jp.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanTarget);
         
                 if (book) {
                     this.selectedBook = book;
-                    // Use the Title from the book itself to avoid Japanese encoding issues in the URL
-                    this.selectedSeries = this.region === 'HK' ? book.Title : book.類;
+                    this.selectedSeries = this.region === 'HK' ? (book.Title || book.類) : (book.類 || book.標題);
                     this.view = 'detail';
-                    console.log("Success: Book Found");
                     return;
                 }
             }
         
-            // 5. Fallback if no ISBN match
-            if (urlSeries) {
-                this.selectedSeries = urlSeries;
+            if (this.debugInfo.urlSeries) {
+                this.selectedSeries = this.debugInfo.urlSeries;
                 this.view = 'books';
             } else {
                 this.view = 'series';

@@ -353,68 +353,70 @@ createApp({
                 ]);
         
                 this.db = { hk, jp, contents, master };
-                localStorage.setItem('manga_db_v3', JSON.stringify(this.db));
-        
-                // CRITICAL FOR MOBILE: Wait for data to settle, then check URL
+                
+                // Final check: Wait for the DOM to be ready
                 setTimeout(() => {
                     this.checkUrlParameters();
                     this.loading = false;
-                }, 300); // 300ms is usually enough for mobile browsers to sync
+                    
+                    // If it STILL says NONE, try one more time 1 second later
+                    if (this.debugInfo.urlIsbn === 'REGEX FAILED') {
+                        setTimeout(() => this.checkUrlParameters(), 1000);
+                    }
+                }, 200);
         
             } catch (e) {
-                console.error("Fetch Error:", e);
+                console.error(e);
                 this.loading = false;
             }
         },
         checkUrlParameters() {
-            // 1. Get the raw URL string directly
-            const fullUrl = window.location.href;
+            // 1. Get the RAW string from the browser (The most reliable source)
+            const rawUrl = window.location.href;
             
-            // 2. Find the part after the '?'
-            if (!fullUrl.includes('?')) {
-                this.debugInfo.urlIsbn = 'NO QUERY';
-                this.view = 'series';
-                return;
+            // 2. Helper function: Manual Regex that doesn't care about "Search" objects
+            const getParamByName = (name, url) => {
+                name = name.replace(/[\[\]]/g, '\\$&');
+                const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+                const results = regex.exec(url);
+                if (!results) return null;
+                if (!results[2]) return '';
+                // decodeURIComponent handles the Japanese characters from animate.html
+                return decodeURIComponent(results[2].replace(/\+/g, ' '));
+            };
+        
+            // 3. Extract parameters directly from the raw string
+            const urlRegion = (getParamByName('region', rawUrl) || '').toUpperCase().trim();
+            const urlIsbn = (getParamByName('isbn', rawUrl) || '').toString().trim();
+            const urlSeries = (getParamByName('series', rawUrl) || '').trim();
+        
+            // 4. Force update the Debugger
+            this.debugInfo.urlRegion = urlRegion || 'REGEX FAILED';
+            this.debugInfo.urlIsbn = urlIsbn || 'REGEX FAILED';
+            this.debugInfo.urlSeries = urlSeries || 'REGEX FAILED';
+        
+            // 5. Apply the Logic
+            if (urlRegion === 'HK' || urlRegion === 'JP') {
+                this.region = urlRegion;
             }
         
-            const queryString = fullUrl.split('?')[1].split('#')[0]; // Ignore anything after #
-            const pairs = queryString.split('&');
-            const params = {};
+            const cleanIsbn = urlIsbn.replace(/\D/g, '');
         
-            // 3. Manually map the keys and values
-            pairs.forEach(pair => {
-                const [key, value] = pair.split('=');
-                if (key) {
-                    params[key.toLowerCase()] = decodeURIComponent(value || '').replace(/\+/g, ' ');
-                }
-            });
-        
-            // 4. Update Debugger with the manual findings
-            this.debugInfo.urlRegion = (params.region || '').toUpperCase().trim();
-            this.debugInfo.urlIsbn = (params.isbn || '').toString().trim();
-            this.debugInfo.urlSeries = (params.series || '').trim();
-        
-            // 5. Logic to switch views
-            if (this.debugInfo.urlRegion === 'JP' || this.debugInfo.urlRegion === 'HK') {
-                this.region = this.debugInfo.urlRegion;
-            }
-        
-            const cleanTarget = this.debugInfo.urlIsbn.replace(/\D/g, '');
-        
-            if (cleanTarget && (this.db.hk.length > 0 || this.db.jp.length > 0)) {
-                const book = this.db.hk.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanTarget) || 
-                             this.db.jp.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanTarget);
-        
+            if (cleanIsbn && (this.db.hk.length > 0 || this.db.jp.length > 0)) {
+                const book = this.db.hk.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanIsbn) || 
+                             this.db.jp.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanIsbn);
+                
                 if (book) {
                     this.selectedBook = book;
+                    // Prioritize the book's own title to avoid encoding errors
                     this.selectedSeries = this.region === 'HK' ? (book.Title || book.類) : (book.類 || book.標題);
                     this.view = 'detail';
                     return;
                 }
             }
         
-            if (this.debugInfo.urlSeries) {
-                this.selectedSeries = this.debugInfo.urlSeries;
+            if (urlSeries) {
+                this.selectedSeries = urlSeries;
                 this.view = 'books';
             } else {
                 this.view = 'series';

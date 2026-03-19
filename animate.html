@@ -32,14 +32,34 @@
 
         /* --- Detail View Card Styles --- */
         .data-card { 
-            display: flex; flex-direction: column;
-            transition: all 0.2s ease; border: 2px solid transparent; 
-            text-align: left; position: relative; overflow: hidden; height: 480px; 
+            display: flex; 
+            flex-direction: column;
+            transition: all 0.3s ease; 
+            border: 2px solid transparent; 
+            text-align: left; 
+            position: relative; 
+            overflow: hidden; 
+            min-height: 480px; /* Changed from height to min-height */
+            height: 100%;      /* Allows it to match its neighbor's height in a grid */
+            background: #ffffff;
+            border-radius: 1.5rem;
         }
         .data-card:hover { border-color: #4f46e5; background-color: #ffffff; transform: translateY(-4px); }
 
-        .image-container { height: 60%; width: 100%; background: #e2e8f0; overflow: hidden; }
-        .text-container { height: 40%; width: 100%; padding: 1.25rem; display: flex; flex-direction: column; justify-content: start; gap: 0.35rem; line-height: 1.4; }
+        .image-container { 
+            width: 100%; 
+            aspect-ratio: 3/4; /* Matches the movie poster feel */
+            background: #f1f5f9; 
+            overflow: hidden; 
+        }
+        .text-container { 
+            flex: 1; /* This fills the remaining space naturally */
+            padding: 1.25rem; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 0.25rem; 
+            line-height: 1.3; 
+        }
 
         /* Smooth Fade Animation */
         .fade-content {
@@ -216,15 +236,24 @@
                                         <button @click.stop.prevent="fcTab = 'HK'" :class="fcTab === 'HK' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="toggle-btn">HK</button>
                                     </div>
                             
-                                    <a :href="generateUrl(mappedFilmComic.current)" target="_blank" :key="fcTab" class="flex flex-col h-full fade-content">
-                                        <div class="image-container">
-                                            <img :src="mappedFilmComic.current.image || 'https://placehold.co/600x400?text=No+Cover'" class="w-full h-full object-cover">
-                                        </div>
-                                        <div class="text-container">
-                                            <p class="font-black text-slate-900 text-lg leading-tight line-clamp-2">{{ mappedFilmComic.current.title }}</p>
-                                            <p v-if="mappedFilmComic.current.subtitle" class="text-xs font-bold italic text-slate-500 line-clamp-1">{{ mappedFilmComic.current.subtitle }}</p>
-                                            <p class="text-xs font-black text-indigo-600 uppercase tracking-widest mt-auto">{{ mappedFilmComic.current.author }}</p>
-                                        </div>
+                                    <a :href="generateUrl(mappedFilmComic.current)" 
+                                       target="_blank" 
+                                       :key="fcTab" 
+                                       class="flex flex-col flex-1 fade-content"> <div class="image-container">
+                                           <img :src="mappedFilmComic.current.image || '...'" class="w-full h-full object-cover">
+                                       </div>
+                                       
+                                       <div class="text-container">
+                                           <p class="font-black text-slate-900 text-[16px] leading-tight mb-1">
+                                               {{ mappedFilmComic.current.title }}
+                                           </p>
+                                           <p v-if="mappedFilmComic.current.subtitle" class="text-[11px] font-bold italic text-slate-400 line-clamp-2 mb-2">
+                                               {{ mappedFilmComic.current.subtitle }}
+                                           </p>
+                                           <p class="text-[10px] font-black text-indigo-600 uppercase tracking-widest mt-auto">
+                                               {{ mappedFilmComic.current.author }}
+                                           </p>
+                                       </div>
                                     </a>
                             
                                     <div class="hover-hint">

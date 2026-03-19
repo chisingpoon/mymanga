@@ -357,61 +357,62 @@ createApp({
                 
                 // Save to cache
                 localStorage.setItem('manga_db_v3', JSON.stringify(this.db));
-        
+
                 // FORCE mobile to wait a millisecond for Vue to react
                 setTimeout(() => {
                     this.checkUrlParameters();
                     this.loading = false;
                 }, 100);
-        
+                // Use nextTick to ensure Vue has finished mapping the data to the UI
+                this.$nextTick(() => {
+                    this.checkUrlParameters();
+                    this.loading = false;
+                });
+                
             } catch (e) {
                 console.error("Fetch failed", e);
                 this.loading = false;
             }
         },
         checkUrlParameters() {
-            const fullUrl = window.location.href;
-            
-            // Function to extract a parameter using a Regular Expression
-            const getParam = (name) => {
-                const results = new RegExp('[?&]' + name + '=([^&#]*)').exec(fullUrl);
-                return results ? decodeURIComponent(results[1].replace(/\+/g, ' ')) : null;
-            };
+            // 1. Get the raw URL string directly from the browser window
+            const search = window.location.search || (window.location.hash.includes('?') ? window.location.hash.split('?')[1] : '');
+            const params = new URLSearchParams(search);
         
-            // 1. Force capture from the raw URL string
-            const urlRegion = (getParam('region') || '').toUpperCase().trim();
-            const urlIsbn = (getParam('isbn') || '').toString().trim();
-            const urlSeries = (getParam('series') || '').trim();
+            // 2. Extract and Force Clean
+            const urlRegion = (params.get('region') || '').toUpperCase().trim();
+            const urlIsbn = (params.get('isbn') || '').toString().trim();
+            const urlSeries = (params.get('series') || '').trim();
         
-            // 2. Update Debugger with the raw findings
-            this.debugInfo.urlRegion = urlRegion || 'REGEX FAILED';
-            this.debugInfo.urlIsbn = urlIsbn || 'REGEX FAILED';
-            this.debugInfo.urlSeries = urlSeries || 'REGEX FAILED';
+            // Debugging (Update these so you can see them)
+            this.debugInfo.urlRegion = urlRegion || 'Empty';
+            this.debugInfo.urlIsbn = urlIsbn || 'Empty';
+            this.debugInfo.urlSeries = urlSeries || 'Empty';
         
-            const cleanIsbn = urlIsbn.replace(/\D/g, '');
-        
-            // 3. Set Region
+            // 3. Set the app state (Region must come first)
             if (urlRegion === 'JP' || urlRegion === 'HK') {
                 this.region = urlRegion;
             }
         
-            // 4. Search the loaded Database
-            if (cleanIsbn && this.db.hk.length > 0) {
-                // Log to console so you can see the search happening in mobile inspect
-                console.log("Searching for ISBN:", cleanIsbn);
+            // 4. Search the database (The exact same way your table does it)
+            if (urlIsbn && (this.db.hk.length > 0 || this.db.jp.length > 0)) {
+                const cleanTarget = urlIsbn.replace(/\D/g, '');
                 
-                const book = this.db.hk.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanIsbn) || 
-                             this.db.jp.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanIsbn);
-                
+                // Match logic that ignores dashes and spaces
+                const book = this.db.hk.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanTarget) || 
+                             this.db.jp.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanTarget);
+        
                 if (book) {
                     this.selectedBook = book;
-                    this.selectedSeries = (this.region === 'HK' ? (book.Title || book.類) : (book.類 || book.標題));
+                    // Use the Title from the book itself to avoid Japanese encoding issues in the URL
+                    this.selectedSeries = this.region === 'HK' ? book.Title : book.類;
                     this.view = 'detail';
+                    console.log("Success: Book Found");
                     return;
                 }
-            } 
+            }
         
-            // 5. Fallback to Series View if no book match
+            // 5. Fallback if no ISBN match
             if (urlSeries) {
                 this.selectedSeries = urlSeries;
                 this.view = 'books';

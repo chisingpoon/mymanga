@@ -30,7 +30,7 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Card Styles */
+        /* --- Detail View Card Styles --- */
         .data-card { 
             display: flex; flex-direction: column;
             transition: all 0.2s ease; border: 2px solid transparent; 
@@ -38,35 +38,37 @@
         }
         .data-card:hover { border-color: #4f46e5; background-color: #ffffff; transform: translateY(-4px); }
 
-        .image-container { height: 65%; width: 100%; background: #e2e8f0; overflow: hidden; }
-        .text-container { height: 35%; width: 100%; padding: 1.25rem; display: flex; flex-direction: column; justify-content: start; gap: 0.25rem; line-height: 1.4; }
+        .image-container { height: 60%; width: 100%; background: #e2e8f0; overflow: hidden; }
+        .text-container { height: 40%; width: 100%; padding: 1.25rem; display: flex; flex-direction: column; justify-content: start; gap: 0.35rem; line-height: 1.4; }
 
-        /* ENLARGED BADGE STYLES */
+        /* Enlarged Badge for Manga/Film Comic Cards */
         .badge {
             position: absolute; top: 12px; left: 12px;
-            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(4px);
-            color: white; 
-            font-size: 11px; /* Increased from 9px */
-            font-weight: 900; 
-            padding: 5px 12px; /* Increased padding */
-            border-radius: 6px; 
-            letter-spacing: 0.05em; 
-            z-index: 30;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(8px);
+            color: white; font-size: 11px; font-weight: 900; padding: 5px 14px;
+            border-radius: 8px; letter-spacing: 0.05em; z-index: 30;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .hover-hint {
-            position: absolute; bottom: 10px; right: 10px;
+            position: absolute; bottom: 12px; right: 12px;
             background: #4f46e5; color: white;
-            font-size: 9px; font-weight: 900; padding: 3px 10px;
+            font-size: 10px; font-weight: 900; padding: 4px 12px;
             border-radius: 99px; text-transform: uppercase; letter-spacing: 0.1em;
             opacity: 0; transform: translateY(8px);
             transition: all 0.3s ease; pointer-events: none; z-index: 40;
         }
         .data-card:hover .hover-hint { opacity: 1; transform: translateY(0); }
 
-        .movie-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
-        .movie-card:hover { transform: translateY(-6px); box-shadow: 0 15px 20px -5px rgba(0,0,0,0.1); }
+        /* --- List View Movie Card Styles --- */
+        .movie-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; height: 100%; background: white; }
+        .movie-card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        
+        /* Interactive Zoom Effect for Poster */
+        .poster-wrapper { position: relative; overflow: hidden; aspect-ratio: 3/4; background: #f1f5f9; }
+        .poster-wrapper img { transition: transform 0.5s ease; }
+        .movie-card:hover .poster-wrapper img { transform: scale(1.08); }
     </style>
 </head>
 <body class="bg-grid" oncontextmenu="return false;">
@@ -101,17 +103,17 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                    <div v-for="movie in sortedMovies" :key="movie.id" @click="selectMovie(movie)" class="movie-card bg-white rounded-2xl overflow-hidden border border-slate-200 flex flex-col shadow-sm">
-                        <div class="aspect-[3/4] bg-slate-100 relative">
+                <div class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+                    <div v-for="movie in sortedMovies" :key="movie.id" @click="selectMovie(movie)" class="movie-card rounded-2xl overflow-hidden border border-slate-200 flex flex-col shadow-sm">
+                        <div class="poster-wrapper">
                             <img :src="movie.jpImage || 'https://placehold.co/600x800?text=No+Poster'" class="w-full h-full object-cover">
-                            <div class="absolute top-3 left-3 bg-indigo-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow-lg uppercase">
-                                Year {{ movie.jpYear || 'TBA' }}
+                            <div class="absolute top-3 left-3 bg-indigo-600 text-white text-[10px] font-black px-2.5 py-1 rounded shadow-lg uppercase z-10">
+                                {{ movie.jpYear || 'TBA' }}
                             </div>
                         </div>
-                        <div class="p-4">
-                            <h3 class="font-black text-slate-900 text-sm line-clamp-1 mb-1">{{ movie.jpTitle }}</h3>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ movie.jpDate }}</p>
+                        <div class="p-5 flex-1 flex flex-col">
+                            <h3 class="font-black text-slate-900 text-[15px] leading-tight mb-2">{{ movie.jpTitle }}</h3>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-auto">{{ movie.jpDate }}</p>
                         </div>
                     </div>
                 </div>
@@ -152,14 +154,14 @@
                                 <a v-if="mappedManga" :href="generateUrl(mappedManga)" target="_blank" class="data-card bg-slate-50 rounded-[1.5rem] border border-slate-100">
                                     <div class="image-container"><img :src="mappedManga.image || 'https://placehold.co/600x400?text=No+Cover'" class="w-full h-full object-cover"></div>
                                     <div class="text-container">
-                                        <p class="font-black text-slate-900 text-lg line-clamp-1">{{ mappedManga.title }}</p>
-                                        <p v-if="mappedManga.subtitle" class="text-xs font-bold italic text-slate-500 line-clamp-1 mb-1">{{ mappedManga.subtitle }}</p>
+                                        <p class="font-black text-slate-900 text-lg leading-tight">{{ mappedManga.title }}</p>
+                                        <p v-if="mappedManga.subtitle" class="text-xs font-bold italic text-slate-500 line-clamp-2">{{ mappedManga.subtitle }}</p>
                                         <p class="text-xs font-black text-indigo-600 uppercase tracking-widest">{{ mappedManga.author }}</p>
                                     </div>
                                     <div class="hover-hint">Details</div>
                                 </a>
                                 <div v-else class="data-card bg-slate-50 rounded-[1.5rem] border-2 border-dashed border-slate-200 flex items-center justify-center opacity-60">
-                                    <p class="text-[11px] text-slate-400 font-black uppercase">No Linked Manga</p>
+                                    <p class="text-[11px] text-slate-400 font-black uppercase tracking-widest">No Linked Manga</p>
                                 </div>
                             </div>
 
@@ -168,14 +170,14 @@
                                 <a v-if="mappedFilmComic" :href="generateUrl(mappedFilmComic)" target="_blank" class="data-card bg-slate-50 rounded-[1.5rem] border border-slate-100">
                                     <div class="image-container"><img :src="mappedFilmComic.image || 'https://placehold.co/600x400?text=No+Cover'" class="w-full h-full object-cover"></div>
                                     <div class="text-container">
-                                        <p class="font-black text-slate-900 text-lg line-clamp-1">{{ mappedFilmComic.title }}</p>
-                                        <p v-if="mappedFilmComic.subtitle" class="text-xs font-bold italic text-slate-500 line-clamp-1 mb-1">{{ mappedFilmComic.subtitle }}</p>
+                                        <p class="font-black text-slate-900 text-lg leading-tight">{{ mappedFilmComic.title }}</p>
+                                        <p v-if="mappedFilmComic.subtitle" class="text-xs font-bold italic text-slate-500 line-clamp-2">{{ mappedFilmComic.subtitle }}</p>
                                         <p class="text-xs font-black text-indigo-600 uppercase tracking-widest">{{ mappedFilmComic.author }}</p>
                                     </div>
                                     <div class="hover-hint">Details</div>
                                 </a>
                                 <div v-else class="data-card bg-slate-50 rounded-[1.5rem] border-2 border-dashed border-slate-200 flex items-center justify-center opacity-60">
-                                    <p class="text-[11px] text-slate-400 font-black uppercase">No Linked Film Comic</p>
+                                    <p class="text-[11px] text-slate-400 font-black uppercase tracking-widest">No Linked Film Comic</p>
                                 </div>
                             </div>
                         </div>
@@ -189,9 +191,7 @@
         const { createApp } = Vue;
         createApp({
             data() {
-                return {
-                    loading: true, searchQuery: '', sortOrder: 'desc', movies: [], mangaCatalog: [], selectedMovie: null
-                }
+                return { loading: true, searchQuery: '', sortOrder: 'desc', movies: [], mangaCatalog: [], selectedMovie: null }
             },
             computed: {
                 sortedMovies() {
@@ -209,16 +209,13 @@
             methods: {
                 generateUrl(item) {
                     if (!item) return '#';
-                    const baseUrl = 'manga-database.html';
                     const params = new URLSearchParams();
                     params.append('region', 'JP');
                     params.append('isbn', item.isbnParam.toString().trim());
                     params.append('series', item.series.toString().trim());
-                    return `${baseUrl}?${params.toString()}`;
+                    return `manga-database.html?${params.toString()}`;
                 },
-                toggleSort() {
-                    this.sortOrder = this.sortOrder === 'desc' ? 'asc' : 'desc';
-                },
+                toggleSort() { this.sortOrder = this.sortOrder === 'desc' ? 'asc' : 'desc'; },
                 getVal(obj, key) {
                     if (!obj) return '';
                     const k = Object.keys(obj).find(x => x.trim().toLowerCase() === key.trim().toLowerCase());

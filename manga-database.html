@@ -345,13 +345,6 @@ createApp({
         async init() {
             this.loading = true;
             try {
-                // Try to load cache first so the UI isn't empty
-                const cached = localStorage.getItem('manga_db_v3');
-                if (cached) { 
-                    this.db = JSON.parse(cached); 
-                }
-        
-                // Fetch fresh data
                 const [hk, jp, contents, master] = await Promise.all([
                     fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json()),
                     fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP").then(r => r.json()),
@@ -359,57 +352,64 @@ createApp({
                     fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json())
                 ]);
         
+                // Assign data
                 this.db = { hk, jp, contents, master };
-                localStorage.setItem('manga_db_v3', JSON.stringify(this.db));
                 
-                // CRITICAL: Check URL only after fresh data is in this.db
-                this.checkUrlParameters();
+                // Save to cache
+                localStorage.setItem('manga_db_v3', JSON.stringify(this.db));
         
-            } catch (e) { 
-                console.error("Sync Error:", e); 
-            } finally { 
-                this.loading = false; 
+                // FORCE mobile to wait a millisecond for Vue to react
+                setTimeout(() => {
+                    this.checkUrlParameters();
+                    this.loading = false;
+                }, 100);
+        
+            } catch (e) {
+                console.error("Fetch failed", e);
+                this.loading = false;
             }
         },
         checkUrlParameters() {
-            // 1. Get the raw search string directly from the window
-            let searchString = window.location.search;
+            // 1. Get the actual string from the address bar manually
+            const fullUrl = window.location.href;
+            const queryString = fullUrl.substring(fullUrl.indexOf('?') + 1);
             
-            // Fallback: If mobile stripped the '?', check the hash '#' (sometimes happens on redirects)
-            if (!searchString && window.location.hash.includes('?')) {
-                searchString = window.location.hash.substring(window.location.hash.indexOf('?'));
+            // If no '?' is found, queryString will be the full URL, so we check:
+            if (!fullUrl.includes('?')) {
+                this.debugInfo.urlIsbn = 'NO QUERY IN ADDR';
+                return;
             }
         
-            const urlParams = new URLSearchParams(searchString);
-            
-            // 2. Capture and Clean with extra fallback
-            const rawRegion = urlParams.get('region');
-            const rawIsbn = urlParams.get('isbn');
-            const rawSeries = urlParams.get('series');
+            // 2. Manually parse the pairs
+            const pairs = queryString.split('&');
+            let params = {};
+            pairs.forEach(pair => {
+                const [key, value] = pair.split('=');
+                if (key) params[key.toLowerCase()] = decodeURIComponent(value || '');
+            });
         
-            this.debugInfo.urlRegion = (rawRegion || '').toUpperCase().trim();
-            this.debugInfo.urlIsbn = (rawIsbn || '').toString().trim();
-            this.debugInfo.urlSeries = (rawSeries || '').trim();
+            // 3. Update Debugger with what we manually found
+            this.debugInfo.urlRegion = (params.region || '').toUpperCase().trim();
+            this.debugInfo.urlIsbn = (params.isbn || '').toString().trim();
+            this.debugInfo.urlSeries = (params.series || '').trim();
         
             const cleanIsbn = this.debugInfo.urlIsbn.replace(/\D/g, '');
-        
-            // 3. Log to console for remote debugging
-            console.log("Detecting Params:", { region: rawRegion, isbn: rawIsbn, series: rawSeries });
         
             // 4. Set Region
             if (this.debugInfo.urlRegion === 'JP' || this.debugInfo.urlRegion === 'HK') {
                 this.region = this.debugInfo.urlRegion;
             }
         
-            // 5. Search for Book
-            if (cleanIsbn) {
+            // 5. Search Logic (Ensure db is populated)
+            if (cleanIsbn && this.db.hk.length > 0) {
                 const book = this.db.hk.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanIsbn) || 
                              this.db.jp.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanIsbn);
                 
                 if (book) {
                     this.selectedBook = book;
-                    this.selectedSeries = (this.region === 'HK' ? book.Title : book.類) || this.debugInfo.urlSeries;
+                    this.selectedSeries = (this.region === 'HK' ? (book.Title || book.類) : (book.類 || book.標題));
                     this.view = 'detail';
+                    console.log("Match Found via Manual Parse!");
                     return;
                 }
             } 
@@ -419,8 +419,6 @@ createApp({
                 this.view = 'books';
             } else {
                 this.view = 'series';
-                this.selectedBook = null;
-                this.selectedSeries = null;
             }
         },
         updateView(newView, params = {}) {

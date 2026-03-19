@@ -121,7 +121,7 @@
 
             <main v-else key="detail" class="max-w-[1920px] mx-auto px-6 pt-6 pb-20">
                 <div class="mb-6">
-                    <button @click="selectedMovie = null" class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-all">
+                    <button @click="closeDetail" class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-all">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg>
                         Back to List
                     </button>
@@ -258,7 +258,18 @@
                 },
                 selectMovie(m) { 
                     this.selectedMovie = m; 
-                    window.scrollTo({ top: 0, behavior: 'smooth' }); 
+                    // Wait for Vue to render the Detail View before scrolling
+                    this.$nextTick(() => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                },
+            
+                closeDetail() {
+                    this.selectedMovie = null;
+                    // Wait for Vue to render the Grid View before scrolling
+                    this.$nextTick(() => {
+                        window.scrollTo(0, 0); // Instant jump is usually better for 'Back'
+                    });
                 },
                 async init() {
                     try {

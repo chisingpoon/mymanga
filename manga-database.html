@@ -20,7 +20,7 @@
             .responsive-table tr { display: block; margin-bottom: 1.5rem; border: 1px solid #e2e8f0; border-radius: 1.5rem; background: white; padding: 1.25rem; }
             .responsive-table td { display: block; width: 100% !important; padding: 0.75rem 0 !important; border: none !important; text-align: left !important; }
             .responsive-table td::before { content: attr(data-label); display: block; font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
-        .detail-view img {
+            .detail-view img {
                 max-width: 180px !important;
                 margin: 1.5rem auto !important; /* Centers the cover */
                 display: block;
@@ -46,6 +46,11 @@
                 width: 100%;
                 margin-bottom: 1rem;
                 padding: 0.75rem;
+            }
+
+            .detail-view td, .detail-view th {
+                padding: 12px 8px !important; /* Larger touch targets for mobile fingers */
+                font-size: 0.85rem; /* Slightly smaller text to prevent wrapping */
             }
         }
 

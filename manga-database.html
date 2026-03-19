@@ -372,23 +372,37 @@ createApp({
             }
         },
         checkUrlParameters() {
-            const urlParams = new URLSearchParams(window.location.search);
+            // 1. Get the raw search string directly from the window
+            let searchString = window.location.search;
             
-            // 1. Capture and Clean
-            this.debugInfo.urlRegion = (urlParams.get('region') || '').toUpperCase().trim();
-            this.debugInfo.urlIsbn = (urlParams.get('isbn') || '').toString().trim();
-            this.debugInfo.urlSeries = (urlParams.get('series') || '').trim();
+            // Fallback: If mobile stripped the '?', check the hash '#' (sometimes happens on redirects)
+            if (!searchString && window.location.hash.includes('?')) {
+                searchString = window.location.hash.substring(window.location.hash.indexOf('?'));
+            }
+        
+            const urlParams = new URLSearchParams(searchString);
+            
+            // 2. Capture and Clean with extra fallback
+            const rawRegion = urlParams.get('region');
+            const rawIsbn = urlParams.get('isbn');
+            const rawSeries = urlParams.get('series');
+        
+            this.debugInfo.urlRegion = (rawRegion || '').toUpperCase().trim();
+            this.debugInfo.urlIsbn = (rawIsbn || '').toString().trim();
+            this.debugInfo.urlSeries = (rawSeries || '').trim();
         
             const cleanIsbn = this.debugInfo.urlIsbn.replace(/\D/g, '');
         
-            // 2. Set Region
+            // 3. Log to console for remote debugging
+            console.log("Detecting Params:", { region: rawRegion, isbn: rawIsbn, series: rawSeries });
+        
+            // 4. Set Region
             if (this.debugInfo.urlRegion === 'JP' || this.debugInfo.urlRegion === 'HK') {
                 this.region = this.debugInfo.urlRegion;
             }
         
-            // 3. Try to find the book
+            // 5. Search for Book
             if (cleanIsbn) {
-                // We log exactly what we are searching for
                 const book = this.db.hk.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanIsbn) || 
                              this.db.jp.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanIsbn);
                 
@@ -400,7 +414,6 @@ createApp({
                 }
             } 
         
-            // 4. Fallback
             if (this.debugInfo.urlSeries) {
                 this.selectedSeries = this.debugInfo.urlSeries;
                 this.view = 'books';

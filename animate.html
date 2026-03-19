@@ -208,31 +208,43 @@
             },
             methods: {
                 generateUrl(item) {
-                    if (!item) return '#';
-                    const params = new URLSearchParams();
-                    params.append('region', 'JP');
-                    params.append('isbn', item.isbnParam.toString().trim());
-                    params.append('series', item.series.toString().trim());
-                    return `manga-database.html?${params.toString()}`;
-                },
-                toggleSort() { this.sortOrder = this.sortOrder === 'desc' ? 'asc' : 'desc'; },
-                getVal(obj, key) {
-                    if (!obj) return '';
-                    const k = Object.keys(obj).find(x => x.trim().toLowerCase() === key.trim().toLowerCase());
-                    return k ? obj[k] : '';
+                        if (!item) return '#';
+                        
+                        // 1. Clean the data: Remove any leading/trailing whitespace or hidden newlines
+                        const cleanIsbn = item.isbnParam ? item.isbnParam.toString().trim() : '';
+                        const cleanSeries = item.series ? item.series.toString().trim() : '';
+                        const cleanRegion = 'JP';
+                
+                        // 2. Construct using URLSearchParams for "Standard" encoding
+                        const params = new URLSearchParams();
+                        params.append('region', cleanRegion);
+                        params.append('isbn', cleanIsbn);
+                        params.append('series', cleanSeries);
+                
+                        // 3. Return the absolute clean URL
+                        return `manga-database.html?${params.toString()}`;
                 },
                 lookup(isbn) {
-                    if (!isbn) return null;
-                    const cleanIsbn = isbn.toString().replace(/[-\s]/g, '');
-                    const found = this.mangaCatalog.find(item => {
-                        const iIsbn = (this.getVal(item, 'ISBN') || '').toString().replace(/[-\s]/g, '');
-                        return iIsbn === cleanIsbn && iIsbn !== "";
-                    });
-                    return found ? {
-                        title: this.getVal(found, '標題'), subtitle: this.getVal(found, '副標題'),
-                        author: this.getVal(found, '著'), series: this.getVal(found, '類'),
-                        image: this.getVal(found, 'image'), isbnParam: this.getVal(found, 'ISBN').trim()
-                    } : null;
+                        if (!isbn) return null;
+                        const cleanIsbn = isbn.toString().replace(/[-\s]/g, '').trim();
+                        
+                        const found = this.mangaCatalog.find(item => {
+                            const iIsbn = (this.getVal(item, 'ISBN') || '').toString().replace(/[-\s]/g, '').trim();
+                            return iIsbn === cleanIsbn && iIsbn !== "";
+                        });
+                
+                        if (found) {
+                            return {
+                                title: this.getVal(found, '標題'),
+                                subtitle: this.getVal(found, '副標題'),
+                                author: this.getVal(found, '著'),
+                                // Ensure series and isbnParam are specifically trimmed here
+                                series: (this.getVal(found, '類') || '').trim(),
+                                isbnParam: (this.getVal(found, 'ISBN') || '').trim(),
+                                image: this.getVal(found, 'image')
+                            };
+                        }
+                        return null;
                 },
                 selectMovie(m) { this.selectedMovie = m; window.scrollTo({ top: 0, behavior: 'smooth' }); },
                 async init() {

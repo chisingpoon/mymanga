@@ -191,62 +191,75 @@
         const { createApp } = Vue;
         createApp({
             data() {
-                return { loading: true, searchQuery: '', sortOrder: 'desc', movies: [], mangaCatalog: [], selectedMovie: null }
+                return {
+                    loading: true, 
+                    searchQuery: '', 
+                    sortOrder: 'desc', 
+                    movies: [], 
+                    mangaCatalog: [], 
+                    selectedMovie: null
+                }
             },
             computed: {
                 sortedMovies() {
                     let filtered = this.movies;
-                    if (this.searchQuery) filtered = this.movies.filter(m => m.searchStr.includes(this.searchQuery.toLowerCase()));
+                    if (this.searchQuery) {
+                        filtered = this.movies.filter(m => m.searchStr.includes(this.searchQuery.toLowerCase()));
+                    }
                     return [...filtered].sort((a, b) => {
                         const yA = parseInt(a.jpYear) || 0;
                         const yB = parseInt(b.jpYear) || 0;
                         return this.sortOrder === 'asc' ? yA - yB : yB - yA;
                     });
                 },
-                mappedManga() { return this.lookup(this.selectedMovie?.mangaRaw); },
-                mappedFilmComic() { return this.lookup(this.selectedMovie?.filmComicRaw); }
+                mappedManga() { 
+                    return this.lookup(this.selectedMovie?.mangaRaw); 
+                },
+                mappedFilmComic() { 
+                    return this.lookup(this.selectedMovie?.filmComicRaw); 
+                }
             },
             methods: {
                 generateUrl(item) {
-                        if (!item) return '#';
-                        
-                        // 1. Clean the data: Remove any leading/trailing whitespace or hidden newlines
-                        const cleanIsbn = item.isbnParam ? item.isbnParam.toString().trim() : '';
-                        const cleanSeries = item.series ? item.series.toString().trim() : '';
-                        const cleanRegion = 'JP';
-                
-                        // 2. Construct using URLSearchParams for "Standard" encoding
-                        const params = new URLSearchParams();
-                        params.append('region', cleanRegion);
-                        params.append('isbn', cleanIsbn);
-                        params.append('series', cleanSeries);
-                
-                        // 3. Return the absolute clean URL
-                        return `manga-database.html?${params.toString()}`;
+                    if (!item) return '#';
+                    const params = new URLSearchParams();
+                    // We use .trim() to ensure no hidden spaces/underscores break the mobile link
+                    params.append('region', 'JP');
+                    params.append('isbn', (item.isbnParam || '').toString().trim());
+                    params.append('series', (item.series || '').toString().trim());
+                    return `manga-database.html?${params.toString()}`;
+                },
+                toggleSort() { 
+                    this.sortOrder = this.sortOrder === 'desc' ? 'asc' : 'desc'; 
+                },
+                getVal(obj, key) {
+                    if (!obj) return '';
+                    const k = Object.keys(obj).find(x => x.trim().toLowerCase() === key.trim().toLowerCase());
+                    return k ? obj[k] : '';
                 },
                 lookup(isbn) {
-                        if (!isbn) return null;
-                        const cleanIsbn = isbn.toString().replace(/[-\s]/g, '').trim();
-                        
-                        const found = this.mangaCatalog.find(item => {
-                            const iIsbn = (this.getVal(item, 'ISBN') || '').toString().replace(/[-\s]/g, '').trim();
-                            return iIsbn === cleanIsbn && iIsbn !== "";
-                        });
-                
-                        if (found) {
-                            return {
-                                title: this.getVal(found, '標題'),
-                                subtitle: this.getVal(found, '副標題'),
-                                author: this.getVal(found, '著'),
-                                // Ensure series and isbnParam are specifically trimmed here
-                                series: (this.getVal(found, '類') || '').trim(),
-                                isbnParam: (this.getVal(found, 'ISBN') || '').trim(),
-                                image: this.getVal(found, 'image')
-                            };
-                        }
-                        return null;
+                    if (!isbn) return null;
+                    const cleanIsbn = isbn.toString().replace(/[-\s]/g, '').trim();
+                    const found = this.mangaCatalog.find(item => {
+                        const iIsbn = (this.getVal(item, 'ISBN') || '').toString().replace(/[-\s]/g, '').trim();
+                        return iIsbn === cleanIsbn && iIsbn !== "";
+                    });
+                    if (found) {
+                        return {
+                            title: this.getVal(found, '標題'),
+                            subtitle: this.getVal(found, '副標題'),
+                            author: this.getVal(found, '著'),
+                            series: (this.getVal(found, '類') || '').trim(),
+                            image: this.getVal(found, 'image'),
+                            isbnParam: (this.getVal(found, 'ISBN') || '').trim()
+                        };
+                    }
+                    return null;
                 },
-                selectMovie(m) { this.selectedMovie = m; window.scrollTo({ top: 0, behavior: 'smooth' }); },
+                selectMovie(m) { 
+                    this.selectedMovie = m; 
+                    window.scrollTo({ top: 0, behavior: 'smooth' }); 
+                },
                 async init() {
                     try {
                         const [mRes, catalogRes] = await Promise.all([
@@ -259,19 +272,30 @@
                             const rawDate = this.getVal(i, 'JP Release Date').toString();
                             const yearMatch = rawDate.match(/\d{4}/);
                             return {
-                                id: this.getVal(i, 'Media ID'), jpTitle: this.getVal(i, 'JP Title'),
-                                hkTitle: this.getVal(i, 'HK Title'), enTitle: this.getVal(i, 'EN Title'),
-                                jpDate: rawDate, jpYear: yearMatch ? yearMatch[0] : '',
+                                id: this.getVal(i, 'Media ID'),
+                                jpTitle: this.getVal(i, 'JP Title'),
+                                hkTitle: this.getVal(i, 'HK Title'),
+                                enTitle: this.getVal(i, 'EN Title'),
+                                jpDate: rawDate,
+                                jpYear: yearMatch ? yearMatch[0] : '',
                                 hkDate: this.getVal(i, 'HK Release Date').toString(),
-                                jpImage: this.getVal(i, 'JP Image'), hkImage: this.getVal(i, 'HK Image'),
-                                mangaRaw: this.getVal(i, 'Manga ISBN'), filmComicRaw: this.getVal(i, 'Film Comics'),
+                                jpImage: this.getVal(i, 'JP Image'),
+                                hkImage: this.getVal(i, 'HK Image'),
+                                mangaRaw: this.getVal(i, 'Manga ISBN'),
+                                filmComicRaw: this.getVal(i, 'Film Comics'),
                                 searchStr: `${this.getVal(i, 'JP Title')} ${this.getVal(i, 'HK Title')}`.toLowerCase()
                             };
                         });
-                    } catch (e) { console.error(e); } finally { this.loading = false; }
+                    } catch (e) { 
+                        console.error("Initialization Error:", e); 
+                    } finally { 
+                        this.loading = false; 
+                    }
                 }
             },
-            mounted() { this.init(); }
+            mounted() { 
+                this.init(); 
+            }
         }).mount('#app')
     </script>
 </body>

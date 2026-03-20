@@ -33,11 +33,17 @@
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         td { padding: 16px 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; }
 
-        .manga-link { display: inline-flex; flex-direction: column; gap: 2px; background: #4f46e5; color: white !important; padding: 8px 12px; border-radius: 8px; font-size: 10px; font-weight: 700; text-decoration: none !important; transition: 0.2s; min-width: 140px; line-height: 1.3; }
-        .manga-link .label-main { font-weight: 900; font-size: 11px; }
-        .manga-link:hover { background: #4338ca; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+        .manga-link { display: inline-flex; flex-direction: column; background: #4f46e5; color: white !important; padding: 8px 12px; border-radius: 10px; font-size: 10px; text-decoration: none !important; transition: 0.2s; min-width: 160px; line-height: 1.2; }
+        .manga-link .title-row { font-weight: 900; font-size: 12px; margin-bottom: 2px; }
+        .manga-link .sub-row { opacity: 0.85; font-weight: 500; font-size: 10px; }
+        .manga-link:hover { background: #4338ca; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
         
-        .movie-link { color: #0891b2; font-weight: 800; text-decoration: none; border-bottom: 1px dashed #0891b2; }
+        .movie-link { display: block; color: #0891b2; font-weight: 800; text-decoration: none; line-height: 1.3; }
+        .movie-link:hover { color: #0e7490; text-decoration: underline; }
+
+        .search-container { position: relative; max-width: 600px; }
+        .clear-search-btn { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; padding: 4px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .clear-search-btn:hover { background: #fee2e2; color: #ef4444; }
 
         .type-badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; text-transform: uppercase; }
         .badge-char { background: #dcfce7; color: #166534; }
@@ -66,9 +72,14 @@
         </nav>
 
         <main class="max-w-[1920px] mx-auto px-6 pt-10">
-            <div class="mb-8 max-w-2xl">
+            <div class="mb-8">
                 <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Global Search</label>
-                <input type="text" v-model="searchQuery" placeholder="Search Names, Movies, Translations..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 text-base font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
+                <div class="search-container">
+                    <input type="text" v-model="searchQuery" placeholder="Search Names, Movies, Translations..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-base font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
+                    <div v-if="searchQuery" @click="searchQuery = ''" class="clear-search-btn">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </div>
+                </div>
             </div>
 
             <div class="main-card">
@@ -78,8 +89,9 @@
                             <tr>
                                 <th>Type</th>
                                 <th>Titles (JP / HK)</th>
-                                <th>譯名 (文傳 / 青文)</th>
-                                <th>Movie Ref</th>
+                                <th>HK Translation</th>
+                                <th>Japan Release</th>
+                                <th>Movie Reference</th>
                                 <th>Original Manga</th>
                                 <th class="w-1/4">Description</th>
                             </tr>
@@ -99,17 +111,21 @@
                                     <div>文傳: {{ row['CultureCom Trans'] || '-' }}</div>
                                     <div>青文: {{ row['HKChingWin Trans'] || '-' }}</div>
                                 </td>
+                                <td class="text-[13px] font-bold text-slate-600 whitespace-nowrap">
+                                    {{ getMovieData(row['Movie ID'], 'Japan Release Date') }}
+                                </td>
                                 <td>
-                                    <a :href="'movie.html?id=' + row['Movie ID']" class="movie-link text-[13px]">
-                                        {{ row['Movie ID'] }}
+                                    <a :href="'movie.html?mediaid=' + getMovieData(row['Movie ID'], 'Media ID')" class="movie-link text-[13px]">
+                                        <div class="text-slate-900">{{ getMovieData(row['Movie ID'], 'JP Title') }}</div>
+                                        <div class="text-[11px] opacity-70">{{ getMovieData(row['Movie ID'], 'HK Title') }}</div>
                                     </a>
                                 </td>
                                 <td>
                                     <a v-if="m = getMapping(row['Work ID'])" 
                                        :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
                                        target="_blank" class="manga-link">
-                                        <span class="label-main">{{ m.fullLabel }}</span>
-                                        <span class="opacity-70 text-[9px]">{{ m.hkIsbn }}</span>
+                                        <span class="title-row">{{ m.title }}</span>
+                                        <span class="sub-row">{{ m.sub }}</span>
                                     </a>
                                     <span v-else class="text-slate-300 text-[11px] font-bold italic">No Manga Ref</span>
                                 </td>
@@ -152,6 +168,7 @@
                     itemsPerPage: 40,
                     showScrollBtn: false,
                     characters: [],
+                    movies: [],
                     contents: [],
                     publishHk: []
                 }
@@ -160,19 +177,8 @@
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
                     return this.characters.filter(r => {
-                        // Movie ID Filter
                         if (!r['Movie ID'] || r['Movie ID'] === "-") return false;
-                        
-                        // Enhanced Search Logic (including CC and CW translations)
-                        const searchFields = [
-                            r['JP Title'], 
-                            r['HK Title'], 
-                            r['Movie ID'], 
-                            r['Description'],
-                            r['CultureCom Trans'],
-                            r['HKChingWin Trans']
-                        ].join(' ').toLowerCase();
-                        
+                        const searchFields = [r['JP Title'], r['HK Title'], r['Movie ID'], r['Description'], r['CultureCom Trans'], r['HKChingWin Trans']].join(' ').toLowerCase();
                         return !q || searchFields.includes(q);
                     });
                 },
@@ -192,20 +198,24 @@
             methods: {
                 async init() {
                     try {
-                        const [c, s, h] = await Promise.all([
+                        const [c, m, s, h] = await Promise.all([
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/人物").then(r => r.json()),
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/電影動畫").then(r => r.json()),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
                         ]);
-                        this.characters = c; this.contents = s; this.publishHk = h;
+                        this.characters = c; this.movies = m; this.contents = s; this.publishHk = h;
                         this.loading = false;
                         window.addEventListener('scroll', () => { this.showScrollBtn = window.scrollY > 400; });
                     } catch (e) { console.error("Fetch Error:", e); }
                 },
+                getMovieData(movieId, field) {
+                    const movie = this.movies.find(m => m['Media ID'] === movieId);
+                    return movie ? movie[field] : (field === 'Media ID' ? movieId : '-');
+                },
                 getMapping(workId) {
                     if(!workId || workId === "-") return null;
                     const idStr = workId.toString().trim();
-                    
                     const match = this.contents.find(item => item.作品番?.toString().trim() === idStr);
                     if (!match || !match.ISBN) return null;
                     
@@ -213,19 +223,12 @@
                     const hkMatches = this.publishHk.filter(h => h.ISBN_JP?.trim() === isbnJp);
                     if (hkMatches.length === 0) return null;
                     
-                    // Sort by date to get latest
                     const latestHk = hkMatches.sort((a, b) => new Date(b.IssueDate || 0) - new Date(a.IssueDate || 0))[0];
                     
-                    // Format Label: Title & Volume & Subtitle
-                    const labelParts = [
-                        latestHk.Title,
-                        latestHk.Volume ? ` Vol.${latestHk.Volume}` : '',
-                        latestHk.Subtitle ? ` (${latestHk.Subtitle})` : ''
-                    ].filter(Boolean).join('');
-
                     return { 
                         hkIsbn: latestHk.ISBN,
-                        fullLabel: labelParts || latestHk.ISBN 
+                        title: latestHk.Title,
+                        sub: (latestHk.Volume ? `Vol.${latestHk.Volume} ` : '') + (latestHk.Subtitle || '')
                     };
                 },
                 changePage(p) { this.currentPage = p; this.scrollToTop(); },

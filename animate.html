@@ -125,8 +125,15 @@
         .poster-wrapper { position: relative; overflow: hidden; aspect-ratio: 3/4; background: #f1f5f9; }
         .movie-card:hover .poster-wrapper img { transform: scale(1.08); }
        
-        .hint-jp { background-color: #4f46e5; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4); }
-        .hint-hk { background-color: #be123c; box-shadow: 0 4px 12px rgba(190, 18, 60, 0.4); }
+        .hint-jp, .bg-jp-active { 
+            background-color: #4f46e5 !important; 
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4); 
+        }
+        .hint-hk, .bg-hk-active { 
+            background-color: #be123c !important; 
+            box-shadow: 0 4px 12px rgba(190, 18, 60, 0.4); 
+        }
+        .toggle-btn.active { color: white; }
     </style>
 </head>
 <body class="bg-grid">
@@ -209,8 +216,12 @@
                                 <div class="badge-base glass-panel">原作/改編漫畫</div>
                                 <div v-if="mappedManga" class="data-card border-slate-100">
                                     <div v-if="mappedManga.hasHk" class="toggle-container glass-panel">
-                                        <button @click.stop.prevent="mangaTab = 'JP'" :class="mangaTab === 'JP' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="toggle-btn">JP</button>
-                                        <button @click.stop.prevent="mangaTab = 'HK'" :class="mangaTab === 'HK' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="toggle-btn">HK</button>
+                                        <button @click.stop.prevent="mangaTab = 'JP'" 
+                                                :class="mangaTab === 'JP' ? 'bg-jp-active active' : 'text-slate-400'" 
+                                                class="toggle-btn">JP</button>
+                                        <button @click.stop.prevent="mangaTab = 'HK'" 
+                                                :class="mangaTab === 'HK' ? 'bg-hk-active active' : 'text-slate-400'" 
+                                                class="toggle-btn">HK</button>
                                     </div>
                                     <a :href="generateUrl(mappedManga.current)" target="_blank" :key="mangaTab" class="flex flex-col h-full fade-content">
                                         <div class="image-container"><img :src="mappedManga.current.image" class="w-full h-full object-cover"></div>
@@ -220,7 +231,6 @@
                                             <p class="text-[10px] font-black text-indigo-600 uppercase tracking-widest mt-auto pt-2">{{ mappedManga.current.author }}</p>
                                         </div>
                                     </a>
-                                    <!-- Dynamic Color Hint -->
                                     <div class="hover-hint flex items-center gap-2" :class="mangaTab === 'JP' ? 'hint-jp' : 'hint-hk'">
                                         <span>{{ mangaTab === 'JP' ? '🇯🇵 View JP Detail' : '🇭🇰 查看香港版本' }}</span>
                                     </div>
@@ -235,8 +245,12 @@
                                 <div class="badge-base glass-panel">電影漫畫</div>
                                 <div v-if="mappedFilmComic" class="data-card border-slate-100">
                                     <div v-if="mappedFilmComic.hasHk" class="toggle-container glass-panel">
-                                        <button @click.stop.prevent="fcTab = 'JP'" :class="fcTab === 'JP' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="toggle-btn">JP</button>
-                                        <button @click.stop.prevent="fcTab = 'HK'" :class="fcTab === 'HK' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="toggle-btn">HK</button>
+                                        <button @click.stop.prevent="fcTab = 'JP'" 
+                                                :class="fcTab === 'JP' ? 'bg-jp-active active' : 'text-slate-400'" 
+                                                class="toggle-btn">JP</button>
+                                        <button @click.stop.prevent="fcTab = 'HK'" 
+                                                :class="fcTab === 'HK' ? 'bg-hk-active active' : 'text-slate-400'" 
+                                                class="toggle-btn">HK</button>
                                     </div>
                                     <a :href="generateUrl(mappedFilmComic.current)" target="_blank" :key="fcTab" class="flex flex-col h-full fade-content">
                                         <div class="image-container"><img :src="mappedFilmComic.current.image" class="w-full h-full object-cover"></div>
@@ -246,7 +260,6 @@
                                             <p class="text-[10px] font-black text-indigo-600 uppercase tracking-widest mt-auto pt-2">{{ mappedFilmComic.current.author }}</p>
                                         </div>
                                     </a>
-                                    <!-- Dynamic Color Hint -->
                                     <div class="hover-hint flex items-center gap-2" :class="fcTab === 'JP' ? 'hint-jp' : 'hint-hk'">
                                         <span>{{ fcTab === 'JP' ? '🇯🇵 View JP Detail' : '🇭🇰 查看香港版本' }}</span>
                                     </div>

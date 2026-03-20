@@ -26,10 +26,10 @@
         th { font-size: 11px; font-weight: 800; padding: 16px 12px; text-align: left; color: #64748b; background: #f8fafc; border-bottom: 2px solid #e2e8f0; white-space: nowrap; position: sticky; top: 0; z-index: 10; text-transform: uppercase; }
         td { padding: 14px 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; background: white; }
 
-        /* Fixed Sticky Logic */
+        /* Sticky Columns with no border between col 2 and 3 */
         @media (min-width: 1280px) {
             .sticky-col-1 { position: sticky; left: 0; z-index: 20; width: 80px; min-width: 80px; }
-            .sticky-col-2 { position: sticky; left: 80px; z-index: 20; border-right: 1px solid #e2e8f0; }
+            .sticky-col-2 { position: sticky; left: 80px; z-index: 20; }
             th.sticky-col-1, th.sticky-col-2 { background: #f8fafc; z-index: 40; }
         }
 
@@ -44,7 +44,6 @@
 </head>
 <body class="bg-grid" oncontextmenu="return false;">
     <div id="app" v-cloak>
-        <!-- Loader -->
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
             <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Syncing Master Archive...</p>
@@ -66,7 +65,6 @@
         </nav>
 
         <main class="max-w-[1920px] mx-auto px-6 pt-10">
-            <!-- Filter Section -->
             <div class="mb-10">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-4xl font-black text-slate-900">Archive</h2>
@@ -84,7 +82,6 @@
                 </div>
             </div>
 
-            <!-- Table Card -->
             <div class="main-card">
                 <div class="p-6 border-b border-slate-100 flex items-center justify-between gap-4">
                     <div class="relative w-full max-w-xl">
@@ -120,7 +117,6 @@
                                     <div class="text-indigo-600 text-[11px] font-black">{{ getSubtitleInfo(row.作品番).hkSub }}</div>
                                 </td>
 
-                                <!-- 45 Vols Column -->
                                 <td>
                                     <div class="flex flex-col gap-2">
                                         <template v-for="t in ['45卷', 'プラス', 'カラー作品集']">
@@ -134,7 +130,6 @@
                                     </div>
                                 </td>
 
-                                <!-- Daizenshu Column -->
                                 <td>
                                     <a v-if="m = getMapping(row.作品番, ['大全集', '大長編大全集'])" 
                                        :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" target="_blank" 
@@ -144,7 +139,6 @@
                                     </a>
                                 </td>
 
-                                <!-- Others Column -->
                                 <td>
                                     <div class="flex flex-col gap-2">
                                         <template v-for="type in ['0卷', 'ドラミちゃん', '文庫版', 'とっておき']">
@@ -170,7 +164,6 @@
                     </table>
                 </div>
 
-                <!-- Pagination -->
                 <div class="bg-slate-50 p-8 flex justify-center border-t border-slate-100">
                     <div class="flex gap-2">
                         <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" 

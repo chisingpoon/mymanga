@@ -33,11 +33,11 @@
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         td { padding: 16px 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; }
 
-        .manga-link { display: inline-flex; align-items: center; gap: 6px; background: #4f46e5; color: white !important; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; text-decoration: none !important; transition: 0.2s; }
-        .manga-link:hover { background: #4338ca; transform: translateY(-1px); }
+        .manga-link { display: inline-flex; flex-direction: column; gap: 2px; background: #4f46e5; color: white !important; padding: 8px 12px; border-radius: 8px; font-size: 10px; font-weight: 700; text-decoration: none !important; transition: 0.2s; min-width: 140px; line-height: 1.3; }
+        .manga-link .label-main { font-weight: 900; font-size: 11px; }
+        .manga-link:hover { background: #4338ca; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
         
-        .movie-link { color: #0891b2; font-weight: 800; text-decoration: none; border-bottom: 1px dashed #0891b2; transition: 0.2s; }
-        .movie-link:hover { color: #0e7490; border-bottom-style: solid; }
+        .movie-link { color: #0891b2; font-weight: 800; text-decoration: none; border-bottom: 1px dashed #0891b2; }
 
         .type-badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; text-transform: uppercase; }
         .badge-char { background: #dcfce7; color: #166534; }
@@ -51,7 +51,7 @@
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Loading Archive Data...</p>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Syncing Movie Archive...</p>
         </div>
 
         <nav class="top-nav">
@@ -66,10 +66,9 @@
         </nav>
 
         <main class="max-w-[1920px] mx-auto px-6 pt-10">
-            <!-- Search -->
             <div class="mb-8 max-w-2xl">
                 <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Global Search</label>
-                <input type="text" v-model="searchQuery" placeholder="Search Names, Movies, or Descriptions..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 text-base font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
+                <input type="text" v-model="searchQuery" placeholder="Search Names, Movies, Translations..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 text-base font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
             </div>
 
             <div class="main-card">
@@ -79,10 +78,10 @@
                             <tr>
                                 <th>Type</th>
                                 <th>Titles (JP / HK)</th>
-                                <th>Trans (CC / CW)</th>
+                                <th>譯名 (文傳 / 青文)</th>
                                 <th>Movie Ref</th>
                                 <th>Original Manga</th>
-                                <th class="w-1/3">Description</th>
+                                <th class="w-1/4">Description</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -97,8 +96,8 @@
                                     <div class="text-indigo-600 text-[13px] tracking-tight">{{ row['HK Title'] }}</div>
                                 </td>
                                 <td class="text-[12px] font-bold text-slate-500">
-                                    <div>CC: {{ row['CultureCom Trans'] || '-' }}</div>
-                                    <div>CW: {{ row['HKChingWin Trans'] || '-' }}</div>
+                                    <div>文傳: {{ row['CultureCom Trans'] || '-' }}</div>
+                                    <div>青文: {{ row['HKChingWin Trans'] || '-' }}</div>
                                 </td>
                                 <td>
                                     <a :href="'movie.html?id=' + row['Movie ID']" class="movie-link text-[13px]">
@@ -109,9 +108,10 @@
                                     <a v-if="m = getMapping(row['Work ID'])" 
                                        :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
                                        target="_blank" class="manga-link">
-                                        📖 {{ m.hkIsbn }}
+                                        <span class="label-main">{{ m.fullLabel }}</span>
+                                        <span class="opacity-70 text-[9px]">{{ m.hkIsbn }}</span>
                                     </a>
-                                    <span v-else class="text-slate-300 text-[11px] font-bold">No Manga Link</span>
+                                    <span v-else class="text-slate-300 text-[11px] font-bold italic">No Manga Ref</span>
                                 </td>
                                 <td class="text-slate-500 text-[13px] leading-relaxed italic">
                                     {{ row['Description'] }}
@@ -121,7 +121,6 @@
                     </table>
                 </div>
 
-                <!-- Pagination -->
                 <div class="bg-slate-50 p-6 flex flex-col md:flex-row items-center justify-between border-t border-slate-200 gap-4">
                     <div class="text-[11px] font-black uppercase text-slate-400 tracking-widest">
                         Page {{ currentPage }} / {{ totalPages }} ({{ filteredData.length }} Entries)
@@ -129,7 +128,7 @@
                     <div class="flex gap-2">
                         <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" 
                                 :class="p === currentPage ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-400 border border-slate-200'" 
-                                class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xs transition-all">
+                                class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xs">
                             {{ p }}
                         </button>
                     </div>
@@ -161,11 +160,20 @@
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
                     return this.characters.filter(r => {
-                        // Filter: Movie ID must not be empty
+                        // Movie ID Filter
                         if (!r['Movie ID'] || r['Movie ID'] === "-") return false;
                         
-                        const combined = [r['JP Title'], r['HK Title'], r['Movie ID'], r['Description']].join(' ').toLowerCase();
-                        return !q || combined.includes(q);
+                        // Enhanced Search Logic (including CC and CW translations)
+                        const searchFields = [
+                            r['JP Title'], 
+                            r['HK Title'], 
+                            r['Movie ID'], 
+                            r['Description'],
+                            r['CultureCom Trans'],
+                            r['HKChingWin Trans']
+                        ].join(' ').toLowerCase();
+                        
+                        return !q || searchFields.includes(q);
                     });
                 },
                 totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
@@ -198,19 +206,27 @@
                     if(!workId || workId === "-") return null;
                     const idStr = workId.toString().trim();
                     
-                    // 1. Match 'Work ID' against '作品番' in 書籍收錄作品
                     const match = this.contents.find(item => item.作品番?.toString().trim() === idStr);
                     if (!match || !match.ISBN) return null;
                     
                     const isbnJp = match.ISBN.trim();
-                    
-                    // 2. Match ISBN against ISBN_JP in 出版目録HK
                     const hkMatches = this.publishHk.filter(h => h.ISBN_JP?.trim() === isbnJp);
                     if (hkMatches.length === 0) return null;
                     
-                    // 3. Pick latest by IssueDate
+                    // Sort by date to get latest
                     const latestHk = hkMatches.sort((a, b) => new Date(b.IssueDate || 0) - new Date(a.IssueDate || 0))[0];
-                    return { hkIsbn: latestHk.ISBN };
+                    
+                    // Format Label: Title & Volume & Subtitle
+                    const labelParts = [
+                        latestHk.Title,
+                        latestHk.Volume ? ` Vol.${latestHk.Volume}` : '',
+                        latestHk.Subtitle ? ` (${latestHk.Subtitle})` : ''
+                    ].filter(Boolean).join('');
+
+                    return { 
+                        hkIsbn: latestHk.ISBN,
+                        fullLabel: labelParts || latestHk.ISBN 
+                    };
                 },
                 changePage(p) { this.currentPage = p; this.scrollToTop(); },
                 scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }

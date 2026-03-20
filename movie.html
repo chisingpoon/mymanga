@@ -340,8 +340,21 @@
                         hk: hkFound ? { title: this.getVal(hkFound, 'Title'), subtitle: this.getVal(hkFound, 'Subtitle'), author: this.getVal(hkFound, 'Author'), image: this.getVal(hkFound, 'Image'), isbnParam: (this.getVal(hkFound, 'ISBN') || '').trim(), series: (this.getVal(hkFound, 'Title') || '').trim() } : null
                     };
                 },
-                selectMovie(m) { this.mangaTab = 'JP'; this.fcTab = 'JP'; this.selectedMovie = m; this.$nextTick(() => window.scrollTo({ top: 0, behavior: 'instant' })); },
-                closeDetail() { this.selectedMovie = null; },
+                selectMovie(m) { 
+                    this.mangaTab = 'JP'; 
+                    this.fcTab = 'JP'; 
+                    this.selectedMovie = m; 
+                    // Update URL parameter without refreshing page
+                    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?id=' + m.id;
+                    window.history.pushState({ path: newUrl }, '', newUrl);
+                    this.$nextTick(() => window.scrollTo({ top: 0, behavior: 'instant' })); 
+                },
+                closeDetail() { 
+                    this.selectedMovie = null; 
+                    // Clear URL parameter
+                    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                    window.history.pushState({ path: newUrl }, '', newUrl);
+                },
                 async init() {
                     try {
                         const [mRes, jpRes, hkRes] = await Promise.all([
@@ -355,7 +368,7 @@
                         this.movies = data.map(i => {
                             const rawDate = this.getVal(i, 'JP Release Date').toString();
                             return {
-                                id: this.getVal(i, 'Media ID'),
+                                id: this.getVal(i, 'Media ID').toString().trim(),
                                 jpTitle: this.getVal(i, 'JP Title'),
                                 hkTitle: this.getVal(i, 'HK Title'),
                                 enTitle: this.getVal(i, 'EN Title'),
@@ -369,6 +382,15 @@
                                 searchStr: `${this.getVal(i, 'JP Title')} ${this.getVal(i, 'HK Title')}`.toLowerCase()
                             };
                         });
+    
+                        // Check for URL Parameter "id"
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const mediaId = urlParams.get('id');
+                        if (mediaId) {
+                            const target = this.movies.find(m => m.id === mediaId.trim());
+                            if (target) this.selectMovie(target);
+                        }
+    
                     } catch (e) { console.error(e); } finally { this.loading = false; }
                 }
             },

@@ -11,9 +11,19 @@
         body { 
             -webkit-user-select: none; user-select: none;
             min-height: 100vh; background-color: #f8fafc; 
-            font-family: 'Inter', 'Noto Sans TC', 'Noto Sans JP', sans-serif; color: #1e293b;
+            font-family: 'Inter', 'Noto Sans TC', 'Noto Sans JP', system-ui, sans-serif; color: #1e293b;
         }
         .bg-grid { background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px); background-size: 40px 40px; }
+        
+        /* 1. HEADER FONT ALIGNMENT (Matching original) */
+        th { 
+            font-size: 12px; font-weight: 800; padding: 16px 12px; 
+            text-align: left; color: #64748b; background: #f8fafc; 
+            border-bottom: 2px solid #e2e8f0; white-space: nowrap; 
+            position: sticky; top: 0; z-index: 10; 
+            text-transform: uppercase; letter-spacing: 0.025em;
+        }
+
         .loader-wrapper { position: fixed; inset: 0; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
         .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid #4f46e5; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -22,20 +32,27 @@
         .main-card { background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); margin-bottom: 3rem; overflow: hidden; border: 1px solid #e2e8f0; }
         
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
-        th { font-size: 11px; font-weight: 800; padding: 16px 12px; text-align: left; color: #64748b; background: #f8fafc; border-bottom: 2px solid #e2e8f0; white-space: nowrap; position: sticky; top: 0; z-index: 10; }
-        td { padding: 14px 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; }
+        td { padding: 18px 12px; border-bottom: 1px solid #f1f5f9; font-size: 15px; vertical-align: middle; }
 
         .vol-link { display: flex; flex-direction: column; font-size: 10px; font-weight: 900; color: white !important; padding: 6px 4px; border-radius: 8px; line-height: 1; text-align: center; min-width: 50px; text-decoration: none !important; transition: all 0.15s; }
         .vol-link span:last-child { font-size: 14px; margin-top: 2px; }
         .vol-link:hover { filter: brightness(110%); transform: translateY(-2px); }
         
-        .year-btn { padding: 8px 16px; border-radius: 12px; font-size: 11px; font-weight: 800; transition: all 0.2s; border: 2px solid #e2e8f0; background: white; color: #64748b; white-space: nowrap; }
+        .year-btn { padding: 8px 16px; border-radius: 12px; font-size: 11px; font-weight: 900; transition: all 0.2s; border: 2px solid #e2e8f0; background: white; color: #64748b; text-transform: uppercase; }
         .year-btn.active { background: #4f46e5; color: white; border-color: #4f46e5; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
         
-        .clear-search-btn { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; padding: 5px; }
+        /* 2. CENTERED SEARCH CLEAR BUTTON */
+        .search-container { position: relative; display: flex; align-items: center; }
+        .clear-search-btn { 
+            position: absolute; right: 16px; 
+            height: 32px; width: 32px;
+            display: flex; align-items: center; justify-content: center;
+            color: #94a3b8; cursor: pointer; transition: color 0.2s;
+        }
         .clear-search-btn:hover { color: #ef4444; }
 
         .pagination-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-weight: 800; font-size: 12px; transition: 0.2s; }
+        .id-badge { background: #f1f5f9; color: #64748b; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 11px; font-weight: 700; }
     </style>
 </head>
 <body class="bg-grid" oncontextmenu="return false;">
@@ -59,19 +76,29 @@
         <main class="max-w-[1920px] mx-auto px-6 pt-10">
             <div class="mb-8">
                 <div class="flex flex-col xl:flex-row gap-6 items-end mb-6">
-                    <div class="w-full max-w-2xl relative">
-                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1">Full Database Search</label>
-                        <input type="text" v-model="searchQuery" placeholder="Search Titles, Media ID, Work ID..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-base font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
-                        <div v-if="searchQuery" @click="searchQuery = ''" class="clear-search-btn">
+                    <div class="w-full max-w-2xl search-container">
+                        <div class="w-full">
+                            <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Global Search</label>
+                            <input type="text" v-model="searchQuery" placeholder="Search titles, IDs, or notes..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-base font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
+                        </div>
+                        <div v-if="searchQuery" @click="searchQuery = ''" class="clear-search-btn" style="top: 34px;">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </div>
                     </div>
-                    <div class="flex flex-wrap gap-2 mb-1">
-                        <button @click="activeYears = []" class="year-btn" :class="{ 'active': activeYears.length === 0 }">All ({{ anime.length }})</button>
-                        <button v-for="(count, decade) in yearStats" :key="decade" @click="toggleYear(decade)" class="year-btn" :class="{ 'active': activeYears.includes(decade) }">
-                            {{ decade }}s <span class="ml-1 opacity-50">{{ count }}</span>
-                        </button>
+                    <div class="flex flex-col gap-2">
+                        <label class="block text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">Broadcast Decade Filter</label>
+                        <div class="flex flex-wrap gap-2">
+                            <button @click="activeYears = []" class="year-btn" :class="{ 'active': activeYears.length === 0 }">Show All ({{ anime.length }})</button>
+                            <button v-for="(count, decade) in yearStats" :key="decade" @click="toggleYear(decade)" class="year-btn" :class="{ 'active': activeYears.includes(decade) }">
+                                {{ decade }}s ({{ count }})
+                            </button>
+                        </div>
                     </div>
+                </div>
+                
+                <div v-if="activeYears.length > 0" class="mb-4 text-[11px] font-black text-indigo-500 uppercase flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"/></svg>
+                    Currently Filtering: {{ activeYears.sort().join('s, ') }}s Era
                 </div>
             </div>
 
@@ -81,8 +108,8 @@
                         <thead>
                             <tr>
                                 <th>Media ID</th>
-                                <th>JP Title / HK Title</th>
-                                <th>Show Date (JP / HK)</th>
+                                <th>Titles (JP / HK)</th>
+                                <th>IDs (Chapter / Show)</th> <th>Show Date (JP / HK)</th>
                                 <th>45卷/P+/カラー</th>
                                 <th>大全集</th>
                                 <th>Note</th>
@@ -90,14 +117,20 @@
                         </thead>
                         <tbody>
                             <tr v-for="row in paginatedData" :key="row['Media ID']">
-                                <td class="font-mono text-slate-400 text-[13px]">{{ row['Media ID'] }}</td>
+                                <td class="font-mono text-slate-400 text-[13px] font-bold">{{ row['Media ID'] }}</td>
                                 <td class="font-black text-slate-900">
-                                    <div>{{ row['JP Title'] }}</div>
-                                    <div class="text-indigo-500 text-xs tracking-tight">{{ row['HK Title'] }}</div>
+                                    <div class="text-[16px]">{{ row['JP Title'] }}</div>
+                                    <div class="text-indigo-500 text-[13px] tracking-tight">{{ row['HK Title'] }}</div>
+                                </td>
+                                <td>
+                                    <div class="flex flex-col gap-1">
+                                        <div class="flex items-center gap-2 text-[10px] text-slate-400 font-black">CH <span class="id-badge">{{ row['JP Chapter ID'] || '-' }}</span></div>
+                                        <div class="flex items-center gap-2 text-[10px] text-slate-400 font-black">SH <span class="id-badge">{{ row['JP Show ID'] || '-' }}</span></div>
+                                    </div>
                                 </td>
                                 <td class="text-[12px] whitespace-nowrap">
-                                    <div class="flex items-center gap-2"><span class="w-4 opacity-50 text-[10px]">JP</span> {{ row['JP Show Date'] || '-' }}</div>
-                                    <div class="flex items-center gap-2 mt-1"><span class="w-4 opacity-50 text-[10px]">HK</span> {{ row['HK Show Date'] || '-' }}</div>
+                                    <div class="flex items-center gap-2 font-bold"><span class="w-4 text-slate-300">🇯🇵</span> {{ row['JP Show Date'] || '-' }}</div>
+                                    <div class="flex items-center gap-2 mt-1 font-bold text-slate-500"><span class="w-4 text-slate-300">🇭🇰</span> {{ row['HK Show Date'] || '-' }}</div>
                                 </td>
                                 <td>
                                     <a v-if="m = getMapping(row['Work ID'], ['45卷', 'カラー作品集', 'プラス'])" :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" target="_blank" class="vol-link bg-emerald-500">
@@ -109,15 +142,15 @@
                                         <span>{{m.vol}}</span>
                                     </a>
                                 </td>
-                                <td class="text-slate-400 italic text-[12px] max-w-xs">{{ row.Note }}</td>
+                                <td class="text-slate-400 italic text-[13px] max-w-xs">{{ row.Note }}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
                 <div class="bg-slate-50 p-6 flex flex-col md:flex-row items-center justify-between border-t border-slate-200 gap-4">
-                    <div class="text-xs font-black uppercase text-slate-400 tracking-widest">
-                        Showing {{ (currentPage-1)*itemsPerPage + 1 }} - {{ Math.min(currentPage*itemsPerPage, filteredData.length) }} of {{ filteredData.length }} Entries
+                    <div class="text-[11px] font-black uppercase text-slate-400 tracking-widest">
+                        Total {{ filteredData.length }} results found
                     </div>
                     <div class="flex gap-2">
                         <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" 
@@ -165,7 +198,7 @@
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
                     return this.anime.filter(r => {
-                        const combined = [r['Media ID'], r['JP Title'], r['HK Title'], r['Work ID'], r['Note']].join(' ').toLowerCase();
+                        const combined = [r['Media ID'], r['JP Title'], r['HK Title'], r['Work ID'], r['Note'], r['JP Chapter ID'], r['JP Show ID']].join(' ').toLowerCase();
                         const matchesSearch = !q || combined.includes(q);
                         let matchesYear = true;
                         if (this.activeYears.length > 0) {

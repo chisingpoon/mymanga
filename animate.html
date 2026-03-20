@@ -31,6 +31,12 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* --- Detail View Card Styles --- */
+        .data-card-wrapper {
+            width: 100%;
+            max-width: 320px; /* Constrains the width so it doesn't get too big */
+            margin: 0 auto;
+        }
+
         .data-card { 
             display: flex; 
             flex-direction: column;
@@ -39,16 +45,15 @@
             text-align: left; 
             position: relative; 
             overflow: hidden; 
-            /* Remove min-height: 480px */
             height: 100%; 
             background: #ffffff;
-            border-radius: 1.25rem; /* Slightly tighter corners for a smaller card */
+            border-radius: 1.25rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
-        .data-card:hover { border-color: #4f46e5; background-color: #ffffff; transform: translateY(-4px); }
+        .data-card:hover { border-color: #4f46e5; transform: translateY(-4px); }
 
         .empty-state-text {
-            font-size: 14px; /* Increased from 11px */
+            font-size: 14px;
             font-weight: 900;
             color: #94a3b8;
             text-transform: uppercase;
@@ -59,12 +64,12 @@
 
         .image-container { 
             width: 100%; 
-            aspect-ratio: 3/4; /* Classic book/poster shape */
+            aspect-ratio: 3/4; 
             background: #f1f5f9; 
             overflow: hidden; 
         }
         .text-container { 
-            flex: 1; /* This fills the remaining space naturally */
+            flex: 1;
             padding: 1.25rem; 
             display: flex; 
             flex-direction: column; 
@@ -72,22 +77,17 @@
             line-height: 1.3; 
         }
 
-        /* Smooth Fade Animation */
-        .fade-content {
-            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .fade-content { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Unified Glassmorphism for UI Elements */
         .glass-panel {
             background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
         
         .badge-base {
@@ -115,22 +115,21 @@
             border-radius: 99px; text-transform: uppercase; letter-spacing: 0.1em;
             opacity: 0; transform: translateY(8px);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-            pointer-events: none; z-index: 60; /* Ensure it's on top */
+            pointer-events: none; z-index: 60;
             box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
         }
         .data-card:hover .hover-hint { opacity: 1; transform: translateY(0); }
 
-        /* --- List View Movie Card Styles --- */
         .movie-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; height: 100%; background: white; }
         .movie-card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-        
-        /* Interactive Zoom Effect for Poster */
         .poster-wrapper { position: relative; overflow: hidden; aspect-ratio: 3/4; background: #f1f5f9; }
-        .poster-wrapper img { transition: transform 0.5s ease; }
         .movie-card:hover .poster-wrapper img { transform: scale(1.08); }
+       
+        .hint-jp { background-color: #4f46e5; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4); }
+        .hint-hk { background-color: #be123c; box-shadow: 0 4px 12px rgba(190, 18, 60, 0.4); }
     </style>
 </head>
-<body class="bg-grid" oncontextmenu="return false;">
+<body class="bg-grid">
     <div id="app" v-cloak>
         
         <div v-if="loading" class="loader-wrapper">
@@ -157,7 +156,7 @@
                         <input type="text" v-model="searchQuery" placeholder="搜尋..." class="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm">
                         <button @click="toggleSort" class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs font-black uppercase outline-none cursor-pointer hover:border-indigo-500 shadow-sm flex items-center justify-between min-w-[120px]">
                             <span>{{ sortOrder === 'desc' ? 'NEWEST' : 'OLDEST' }}</span>
-                            <svg class="w-3 h-3 ml-2 transition-transform" :class="sortOrder === 'asc' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
+                            <svg class="w-3 h-3 ml-2" :class="sortOrder === 'asc' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
                         </button>
                     </div>
                 </div>
@@ -165,10 +164,8 @@
                 <div class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
                     <div v-for="movie in sortedMovies" :key="movie.id" @click="selectMovie(movie)" class="movie-card rounded-2xl overflow-hidden border border-slate-200 flex flex-col shadow-sm">
                         <div class="poster-wrapper">
-                            <img :src="movie.jpImage || 'https://placehold.co/600x800?text=No+Poster'" class="w-full h-full object-cover">
-                            <div class="absolute top-3 left-3 bg-indigo-600 text-white text-[10px] font-black px-2.5 py-1 rounded shadow-lg uppercase z-10">
-                                {{ movie.jpYear || 'TBA' }}
-                            </div>
+                            <img :src="movie.jpImage" class="w-full h-full object-cover">
+                            <div class="absolute top-3 left-3 bg-indigo-600 text-white text-[10px] font-black px-2.5 py-1 rounded shadow-lg uppercase z-10">{{ movie.jpYear || 'TBA' }}</div>
                         </div>
                         <div class="p-5 flex-1 flex flex-col">
                             <h3 class="font-black text-slate-900 text-[15px] leading-tight mb-2">{{ movie.jpTitle }}</h3>
@@ -181,8 +178,7 @@
             <main v-else key="detail" class="max-w-[1920px] mx-auto px-6 pt-6 pb-20">
                 <div class="mb-6">
                     <button @click="closeDetail" class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-all">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg>
-                        Back to List
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg> Back to List
                     </button>
                 </div>
 
@@ -208,58 +204,53 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="relative">
+                            <!-- Manga Card -->
+                            <div class="data-card-wrapper relative">
                                 <div class="badge-base glass-panel">原作/改編漫畫</div>
-                                
                                 <div v-if="mappedManga" class="data-card border-slate-100">
+                                    <div v-if="mappedManga.hasHk" class="toggle-container glass-panel">
+                                        <button @click.stop.prevent="mangaTab = 'JP'" :class="mangaTab === 'JP' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="toggle-btn">JP</button>
+                                        <button @click.stop.prevent="mangaTab = 'HK'" :class="mangaTab === 'HK' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="toggle-btn">HK</button>
+                                    </div>
                                     <a :href="generateUrl(mappedManga.current)" target="_blank" :key="mangaTab" class="flex flex-col h-full fade-content">
-                                        <div class="image-container">
-                                            <img :src="mappedManga.current.image || '...'" class="w-full h-full object-cover">
-                                        </div>
-                                        <div class="text-container !p-4"> <p class="font-black text-slate-900 text-base leading-tight">{{ mappedManga.current.title }}</p>
+                                        <div class="image-container"><img :src="mappedManga.current.image" class="w-full h-full object-cover"></div>
+                                        <div class="text-container !p-4">
+                                            <p class="font-black text-slate-900 text-base leading-tight">{{ mappedManga.current.title }}</p>
                                             <p class="text-[11px] font-bold italic text-slate-500 line-clamp-2">{{ mappedManga.current.subtitle }}</p>
-                                            <p class="text-[10px] font-black text-indigo-600 uppercase tracking-widest mt-2">{{ mappedManga.current.author }}</p>
+                                            <p class="text-[10px] font-black text-indigo-600 uppercase tracking-widest mt-auto pt-2">{{ mappedManga.current.author }}</p>
                                         </div>
                                     </a>
-                                    <div class="hover-hint">{{ mangaTab === 'JP' ? 'View JP Edition Detail' : 'View HK Edition Detail' }}</div>
+                                    <!-- Dynamic Color Hint -->
+                                    <div class="hover-hint flex items-center gap-2" :class="mangaTab === 'JP' ? 'hint-jp' : 'hint-hk'">
+                                        <span>{{ mangaTab === 'JP' ? '🇯🇵 View JP Detail' : '🇭🇰 查看香港版本' }}</span>
+                                    </div>
                                 </div>
-                            
                                 <div v-else class="data-card border-2 border-dashed border-slate-200 flex items-center justify-center bg-slate-50/50" style="aspect-ratio: 3/4.5;">
                                     <p class="empty-state-text">No Linked Manga</p>
                                 </div>
                             </div>
-
-                            <div class="relative">
+                            
+                            <!-- Film Comic Card -->
+                            <div class="data-card-wrapper relative">
                                 <div class="badge-base glass-panel">電影漫畫</div>
-                                
-                                <div v-if="mappedFilmComic" class="data-card border-slate-100 overflow-hidden relative">
+                                <div v-if="mappedFilmComic" class="data-card border-slate-100">
                                     <div v-if="mappedFilmComic.hasHk" class="toggle-container glass-panel">
                                         <button @click.stop.prevent="fcTab = 'JP'" :class="fcTab === 'JP' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="toggle-btn">JP</button>
                                         <button @click.stop.prevent="fcTab = 'HK'" :class="fcTab === 'HK' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="toggle-btn">HK</button>
                                     </div>
-                            
-                                    <a :href="generateUrl(mappedFilmComic.current)" target="_blank" :key="fcTab" class="flex flex-col flex-1 fade-content">
-                                        <div class="image-container">
-                                            <img :src="mappedFilmComic.current.image || 'https://placehold.co/600x400?text=No+Cover'" class="w-full h-full object-cover">
-                                        </div>
-                                        <div class="text-container !p-4"> 
-                                            <p class="font-black text-slate-900 text-base leading-tight line-clamp-2">
-                                                {{ mappedFilmComic.current.title }}
-                                            </p>
-                                            <p v-if="mappedFilmComic.current.subtitle" class="text-[11px] font-bold italic text-slate-500 line-clamp-1">
-                                                {{ mappedFilmComic.current.subtitle }}
-                                            </p>
-                                            <p class="text-[10px] font-black text-indigo-600 uppercase tracking-widest mt-auto pt-2">
-                                                {{ mappedFilmComic.current.author }}
-                                            </p>
+                                    <a :href="generateUrl(mappedFilmComic.current)" target="_blank" :key="fcTab" class="flex flex-col h-full fade-content">
+                                        <div class="image-container"><img :src="mappedFilmComic.current.image" class="w-full h-full object-cover"></div>
+                                        <div class="text-container !p-4">
+                                            <p class="font-black text-slate-900 text-base leading-tight">{{ mappedFilmComic.current.title }}</p>
+                                            <p v-if="mappedFilmComic.current.subtitle" class="text-[11px] font-bold italic text-slate-500 line-clamp-2">{{ mappedFilmComic.current.subtitle }}</p>
+                                            <p class="text-[10px] font-black text-indigo-600 uppercase tracking-widest mt-auto pt-2">{{ mappedFilmComic.current.author }}</p>
                                         </div>
                                     </a>
-                            
-                                    <div class="hover-hint">
-                                        {{ fcTab === 'JP' ? 'View JP Edition Detail' : 'View HK Edition Detail' }}
+                                    <!-- Dynamic Color Hint -->
+                                    <div class="hover-hint flex items-center gap-2" :class="fcTab === 'JP' ? 'hint-jp' : 'hint-hk'">
+                                        <span>{{ fcTab === 'JP' ? '🇯🇵 View JP Detail' : '🇭🇰 查看香港版本' }}</span>
                                     </div>
                                 </div>
-                            
                                 <div v-else class="data-card border-2 border-dashed border-slate-200 flex items-center justify-center bg-slate-50/50" style="aspect-ratio: 3/4.5;">
                                     <p class="empty-state-text">No Linked Film Comic</p>
                                 </div>
@@ -276,27 +267,17 @@
         createApp({
             data() {
                 return {
-                    loading: true, 
-                    searchQuery: '', 
-                    sortOrder: 'desc', 
-                    movies: [], 
-                    mangaCatalog: [],
-                    hkCatalog: [], // Ensure this is here
-                    selectedMovie: null,
-                    // ADD THESE TWO LINES:
-                    mangaTab: 'JP',
-                    fcTab: 'JP'
+                    loading: true, searchQuery: '', sortOrder: 'desc', 
+                    movies: [], mangaCatalog: [], hkCatalog: [], 
+                    selectedMovie: null, mangaTab: 'JP', fcTab: 'JP'
                 }
             },
             computed: {
                 sortedMovies() {
                     let filtered = this.movies;
-                    if (this.searchQuery) {
-                        filtered = this.movies.filter(m => m.searchStr.includes(this.searchQuery.toLowerCase()));
-                    }
+                    if (this.searchQuery) filtered = this.movies.filter(m => m.searchStr.includes(this.searchQuery.toLowerCase()));
                     return [...filtered].sort((a, b) => {
-                        const yA = parseInt(a.jpYear) || 0;
-                        const yB = parseInt(b.jpYear) || 0;
+                        const yA = parseInt(a.jpYear) || 0; const yB = parseInt(b.jpYear) || 0;
                         return this.sortOrder === 'asc' ? yA - yB : yB - yA;
                     });
                 },
@@ -304,34 +285,25 @@
                     const data = this.lookup(this.selectedMovie?.mangaRaw);
                     if (!data) return null;
                     const current = this.mangaTab === 'JP' ? data.jp : data.hk;
-                    return { 
-                        current: { ...current, region: this.mangaTab }, 
-                        hasHk: !!data.hk 
-                    };
+                    return { current: { ...current, region: this.mangaTab }, hasHk: !!data.hk };
                 },
                 mappedFilmComic() { 
                     const data = this.lookup(this.selectedMovie?.filmComicRaw);
                     if (!data) return null;
                     const current = this.fcTab === 'JP' ? data.jp : data.hk;
-                    return { 
-                        current: { ...current, region: this.fcTab }, 
-                        hasHk: !!data.hk 
-                    };
+                    return { current: { ...current, region: this.fcTab }, hasHk: !!data.hk };
                 }
             },
             methods: {
                 generateUrl(item) {
                     if (!item) return '#';
                     const params = new URLSearchParams();
-                    // Use the region from the item (JP or HK) instead of hardcoding 'JP'
                     params.append('region', item.region || 'JP'); 
                     params.append('isbn', (item.isbnParam || '').toString().trim());
                     params.append('series', (item.series || '').toString().trim());
                     return `manga-database.html?${params.toString()}`;
                 },
-                toggleSort() { 
-                    this.sortOrder = this.sortOrder === 'desc' ? 'asc' : 'desc'; 
-                },
+                toggleSort() { this.sortOrder = this.sortOrder === 'desc' ? 'asc' : 'desc'; },
                 getVal(obj, key) {
                     if (!obj) return '';
                     const k = Object.keys(obj).find(x => x.trim().toLowerCase() === key.trim().toLowerCase());
@@ -340,62 +312,23 @@
                 lookup(isbn) {
                     if (!isbn) return null;
                     const cleanIsbn = isbn.toString().replace(/[-\s]/g, '').trim();
-                    
                     const jpFound = this.mangaCatalog.find(item => {
                         const iIsbn = (this.getVal(item, 'ISBN') || '').toString().replace(/[-\s]/g, '').trim();
                         return iIsbn === cleanIsbn && iIsbn !== "";
                     });
-                
                     if (!jpFound) return null;
-                
                     const hkMatches = this.hkCatalog.filter(item => {
                         const hkIsbnJp = (this.getVal(item, 'ISBN_JP') || '').toString().replace(/[-\s]/g, '').trim();
-                        return hkIsbnJp === cleanIsbn && hkIsbnJp !== "";
+                        return hkIsbnJp === cleanIsbn;
                     });
-                
-                    let hkFound = null;
-                    if (hkMatches.length > 0) {
-                        hkFound = [...hkMatches].sort((a, b) => {
-                            const dateA = new Date(this.getVal(a, 'IssueDate'));
-                            const dateB = new Date(this.getVal(b, 'IssueDate'));
-                            return dateB - dateA;
-                        })[0];
-                    }
-                
-                    // CRITICAL: Return a reactive-friendly object
+                    let hkFound = hkMatches.length > 0 ? [...hkMatches].sort((a, b) => new Date(this.getVal(b, 'IssueDate')) - new Date(this.getVal(a, 'IssueDate')))[0] : null;
                     return {
-                        activeTab: 'JP', 
-                        jp: {
-                            title: this.getVal(jpFound, '標題'),
-                            subtitle: this.getVal(jpFound, '副標題'),
-                            author: this.getVal(jpFound, '著'),
-                            image: this.getVal(jpFound, 'image'),
-                            isbnParam: (this.getVal(jpFound, 'ISBN') || '').trim(),
-                            series: (this.getVal(jpFound, '類') || '').trim()
-                        },
-                        hk: hkFound ? {
-                            title: this.getVal(hkFound, 'Title'),
-                            subtitle: this.getVal(hkFound, 'Subtitle'),
-                            author: this.getVal(hkFound, 'Author'),
-                            image: this.getVal(hkFound, 'Image'),
-                            isbnParam: (this.getVal(hkFound, 'ISBN') || '').trim(),
-                            series: (this.getVal(hkFound, 'Title') || '').trim()
-                        } : null
+                        jp: { title: this.getVal(jpFound, '標題'), subtitle: this.getVal(jpFound, '副標題'), author: this.getVal(jpFound, '著'), image: this.getVal(jpFound, 'image'), isbnParam: (this.getVal(jpFound, 'ISBN') || '').trim(), series: (this.getVal(jpFound, '類') || '').trim() },
+                        hk: hkFound ? { title: this.getVal(hkFound, 'Title'), subtitle: this.getVal(hkFound, 'Subtitle'), author: this.getVal(hkFound, 'Author'), image: this.getVal(hkFound, 'Image'), isbnParam: (this.getVal(hkFound, 'ISBN') || '').trim(), series: (this.getVal(hkFound, 'Title') || '').trim() } : null
                     };
                 },
-                selectMovie(m) { 
-                    this.mangaTab = 'JP'; // Reset tabs on new selection
-                    this.fcTab = 'JP';
-                    this.selectedMovie = m; 
-                    this.$nextTick(() => { window.scrollTo({ top: 0, behavior: 'instant' }); });
-                },
-            
-                closeDetail() {
-                    this.selectedMovie = null;
-                    this.mangaTab = 'JP'; // Reset tabs on close
-                    this.fcTab = 'JP';
-                    this.$nextTick(() => { window.scrollTo(0, 0); });
-                },
+                selectMovie(m) { this.mangaTab = 'JP'; this.fcTab = 'JP'; this.selectedMovie = m; this.$nextTick(() => window.scrollTo({ top: 0, behavior: 'instant' })); },
+                closeDetail() { this.selectedMovie = null; },
                 async init() {
                     try {
                         const [mRes, jpRes, hkRes] = await Promise.all([
@@ -408,15 +341,14 @@
                         const data = await mRes.json();
                         this.movies = data.map(i => {
                             const rawDate = this.getVal(i, 'JP Release Date').toString();
-                            const yearMatch = rawDate.match(/\d{4}/);
                             return {
                                 id: this.getVal(i, 'Media ID'),
                                 jpTitle: this.getVal(i, 'JP Title'),
                                 hkTitle: this.getVal(i, 'HK Title'),
                                 enTitle: this.getVal(i, 'EN Title'),
                                 jpDate: rawDate,
-                                jpYear: yearMatch ? yearMatch[0] : '',
-                                hkDate: this.getVal(i, 'HK Release Date').toString(),
+                                jpYear: (rawDate.match(/\d{4}/) || [])[0] || '',
+                                hkDate: this.getVal(i, 'HK Release Date'),
                                 jpImage: this.getVal(i, 'JP Image'),
                                 hkImage: this.getVal(i, 'HK Image'),
                                 mangaRaw: this.getVal(i, 'Manga ISBN'),
@@ -424,16 +356,10 @@
                                 searchStr: `${this.getVal(i, 'JP Title')} ${this.getVal(i, 'HK Title')}`.toLowerCase()
                             };
                         });
-                    } catch (e) { 
-                        console.error("Initialization Error:", e); 
-                    } finally { 
-                        this.loading = false; 
-                    }
+                    } catch (e) { console.error(e); } finally { this.loading = false; }
                 }
             },
-            mounted() { 
-                this.init(); 
-            }
+            mounted() { this.init(); }
         }).mount('#app')
     </script>
 </body>

@@ -33,19 +33,34 @@
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         td { padding: 16px 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; }
 
-        .filter-select { background-color: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 8px 12px; font-size: 13px; font-weight: 700; color: #1e293b; outline: none; transition: 0.2s; cursor: pointer; width: 100%; }
+        /* Unified Link Styles */
+        .archive-link { 
+            display: flex; flex-direction: column; 
+            padding: 8px 12px; border-radius: 10px; 
+            text-decoration: none !important; transition: 0.2s; 
+            line-height: 1.2; border: 1px solid rgba(0,0,0,0.05);
+            margin-bottom: 6px; min-width: 180px;
+        }
+        .archive-link:last-child { margin-bottom: 0; }
+        .archive-link .label-top { font-weight: 900; font-size: 12px; margin-bottom: 2px; }
+        .archive-link .label-bottom { opacity: 0.85; font-weight: 600; font-size: 10px; }
+        
+        /* Manga Specific Style */
+        .manga-btn { background: #4f46e5; color: white !important; }
+        .manga-btn:hover { background: #4338ca; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+        
+        /* Movie Specific Style */
+        .movie-btn { background: #0891b2; color: white !important; }
+        .movie-btn:hover { background: #0e7490; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3); }
+
+        .filter-select { background-color: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 8px 12px; font-size: 13px; font-weight: 700; outline: none; transition: 0.2s; cursor: pointer; width: 100%; }
         .filter-select:focus { border-color: #4f46e5; }
 
-        .manga-link { display: inline-flex; flex-direction: column; background: #4f46e5; color: white !important; padding: 8px 12px; border-radius: 10px; font-size: 10px; text-decoration: none !important; transition: 0.2s; min-width: 170px; line-height: 1.2; border: 1px solid rgba(0,0,0,0.1); }
-        .manga-link .title-row { font-weight: 900; font-size: 12px; margin-bottom: 2px; }
-        .manga-link .sub-row { opacity: 0.9; font-weight: 600; font-size: 10px; }
-        .manga-link:hover { background: #4338ca; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
-        
-        .movie-link { display: block; color: #0891b2; font-weight: 800; text-decoration: none; line-height: 1.3; }
-        .movie-link:hover { color: #0e7490; text-decoration: underline; }
-
         .search-container { position: relative; }
-        .clear-search-btn { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; padding: 4px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .clear-search-btn { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; }
+
+        .counter-badge { background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 800; border: 1px solid #e2e8f0; }
+        .reset-link { color: #6366f1; font-size: 11px; font-weight: 800; text-transform: uppercase; cursor: pointer; }
 
         .type-badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; text-transform: uppercase; }
         .badge-char { background: #dcfce7; color: #166534; }
@@ -53,26 +68,6 @@
 
         .back-to-top { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background: #1e293b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: 0.3s; }
         .back-to-top.visible { opacity: 1; pointer-events: auto; }
-    
-        .counter-badge {
-            background: #f1f5f9;
-            color: #475569;
-            padding: 4px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 800;
-            border: 1px solid #e2e8f0;
-        }
-        .reset-link {
-            color: #6366f1;
-            font-size: 11px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .reset-link:hover { color: #4338ca; text-decoration: underline; }
     </style>
 </head>
 <body class="bg-grid">
@@ -94,31 +89,21 @@
         </nav>
 
         <main class="max-w-[1920px] mx-auto px-6 pt-10">
-            <div class="flex items-end justify-between mb-4 px-1">
-                <div class="flex items-center gap-3">
-                    <span class="counter-badge">
-                        Showing {{ filteredData.length }} of {{ characters.length }} Entries
-                    </span>
-                    <span v-if="isFiltered" @click="resetFilters" class="reset-link">
-                        ✕ Reset All Filters
-                    </span>
-                </div>
-                <div class="text-[10px] font-black uppercase text-slate-400 tracking-widest">
-                    Archive Version 2.4.1
-                </div>
+            <div class="flex items-center gap-3 mb-6 px-1">
+                <span class="counter-badge">Showing {{ filteredData.length }} of {{ characters.length }} Records</span>
+                <span v-if="isFiltered" @click="resetFilters" class="reset-link">✕ Reset Filters</span>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="search-container">
-                    <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Search Keywords</label>
+                    <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Global Search</label>
                     <div class="relative">
-                        <input type="text" v-model="searchQuery" placeholder="Search names, descriptions..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
+                        <input type="text" v-model="searchQuery" placeholder="Search keywords..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
                         <div v-if="searchQuery" @click="searchQuery = ''" class="clear-search-btn">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </div>
                     </div>
                 </div>
-
                 <div>
                     <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Movie Filter</label>
                     <select v-model="selectedMovie" class="filter-select h-[58px]">
@@ -126,11 +111,10 @@
                         <option v-for="m in uniqueMovies" :key="m.id" :value="m.id">{{ m.label }}</option>
                     </select>
                 </div>
-
                 <div>
                     <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Manga Filter</label>
                     <select v-model="selectedManga" class="filter-select h-[58px]">
-                        <option value="">All Manga Volumes</option>
+                        <option value="">All Manga Series</option>
                         <option v-for="title in uniqueManga" :key="title" :value="title">{{ title }}</option>
                     </select>
                 </div>
@@ -146,7 +130,7 @@
                                 <th>HK Translation</th>
                                 <th>JP Release Date</th>
                                 <th>Movie Reference</th>
-                                <th>Original Manga</th>
+                                <th>Original Manga References</th>
                                 <th class="w-1/4">Description</th>
                             </tr>
                         </thead>
@@ -169,18 +153,20 @@
                                     {{ getMovieData(row['Movie ID'], 'JP Release Date') }}
                                 </td>
                                 <td>
-                                    <a :href="'movie.html?mediaid=' + getMovieData(row['Movie ID'], 'Media ID')" class="movie-link text-[13px]">
-                                        <div class="text-slate-900">{{ getMovieData(row['Movie ID'], 'JP Title') }}</div>
-                                        <div class="text-[11px] opacity-70">{{ getMovieData(row['Movie ID'], 'HK Title') }}</div>
+                                    <a :href="'movie.html?mediaid=' + getMovieData(row['Movie ID'], 'Media ID')" class="archive-link movie-btn">
+                                        <span class="label-top">{{ getMovieData(row['Movie ID'], 'JP Title') }}</span>
+                                        <span class="label-bottom">{{ getMovieData(row['Movie ID'], 'HK Title') }}</span>
                                     </a>
                                 </td>
                                 <td>
-                                    <a v-if="m = getMapping(row['Work ID'])" 
-                                       :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
-                                       target="_blank" class="manga-link">
-                                        <span class="title-row">{{ m.title }}</span>
-                                        <span class="sub-row">{{ m.sub }}</span>
-                                    </a>
+                                    <div v-if="mList = getMappingList(row['Work ID'])" class="flex flex-col">
+                                        <a v-for="m in mList" :key="m.hkIsbn" 
+                                           :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
+                                           target="_blank" class="archive-link manga-btn">
+                                            <span class="label-top">{{ m.title }}</span>
+                                            <span class="label-bottom">{{ m.sub }}</span>
+                                        </a>
+                                    </div>
                                     <span v-else class="text-slate-300 text-[11px] font-bold italic">No Manga Ref</span>
                                 </td>
                                 <td class="text-slate-500 text-[13px] leading-relaxed italic">
@@ -193,7 +179,7 @@
 
                 <div class="bg-slate-50 p-6 flex flex-col md:flex-row items-center justify-between border-t border-slate-200 gap-4">
                     <div class="text-[11px] font-black uppercase text-slate-400 tracking-widest">
-                        Page {{ currentPage }} / {{ totalPages }} ({{ filteredData.length }} Entries)
+                        Page {{ currentPage }} / {{ totalPages }}
                     </div>
                     <div class="flex gap-2">
                         <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" 
@@ -216,23 +202,13 @@
         createApp({
             data() {
                 return {
-                    loading: true,
-                    searchQuery: '',
-                    selectedMovie: '',
-                    selectedManga: '',
-                    currentPage: 1,
-                    itemsPerPage: 40,
-                    showScrollBtn: false,
-                    characters: [],
-                    movies: [],
-                    contents: [],
-                    publishHk: []
+                    loading: true, searchQuery: '', selectedMovie: '', selectedManga: '',
+                    currentPage: 1, itemsPerPage: 40, showScrollBtn: false,
+                    characters: [], movies: [], contents: [], publishHk: []
                 }
             },
             computed: {
-                isFiltered() {
-                    return this.searchQuery !== '' || this.selectedMovie !== '' || this.selectedManga !== '';
-                },
+                isFiltered() { return this.searchQuery !== '' || this.selectedMovie !== '' || this.selectedManga !== ''; },
                 uniqueMovies() {
                     const ids = [...new Set(this.characters.map(c => c['Movie ID']).filter(id => id && id !== "-"))];
                     return ids.map(id => {
@@ -241,29 +217,27 @@
                     }).sort((a,b) => a.label.localeCompare(b.label, 'zh-Hant'));
                 },
                 uniqueManga() {
-                    const titles = this.characters.map(c => this.getMapping(c['Work ID'])?.title).filter(Boolean);
+                    const titles = this.characters.flatMap(c => {
+                        const list = this.getMappingList(c['Work ID']);
+                        return list ? list.map(m => m.title) : [];
+                    });
                     return [...new Set(titles)].sort((a,b) => a.localeCompare(b, 'zh-Hant'));
                 },
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
                     return this.characters.filter(r => {
                         if (!r['Movie ID'] || r['Movie ID'] === "-") return false;
-                        
                         const movie = this.movies.find(m => m['Media ID'] === r['Movie ID']) || {};
-                        const manga = this.getMapping(r['Work ID']) || {};
-
-                        // Movie Filter
-                        if (this.selectedMovie && r['Movie ID'] !== this.selectedMovie) return false;
+                        const mangaList = this.getMappingList(r['Work ID']) || [];
                         
-                        // Manga Filter
-                        if (this.selectedManga && manga.title !== this.selectedManga) return false;
+                        if (this.selectedMovie && r['Movie ID'] !== this.selectedMovie) return false;
+                        if (this.selectedManga && !mangaList.some(m => m.title === this.selectedManga)) return false;
 
-                        // Search Keywords
                         const searchFields = [
                             r['JP Title'], r['HK Title'], r['Description'], 
                             r['CultureCom Trans'], r['HKChingWin Trans'],
                             movie['JP Title'], movie['HK Title'],
-                            manga['title'], manga['sub']
+                            ...mangaList.map(m => m.title + m.sub)
                         ].join(' ').toLowerCase();
                         
                         return !q || searchFields.includes(q);
@@ -299,40 +273,38 @@
                         this.characters = c; this.movies = m; this.contents = s; this.publishHk = h;
                         this.loading = false;
                         window.addEventListener('scroll', () => { this.showScrollBtn = window.scrollY > 400; });
-                    } catch (e) { console.error("Sync Error:", e); }
+                    } catch (e) { console.error(e); }
                 },
                 getMovieData(movieId, field) {
-                    if (!movieId) return '-';
                     const movie = this.movies.find(m => m['Media ID'] === movieId);
                     if (!movie) return (field === 'Media ID' ? movieId : '-');
                     return movie[field] || '-';
                 },
-                getMapping(workId) {
+                getMappingList(workId) {
                     if(!workId || workId === "-") return null;
                     const idStr = workId.toString().trim();
-                    const match = this.contents.find(item => item.作品番?.toString().trim() === idStr);
-                    if (!match || !match.ISBN) return null;
+                    const contentsMatches = this.contents.filter(item => item.作品番?.toString().trim() === idStr);
+                    if (!contentsMatches.length) return null;
                     
-                    const isbnJp = match.ISBN.trim();
-                    const hkMatches = this.publishHk.filter(h => h.ISBN_JP?.trim() === isbnJp);
-                    if (hkMatches.length === 0) return null;
+                    const mapped = [];
+                    contentsMatches.forEach(match => {
+                        const isbnJp = match.ISBN?.trim();
+                        const hkItems = this.publishHk.filter(h => h.ISBN_JP?.trim() === isbnJp);
+                        hkItems.forEach(h => {
+                            mapped.push({
+                                hkIsbn: h.ISBN,
+                                title: h.Title,
+                                sub: (h.Volume ? `Vol.${h.Volume} ` : '') + (h.Subtitle || ''),
+                                date: new Date(h.IssueDate || 0)
+                            });
+                        });
+                    });
                     
-                    const latestHk = hkMatches.sort((a, b) => new Date(b.IssueDate || 0) - new Date(a.IssueDate || 0))[0];
-                    
-                    return { 
-                        hkIsbn: latestHk.ISBN,
-                        title: latestHk.Title,
-                        sub: (latestHk.Volume ? `Vol.${latestHk.Volume} ` : '') + (latestHk.Subtitle || '')
-                    };
+                    return mapped.length ? mapped.sort((a,b) => b.date - a.date) : null;
                 },
+                resetFilters() { this.searchQuery = ''; this.selectedMovie = ''; this.selectedManga = ''; },
                 changePage(p) { this.currentPage = p; this.scrollToTop(); },
-                scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },
-                resetFilters() {
-                    this.searchQuery = '';
-                    this.selectedMovie = '';
-                    this.selectedManga = '';
-                    this.currentPage = 1;
-                }
+                scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
             },
             mounted() { this.init(); }
         }).mount('#app')

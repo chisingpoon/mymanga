@@ -89,11 +89,6 @@
                     <option v-for="t in dynamicGrandTypes" :key="t" :value="t">{{ t }}</option>
                 </select>
 
-                <select v-model="selectedStandardTitle" @change="handleManualInput" class="min-w-[180px] bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold">
-                    <option value="">Standard: All Titles</option>
-                    <option v-for="t in dynamicStandardTitles" :key="t" :value="t">{{ t }}</option>
-                </select>
-
                 <button @click="resetFilters" class="px-6 py-4 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-2xl transition-colors">Reset</button>
             </div>
 
@@ -176,7 +171,7 @@
                     searchQuery: '',
                     selectedMovie: '',
                     selectedGrandType: '',
-                    selectedStandardTitle: '',
+                    // Removed selectedStandardTitle
                     paramGadgetId: null,
                     currentPage: 1,
                     itemsPerPage: 30,
@@ -221,12 +216,6 @@
                             if (!this.getMangaData(g, true).some(b => b.type === this.selectedGrandType)) return false;
                         }
         
-                        // 3. Standard Manga Filter (Fixed)
-                        if (this.selectedStandardTitle) {
-                            const standardBooks = this.getMangaData(g, false);
-                            if (!standardBooks.some(b => b.title === this.selectedStandardTitle)) return false;
-                        }
-        
                         return true;
                     }).map(g => {
                         let apps = this.gadgetMedia.filter(m => String(m['Gadget ID']).trim() === String(g['Gadget ID']).trim());
@@ -255,10 +244,7 @@
                     return [...new Set(types)].filter(Boolean).sort();
                 },
         
-                dynamicStandardTitles() {
-                    const titles = this.baseFiltered.flatMap(g => this.getMangaData(g, false).map(b => b.title));
-                    return [...new Set(titles)].filter(Boolean).sort();
-                },
+                // Removed dynamicStandardTitles
         
                 paginatedData() {
                     const start = (this.currentPage - 1) * this.itemsPerPage;
@@ -313,7 +299,6 @@
                             const pubMatches = this.publishHk.filter(p => String(p.ISBN_JP).trim() === String(entry.ISBN).trim());
                             
                             if (pubMatches.length > 0) {
-                                // RE-ADDED: Latest Issue logic based on IssueDate
                                 const latest = pubMatches.sort((a, b) => {
                                     const dateA = new Date(a.IssueDate || 0);
                                     const dateB = new Date(b.IssueDate || 0);
@@ -324,13 +309,11 @@
                                     hkIsbn: latest.ISBN,
                                     title: latest.Title,
                                     sub: (latest.Volume ? `Vol.${latest.Volume} ` : '') + (latest.Subtitle || ''),
-                                    type: entry.類,
-                                    issueDate: latest.IssueDate
+                                    type: entry.類
                                 });
                             }
                         });
                     });
-                    // Unique by ISBN to prevent duplicate chapter rows
                     return Array.from(new Map(books.map(b => [b.hkIsbn, b])).values());
                 },
         
@@ -349,7 +332,7 @@
                 handleManualInput() { this.currentPage = 1; },
                 resetFilters() { 
                     this.searchQuery = ''; this.selectedMovie = ''; this.selectedGrandType = ''; 
-                    this.selectedStandardTitle = ''; this.paramGadgetId = null; this.currentPage = 1; 
+                    this.paramGadgetId = null; this.currentPage = 1; 
                     window.history.replaceState({}, '', window.location.pathname);
                 },
                 changePage(p) { this.currentPage = p; window.scrollTo({top:0, behavior:'smooth'}); }

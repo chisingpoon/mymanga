@@ -187,7 +187,6 @@
                     publishHk: []
                 }
             },
-            // IMPORTANT: This triggers the data load
             mounted() {
                 this.init();
             },
@@ -198,26 +197,20 @@
                     const targetMovie = this.selectedMovie ? String(this.selectedMovie).trim() : null;
         
                     return this.gadgetsMaster.filter(g => {
-                        // 1. Basic Visibility
                         if ((g['Active'] || 'yes').toLowerCase().trim() !== 'yes') return false;
-        
-                        // 2. URL Gadget ID Filter
                         if (this.paramGadgetId && String(g['Gadget ID']).trim() !== String(this.paramGadgetId).trim()) return false;
         
-                        // Get all possible appearances for this gadget
                         const allApps = this.gadgetMedia.filter(m => String(m['Gadget ID']).trim() === String(g['Gadget ID']).trim());
         
-                        // 3. Movie Filter Logic
                         if (targetMovie) {
                             const hasMatch = allApps.some(a => String(a['Movie ID']).trim() === targetMovie);
                             if (!hasMatch) return false;
                         }
         
-                        // 4. Manga Type/Title Filters
+                        // Filtering by Manga Dropdowns
                         if (this.selectedGrandType && !this.getMangaData(g, true).some(b => b.type === this.selectedGrandType)) return false;
                         if (this.selectedStandardTitle && !this.getMangaData(g, false).some(b => b.title === this.selectedStandardTitle)) return false;
         
-                        // 5. Text Search
                         if (q) {
                             const searchableText = (g['JP Title'] + ' ' + allApps.map(a => `${a['HK Translation']} ${a['CultureCom Trans']} ${a['HKChingWin Trans']}`).join(' ')).toLowerCase();
                             if (!searchableText.includes(q)) return false;
@@ -225,7 +218,6 @@
         
                         return true;
                     }).map(g => {
-                        // Return original gadget but with filtered appearances array inside it
                         let apps = this.gadgetMedia.filter(m => String(m['Gadget ID']).trim() === String(g['Gadget ID']).trim());
                         if (targetMovie) {
                             apps = apps.filter(a => String(a['Movie ID']).trim() === targetMovie);
@@ -239,14 +231,14 @@
                     return this.filteredData.slice(start, start + this.itemsPerPage);
                 },
         
-                totalPages() {
-                    return Math.ceil(this.filteredData.length / this.itemsPerPage);
-                },
+                totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
         
                 paginationRange() {
-                    let range = [];
-                    for (let i = 1; i <= this.totalPages; i++) range.push(i);
-                    return range;
+                    const current = this.currentPage, last = this.totalPages, range = [];
+                    for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i); }
+                    const res = []; let l;
+                    for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
+                    return res;
                 },
         
                 dynamicMovies() {
@@ -258,11 +250,12 @@
                 },
         
                 dynamicGrandTypes() {
-                    return [...new Set(this.contents.filter(c => c['Grand Collection'] === 'yes').map(c => c['Manga Type']))].filter(Boolean).sort();
+                    return [...new Set(this.contents.filter(item => (item.類 === '大長編大全集' || item.類 === '大全集')).map(item => item.類))].sort();
                 },
         
                 dynamicStandardTitles() {
-                    return [...new Set(this.contents.filter(c => c['Grand Collection'] !== 'yes').map(c => c['Standard Manga Title']))].filter(Boolean).sort();
+                    const ids = [...new Set(this.contents.filter(item => !(item.類 === '大長編大全集' || item.類 === '大全集')).map(item => item.ISBN))];
+                    return [...new Set(this.publishHk.filter(h => ids.includes(h.ISBN_JP)).map(h => h.Title))].sort();
                 }
             },
             methods: {
@@ -276,61 +269,73 @@
                             fetch(base + "書籍收錄作品").then(r => r.json()),
                             fetch(base + "出版目録HK").then(r => r.json())
                         ]);
-                        this.gadgetsMaster = g;
-                        this.gadgetMedia = gm;
-                        this.movies = m;
-                        this.contents = s;
-                        this.publishHk = h;
+                        this.gadgetsMaster = g; this.gadgetMedia = gm; this.movies = m; this.contents = s; this.publishHk = h;
                         
                         const params = new URLSearchParams(window.location.search);
                         if (params.get('gadgetid')) this.paramGadgetId = params.get('gadgetid').trim();
                         if (params.get('movieid')) this.selectedMovie = params.get('movieid').trim();
                         
                         this.loading = false;
-                    } catch (e) {
-                        console.error("Fetch Error:", e);
-                        this.loading = false;
-                    }
-                },
-        
-                getMovieData(id, field) {
-                    const movie = this.movies.find(m => String(m['Media ID']).trim() === String(id).trim());
-                    return movie ? movie[field] : (field === 'Media ID' ? id : '-');
+                    } catch (e) { console.error(e); this.loading = false; }
                 },
         
                 getMangaData(gadget, isGrand) {
                     const gid = String(gadget['Gadget ID']).trim();
-                    return this.contents
-                        .filter(c => String(c['Gadget ID']).trim() === gid && (isGrand ? c['Grand Collection'] === 'yes' : c['Grand Collection'] !== 'yes'))
-                        .map(c => ({
-                            title: isGrand ? c['Manga Type'] : c['Standard Manga Title'],
-                            sub: isGrand ? c['JP Title'] : `Vol.${c['Volume']} Ch.${c['Chapter']}`,
-                            hkIsbn: c['HK ISBN'],
-                            type: c['Manga Type']
-                        }));
+                    // 1. Get unique Work IDs associated with this gadget
+                    const wids = [...new Set(this.gadgetMedia
+                        .filter(m => String(m['Gadget ID']).trim() === gid)
+                        .map(a => a['Work ID'])
+                        .filter(id => id && id !== "-")
+                    )];
+                    
+                    let books = [];
+                    wids.forEach(wid => {
+                        // 2. Find matching entries in "書籍收錄作品"
+                        this.contents.filter(item => {
+                            const isG = (item.類 === '大長編大全集' || item.類 === '大全集');
+                            return String(item.作品番).trim() === String(wid).trim() && (isGrand ? isG : !isG);
+                        }).forEach(c => {
+                            // 3. Find matching HK Publisher info via ISBN
+                            const hkMatches = this.publishHk.filter(h => h.ISBN_JP?.trim() === c.ISBN?.trim());
+                            if (hkMatches.length > 0) {
+                                const latest = hkMatches.sort((a, b) => new Date(b.IssueDate || 0) - new Date(a.IssueDate || 0))[0];
+                                books.push({ 
+                                    hkIsbn: latest.ISBN, 
+                                    title: latest.Title, 
+                                    sub: (latest.Volume ? `Vol.${latest.Volume} ` : '') + (latest.Subtitle || ''), 
+                                    type: c.類 
+                                });
+                            }
+                        });
+                    });
+                    // Remove duplicates by ISBN
+                    return Array.from(new Map(books.map(b => [b.hkIsbn, b])).values());
+                },
+        
+                getMovieData(id, field) {
+                    const m = this.movies.find(x => String(x['Media ID']).trim() === String(id).trim());
+                    return m ? (m[field] || '-') : (field === 'Media ID' ? id : '-');
                 },
         
                 getUniquePubTrans(gadget) {
                     const gid = String(gadget['Gadget ID']).trim();
-                    const matches = this.publishHk.filter(p => String(p['Gadget ID']).trim() === gid);
-                    if (!matches.length) return [{ culture: '-', chingwin: '-' }];
-                    return matches.map(m => ({ culture: m['CultureCom Trans'] || '-', chingwin: m['HKChingWin Trans'] || '-' }));
+                    const apps = this.gadgetMedia.filter(m => String(m['Gadget ID']).trim() === gid);
+                    const trans = apps.map(a => ({ 
+                        culture: a['CultureCom Trans'] || '-', 
+                        chingwin: a['HKChingWin Trans'] || '-' 
+                    }));
+                    return [...new Set(trans.map(t => JSON.stringify(t)))].map(s => JSON.parse(s));
                 },
         
-                changePage(p) {
-                    this.currentPage = p;
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                },
+                changePage(p) { this.currentPage = p; window.scrollTo({top:0, behavior:'smooth'}); },
         
-                resetFilters() {
-                    this.searchQuery = ''; this.selectedMovie = ''; this.selectedGrandType = '';
-                    this.selectedStandardTitle = ''; this.paramGadgetId = null; this.currentPage = 1;
+                resetFilters() { 
+                    this.searchQuery = ''; this.selectedMovie = ''; this.selectedGrandType = ''; 
+                    this.selectedStandardTitle = ''; this.paramGadgetId = null; this.currentPage = 1; 
                     window.history.replaceState({}, '', window.location.pathname);
                 },
         
-                handleManualInput() {
-                    this.currentPage = 1;
-                }
+                handleManualInput() { this.currentPage = 1; }
             }
         }).mount('#app');
     </script>

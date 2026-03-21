@@ -44,11 +44,12 @@
         .archive-link .label-top { font-weight: 900; font-size: 12px; margin-bottom: 2px; }
         .archive-link .label-bottom { opacity: 0.85; font-weight: 600; font-size: 10px; }
         
-        /* Manga Colors Based on Type */
-        .manga-default { background: #4f46e5; color: white !important; } /* Standard Indigo */
-        .manga-grand { background: #7c3aed; color: white !important; }   /* Purple for 大長編 */
-        .manga-plus { background: #059669; color: white !important; }    /* Green for Plus/Special */
-        .manga-tc { background: #dc2626; color: white !important; }      /* Red for Tentomushi Comics */
+        /* Manga Colors Based on Title Keywords */
+        .manga-standard { background: #4f46e5; color: white !important; } /* Indigo: 哆啦A夢 */
+        .manga-long { background: #7c3aed; color: white !important; }     /* Purple: 大長編 */
+        .manga-plus { background: #059669; color: white !important; }     /* Green: PLUS/彩色版 */
+        .manga-movie { background: #be185d; color: white !important; }    /* Pink: 電影完全版 */
+        .manga-default { background: #64748b; color: white !important; }  /* Slate: Others */
 
         .manga-btn:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         
@@ -161,7 +162,7 @@
                                         <a v-for="m in mList" :key="m.hkIsbn" 
                                            :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
                                            target="_blank" class="archive-link manga-btn"
-                                           :class="getMangaClass(m.type)">
+                                           :class="getMangaClass(m.title)">
                                              <span class="label-top">{{ m.title }}</span>
                                              <span class="label-bottom">{{ m.sub }}</span>
                                         </a>
@@ -279,11 +280,13 @@
                     if (!movie) return (field === 'Media ID' ? movieId : '-');
                     return movie[field] || '-';
                 },
-                getMangaClass(type) {
-                    if (!type) return 'manga-default';
-                    if (type.includes('大長編')) return 'manga-grand';
-                    if (type.includes('PLUS') || type.includes('特別篇')) return 'manga-plus';
-                    if (type.includes('單行本')) return 'manga-tc';
+                getMangaClass(title) {
+                    if (!title) return 'manga-default';
+                    // Check for specific Title keywords
+                    if (title.includes('大長編')) return 'manga-long';
+                    if (title.includes('PLUS') || title.includes('彩色版') || title.includes('特別篇')) return 'manga-plus';
+                    if (title.includes('電影完全版') || title.includes('彩色電影版')) return 'manga-movie';
+                    if (title.includes('哆啦A夢')) return 'manga-standard';
                     return 'manga-default';
                 },
                 getMappingList(workId) {
@@ -295,14 +298,12 @@
                     const mapped = [];
                     contentsMatches.forEach(match => {
                         const isbnJp = match.ISBN?.trim();
-                        const bookType = match.類?.trim(); // Get the type from the contents sheet
                         const hkItems = this.publishHk.filter(h => h.ISBN_JP?.trim() === isbnJp);
                         hkItems.forEach(h => {
                             mapped.push({
                                 hkIsbn: h.ISBN,
                                 title: h.Title,
                                 sub: (h.Volume ? `Vol.${h.Volume} ` : '') + (h.Subtitle || ''),
-                                type: bookType, // Save type here
                                 date: new Date(h.IssueDate || 0)
                             });
                         });

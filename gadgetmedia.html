@@ -1,287 +1,178 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Archive | Gadgets in Media</title>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        [v-cloak] { display: none; }
-        body { 
-            -webkit-user-select: none; user-select: none;
-            min-height: 100vh; background-color: #f8fafc; 
-            font-family: 'Inter', 'Noto Sans TC', 'Noto Sans JP', system-ui, sans-serif; color: #1e293b;
-        }
-        .bg-grid { background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px); background-size: 40px 40px; }
-        
-        th { 
-            font-size: 11px; font-weight: 800; padding: 16px 12px; 
-            text-align: left; color: #64748b; background: #f8fafc; 
-            border-bottom: 2px solid #e2e8f0; white-space: nowrap; 
-            position: sticky; top: 0; z-index: 10; 
-            text-transform: uppercase; letter-spacing: 0.05em;
-        }
+<script>
+    const { createApp } = Vue;
+    createApp({
+        data() {
+            return {
+                loading: true, searchQuery: '', selectedMovie: '',
+                currentPage: 1, itemsPerPage: 40, showScrollBtn: false,
+                gadgetsMaster: [], // This is now the primary data source
+                gadgetMedia: [], movies: [], contents: [], publishHk: []
+            }
+        },
+        computed: {
+            isFiltered() { return this.searchQuery !== '' || this.selectedMovie !== ''; },
+            
+            // Filters based on the Active Gadgets list
+            filteredData() {
+                const q = this.searchQuery.toLowerCase().trim();
+                return this.gadgetsMaster.filter(g => {
+                    // Filter: Only 'yes' active
+                    if (g['Active']?.toLowerCase() !== 'yes') return false;
 
-        .loader-wrapper { position: fixed; inset: 0; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
-        .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid #4f46e5; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        /* RESTORED HEADER STYLE */
-        .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
-        .main-card { background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); margin-bottom: 3rem; overflow: hidden; border: 1px solid #e2e8f0; }
-        
-        table { width: 100%; border-collapse: separate; border-spacing: 0; }
-        td { padding: 16px 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; vertical-align: middle; }
-
-        .archive-link { 
-            display: flex; flex-direction: column; 
-            padding: 8px 12px; border-radius: 10px; 
-            text-decoration: none !important; transition: 0.2s; 
-            line-height: 1.2; border: 1px solid rgba(0,0,0,0.05);
-            margin-bottom: 6px; min-width: 170px;
-        }
-        .archive-link:last-child { margin-bottom: 0; }
-        .archive-link .label-top { font-weight: 900; font-size: 12px; margin-bottom: 2px; }
-        .archive-link .label-bottom { opacity: 0.85; font-weight: 600; font-size: 10px; }
-        
-        /* THEME COLORS */
-        .manga-standard { background: #4f46e5; color: white !important; } 
-        .manga-grand { background: #be185d; color: white !important; }     
-        .movie-btn { background: #0891b2; color: white !important; }      
-
-        .archive-link:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); filter: brightness(1.05); }
-
-        .search-container { position: relative; max-width: 600px; }
-        .clear-search-btn { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; }
-
-        .counter-badge { background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 800; border: 1px solid #e2e8f0; }
-        .reset-link { color: #6366f1; font-size: 11px; font-weight: 800; text-transform: uppercase; cursor: pointer; margin-left: 8px; }
-
-        .back-to-top { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background: #1e293b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: 0.3s; }
-        .back-to-top.visible { opacity: 1; pointer-events: auto; }
-    </style>
-</head>
-<body class="bg-grid">
-    <div id="app" v-cloak>
-        <div v-if="loading" class="loader-wrapper">
-            <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Syncing Gadget Media Records...</p>
-        </div>
-
-        <nav class="top-nav">
-            <div class="max-w-[1920px] mx-auto px-6 h-20 flex items-center justify-between">
-                <div class="flex items-center gap-6">
-                    <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                    </a>
-                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Gadgets in Media</h1>
-                </div>
-            </div>
-        </nav>
-
-        <main class="max-w-[1920px] mx-auto px-6 pt-10">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="search-container">
-                    <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Global Search</label>
-                    <div class="relative">
-                        <input type="text" v-model="searchQuery" placeholder="Search gadget names, movies, or translations..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
-                        <div v-if="searchQuery" @click="searchQuery = ''" class="clear-search-btn">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Movie Filter</label>
-                    <select v-model="selectedMovie" class="bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none cursor-pointer focus:border-indigo-500 w-full h-[58px]">
-                        <option value="">All Movie References</option>
-                        <option v-for="m in uniqueMovies" :key="m.id" :value="m.id">{{ m.label }}</option>
-                    </select>
-                </div>
-
-                <div class="flex flex-col justify-end">
-                    <div class="flex items-center mb-2">
-                        <span class="counter-badge">Found {{ filteredData.length }} Records</span>
-                        <span v-if="isFiltered" @click="resetFilters" class="reset-link">✕ Reset</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="main-card">
-                <div class="overflow-x-auto">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Gadget Title</th>
-                                <th>HK Translation</th>
-                                <th>Publisher Trans.</th>
-                                <th>JP Release</th>
-                                <th>Movie Reference</th>
-                                <th>Grand Collection</th>
-                                <th>Standard Manga</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="row in paginatedData" :key="row['Gadget Media ID']">
-                                <td class="font-black text-slate-900 text-[15px]">
-                                    {{ getGadgetJP(row['Gadget ID']) }}
-                                </td>
-                                <td class="font-bold text-slate-700">
-                                    {{ row['HK Translation'] || '-' }}
-                                </td>
-                                <td class="text-[12px] font-bold text-slate-500">
-                                    <div class="mb-1 text-slate-900">文傳: {{ row['CultureCom TransHK'] || '-' }}</div>
-                                    <div>青文: {{ row['ChingWin Trans'] || '-' }}</div>
-                                </td>
-                                <td class="text-[13px] font-bold text-slate-600 whitespace-nowrap">
-                                    {{ getMovieData(row['Movie ID'], 'JP Release Date') }}
-                                </td>
-                                <td>
-                                    <a v-if="row['Movie ID'] && row['Movie ID'] !== '-'" 
-                                       :href="'movie.html?mediaid=' + getMovieData(row['Movie ID'], 'Media ID')" class="archive-link movie-btn">
-                                        <span class="label-top">{{ getMovieData(row['Movie ID'], 'JP Title') }}</span>
-                                        <span class="label-bottom">{{ getMovieData(row['Movie ID'], 'HK Title') }}</span>
-                                    </a>
-                                </td>
-                                <td>
-                                    <div v-if="mList = getMangaByCat(row['Work ID'], true)" class="flex flex-col">
-                                        <a v-for="m in mList" :key="m.hkIsbn" 
-                                           :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
-                                           target="_blank" class="archive-link manga-grand">
-                                            <span class="label-top">{{ m.title }}</span>
-                                            <span class="label-bottom">{{ m.sub }}</span>
-                                        </a>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div v-if="mList = getMangaByCat(row['Work ID'], false)" class="flex flex-col">
-                                        <a v-for="m in mList" :key="m.hkIsbn" 
-                                           :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
-                                           target="_blank" class="archive-link manga-standard">
-                                            <span class="label-top">{{ m.title }}</span>
-                                            <span class="label-bottom">{{ m.sub }}</span>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="bg-slate-50 p-6 flex flex-col md:flex-row items-center justify-between border-t border-slate-200 gap-4">
-                    <div class="text-[11px] font-black uppercase text-slate-400 tracking-widest">
-                        Page {{ currentPage }} / {{ totalPages }}
-                    </div>
-                    <div class="flex gap-2">
-                        <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" 
-                                :class="p === currentPage ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-400 border border-slate-200'" 
-                                class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xs">
-                            {{ p }}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </main>
-        
-        <button @click="scrollToTop" class="back-to-top" :class="{ 'visible': showScrollBtn }">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M5 15l7-7 7 7"></path></svg>
-        </button>
-    </div>
-
-    <script>
-        const { createApp } = Vue;
-        createApp({
-            data() {
-                return {
-                    loading: true, searchQuery: '', selectedMovie: '',
-                    currentPage: 1, itemsPerPage: 40, showScrollBtn: false,
-                    gadgetMedia: [], gadgetsMaster: [], movies: [], contents: [], publishHk: []
-                }
-            },
-            computed: {
-                isFiltered() { return this.searchQuery !== '' || this.selectedMovie !== ''; },
-                uniqueMovies() {
-                    const ids = [...new Set(this.gadgetMedia.map(c => c['Movie ID']).filter(id => id && id !== "-"))];
-                    return ids.map(id => {
-                        const m = this.movies.find(movie => movie['Media ID'] === id);
-                        return { id, label: m ? `${m['JP Title']} (${m['HK Title']})` : id };
-                    }).sort((a,b) => a.label.localeCompare(b.label, 'zh-Hant'));
-                },
-                filteredData() {
-                    const q = this.searchQuery.toLowerCase().trim();
-                    return this.gadgetMedia.filter(r => {
-                        if (this.selectedMovie && r['Movie ID'] !== this.selectedMovie) return false;
-                        const movie = this.movies.find(m => m['Media ID'] === r['Movie ID']) || {};
-                        const gadgetJP = this.getGadgetJP(r['Gadget ID']);
-                        const searchFields = [gadgetJP, r['HK Translation'], r['CultureCom TransHK'], r['ChingWin Trans'], movie['JP Title'], movie['HK Title']].join(' ').toLowerCase();
-                        return !q || searchFields.includes(q);
-                    });
-                },
-                totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
-                paginatedData() {
-                    const start = (this.currentPage - 1) * this.itemsPerPage;
-                    return this.filteredData.slice(start, start + this.itemsPerPage);
-                },
-                paginationRange() {
-                    const current = this.currentPage, last = this.totalPages, range = [];
-                    for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i); }
-                    const res = []; let l;
-                    for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
-                    return res;
-                }
-            },
-            methods: {
-                async init() {
-                    try {
-                        const [gm, g, m, s, h] = await Promise.all([
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/媒體與法寶").then(r => r.json()),
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/法寶").then(r => r.json()),
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/電影動畫").then(r => r.json()),
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
-                        ]);
-                        this.gadgetMedia = gm; this.gadgetsMaster = g; this.movies = m; this.contents = s; this.publishHk = h;
-                        
-                        const gid = new URLSearchParams(window.location.search).get('gadgetid');
-                        if (gid) this.searchQuery = this.getGadgetJP(gid);
-                        
-                        this.loading = false;
-                        window.addEventListener('scroll', () => { this.showScrollBtn = window.scrollY > 400; });
-                    } catch (e) { console.error(e); }
-                },
-                getGadgetJP(id) {
-                    const gadget = this.gadgetsMaster.find(g => g['Gadget ID'] === id);
-                    return gadget ? gadget['JP Title'] : id;
-                },
-                getMovieData(movieId, field) {
-                    const movie = this.movies.find(m => m['Media ID'] === movieId);
-                    return movie ? (movie[field] || '-') : (field === 'Media ID' ? movieId : '-');
-                },
-                getMangaByCat(workId, isGrand) {
-                    if(!workId || workId === "-") return null;
-                    const idStr = workId.toString().trim();
-                    const contentsMatches = this.contents.filter(item => {
-                        const matchId = item.作品番?.toString().trim() === idStr;
-                        const isGrandType = (item.類 === '大長編大全集' || item.類 === '大全集');
-                        return matchId && (isGrand ? isGrandType : !isGrandType);
-                    });
+                    // Get all media appearances for this specific gadget
+                    const appearances = this.gadgetMedia.filter(m => m['Gadget ID'] === g['Gadget ID']);
                     
-                    const mapped = [];
-                    contentsMatches.forEach(match => {
-                        const hkItems = this.publishHk.filter(h => h.ISBN_JP?.trim() === match.ISBN?.trim());
-                        hkItems.forEach(h => {
-                            mapped.push({ hkIsbn: h.ISBN, title: h.Title, sub: (h.Volume ? `Vol.${h.Volume} ` : '') + (h.Subtitle || ''), date: new Date(h.IssueDate || 0) });
-                        });
-                    });
-                    return mapped.length ? mapped.sort((a,b) => b.date - a.date) : null;
-                },
-                resetFilters() { this.searchQuery = ''; this.selectedMovie = ''; },
-                changePage(p) { this.currentPage = p; this.scrollToTop(); },
-                scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+                    // Filter: Movie Selection (If a movie is selected, the gadget must appear in it)
+                    if (this.selectedMovie && !appearances.some(a => a['Movie ID'] === this.selectedMovie)) return false;
+
+                    // Search Logic: Search Gadget Title or any of its media appearance translations
+                    const appearanceTrans = appearances.map(a => 
+                        `${a['HK Translation']} ${a['CultureCom TransHK']} ${a['ChingWin Trans']}`
+                    ).join(' ');
+                    
+                    const searchFields = [
+                        g['JP Title'], 
+                        g['Gadget ID'],
+                        appearanceTrans
+                    ].join(' ').toLowerCase();
+                    
+                    return !q || searchFields.includes(q);
+                });
             },
-            mounted() { this.init(); }
-        }).mount('#app')
-    </script>
-</body>
-</html>
+
+            uniqueMovies() {
+                // Get all movie IDs that are actually linked to active gadgets
+                const activeGadgetIds = this.filteredData.map(g => g['Gadget ID']);
+                const movieIds = [...new Set(
+                    this.gadgetMedia
+                        .filter(m => activeGadgetIds.includes(m['Gadget ID']))
+                        .map(m => m['Movie ID'])
+                        .filter(id => id && id !== "-")
+                )];
+                
+                return movieIds.map(id => {
+                    const m = this.movies.find(movie => movie['Media ID'] === id);
+                    return { id, label: m ? `${m['JP Title']} (${m['HK Title']})` : id };
+                }).sort((a,b) => a.label.localeCompare(b.label, 'zh-Hant'));
+            },
+
+            totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
+            paginatedData() {
+                const start = (this.currentPage - 1) * this.itemsPerPage;
+                return this.filteredData.slice(start, start + this.itemsPerPage);
+            },
+            paginationRange() {
+                const current = this.currentPage, last = this.totalPages, range = [];
+                for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i); }
+                const res = []; let l;
+                for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
+                return res;
+            }
+        },
+        methods: {
+            async init() {
+                try {
+                    const [g, gm, m, s, h] = await Promise.all([
+                        fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/法寶").then(r => r.json()),
+                        fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/媒體與法寶").then(r => r.json()),
+                        fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/電影動畫").then(r => r.json()),
+                        fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
+                        fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
+                    ]);
+                    this.gadgetsMaster = g; this.gadgetMedia = gm; this.movies = m; this.contents = s; this.publishHk = h;
+                    
+                    // URL Param: Filter by ID
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const gid = urlParams.get('gadgetid');
+                    if (gid) this.searchQuery = gid;
+
+                    this.loading = false;
+                    window.addEventListener('scroll', () => { this.showScrollBtn = window.scrollY > 400; });
+                } catch (e) { console.error(e); }
+            },
+
+            // Helper to get all media records for a specific Gadget
+            getMediaRows(gadgetId) {
+                return this.gadgetMedia.filter(m => m['Gadget ID'] === gadgetId);
+            },
+
+            getMovieData(movieId, field) {
+                const movie = this.movies.find(m => m['Media ID'] === movieId);
+                return movie ? (movie[field] || '-') : (field === 'Media ID' ? movieId : '-');
+            },
+
+            getMangaByCat(workId, isGrand) {
+                if(!workId || workId === "-") return null;
+                const idStr = workId.toString().trim();
+                const contentsMatches = this.contents.filter(item => {
+                    const matchId = item.作品番?.toString().trim() === idStr;
+                    const isGrandType = (item.類 === '大長編大全集' || item.類 === '大全集');
+                    return matchId && (isGrand ? isGrandType : !isGrandType);
+                });
+                
+                const mapped = [];
+                contentsMatches.forEach(match => {
+                    const hkItems = this.publishHk.filter(h => h.ISBN_JP?.trim() === match.ISBN?.trim());
+                    hkItems.forEach(h => {
+                        mapped.push({ hkIsbn: h.ISBN, title: h.Title, sub: (h.Volume ? `Vol.${h.Volume} ` : '') + (h.Subtitle || ''), date: new Date(h.IssueDate || 0) });
+                    });
+                });
+                return mapped.length ? mapped.sort((a,b) => b.date - a.date) : null;
+            },
+            resetFilters() { this.searchQuery = ''; this.selectedMovie = ''; },
+            changePage(p) { this.currentPage = p; this.scrollToTop(); },
+            scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        },
+        mounted() { this.init(); }
+    }).mount('#app')
+</script>
+
+<tr v-for="gadget in paginatedData" :key="gadget['Gadget ID']">
+    <td class="font-black text-slate-900 text-[15px]">
+        {{ gadget['JP Title'] }}
+    </td>
+    
+    <td colspan="6" class="p-0">
+        <table class="w-full border-none">
+            <tr v-for="media in getMediaRows(gadget['Gadget ID'])" :key="media['Gadget Media ID']" class="border-none">
+                <td class="w-[14.1%] border-none font-bold text-slate-700">
+                    {{ media['HK Translation'] || '-' }}
+                </td>
+                <td class="w-[17.6%] border-none text-[12px] font-bold text-slate-500">
+                    <div class="mb-1 text-slate-900">文傳: {{ media['CultureCom TransHK'] || '-' }}</div>
+                    <div>青文: {{ media['ChingWin Trans'] || '-' }}</div>
+                </td>
+                <td class="w-[11.8%] border-none text-[13px] font-bold text-slate-600">
+                    {{ getMovieData(media['Movie ID'], 'JP Release Date') }}
+                </td>
+                <td class="w-[18.8%] border-none">
+                    <a v-if="media['Movie ID'] && media['Movie ID'] !== '-'" 
+                       :href="'movie.html?mediaid=' + getMovieData(media['Movie ID'], 'Media ID')" class="archive-link movie-btn">
+                        <span class="label-top">{{ getMovieData(media['Movie ID'], 'JP Title') }}</span>
+                        <span class="label-bottom">{{ getMovieData(media['Movie ID'], 'HK Title') }}</span>
+                    </a>
+                </td>
+                <td class="w-[18.8%] border-none">
+                    <div v-if="mList = getMangaByCat(media['Work ID'], true)" class="flex flex-col">
+                        <a v-for="m in mList" :key="m.hkIsbn" 
+                           :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
+                           target="_blank" class="archive-link manga-grand">
+                            <span class="label-top">{{ m.title }}</span>
+                            <span class="label-bottom">{{ m.sub }}</span>
+                        </a>
+                    </div>
+                </td>
+                <td class="w-[18.8%] border-none">
+                    <div v-if="mList = getMangaByCat(media['Work ID'], false)" class="flex flex-col">
+                        <a v-for="m in mList" :key="m.hkIsbn" 
+                           :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
+                           target="_blank" class="archive-link manga-standard">
+                            <span class="label-top">{{ m.title }}</span>
+                            <span class="label-bottom">{{ m.sub }}</span>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </td>
+</tr>

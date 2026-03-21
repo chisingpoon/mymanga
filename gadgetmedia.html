@@ -57,7 +57,7 @@
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Syncing Media Archive...</p>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Processing Archive...</p>
         </div>
 
         <nav class="top-nav">
@@ -75,21 +75,21 @@
         <main class="max-w-[1920px] mx-auto px-6 pt-10">
             <div class="flex flex-wrap gap-4 mb-8">
                 <div class="flex-1 min-w-[300px] relative">
-                    <input type="text" v-model.trim="searchQuery" @input="currentPage = 1" placeholder="Search gadget names..." class="w-full bg-white border-2 border-slate-200 rounded-2xl pl-12 pr-12 py-4 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
-                    <button v-if="searchQuery" @click="searchQuery = ''; currentPage = 1" class="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-200">✕</button>
+                    <input type="text" v-model.trim="searchQuery" @input="handleManualInput" placeholder="Search gadget names..." class="w-full bg-white border-2 border-slate-200 rounded-2xl pl-12 pr-12 py-4 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
+                    <button v-if="searchQuery || selectedGadgetId" @click="resetFilters" class="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-200">✕</button>
                 </div>
 
-                <select v-model="selectedMovie" @change="currentPage = 1" class="min-w-[180px] bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold">
+                <select v-model="selectedMovie" @change="handleManualInput" class="min-w-[180px] bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold">
                     <option value="">All Movies</option>
                     <option v-for="m in dynamicMovies" :key="m.id" :value="m.id">{{ m.label }}</option>
                 </select>
 
-                <select v-model="selectedGrandType" @change="currentPage = 1" class="min-w-[180px] bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold">
+                <select v-model="selectedGrandType" @change="handleManualInput" class="min-w-[180px] bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold">
                     <option value="">Grand: All Types</option>
                     <option v-for="t in dynamicGrandTypes" :key="t" :value="t">{{ t }}</option>
                 </select>
 
-                <select v-model="selectedStandardTitle" @change="currentPage = 1" class="min-w-[180px] bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold">
+                <select v-model="selectedStandardTitle" @change="handleManualInput" class="min-w-[180px] bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold">
                     <option value="">Standard: All Titles</option>
                     <option v-for="t in dynamicStandardTitles" :key="t" :value="t">{{ t }}</option>
                 </select>
@@ -154,7 +154,7 @@
                     </table>
                 </div>
 
-                <div class="bg-slate-50 p-6 flex items-center justify-between border-t border-slate-200">
+                <div v-if="totalPages > 1" class="bg-slate-50 p-6 flex items-center justify-between border-t border-slate-200">
                     <div class="text-[11px] font-black text-slate-400 uppercase">Page {{ currentPage }} / {{ totalPages }}</div>
                     <div class="flex gap-2">
                         <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" :class="p === currentPage ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-400'" class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xs transition-all">
@@ -173,6 +173,7 @@
                 return {
                     loading: true, searchQuery: '', selectedMovie: '',
                     selectedGrandType: '', selectedStandardTitle: '',
+                    selectedGadgetId: null, // Track URL parameter
                     currentPage: 1, itemsPerPage: 30,
                     gadgetsMaster: [], gadgetMedia: [], movies: [], contents: [], publishHk: []
                 }
@@ -183,6 +184,10 @@
                     const q = this.searchQuery.toLowerCase();
                     return this.gadgetsMaster.filter(g => {
                         if (g['Active']?.toLowerCase() !== 'yes') return false;
+                        
+                        // If gadgetid parameter exists, override text search
+                        if (this.selectedGadgetId && g['Gadget ID'] !== this.selectedGadgetId) return false;
+
                         if (!q) return true;
                         const relatedMedia = this.gadgetMedia.filter(m => m['Gadget ID'] === g['Gadget ID']);
                         const text = (g['JP Title'] + ' ' + relatedMedia.map(m => `${m['HK Translation']} ${m['CultureCom Trans']} ${m['HKChingWin Trans']}`).join(' ')).toLowerCase();
@@ -233,8 +238,27 @@
                             fetch(baseUrl + "出版目録HK").then(r => r.json())
                         ]);
                         this.gadgetsMaster = g; this.gadgetMedia = gm; this.movies = m; this.contents = s; this.publishHk = h;
+                        
+                        this.checkUrlParams(); // Parse URL after data loaded
                         this.loading = false;
                     } catch (e) { console.error(e); }
+                },
+                checkUrlParams() {
+                    const params = new URLSearchParams(window.location.search);
+                    const gid = params.get('gadgetid');
+                    const mid = params.get('movieid');
+                    
+                    if (gid) {
+                        this.selectedGadgetId = gid;
+                    }
+                    if (mid) {
+                        this.selectedMovie = mid;
+                    }
+                },
+                handleManualInput() {
+                    // If user interacts with filters, clear the strict Gadget ID locking
+                    this.selectedGadgetId = null;
+                    this.currentPage = 1;
                 },
                 getMangaData(gadget, isGrand) {
                     if (this.loading) return [];
@@ -246,23 +270,15 @@
                             return String(item.作品番) === String(wid) && (isGrand ? isGrandType : !isGrandType);
                         });
                         matchesInContents.forEach(c => {
-                            // Find ALL matches in PublishHK and sort by IssueDate descending
                             const hkMatches = this.publishHk
                                 .filter(h => h.ISBN_JP?.trim() === c.ISBN?.trim())
                                 .sort((a, b) => new Date(b.IssueDate || 0) - new Date(a.IssueDate || 0));
-                            
                             if (hkMatches.length > 0) {
                                 const latest = hkMatches[0];
-                                books.push({ 
-                                    hkIsbn: latest.ISBN, 
-                                    title: latest.Title, 
-                                    sub: (latest.Volume ? `Vol.${latest.Volume} ` : '') + (latest.Subtitle || ''), 
-                                    type: c.類 
-                                });
+                                books.push({ hkIsbn: latest.ISBN, title: latest.Title, sub: (latest.Volume ? `Vol.${latest.Volume} ` : '') + (latest.Subtitle || ''), type: c.類 });
                             }
                         });
                     });
-                    // Final deduplication by ISBN
                     return Array.from(new Map(books.map(b => [b.hkIsbn, b])).values());
                 },
                 getMovieData(id, field) {
@@ -273,7 +289,16 @@
                     const trans = (gadget.appearances || []).map(a => ({ culture: a['CultureCom Trans'] || '-', chingwin: a['HKChingWin Trans'] || '-' }));
                     return [...new Set(trans.map(t => JSON.stringify(t)))].map(s => JSON.parse(s));
                 },
-                resetFilters() { this.searchQuery = ''; this.selectedMovie = ''; this.selectedGrandType = ''; this.selectedStandardTitle = ''; this.currentPage = 1; },
+                resetFilters() { 
+                    this.searchQuery = ''; 
+                    this.selectedMovie = ''; 
+                    this.selectedGrandType = ''; 
+                    this.selectedStandardTitle = ''; 
+                    this.selectedGadgetId = null;
+                    this.currentPage = 1; 
+                    // Optional: Clean URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                },
                 changePage(p) { this.currentPage = p; window.scrollTo({top:0, behavior:'smooth'}); }
             },
             mounted() { this.init(); }

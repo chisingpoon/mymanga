@@ -191,7 +191,6 @@
                 this.init();
             },
             computed: {
-                // Stage 1: Basic Search and URL ID
                 baseFiltered() {
                     if (this.loading) return [];
                     const q = this.searchQuery.toLowerCase().trim();
@@ -209,7 +208,6 @@
                     });
                 },
         
-                // Stage 2: Dropdown Filters (Movie, Grand, Standard)
                 filteredData() {
                     return this.baseFiltered.filter(g => {
                         // 1. Movie Filter
@@ -220,20 +218,17 @@
         
                         // 2. Grand Manga Filter
                         if (this.selectedGrandType) {
-                            const grandBooks = this.getMangaData(g, true);
-                            if (!grandBooks.some(b => b.type === this.selectedGrandType)) return false;
+                            if (!this.getMangaData(g, true).some(b => b.type === this.selectedGrandType)) return false;
                         }
         
-                        // 3. Standard Manga Filter (FIXED)
+                        // 3. Standard Manga Filter (Fixed)
                         if (this.selectedStandardTitle) {
                             const standardBooks = this.getMangaData(g, false);
-                            // Match by exact title string
                             if (!standardBooks.some(b => b.title === this.selectedStandardTitle)) return false;
                         }
         
                         return true;
                     }).map(g => {
-                        // Sync the "Appearances" column with the movie filter
                         let apps = this.gadgetMedia.filter(m => String(m['Gadget ID']).trim() === String(g['Gadget ID']).trim());
                         if (this.selectedMovie) {
                             apps = apps.filter(a => String(a['Movie ID']).trim() === String(this.selectedMovie).trim());
@@ -242,7 +237,6 @@
                     });
                 },
         
-                // DYNAMIC DROPDOWNS
                 dynamicMovies() {
                     const currentGids = new Set(this.baseFiltered.map(g => String(g['Gadget ID']).trim()));
                     const movieIds = [...new Set(this.gadgetMedia
@@ -257,13 +251,11 @@
                 },
         
                 dynamicGrandTypes() {
-                    // Shows types available for the gadgets currently in view
                     const types = this.baseFiltered.flatMap(g => this.getMangaData(g, true).map(b => b.type));
                     return [...new Set(types)].filter(Boolean).sort();
                 },
         
                 dynamicStandardTitles() {
-                    // Shows titles available for the gadgets currently in view
                     const titles = this.baseFiltered.flatMap(g => this.getMangaData(g, false).map(b => b.title));
                     return [...new Set(titles)].filter(Boolean).sort();
                 },
@@ -304,36 +296,42 @@
         
                 getMangaData(gadget, isGrand) {
                     const gid = String(gadget['Gadget ID']).trim();
-                    // Find all Work IDs for this gadget
                     const wids = [...new Set(this.gadgetMedia
                         .filter(m => String(m['Gadget ID']).trim() === gid)
                         .map(a => String(a['Work ID']).trim())
                         .filter(id => id && id !== "-")
                     )];
                     
-                    let results = [];
+                    let books = [];
                     wids.forEach(wid => {
-                        // Find entries in Books (書籍收錄作品)
                         const bookEntries = this.contents.filter(c => {
                             const isGCategory = (c.類 === '大長編大全集' || c.類 === '大全集');
                             return String(c.作品番).trim() === wid && (isGrand ? isGCategory : !isGCategory);
                         });
         
                         bookEntries.forEach(entry => {
-                            // Match with Publisher Info (出版目録HK) via JP ISBN
                             const pubMatches = this.publishHk.filter(p => String(p.ISBN_JP).trim() === String(entry.ISBN).trim());
-                            pubMatches.forEach(p => {
-                                results.push({
-                                    hkIsbn: p.ISBN,
-                                    title: p.Title,
-                                    sub: (p.Volume ? `Vol.${p.Volume} ` : '') + (p.Subtitle || ''),
-                                    type: entry.類
+                            
+                            if (pubMatches.length > 0) {
+                                // RE-ADDED: Latest Issue logic based on IssueDate
+                                const latest = pubMatches.sort((a, b) => {
+                                    const dateA = new Date(a.IssueDate || 0);
+                                    const dateB = new Date(b.IssueDate || 0);
+                                    return dateB - dateA;
+                                })[0];
+        
+                                books.push({
+                                    hkIsbn: latest.ISBN,
+                                    title: latest.Title,
+                                    sub: (latest.Volume ? `Vol.${latest.Volume} ` : '') + (latest.Subtitle || ''),
+                                    type: entry.類,
+                                    issueDate: latest.IssueDate
                                 });
-                            });
+                            }
                         });
                     });
-                    // Unique by ISBN to avoid duplicate chapter rows
-                    return Array.from(new Map(results.map(r => [r.hkIsbn, r])).values());
+                    // Unique by ISBN to prevent duplicate chapter rows
+                    return Array.from(new Map(books.map(b => [b.hkIsbn, b])).values());
                 },
         
                 getMovieData(id, field) {

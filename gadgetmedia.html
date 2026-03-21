@@ -116,7 +116,6 @@
                     searchQuery: '',
                     selectedMovie: '',
                     selectedGrandType: '',
-                    // Removed selectedStandardTitle
                     paramGadgetId: null,
                     currentPage: 1,
                     itemsPerPage: 30,
@@ -131,38 +130,51 @@
                 this.init();
             },
             computed: {
+                // STAGE 1: Handles Text Search and URL Parameters
                 baseFiltered() {
                     if (this.loading) return [];
                     const q = this.searchQuery.toLowerCase().trim();
                     
                     return this.gadgetsMaster.filter(g => {
+                        // 1. Must be Active
                         if ((g['Active'] || 'yes').toLowerCase().trim() !== 'yes') return false;
-                        if (this.paramGadgetId && String(g['Gadget ID']).trim() !== String(this.paramGadgetId).trim()) return false;
         
+                        // 2. URL Gadget ID (Only filter if the parameter actually exists)
+                        if (this.paramGadgetId && String(g['Gadget ID']).trim() !== String(this.paramGadgetId).trim()) {
+                            return false;
+                        }
+        
+                        // 3. Text Search
                         if (q) {
                             const allApps = this.gadgetMedia.filter(m => String(m['Gadget ID']).trim() === String(g['Gadget ID']).trim());
-                            const searchableText = (g['JP Title'] + ' ' + allApps.map(a => `${a['HK Translation']} ${a['CultureCom Trans']} ${a['HKChingWin Trans']}`).join(' ')).toLowerCase();
+                            const searchableText = (
+                                (g['JP Title'] || '') + ' ' + 
+                                allApps.map(a => `${a['HK Translation']} ${a['CultureCom Trans']} ${a['HKChingWin Trans']}`).join(' ')
+                            ).toLowerCase();
                             if (!searchableText.includes(q)) return false;
                         }
+        
                         return true;
                     });
                 },
         
+                // STAGE 2: Handles Dropdown Filters
                 filteredData() {
                     return this.baseFiltered.filter(g => {
-                        // 1. Movie Filter
+                        // Movie Filter
                         if (this.selectedMovie) {
                             const apps = this.gadgetMedia.filter(m => String(m['Gadget ID']).trim() === String(g['Gadget ID']).trim());
                             if (!apps.some(a => String(a['Movie ID']).trim() === String(this.selectedMovie).trim())) return false;
                         }
         
-                        // 2. Grand Manga Filter
+                        // Grand Manga Filter
                         if (this.selectedGrandType) {
                             if (!this.getMangaData(g, true).some(b => b.type === this.selectedGrandType)) return false;
                         }
         
                         return true;
                     }).map(g => {
+                        // Sync visible cell content with Movie Filter
                         let apps = this.gadgetMedia.filter(m => String(m['Gadget ID']).trim() === String(g['Gadget ID']).trim());
                         if (this.selectedMovie) {
                             apps = apps.filter(a => String(a['Movie ID']).trim() === String(this.selectedMovie).trim());
@@ -188,8 +200,6 @@
                     const types = this.baseFiltered.flatMap(g => this.getMangaData(g, true).map(b => b.type));
                     return [...new Set(types)].filter(Boolean).sort();
                 },
-        
-                // Removed dynamicStandardTitles
         
                 paginatedData() {
                     const start = (this.currentPage - 1) * this.itemsPerPage;
@@ -218,8 +228,12 @@
                         this.gadgetsMaster = g; this.gadgetMedia = gm; this.movies = m; this.contents = s; this.publishHk = h;
                         
                         const params = new URLSearchParams(window.location.search);
-                        if (params.get('gadgetid')) this.paramGadgetId = params.get('gadgetid').trim();
-                        if (params.get('movieid')) this.selectedMovie = params.get('movieid').trim();
+                        const gid = params.get('gadgetid');
+                        const mid = params.get('movieid');
+                        
+                        // If the URL has these, set them. If not, they remain null/empty string (Default Show All)
+                        if (gid) this.paramGadgetId = gid.trim();
+                        if (mid) this.selectedMovie = mid.trim();
                         
                         this.loading = false;
                     } catch (e) { console.error(e); this.loading = false; }
@@ -242,14 +256,8 @@
         
                         bookEntries.forEach(entry => {
                             const pubMatches = this.publishHk.filter(p => String(p.ISBN_JP).trim() === String(entry.ISBN).trim());
-                            
                             if (pubMatches.length > 0) {
-                                const latest = pubMatches.sort((a, b) => {
-                                    const dateA = new Date(a.IssueDate || 0);
-                                    const dateB = new Date(b.IssueDate || 0);
-                                    return dateB - dateA;
-                                })[0];
-        
+                                const latest = pubMatches.sort((a, b) => new Date(b.IssueDate || 0) - new Date(a.IssueDate || 0))[0];
                                 books.push({
                                     hkIsbn: latest.ISBN,
                                     title: latest.Title,

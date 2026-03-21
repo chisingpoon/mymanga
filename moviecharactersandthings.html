@@ -33,6 +33,9 @@
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         td { padding: 16px 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; }
 
+        .filter-select { background-color: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 8px 12px; font-size: 13px; font-weight: 700; color: #1e293b; outline: none; transition: 0.2s; cursor: pointer; width: 100%; }
+        .filter-select:focus { border-color: #4f46e5; }
+
         .manga-link { display: inline-flex; flex-direction: column; background: #4f46e5; color: white !important; padding: 8px 12px; border-radius: 10px; font-size: 10px; text-decoration: none !important; transition: 0.2s; min-width: 170px; line-height: 1.2; border: 1px solid rgba(0,0,0,0.1); }
         .manga-link .title-row { font-weight: 900; font-size: 12px; margin-bottom: 2px; }
         .manga-link .sub-row { opacity: 0.9; font-weight: 600; font-size: 10px; }
@@ -41,15 +44,14 @@
         .movie-link { display: block; color: #0891b2; font-weight: 800; text-decoration: none; line-height: 1.3; }
         .movie-link:hover { color: #0e7490; text-decoration: underline; }
 
-        .search-container { position: relative; max-width: 600px; }
+        .search-container { position: relative; }
         .clear-search-btn { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; padding: 4px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .clear-search-btn:hover { background: #fee2e2; color: #ef4444; }
 
         .type-badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; text-transform: uppercase; }
         .badge-char { background: #dcfce7; color: #166534; }
         .badge-obj { background: #fef9c3; color: #854d0e; }
 
-        .back-to-top { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background: #1e293b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2); cursor: pointer; transition: 0.3s; z-index: 1000; opacity: 0; pointer-events: none; }
+        .back-to-top { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background: #1e293b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: 0.3s; }
         .back-to-top.visible { opacity: 1; pointer-events: auto; }
     </style>
 </head>
@@ -72,13 +74,31 @@
         </nav>
 
         <main class="max-w-[1920px] mx-auto px-6 pt-10">
-            <div class="mb-8">
-                <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Global Search</label>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="search-container">
-                    <input type="text" v-model="searchQuery" placeholder="Search Names, Movies, Manga, Translations..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-base font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
-                    <div v-if="searchQuery" @click="searchQuery = ''" class="clear-search-btn">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Search Keywords</label>
+                    <div class="relative">
+                        <input type="text" v-model="searchQuery" placeholder="Search names, descriptions..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
+                        <div v-if="searchQuery" @click="searchQuery = ''" class="clear-search-btn">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </div>
                     </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Movie Filter</label>
+                    <select v-model="selectedMovie" class="filter-select h-[58px]">
+                        <option value="">All Movies</option>
+                        <option v-for="m in uniqueMovies" :key="m.id" :value="m.id">{{ m.label }}</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Manga Filter</label>
+                    <select v-model="selectedManga" class="filter-select h-[58px]">
+                        <option value="">All Manga Volumes</option>
+                        <option v-for="title in uniqueManga" :key="title" :value="title">{{ title }}</option>
+                    </select>
                 </div>
             </div>
 
@@ -164,6 +184,8 @@
                 return {
                     loading: true,
                     searchQuery: '',
+                    selectedMovie: '',
+                    selectedManga: '',
                     currentPage: 1,
                     itemsPerPage: 40,
                     showScrollBtn: false,
@@ -174,6 +196,17 @@
                 }
             },
             computed: {
+                uniqueMovies() {
+                    const ids = [...new Set(this.characters.map(c => c['Movie ID']).filter(id => id && id !== "-"))];
+                    return ids.map(id => {
+                        const m = this.movies.find(movie => movie['Media ID'] === id);
+                        return { id, label: m ? `${m['JP Title']} (${m['HK Title']})` : id };
+                    }).sort((a,b) => a.label.localeCompare(b.label, 'zh-Hant'));
+                },
+                uniqueManga() {
+                    const titles = this.characters.map(c => this.getMapping(c['Work ID'])?.title).filter(Boolean);
+                    return [...new Set(titles)].sort((a,b) => a.localeCompare(b, 'zh-Hant'));
+                },
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
                     return this.characters.filter(r => {
@@ -182,6 +215,13 @@
                         const movie = this.movies.find(m => m['Media ID'] === r['Movie ID']) || {};
                         const manga = this.getMapping(r['Work ID']) || {};
 
+                        // Movie Filter
+                        if (this.selectedMovie && r['Movie ID'] !== this.selectedMovie) return false;
+                        
+                        // Manga Filter
+                        if (this.selectedManga && manga.title !== this.selectedManga) return false;
+
+                        // Search Keywords
                         const searchFields = [
                             r['JP Title'], r['HK Title'], r['Description'], 
                             r['CultureCom Trans'], r['HKChingWin Trans'],
@@ -204,6 +244,11 @@
                     for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
                     return res;
                 }
+            },
+            watch: {
+                searchQuery() { this.currentPage = 1; },
+                selectedMovie() { this.currentPage = 1; },
+                selectedManga() { this.currentPage = 1; }
             },
             methods: {
                 async init() {

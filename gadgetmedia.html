@@ -73,91 +73,36 @@
         </nav>
 
         <main class="max-w-[1920px] mx-auto px-6 pt-10">
-            <div class="flex flex-wrap gap-4 mb-8">
-                <div class="flex-1 min-w-[300px] relative">
-                    <input type="text" v-model.trim="searchQuery" @input="handleManualInput" placeholder="Search gadget names..." class="w-full bg-white border-2 border-slate-200 rounded-2xl pl-12 pr-12 py-4 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
-                    <button v-if="searchQuery || selectedGadgetId" @click="resetFilters" class="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-200">✕</button>
+        <div class="flex flex-wrap gap-4 mb-8">
+            <div class="flex-[2] min-w-[300px] relative">
+                <input type="text" v-model.trim="searchQuery" @input="handleManualInput" 
+                       placeholder="Search gadget names or translations..." 
+                       class="w-full bg-white border-2 border-slate-200 rounded-2xl pl-12 pr-12 py-4 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
+                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                 </div>
-
-                <select v-model="selectedMovie" @change="handleManualInput" class="min-w-[180px] bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold">
-                    <option value="">All Movies</option>
+                <button v-if="searchQuery" @click="searchQuery = ''; handleManualInput()" class="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-200">✕</button>
+            </div>
+    
+            <div class="flex-1 min-w-[200px]">
+                <select v-model="selectedMovie" @change="handleManualInput" class="w-full bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold appearance-none cursor-pointer focus:border-indigo-500 outline-none shadow-sm">
+                    <option value="">🎬 All Movies</option>
                     <option v-for="m in dynamicMovies" :key="m.id" :value="m.id">{{ m.label }}</option>
                 </select>
-
-                <select v-model="selectedGrandType" @change="handleManualInput" class="min-w-[180px] bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold">
-                    <option value="">Grand: All Types</option>
+            </div>
+    
+            <div class="flex-1 min-w-[200px]">
+                <select v-model="selectedGrandType" @change="handleManualInput" class="w-full bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold appearance-none cursor-pointer focus:border-indigo-500 outline-none shadow-sm">
+                    <option value="">📚 Grand: All Types</option>
                     <option v-for="t in dynamicGrandTypes" :key="t" :value="t">{{ t }}</option>
                 </select>
-
-                <button @click="resetFilters" class="px-6 py-4 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-2xl transition-colors">Reset</button>
             </div>
-
-            <div class="main-card">
-                <div class="overflow-x-auto">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th class="w-[15%] th-gadget">Gadget (JP)</th>
-                                <th class="w-[18%] th-media">Movie Reference</th>
-                                <th class="w-[12%] th-media">HK Translation</th>
-                                <th class="w-[10%] th-media">JP Release</th>
-                                <th class="w-[15%] th-manga">Grand Collection</th>
-                                <th class="w-[15%] th-manga">Standard Manga</th>
-                                <th class="w-[15%] th-manga">Publisher Trans.</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="gadget in paginatedData" :key="gadget['Gadget ID']">
-                                <td class="font-black text-slate-900 text-[16px]">{{ gadget['JP Title'] }}</td>
-                                <td>
-                                    <div v-for="m in gadget.appearances" class="appearance-item">
-                                        <a v-if="m['Movie ID'] && m['Movie ID'] !== '-'" :href="'movie.html?mediaid=' + getMovieData(m['Movie ID'], 'Media ID')" class="archive-link movie-btn">
-                                            <span class="label-top">{{ getMovieData(m['Movie ID'], 'JP Title') }}</span>
-                                            <span class="label-bottom">{{ getMovieData(m['Movie ID'], 'HK Title') }}</span>
-                                        </a>
-                                        <div v-else class="text-slate-300 italic text-[11px]">—</div>
-                                    </div>
-                                </td>
-                                <td><div v-for="m in gadget.appearances" class="appearance-item font-bold text-slate-700">{{ m['HK Translation'] || '-' }}</div></td>
-                                <td><div v-for="m in gadget.appearances" class="appearance-item text-[13px] font-bold text-slate-600">{{ getMovieData(m['Movie ID'], 'JP Release Date') }}</div></td>
-                                <td>
-                                    <div v-for="book in getMangaData(gadget, true)" :key="book.hkIsbn">
-                                        <a :href="'manga-database.html?isbn=' + book.hkIsbn + '&region=HK'" target="_blank" class="archive-link manga-grand">
-                                            <span class="label-top">{{ book.title }}</span>
-                                            <span class="label-bottom">{{ book.sub }}</span>
-                                        </a>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div v-for="book in getMangaData(gadget, false)" :key="book.hkIsbn">
-                                        <a :href="'manga-database.html?isbn=' + book.hkIsbn + '&region=HK'" target="_blank" class="archive-link manga-standard">
-                                            <span class="label-top">{{ book.title }}</span>
-                                            <span class="label-bottom">{{ book.sub }}</span>
-                                        </a>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 min-w-[140px]">
-                                        <div v-for="(trans, idx) in getUniquePubTrans(gadget)" :key="idx" class="mb-3 last:mb-0">
-                                            <div class="pub-badge pub-culture"><span>文傳:</span> <span class="font-black">{{ trans.culture }}</span></div>
-                                            <div class="pub-badge pub-chingwin"><span>青文:</span> <span class="font-black">{{ trans.chingwin }}</span></div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div v-if="totalPages > 1" class="bg-slate-50 p-6 flex items-center justify-between border-t border-slate-200">
-                    <div class="text-[11px] font-black text-slate-400 uppercase">Page {{ currentPage }} / {{ totalPages }}</div>
-                    <div class="flex gap-2">
-                        <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" :class="p === currentPage ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-400'" class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xs transition-all">
-                            {{ p }}
-                        </button>
-                    </div>
-                </div>
-            </div>
+    
+            <button @click="resetFilters" class="px-8 py-4 bg-slate-200 hover:bg-slate-800 hover:text-white text-slate-700 font-bold rounded-2xl transition-all shadow-sm">
+                Reset
+            </button>
+        </div>
+    
         </main>
     </div>
 

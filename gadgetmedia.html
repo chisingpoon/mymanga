@@ -130,26 +130,32 @@
                 this.init();
             },
             computed: {
-                // STAGE 1: Handles Text Search and URL Parameters
+                // STAGE 1: The Core Filter (Search + URL)
                 baseFiltered() {
-                    if (this.loading) return [];
+                    if (this.loading || !this.gadgetsMaster.length) return [];
                     const q = this.searchQuery.toLowerCase().trim();
                     
                     return this.gadgetsMaster.filter(g => {
-                        // 1. Must be Active
-                        if ((g['Active'] || 'yes').toLowerCase().trim() !== 'yes') return false;
+                        // 1. Safety: Ignore empty rows
+                        if (!g || !g['Gadget ID']) return false;
         
-                        // 2. URL Gadget ID (Only filter if the parameter actually exists)
-                        if (this.paramGadgetId && String(g['Gadget ID']).trim() !== String(this.paramGadgetId).trim()) {
-                            return false;
+                        // 2. Active Status: Default to 'yes' if the column is missing
+                        const isActive = (g['Active'] || 'yes').toLowerCase().trim() === 'yes';
+                        if (!isActive) return false;
+        
+                        // 3. URL Parameter: ONLY filter if paramGadgetId actually has a value
+                        if (this.paramGadgetId) {
+                            if (String(g['Gadget ID']).trim() !== String(this.paramGadgetId).trim()) {
+                                return false;
+                            }
                         }
         
-                        // 3. Text Search
+                        // 4. Text Search: ONLY filter if searchQuery actually has a value
                         if (q) {
-                            const allApps = this.gadgetMedia.filter(m => String(m['Gadget ID']).trim() === String(g['Gadget ID']).trim());
+                            const apps = this.gadgetMedia.filter(m => String(m['Gadget ID']).trim() === String(g['Gadget ID']).trim());
                             const searchableText = (
                                 (g['JP Title'] || '') + ' ' + 
-                                allApps.map(a => `${a['HK Translation']} ${a['CultureCom Trans']} ${a['HKChingWin Trans']}`).join(' ')
+                                apps.map(a => `${a['HK Translation']} ${a['CultureCom Trans']} ${a['HKChingWin Trans']}`).join(' ')
                             ).toLowerCase();
                             if (!searchableText.includes(q)) return false;
                         }
@@ -158,23 +164,26 @@
                     });
                 },
         
-                // STAGE 2: Handles Dropdown Filters
+                // STAGE 2: Dropdown Filters (applied to the results of Stage 1)
                 filteredData() {
                     return this.baseFiltered.filter(g => {
-                        // Movie Filter
+                        // Movie Dropdown: ONLY filter if a movie is selected
                         if (this.selectedMovie) {
                             const apps = this.gadgetMedia.filter(m => String(m['Gadget ID']).trim() === String(g['Gadget ID']).trim());
-                            if (!apps.some(a => String(a['Movie ID']).trim() === String(this.selectedMovie).trim())) return false;
+                            const hasMovie = apps.some(a => String(a['Movie ID']).trim() === String(this.selectedMovie).trim());
+                            if (!hasMovie) return false;
                         }
         
-                        // Grand Manga Filter
+                        // Grand Collection Dropdown: ONLY filter if a type is selected
                         if (this.selectedGrandType) {
-                            if (!this.getMangaData(g, true).some(b => b.type === this.selectedGrandType)) return false;
+                            const grandBooks = this.getMangaData(g, true);
+                            const hasGrandType = grandBooks.some(b => b.type === this.selectedGrandType);
+                            if (!hasGrandType) return false;
                         }
         
                         return true;
                     }).map(g => {
-                        // Sync visible cell content with Movie Filter
+                        // Attach appearances for table display
                         let apps = this.gadgetMedia.filter(m => String(m['Gadget ID']).trim() === String(g['Gadget ID']).trim());
                         if (this.selectedMovie) {
                             apps = apps.filter(a => String(a['Movie ID']).trim() === String(this.selectedMovie).trim());
@@ -184,6 +193,7 @@
                 },
         
                 dynamicMovies() {
+                    if (!this.baseFiltered.length) return [];
                     const currentGids = new Set(this.baseFiltered.map(g => String(g['Gadget ID']).trim()));
                     const movieIds = [...new Set(this.gadgetMedia
                         .filter(m => currentGids.has(String(m['Gadget ID']).trim()))
@@ -197,6 +207,7 @@
                 },
         
                 dynamicGrandTypes() {
+                    if (!this.baseFiltered.length) return [];
                     const types = this.baseFiltered.flatMap(g => this.getMangaData(g, true).map(b => b.type));
                     return [...new Set(types)].filter(Boolean).sort();
                 },
@@ -205,14 +216,7 @@
                     const start = (this.currentPage - 1) * this.itemsPerPage;
                     return this.filteredData.slice(start, start + this.itemsPerPage);
                 },
-                totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
-                paginationRange() {
-                    const current = this.currentPage, last = this.totalPages, range = [];
-                    for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i); }
-                    const res = []; let l;
-                    for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
-                    return res;
-                }
+                totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; }
             },
             methods: {
                 async init() {
@@ -225,18 +229,24 @@
                             fetch(base + "書籍收錄作品").then(r => r.json()),
                             fetch(base + "出版目録HK").then(r => r.json())
                         ]);
-                        this.gadgetsMaster = g; this.gadgetMedia = gm; this.movies = m; this.contents = s; this.publishHk = h;
+                        this.gadgetsMaster = Array.isArray(g) ? g : [];
+                        this.gadgetMedia = Array.isArray(gm) ? gm : [];
+                        this.movies = Array.isArray(m) ? m : [];
+                        this.contents = Array.isArray(s) ? s : [];
+                        this.publishHk = Array.isArray(h) ? h : [];
                         
                         const params = new URLSearchParams(window.location.search);
                         const gid = params.get('gadgetid');
                         const mid = params.get('movieid');
                         
-                        // If the URL has these, set them. If not, they remain null/empty string (Default Show All)
                         if (gid) this.paramGadgetId = gid.trim();
                         if (mid) this.selectedMovie = mid.trim();
                         
                         this.loading = false;
-                    } catch (e) { console.error(e); this.loading = false; }
+                    } catch (e) { 
+                        console.error("Initialization failed:", e); 
+                        this.loading = false; 
+                    }
                 },
         
                 getMangaData(gadget, isGrand) {
@@ -275,19 +285,13 @@
                     return m ? (m[field] || '-') : (field === 'Media ID' ? id : '-');
                 },
         
-                getUniquePubTrans(gadget) {
-                    const gid = String(gadget['Gadget ID']).trim();
-                    const apps = this.gadgetMedia.filter(m => String(m['Gadget ID']).trim() === gid);
-                    const trans = apps.map(a => ({ culture: a['CultureCom Trans'] || '-', chingwin: a['HKChingWin Trans'] || '-' }));
-                    return [...new Set(trans.map(t => JSON.stringify(t)))].map(s => JSON.parse(s));
-                },
-        
-                handleManualInput() { this.currentPage = 1; },
                 resetFilters() { 
                     this.searchQuery = ''; this.selectedMovie = ''; this.selectedGrandType = ''; 
                     this.paramGadgetId = null; this.currentPage = 1; 
                     window.history.replaceState({}, '', window.location.pathname);
                 },
+        
+                handleManualInput() { this.currentPage = 1; },
                 changePage(p) { this.currentPage = p; window.scrollTo({top:0, behavior:'smooth'}); }
             }
         }).mount('#app');

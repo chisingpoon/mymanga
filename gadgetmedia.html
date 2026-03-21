@@ -171,87 +171,195 @@
         createApp({
             data() {
                 return {
-                    loading: true, searchQuery: '', selectedMovie: '',
-                    selectedGrandType: '', selectedStandardTitle: '',
-                    selectedGadgetId: null,
-                    currentPage: 1, itemsPerPage: 30,
-                    gadgetsMaster: [], gadgetMedia: [], movies: [], contents: [], publishHk: []
+                    loading: true, 
+                    searchQuery: '', 
+                    selectedMovie: '',
+                    selectedGrandType: '', 
+                    selectedStandardTitle: '',
+                    paramGadgetId: null,
+                    currentPage: 1, 
+                    itemsPerPage: 30,
+                    gadgetsMaster: [], 
+                    gadgetMedia: [], 
+                    movies: [], 
+                    contents: [], 
+                    publishHk: []
                 }
             },
             computed: {
+                // STAGE 1: Basic text and ID filtering
                 searchFiltered() {
-                    if (this.loading) return [];
-                    const q = this.searchQuery.toLowerCase();
+                    if (this.loading || !this.gadgetsMaster.length) return [];
+                    
+                    const q = this.searchQuery.toLowerCase().trim();
                     
                     return this.gadgetsMaster.filter(g => {
-                        if (g['Active']?.toLowerCase() !== 'yes') return false;
+                        // 1. Skip if no title exists at all
+                        if (!g['JP Title']) return false;
+
+                        // 2. Active Check (Case-insensitive, defaults to "yes" if blank for safety)
+                        const activeStatus = (g['Active'] || 'yes').toLowerCase().trim();
+                        if (activeStatus !== 'yes') return false;
                         
-                        // FIX: Ensure Gadget ID comparison is string-to-string
-                        if (this.selectedGadgetId && String(g['Gadget ID']).trim() !== String(this.selectedGadgetId).trim()) {
-                            return false;
+                        // 3. URL Parameter Override (Strict check)
+                        if (this.paramGadgetId) {
+                            if (String(g['Gadget ID']).trim() !== String(this.paramGadgetId).trim()) return false;
                         }
 
+                        // 4. Text Search
                         if (!q) return true;
-                        const relatedMedia = this.gadgetMedia.filter(m => String(m['Gadget ID']) === String(g['Gadget ID']));
-                        const text = (g['JP Title'] + ' ' + relatedMedia.map(m => `${m['HK Translation']} ${m['CultureCom Trans']} ${m['HKChingWin Trans']}`).join(' ')).toLowerCase();
-                        return text.includes(q);
+                        
+                        const related = this.gadgetMedia.filter(m => String(m['Gadget ID']) === String(g['Gadget ID']));
+                        const searchableText = [
+                            g['JP Title'],
+                            ...related.map(m => `${m['HK Translation']} ${m['CultureCom Trans']} ${m['HKChingWin Trans']}`)
+                        ].join(' ').toLowerCase();
+                        
+                        return searchableText.includes(q);
                     });
                 },
-                // ... (Keep dynamicMovies, dynamicGrandTypes, dynamicStandardTitles computed properties) ...
-                
+
+                // STAGE 2: Dropdown Filtering
                 filteredData() {
-                    return this.searchFiltered.filter(g => {
-                        const appearances = this.gadgetMedia.filter(m => String(m['Gadget ID']) === String(g['Gadget ID']));
+                    const baseData = this.searchFiltered;
+                    if (!baseData.length) return [];
+
+                    return baseData.filter(g => {
+                        const apps = this.gadgetMedia.filter(m => String(m['Gadget ID']).trim() === String(g['Gadget ID']).trim());
                         
-                        // FIX: Ensure Movie ID comparison is string-to-string
+                        // Movie Filter
                         if (this.selectedMovie) {
-                            const hasMovie = appearances.some(a => String(a['Movie ID']).trim() === String(this.selectedMovie).trim());
-                            if (!hasMovie) return false;
+                            const match = apps.some(a => String(a['Movie ID']).trim() === String(this.selectedMovie).trim());
+                            if (!match) return false;
                         }
 
-                        if (this.selectedGrandType && !this.getMangaData(g, true).some(b => b.type === this.selectedGrandType)) return false;
-                        if (this.selectedStandardTitle && !this.getMangaData(g, false).some(b => b.title === this.selectedStandardTitle)) return false;
+                        // Manga Filters
+                        if (this.selectedGrandType) {
+                            if (!this.getMangaData(g, true).some(b => b.type === this.selectedGrandType)) return false;
+                        }
+                        if (this.selectedStandardTitle) {
+                            if (!this.getMangaData(g, false).some(b => b.title === this.selectedStandardTitle)) return false;
+                        }
+
                         return true;
-                    }).map(g => ({ ...g, appearances: this.gadgetMedia.filter(m => String(m['Gadget ID']) === String(g['Gadget ID'])) }));
+                    }).map(g => ({
+                        ...g,
+                        appearances: this.gadgetMedia.filter(m => String(m['Gadget ID']).trim() === String(g['Gadget ID']).trim())
+                    }));
                 },
-                // ... (Keep paginatedData, totalPages, paginationRange) ...
+
+                paginatedData() {
+                    const start = (this.currentPage - 1) * this.itemsPerPage;
+                    return this.filteredData.slice(start, start + this.itemsPerPage);
+                },
+                totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
+                paginationRange() {
+                    const current = this.currentPage, last = this.totalPages, range = [];
+                    for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i); }
+                    const res = []; let l;
+                    for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
+                    return res;
+                },
+                // Added for Debugging
+                dynamicMovies() {
+                    const ids = [...new Set(this.searchFiltered.flatMap(g => 
+                        this.gadgetMedia.filter(m => String(m['Gadget ID']) === String(g['Gadget ID'])).map(m => m['Movie ID'])
+                    ))].filter(id => id && id !== "-");
+                    
+                    return ids.map(id => {
+                        const m = this.movies.find(movie => String(movie['Media ID']).trim() === String(id).trim());
+                        return { id, label: m ? `${m['JP Title']} (${m['HK Title']})` : id };
+                    }).sort((a,b) => a.label.localeCompare(b.label, 'zh-Hant'));
+                },
+                dynamicGrandTypes() {
+                    return [...new Set(this.searchFiltered.flatMap(g => this.getMangaData(g, true).map(b => b.type)))].filter(Boolean).sort();
+                },
+                dynamicStandardTitles() {
+                    return [...new Set(this.searchFiltered.flatMap(g => this.getMangaData(g, false).map(b => b.title)))].filter(Boolean).sort();
+                }
             },
             methods: {
                 async init() {
                     try {
-                        const baseUrl = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
+                        const base = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
                         const [g, gm, m, s, h] = await Promise.all([
-                            fetch(baseUrl + "法寶").then(r => r.json()), fetch(baseUrl + "媒體與法寶").then(r => r.json()),
-                            fetch(baseUrl + "電影動畫").then(r => r.json()), fetch(baseUrl + "書籍收錄作品").then(r => r.json()),
-                            fetch(baseUrl + "出版目録HK").then(r => r.json())
+                            fetch(base + "法寶").then(r => r.json()), 
+                            fetch(base + "媒體與法寶").then(r => r.json()),
+                            fetch(base + "電影動畫").then(r => r.json()), 
+                            fetch(base + "書籍收錄作品").then(r => r.json()),
+                            fetch(base + "出版目録HK").then(r => r.json())
                         ]);
+
+                        // Direct Assignment
+                        this.gadgetsMaster = Array.isArray(g) ? g : [];
+                        this.gadgetMedia = Array.isArray(gm) ? gm : [];
+                        this.movies = Array.isArray(m) ? m : [];
+                        this.contents = Array.isArray(s) ? s : [];
+                        this.publishHk = Array.isArray(h) ? h : [];
                         
-                        // Assign data first
-                        this.gadgetsMaster = g; 
-                        this.gadgetMedia = gm; 
-                        this.movies = m; 
-                        this.contents = s; 
-                        this.publishHk = h;
+                        // Parse URL Parameters
+                        const params = new URLSearchParams(window.location.search);
+                        const gid = params.get('gadgetid');
+                        const mid = params.get('movieid');
                         
-                        // Then trigger params check
-                        this.checkUrlParams(); 
+                        if (gid) this.paramGadgetId = gid.trim();
+                        if (mid) this.selectedMovie = mid.trim();
+                        
                         this.loading = false;
-                    } catch (e) { console.error("Initialization Error:", e); }
+                    } catch (e) {
+                        console.error("Critical Load Error:", e);
+                        this.loading = false;
+                    }
                 },
-                checkUrlParams() {
-                    const params = new URLSearchParams(window.location.search);
-                    // Use .get() and ensure it's handled as a string
-                    const gid = params.get('gadgetid');
-                    const mid = params.get('movieid');
+                getMangaData(gadget, isGrand) {
+                    const gid = String(gadget['Gadget ID']).trim();
+                    const wids = [...new Set(this.gadgetMedia
+                        .filter(m => String(m['Gadget ID']).trim() === gid)
+                        .map(a => a['Work ID'])
+                        .filter(id => id && id !== "-")
+                    )];
                     
-                    if (gid) {
-                        this.selectedGadgetId = gid.trim();
-                    }
-                    if (mid) {
-                        this.selectedMovie = mid.trim();
-                    }
+                    let books = [];
+                    wids.forEach(wid => {
+                        this.contents.filter(item => {
+                            const isG = (item.類 === '大長編大全集' || item.類 === '大全集');
+                            return String(item.作品番).trim() === String(wid).trim() && (isGrand ? isG : !isG);
+                        }).forEach(c => {
+                            const hkMatches = this.publishHk.filter(h => h.ISBN_JP?.trim() === c.ISBN?.trim());
+                            if (hkMatches.length > 0) {
+                                const latest = hkMatches.sort((a, b) => new Date(b.IssueDate || 0) - new Date(a.IssueDate || 0))[0];
+                                books.push({ 
+                                    hkIsbn: latest.ISBN, 
+                                    title: latest.Title, 
+                                    sub: (latest.Volume ? `Vol.${latest.Volume} ` : '') + (latest.Subtitle || ''), 
+                                    type: c.類 
+                                });
+                            }
+                        });
+                    });
+                    return Array.from(new Map(books.map(b => [b.hkIsbn, b])).values());
                 },
-                // ... (Keep handleManualInput, getMangaData, getMovieData, getUniquePubTrans, resetFilters, changePage) ...
+                getMovieData(id, field) {
+                    const m = this.movies.find(x => String(x['Media ID']).trim() === String(id).trim());
+                    if (!m) return field === 'Media ID' ? id : '-';
+                    return m[field] || '-';
+                },
+                getUniquePubTrans(gadget) {
+                    const gid = String(gadget['Gadget ID']).trim();
+                    const apps = this.gadgetMedia.filter(m => String(m['Gadget ID']).trim() === gid);
+                    const trans = apps.map(a => ({ 
+                        culture: a['CultureCom Trans'] || '-', 
+                        chingwin: a['HKChingWin Trans'] || '-' 
+                    }));
+                    return [...new Set(trans.map(t => JSON.stringify(t)))].map(s => JSON.parse(s));
+                },
+                clearParamOverride() { this.paramGadgetId = null; this.currentPage = 1; },
+                resetFilters() { 
+                    this.searchQuery = ''; this.selectedMovie = ''; this.selectedGrandType = ''; 
+                    this.selectedStandardTitle = ''; this.paramGadgetId = null; this.currentPage = 1; 
+                    window.history.replaceState({}, '', window.location.pathname);
+                },
+                changePage(p) { this.currentPage = p; window.scrollTo({top:0, behavior:'smooth'}); }
             },
             mounted() { this.init(); }
         }).mount('#app')

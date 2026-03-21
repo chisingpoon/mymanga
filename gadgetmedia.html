@@ -36,7 +36,6 @@
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         td { padding: 16px 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; vertical-align: top; }
 
-        /* Media Group Spacing */
         .appearance-item { 
             min-height: 52px; padding-bottom: 8px; margin-bottom: 8px; 
             border-bottom: 1px dashed #e2e8f0; 
@@ -44,7 +43,6 @@
         }
         .appearance-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
 
-        /* Link Buttons */
         .archive-link { 
             display: flex; flex-direction: column; 
             padding: 8px 12px; border-radius: 10px; 
@@ -61,35 +59,32 @@
 
         .archive-link:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .counter-badge { background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 800; border: 1px solid #e2e8f0; }
-        
-        /* Publisher Trans Container */
-        .pub-trans-box { line-height: 1.6; }
     </style>
 </head>
 <body class="bg-grid">
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Combining References...</p>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Connecting Database...</p>
         </div>
 
         <nav class="top-nav">
             <div class="max-w-[1920px] mx-auto px-6 h-20 flex items-center justify-between">
                 <div class="flex items-center gap-6">
-                    <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                    </a>
-                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Gadgets in Media</h1>
+                    <div class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </div>
+                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Gadgets Archive</h1>
                 </div>
-                <span class="counter-badge">{{ filteredData.length }} Gadgets</span>
+                <span class="counter-badge">{{ filteredData.length }} Items Found</span>
             </div>
         </nav>
 
         <main class="max-w-[1920px] mx-auto px-6 pt-10">
             <div class="flex items-center justify-between mb-8 gap-6">
-                <input type="text" v-model="searchQuery" placeholder="Search Gadget..." class="flex-1 max-w-xl bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
+                <input type="text" v-model="searchQuery" placeholder="Search Gadget ID or Name..." class="flex-1 max-w-xl bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
                 <select v-model="selectedMovie" class="bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none cursor-pointer focus:border-indigo-500 min-w-[300px]">
-                    <option value="">Filter by Movie Reference</option>
+                    <option value="">All Movie References</option>
                     <option v-for="m in uniqueMovies" :key="m.id" :value="m.id">{{ m.label }}</option>
                 </select>
             </div>
@@ -115,6 +110,7 @@
                                     <div class="text-[9px] text-slate-400 mt-1 font-bold">{{ gadget['Gadget ID'] }}</div>
                                 </td>
 
+                                <!-- Media Group -->
                                 <td>
                                     <div v-for="m in gadget.appearances" class="appearance-item">
                                         <a v-if="m['Movie ID'] && m['Movie ID'] !== '-'" 
@@ -136,6 +132,7 @@
                                     </div>
                                 </td>
 
+                                <!-- Manga Group (Deduplicated) -->
                                 <td>
                                     <div v-for="book in getCombinedManga(gadget, true)" :key="book.hkIsbn">
                                         <a :href="'manga-database.html?isbn=' + book.hkIsbn + '&region=HK'" target="_blank" class="archive-link manga-grand">
@@ -153,7 +150,7 @@
                                     </div>
                                 </td>
                                 <td class="text-[12px] font-bold text-slate-500">
-                                    <div class="pub-trans-box bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
                                         <div v-for="(trans, idx) in getUniquePubTrans(gadget)" :key="idx" class="mb-2 last:mb-0 pb-2 last:pb-0 border-b last:border-0 border-slate-200">
                                             <div class="text-slate-900">文: {{ trans.culture || '-' }}</div>
                                             <div class="text-slate-500">青: {{ trans.chingwin || '-' }}</div>
@@ -165,12 +162,13 @@
                     </table>
                 </div>
 
+                <!-- Pagination -->
                 <div class="bg-slate-50 p-6 flex items-center justify-between border-t border-slate-200">
-                    <div class="text-[11px] font-black text-slate-400">PAGE {{ currentPage }} / {{ totalPages }}</div>
+                    <div class="text-[11px] font-black text-slate-400 uppercase">Page {{ currentPage }} / {{ totalPages }}</div>
                     <div class="flex gap-2">
                         <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" 
-                                :class="p === currentPage ? 'bg-slate-900 text-white' : 'bg-white text-slate-400'" 
-                                class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xs">
+                                :class="p === currentPage ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-400'" 
+                                class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xs transition-all">
                             {{ p }}
                         </button>
                     </div>
@@ -191,17 +189,27 @@
             },
             computed: {
                 groupedData() {
-                    return this.gadgetsMaster.filter(g => g['Active']?.toLowerCase() === 'yes').map(gadget => ({
-                        ...gadget, appearances: this.gadgetMedia.filter(m => m['Gadget ID'] === gadget['Gadget ID'])
-                    }));
+                    return this.gadgetsMaster
+                        .filter(g => g['Active']?.toLowerCase() === 'yes')
+                        .map(gadget => ({
+                            ...gadget, 
+                            appearances: this.gadgetMedia.filter(m => m['Gadget ID'] === gadget['Gadget ID'])
+                        }));
                 },
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
                     return this.groupedData.filter(gadget => {
                         if (this.selectedMovie && !gadget.appearances.some(a => a['Movie ID'] === this.selectedMovie)) return false;
-                        const searchFields = [gadget['JP Title'], gadget['Gadget ID']].join(' ').toLowerCase();
-                        return !q || searchFields.includes(q);
+                        const matchText = [gadget['JP Title'], gadget['Gadget ID']].join(' ').toLowerCase();
+                        return !q || matchText.includes(q);
                     });
+                },
+                paginatedData() {
+                    const start = (this.currentPage - 1) * this.itemsPerPage;
+                    return this.filteredData.slice(start, start + this.itemsPerPage);
+                },
+                totalPages() {
+                    return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1;
                 },
                 uniqueMovies() {
                     const ids = [...new Set(this.filteredData.flatMap(g => g.appearances.map(a => a['Movie ID'])))].filter(id => id && id !== "-");
@@ -210,7 +218,13 @@
                         return { id, label: m ? `${m['JP Title']} (${m['HK Title']})` : id };
                     }).sort((a,b) => a.label.localeCompare(b.label, 'zh-Hant'));
                 },
-                totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; }
+                paginationRange() {
+                    const current = this.currentPage, last = this.totalPages, range = [];
+                    for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i); }
+                    const res = []; let l;
+                    for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
+                    return res;
+                }
             },
             methods: {
                 async init() {
@@ -223,15 +237,18 @@
                             fetch(baseUrl + "書籍收錄作品").then(r => r.json()),
                             fetch(baseUrl + "出版目録HK").then(r => r.json())
                         ]);
-                        this.gadgetsMaster = g; this.gadgetMedia = gm; this.movies = m; this.contents = s; this.publishHk = h;
+                        this.gadgetsMaster = Array.isArray(g) ? g : [];
+                        this.gadgetMedia = Array.isArray(gm) ? gm : [];
+                        this.movies = Array.isArray(m) ? m : [];
+                        this.contents = Array.isArray(s) ? s : [];
+                        this.publishHk = Array.isArray(h) ? h : [];
                         this.loading = false;
-                    } catch (e) { console.error(e); }
+                    } catch (e) { console.error("Data Load Error:", e); }
                 },
                 getMovieData(id, field) {
                     const m = this.movies.find(x => x['Media ID'] === id);
                     return m ? (m[field] || '-') : (field === 'Media ID' ? id : '-');
                 },
-                // NEW: Combine all Work IDs for a gadget and find unique Manga links
                 getCombinedManga(gadget, isGrand) {
                     const allWorkIds = [...new Set(gadget.appearances.map(a => a['Work ID']).filter(id => id && id !== "-"))];
                     let allBooks = [];
@@ -247,7 +264,6 @@
                             });
                         });
                     });
-                    // Remove duplicates by ISBN
                     return Array.from(new Map(allBooks.map(b => [b.hkIsbn, b])).values());
                 },
                 getUniquePubTrans(gadget) {
@@ -255,17 +271,9 @@
                         culture: a['CultureCom Trans'] || '-',
                         chingwin: a['HKChingWin Trans'] || '-'
                     }));
-                    // Stringify to compare uniqueness
                     return [...new Set(trans.map(t => JSON.stringify(t)))].map(s => JSON.parse(s));
                 },
-                changePage(p) { this.currentPage = p; window.scrollTo({top:0, behavior:'smooth'}); },
-                paginationRange() {
-                    const current = this.currentPage || 1, last = this.totalPages || 1, range = [];
-                    for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i); }
-                    const res = []; let l;
-                    for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
-                    return res;
-                }
+                changePage(p) { this.currentPage = p; window.scrollTo({top:0, behavior:'smooth'}); }
             },
             mounted() { this.init(); }
         }).mount('#app')

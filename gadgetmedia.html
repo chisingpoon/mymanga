@@ -63,6 +63,7 @@
 
         .back-top { position: fixed; bottom: 24px; right: 24px; width: 48px; height: 48px; background: #1e293b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transition: 0.3s; z-index: 50; }
         .back-top.show { opacity: 1; }
+        .counter-badge { background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 800; border: 1px solid #e2e8f0; }
     </style>
 </head>
 <body class="bg-grid">
@@ -128,9 +129,52 @@
                         </thead>
                         <tbody>
                             <tr v-for="gadget in paginatedData" :key="gadget['Gadget ID']">
-                                <td class="font-black text-slate-900 text-[16px] border-r border-slate-100">
-                                    {{ gadget['JP Title'] }}
-                                </td>
+                                <td class="font-black text-slate-900 text-[16px] border-r border-slate-100">{{ gadget['JP Title'] }}</td>
                                 <td>
                                     <div v-for="m in gadget.appearances" class="appearance-item">
-                                        <a v-if="m
+                                        <a v-if="m['Movie ID'] && m['Movie ID'] !== '-'" :href="'movie.html?mediaid=' + getMovieData(m['Movie ID'], 'Media ID')" class="archive-link movie-btn">
+                                            <span class="label-top">{{ getMovieData(m['Movie ID'], 'JP Title') }}</span>
+                                            <span class="label-bottom">{{ getMovieData(m['Movie ID'], 'HK Title') }}</span>
+                                        </a>
+                                        <div v-else class="text-slate-300 italic text-[11px]">—</div>
+                                    </div>
+                                </td>
+                                <td class="font-bold text-slate-700">
+                                    <div v-for="m in gadget.appearances" class="appearance-item">{{ m['HK Translation'] || '-' }}</div>
+                                </td>
+                                <td class="text-[13px] font-bold text-slate-600">
+                                    <div v-for="m in gadget.appearances" class="appearance-item">{{ getMovieData(m['Movie ID'], 'JP Release Date') }}</div>
+                                </td>
+                                <td>
+                                    <div v-for="book in gadget._grandManga" :key="book.hkIsbn">
+                                        <a :href="'manga-database.html?isbn=' + book.hkIsbn + '&region=HK'" target="_blank" class="archive-link manga-grand">
+                                            <span class="label-top">{{ book.title }}</span>
+                                            <span class="label-bottom">{{ book.sub }}</span>
+                                        </a>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div v-for="book in gadget._standardManga" :key="book.hkIsbn">
+                                        <a :href="'manga-database.html?isbn=' + book.hkIsbn + '&region=HK'" target="_blank" class="archive-link manga-standard">
+                                            <span class="label-top">{{ book.title }}</span>
+                                            <span class="label-bottom">{{ book.sub }}</span>
+                                        </a>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 min-w-[140px]">
+                                        <div v-for="(trans, idx) in getUniquePubTrans(gadget)" :key="idx" class="mb-3 last:mb-0">
+                                            <div class="pub-badge pub-culture"><span>文傳:</span> <span class="font-black">{{ trans.culture }}</span></div>
+                                            <div class="pub-badge pub-chingwin"><span>青文:</span> <span class="font-black">{{ trans.chingwin }}</span></div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="bg-slate-50 p-6 flex items-center justify-between border-t border-slate-200">
+                    <div class="text-[11px] font-black text-slate-400">Page {{ currentPage }} / {{ totalPages }}</div>
+                    <div class="flex gap-2">
+                        <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" :class="p === currentPage ? 'bg-slate-900

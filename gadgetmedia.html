@@ -31,7 +31,7 @@
         .main-card { background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); margin-bottom: 3rem; overflow: hidden; border: 1px solid #e2e8f0; }
         
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
-        td { padding: 16px 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; vertical-align: middle; }
+        td { padding: 16px 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; vertical-align: top; }
 
         .archive-link { 
             display: flex; flex-direction: column; 
@@ -40,6 +40,7 @@
             line-height: 1.2; border: 1px solid rgba(0,0,0,0.05);
             margin-bottom: 6px; min-width: 170px;
         }
+        .archive-link:last-child { margin-bottom: 0; }
         .archive-link .label-top { font-weight: 900; font-size: 11px; margin-bottom: 2px; }
         .archive-link .label-bottom { opacity: 0.85; font-weight: 600; font-size: 9px; }
         
@@ -50,13 +51,16 @@
         .archive-link:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .counter-badge { background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 800; border: 1px solid #e2e8f0; }
         .reset-link { color: #6366f1; font-size: 11px; font-weight: 800; text-transform: uppercase; cursor: pointer; }
+
+        .trans-item { padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px dashed #e2e8f0; }
+        .trans-item:last-child { border-bottom: none; margin-bottom: 0; }
     </style>
 </head>
 <body class="bg-grid">
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Syncing Master Archive...</p>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Processing Gadget Groups...</p>
         </div>
 
         <nav class="top-nav">
@@ -73,7 +77,7 @@
         <main class="max-w-[1920px] mx-auto px-6 pt-10">
             <div class="flex items-center justify-between mb-8 gap-6">
                 <div class="relative flex-1 max-w-xl">
-                    <input type="text" v-model="searchQuery" placeholder="Search gadget name or media keyword..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
+                    <input type="text" v-model="searchQuery" placeholder="Search gadget name..." class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
                     <div v-if="searchQuery" @click="searchQuery = ''" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 cursor-pointer">✕</div>
                 </div>
                 <div class="flex items-center gap-4">
@@ -81,7 +85,7 @@
                         <option value="">All Movie References</option>
                         <option v-for="m in uniqueMovies" :key="m.id" :value="m.id">{{ m.label }}</option>
                     </select>
-                    <span class="counter-badge">{{ filteredData.length }} Records</span>
+                    <span class="counter-badge">{{ filteredData.length }} Unique Gadgets</span>
                     <span v-if="isFiltered" @click="resetFilters" class="reset-link">Reset</span>
                 </div>
             </div>
@@ -94,48 +98,72 @@
                                 <th class="w-[15%]">Gadget (JP)</th>
                                 <th class="w-[12%]">HK Translation</th>
                                 <th class="w-[15%]">Publisher Trans.</th>
-                                <th class="w-[10%]">JP Release</th>
-                                <th class="w-[16%]">Movie Reference</th>
+                                <th class="w-[10%]">JP Release Dates</th>
+                                <th class="w-[16%]">Movie References</th>
                                 <th class="w-[16%]">Grand Collection</th>
                                 <th class="w-[16%]">Standard Manga</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="row in paginatedData" :key="row.media['Gadget Media ID']">
-                                <td class="font-black text-slate-900 text-[15px]">{{ row.master['JP Title'] }}</td>
-                                <td class="font-bold text-slate-700">{{ row.media['HK Translation'] || '-' }}</td>
-                                <td class="text-[12px] font-bold text-slate-500">
-                                    <div class="mb-1 text-slate-900">文傳: {{ row.media['CultureCom TransHK'] || '-' }}</div>
-                                    <div>青文: {{ row.media['ChingWin Trans'] || '-' }}</div>
+                            <tr v-for="gadget in paginatedData" :key="gadget['Gadget ID']">
+                                <td class="font-black text-slate-900 text-[15px]">
+                                    {{ gadget['JP Title'] }}
+                                    <div class="text-[10px] text-slate-400 mt-1 uppercase tracking-tighter font-bold">{{ gadget['Gadget ID'] }}</div>
                                 </td>
-                                <td class="text-[13px] font-bold text-slate-600 whitespace-nowrap">
-                                    {{ getMovieData(row.media['Movie ID'], 'JP Release Date') }}
-                                </td>
-                                <td>
-                                    <a v-if="row.media['Movie ID'] && row.media['Movie ID'] !== '-'" 
-                                       :href="'movie.html?mediaid=' + getMovieData(row.media['Movie ID'], 'Media ID')" class="archive-link movie-btn">
-                                        <span class="label-top">{{ getMovieData(row.media['Movie ID'], 'JP Title') }}</span>
-                                        <span class="label-bottom">{{ getMovieData(row.media['Movie ID'], 'HK Title') }}</span>
-                                    </a>
-                                </td>
-                                <td>
-                                    <div v-if="mList = getMangaByCat(row.media['Work ID'], true)" class="flex flex-col">
-                                        <a v-for="m in mList" :key="m.hkIsbn" 
-                                           :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
-                                           target="_blank" class="archive-link manga-grand">
-                                            <span class="label-top">{{ m.title }}</span>
-                                            <span class="label-bottom">{{ m.sub }}</span>
-                                        </a>
+
+                                <td class="font-bold text-slate-700">
+                                    <div v-for="m in gadget.appearances" class="trans-item">
+                                        {{ m['HK Translation'] || '-' }}
                                     </div>
                                 </td>
+
+                                <td class="text-[12px] font-bold text-slate-500">
+                                    <div v-for="m in gadget.appearances" class="trans-item">
+                                        <div class="text-slate-900">文: {{ m['CultureCom TransHK'] || '-' }}</div>
+                                        <div>青: {{ m['ChingWin Trans'] || '-' }}</div>
+                                    </div>
+                                </td>
+
+                                <td class="text-[13px] font-bold text-slate-600 whitespace-nowrap">
+                                    <div v-for="m in gadget.appearances" class="h-[58px] flex items-center mb-1.5 last:mb-0">
+                                        {{ getMovieData(m['Movie ID'], 'JP Release Date') }}
+                                    </div>
+                                </td>
+
                                 <td>
-                                    <div v-if="mList = getMangaByCat(row.media['Work ID'], false)" class="flex flex-col">
-                                        <a v-for="m in mList" :key="m.hkIsbn" 
-                                           :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
-                                           target="_blank" class="archive-link manga-standard">
-                                            <span class="label-top">{{ m.title }}</span>
-                                            <span class="label-bottom">{{ m.sub }}</span>
+                                    <div v-for="m in gadget.appearances" class="mb-1.5 last:mb-0">
+                                        <a v-if="m['Movie ID'] && m['Movie ID'] !== '-'" 
+                                           :href="'movie.html?mediaid=' + getMovieData(m['Movie ID'], 'Media ID')" class="archive-link movie-btn">
+                                            <span class="label-top">{{ getMovieData(m['Movie ID'], 'JP Title') }}</span>
+                                            <span class="label-bottom">{{ getMovieData(m['Movie ID'], 'HK Title') }}</span>
                                         </a>
+                                        <div v-else class="h-[42px]"></div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div v-for="m in gadget.appearances" class="mb-1.5 last:mb-0">
+                                        <div v-if="mList = getMangaByCat(m['Work ID'], true)" class="flex flex-col">
+                                            <a v-for="book in mList" :key="book.hkIsbn" 
+                                               :href="'manga-database.html?isbn=' + book.hkIsbn + '&region=HK'" 
+                                               target="_blank" class="archive-link manga-grand">
+                                                <span class="label-top">{{ book.title }}</span>
+                                                <span class="label-bottom">{{ book.sub }}</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div v-for="m in gadget.appearances" class="mb-1.5 last:mb-0">
+                                        <div v-if="mList = getMangaByCat(m['Work ID'], false)" class="flex flex-col">
+                                            <a v-for="book in mList" :key="book.hkIsbn" 
+                                               :href="'manga-database.html?isbn=' + book.hkIsbn + '&region=HK'" 
+                                               target="_blank" class="archive-link manga-standard">
+                                                <span class="label-top">{{ book.title }}</span>
+                                                <span class="label-bottom">{{ book.sub }}</span>
+                                            </a>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -170,33 +198,34 @@
             computed: {
                 isFiltered() { return this.searchQuery !== '' || this.selectedMovie !== ''; },
                 
-                // CRITICAL LOGIC: Create combined list where Gadget is ACTIVE
-                activeMediaList() {
+                // 1. Filter ACTIVE Gadgets
+                // 2. Attach an 'appearances' array to each gadget
+                groupedData() {
                     const activeGadgets = this.gadgetsMaster.filter(g => g['Active']?.toLowerCase() === 'yes');
-                    const results = [];
-                    this.gadgetMedia.forEach(media => {
-                        const master = activeGadgets.find(g => g['Gadget ID'] === media['Gadget ID']);
-                        if (master) results.push({ master, media });
+                    
+                    return activeGadgets.map(gadget => {
+                        const appearances = this.gadgetMedia.filter(m => m['Gadget ID'] === gadget['Gadget ID']);
+                        return { ...gadget, appearances };
                     });
-                    return results;
                 },
 
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
-                    return this.activeMediaList.filter(row => {
-                        if (this.selectedMovie && row.media['Movie ID'] !== this.selectedMovie) return false;
-                        const movie = this.movies.find(m => m['Media ID'] === row.media['Movie ID']) || {};
-                        const searchFields = [
-                            row.master['JP Title'], row.media['HK Translation'], 
-                            row.media['CultureCom TransHK'], row.media['ChingWin Trans'],
-                            movie['JP Title'], movie['HK Title']
-                        ].join(' ').toLowerCase();
+                    return this.groupedData.filter(gadget => {
+                        // Filter by Movie: If a movie is selected, the gadget must appear in it
+                        if (this.selectedMovie && !gadget.appearances.some(a => a['Movie ID'] === this.selectedMovie)) return false;
+
+                        // Search: Check Gadget Title or any translation in its appearances
+                        const appText = gadget.appearances.map(a => `${a['HK Translation']} ${a['CultureCom TransHK']}`).join(' ');
+                        const searchFields = [gadget['JP Title'], gadget['Gadget ID'], appText].join(' ').toLowerCase();
+                        
                         return !q || searchFields.includes(q);
                     });
                 },
 
                 uniqueMovies() {
-                    const ids = [...new Set(this.activeMediaList.map(r => r.media['Movie ID']).filter(id => id && id !== "-"))];
+                    const activeIds = this.filteredData.flatMap(g => g.appearances.map(a => a['Movie ID']));
+                    const ids = [...new Set(activeIds.filter(id => id && id !== "-"))];
                     return ids.map(id => {
                         const m = this.movies.find(movie => movie['Media ID'] === id);
                         return { id, label: m ? `${m['JP Title']} (${m['HK Title']})` : id };
@@ -229,10 +258,8 @@
                         this.gadgetsMaster = g; this.gadgetMedia = gm; this.movies = m; this.contents = s; this.publishHk = h;
                         
                         const gid = new URLSearchParams(window.location.search).get('gadgetid');
-                        if (gid) {
-                            const masterObj = this.gadgetsMaster.find(x => x['Gadget ID'] === gid);
-                            if (masterObj) this.searchQuery = masterObj['JP Title'];
-                        }
+                        if (gid) this.searchQuery = gid;
+                        
                         this.loading = false;
                     } catch (e) { console.error(e); }
                 },

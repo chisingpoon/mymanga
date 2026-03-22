@@ -169,7 +169,7 @@
                 </div>
 
                 <div class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-                    <div v-for="movie in sortedMovies" :key="movie.id" @click="selectMovie(movie)" class="movie-card rounded-2xl overflow-hidden border border-slate-200 flex flex-col shadow-sm">
+                    <div v-for="movie in sortedMovies" :key="movie.id" @click="selectMovie(movie)" class="movie-card rounded-2xl overflow-hidden border border-slate-200 flex flex-col shadow-sm active:opacity-70">
                         <div class="poster-wrapper">
                             <img :src="movie.jpImage" class="w-full h-full object-cover">
                             <div class="absolute top-3 left-3 bg-indigo-600 text-white text-[10px] font-black px-2.5 py-1 rounded shadow-lg uppercase z-10">{{ movie.jpYear || 'TBA' }}</div>
@@ -364,25 +364,25 @@
                     this.selectedMovie = m;
                     this.mangaTab = 'JP'; 
                     this.fcTab = 'JP'; 
-                    // Push state only if the current URL doesn't already have this ID (prevents history bloating)
-                    const urlParams = new URLSearchParams(window.location.search);
-                    if (urlParams.get('mediaid') !== m.id) {
-                        const newUrl = window.location.pathname + '?mediaid=' + encodeURIComponent(m.id);
-                        window.history.pushState({ mediaid: m.id }, '', newUrl);
-                    }
-                    this.$nextTick(() => window.scrollTo({ top: 0, behavior: 'instant' })); 
+                    
+                    const newUrl = window.location.pathname + '?mediaid=' + encodeURIComponent(m.id);
+                    window.history.pushState({ mediaid: m.id }, '', newUrl);
+                
+                    // Use a slight timeout to ensure the DOM has switched to 'detail' view
+                    setTimeout(() => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }, 50);
                 },
                 closeDetail() { 
                     this.selectedMovie = null; 
-                    // Clear URL parameters when returning to list
-                    const newUrl = window.location.pathname;
-                    window.history.pushState({ mediaid: null }, '', newUrl);
+                    // Use replaceState instead of pushState to prevent history bloat
+                    window.history.replaceState({ mediaid: null }, '', window.location.pathname);
                 },
                 checkUrlParam() {
                     const urlParams = new URLSearchParams(window.location.search);
                     const mediaIdParam = urlParams.get('mediaid');
                     if (mediaIdParam) {
-                        const target = this.movies.find(m => m.id.toLowerCase() === mediaIdParam.trim().toLowerCase());
+                        const target = this.movies.find(m => m.id.toString().toLowerCase().trim() === mediaIdParam.toLowerCase().trim());
                         if (target) {
                             this.selectedMovie = target;
                         } else {
@@ -434,5 +434,8 @@
             mounted() { this.init(); }
         }).mount('#app')
     </script>
+    <div class="fixed bottom-0 left-0 bg-black/80 text-white text-[8px] p-2 z-[9999]">
+      ID: {{ selectedMovie?.id || 'None' }} | Movies: {{ movies.length }}
+    </div>
 </body>
 </html>

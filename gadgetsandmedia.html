@@ -89,19 +89,13 @@
                                 <span class="text-[11px] font-black text-cyan-600 uppercase tracking-widest mb-1 block">
                                     Movie Appearance ({{ getYear(getMovieData(group.id, 'JP Release Date')) }})
                                 </span>
-                                <h2 class="text-2xl font-black text-slate-900 leading-tight group-hover:text-cyan-600 transition-colors">
-                                    {{ group.title }}
-                                </h2>
-                                <div class="mt-2 flex items-center gap-2">
-                                    <span class="bg-slate-100 text-slate-500 px-2 py-1 rounded text-[10px] font-black uppercase">
-                                        {{ group.items.length }} Gadgets Recorded
-                                    </span>
-                                </div>
+                                <h2 class="text-2xl font-black text-slate-900 leading-tight">{{ group.title }}</h2>
                             </template>
+                            
                             <template v-else>
                                 <span class="text-[11px] font-black text-indigo-500 uppercase tracking-widest mb-1 block">Gadget Identity</span>
-                                <h2 class="text-2xl font-black text-slate-900 leading-tight">原文▶{{ group.title }}</h2>
-                                <h2 v-if="group.hkTrans" class="text-2xl font-black text-slate-500 leading-tight">港譯▶{{ group.hkTrans }}</h2>
+                                <h2 class="text-2xl font-black text-slate-900 leading-tight">{{ group.title }}</h2>
+                                <h2 v-if="group.hkTrans" class="text-2xl font-black text-slate-500 leading-tight">{{ group.hkTrans }}</h2>
                             </template>
                         </div>
             
@@ -109,7 +103,14 @@
             
                         <div class="flex-1 space-y-8">
                             <div v-for="(item, idx) in group.items" :key="idx" class="border-l-4 border-indigo-200 pl-5">
-                                <div class="bg-white border-2 border-slate-50 rounded-2xl p-4 mb-4 shadow-sm hover:border-cyan-300 transition-all">
+                                
+                                <div v-if="groupBy === 'movie'" class="bg-white border-2 border-slate-50 rounded-2xl p-4 mb-4 shadow-sm border-l-4 border-l-indigo-500">
+                                    <span class="text-[10px] font-black text-slate-400 uppercase mb-1 block">Gadget Identity</span>
+                                    <div class="font-black text-slate-800 text-xl leading-snug">{{ item.jpTitle }}</div>
+                                    <div v-if="item.hkTrans" class="font-bold text-slate-500 text-lg">{{ item.hkTrans }}</div>
+                                </div>
+                        
+                                <div v-else class="bg-white border-2 border-slate-50 rounded-2xl p-4 mb-4 shadow-sm hover:border-cyan-300 transition-all">
                                     <span class="text-[10px] font-black text-slate-400 uppercase mb-2 block">Media Appearance</span>
                                     <a :href="'movie.html?mediaid=' + item.movieId" class="group block">
                                         <span class="bg-cyan-600 text-white px-2 py-1 rounded-md text-[11px] font-black uppercase inline-block mb-2">
@@ -120,28 +121,13 @@
                                         </div>
                                     </a>
                                 </div>
-            
+                        
                                 <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4">
                                     <div class="flex items-center justify-between mb-3">
-                                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">HK Manga Editions</span>
+                                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">HK Manga</span>
                                         <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full text-[9px] font-black">{{ getMangaDataForWork(item.workId).length }} Found</span>
                                     </div>
-                                    <div class="space-y-2">
-                                        <div v-for="book in getMangaDataForWork(item.workId)" :key="book.isbn">
-                                            <a :href="'manga-database.html?isbn=' + book.isbn + '&region=HK'" target="_blank" 
-                                               :class="['flex items-center justify-between p-2.5 rounded-lg border transition-all group mb-2', book.type === 'grand' ? 'bg-amber-50 border-amber-200' : 'bg-white border-slate-200']">
-                                                <div class="flex flex-col flex-1 pr-2 overflow-hidden">
-                                                    <span class="font-bold text-xs text-slate-800 group-hover:text-indigo-600 truncate">{{ book.label }}</span>
-                                                </div>
-                                                <svg class="w-3.5 h-3.5 flex-shrink-0 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                                            </a>
-                                        </div>
-                                        <div v-if="item.culture || item.chingwin" class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-200">
-                                            <span v-if="item.culture && item.culture !== '-'" class="px-3 py-1.5 text-xs font-black rounded bg-red-50 text-red-800 ring-1 ring-red-100">文傳: {{ item.culture }}</span>
-                                            <span v-if="item.chingwin && item.chingwin !== '-'" class="px-3 py-1.5 text-xs font-black rounded bg-blue-50 text-blue-800 ring-1 ring-blue-100">青文: {{ item.chingwin }}</span>
-                                        </div>
                                     </div>
-                                </div>
                             </div>
                         </div>
                     </div>

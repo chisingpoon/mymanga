@@ -298,168 +298,176 @@
     </div>
 
     <script>
-    const { createApp } = Vue;
-    
-    const app = createApp({
-        data() {
-            return {
-                loading: true,
-                searchQuery: '',
-                sortOrder: 'desc',
-                movies: [],
-                mangaCatalog: [],
-                hkCatalog: [],
-                selectedMovie: null,
-                mangaTab: 'JP',
-                fcTab: 'JP'
-            }
-        },
-        computed: {
-            sortedMovies() {
-                if (!this.movies.length) return [];
-                let filtered = this.movies;
-                if (this.searchQuery) {
-                    const q = this.searchQuery.toLowerCase();
-                    filtered = this.movies.filter(m => m.searchStr && m.searchStr.includes(q));
-                }
-                return [...filtered].sort((a, b) => {
-                    const yA = parseInt(a.jpYear) || 0;
-                    const yB = parseInt(b.jpYear) || 0;
-                    return this.sortOrder === 'asc' ? yA - yB : yB - yA;
-                });
-            },
-            mappedManga() { 
-                if (!this.selectedMovie || !this.selectedMovie.mangaRaw) return null;
-                const data = this.lookup(this.selectedMovie.mangaRaw);
-                if (!data) return null;
-                const current = this.mangaTab === 'JP' ? data.jp : data.hk;
-                return { current: { ...current, region: this.mangaTab }, hasHk: !!data.hk };
-            },
-            mappedFilmComic() { 
-                if (!this.selectedMovie || !this.selectedMovie.filmComicRaw) return null;
-                const data = this.lookup(this.selectedMovie.filmComicRaw);
-                if (!data) return null;
-                const current = this.fcTab === 'JP' ? data.jp : data.hk;
-                return { current: { ...current, region: this.fcTab }, hasHk: !!data.hk };
-            }
-        },
-        methods: {
-            getVal(obj, key) {
-                if (!obj) return '';
-                const targetKey = key.trim().toLowerCase();
-                const actualKey = Object.keys(obj).find(k => k.trim().toLowerCase() === targetKey);
-                return actualKey ? obj[actualKey] : '';
-            },
-            lookup(isbn) {
-                if (!isbn) return null;
-                const cleanIsbn = isbn.toString().replace(/[-\s]/g, '').trim();
-                if (!cleanIsbn) return null;
-    
-                const jpFound = this.mangaCatalog.find(item => {
-                    const iIsbn = this.getVal(item, 'ISBN').toString().replace(/[-\s]/g, '').trim();
-                    return iIsbn === cleanIsbn;
-                });
-                if (!jpFound) return null;
-    
-                const hkMatches = this.hkCatalog.filter(item => {
-                    const hkIsbnJp = this.getVal(item, 'ISBN_JP').toString().replace(/[-\s]/g, '').trim();
-                    return hkIsbnJp === cleanIsbn;
-                });
-                
-                let hkFound = null;
-                if (hkMatches.length > 0) {
-                    hkFound = [...hkMatches].sort((a, b) => {
-                        return new Date(this.getVal(b, 'IssueDate')) - new Date(this.getVal(a, 'IssueDate'));
-                    })[0];
-                }
-    
+        const { createApp } = Vue;
+        
+        createApp({
+            data() {
                 return {
-                    jp: { 
-                        title: this.getVal(jpFound, '標題'), 
-                        subtitle: this.getVal(jpFound, '副標題'), 
-                        author: this.getVal(jpFound, '著'), 
-                        image: this.getVal(jpFound, 'image'), 
-                        isbnParam: this.getVal(jpFound, 'ISBN').trim(), 
-                        series: this.getVal(jpFound, '類').trim() 
-                    },
-                    hk: hkFound ? { 
-                        title: this.getVal(hkFound, 'Title'), 
-                        subtitle: this.getVal(hkFound, 'Subtitle'), 
-                        author: this.getVal(hkFound, 'Author'), 
-                        image: this.getVal(hkFound, 'Image'), 
-                        isbnParam: this.getVal(hkFound, 'ISBN').trim(), 
-                        series: this.getVal(hkFound, 'Title').trim() 
-                    } : null
-                };
-            },
-            selectMovie(m) { 
-                this.selectedMovie = m;
-                this.mangaTab = 'JP'; 
-                this.fcTab = 'JP'; 
-                const newUrl = window.location.pathname + '?mediaid=' + encodeURIComponent(m.id);
-                window.history.pushState({ mediaid: m.id }, '', newUrl);
-                this.$nextTick(() => window.scrollTo({ top: 0, behavior: 'auto' })); 
-            },
-            closeDetail() { 
-                this.selectedMovie = null; 
-                window.history.pushState({ mediaid: null }, '', window.location.pathname);
-            },
-            checkUrlParam() {
-                const params = new URLSearchParams(window.location.search);
-                const mid = params.get('mediaid');
-                if (mid && this.movies.length) {
-                    const target = this.movies.find(m => m.id.toLowerCase() === decodeURIComponent(mid).toLowerCase().trim());
-                    if (target) this.selectedMovie = target;
+                    loading: true,
+                    searchQuery: '',
+                    sortOrder: 'desc',
+                    movies: [],
+                    mangaCatalog: [],
+                    hkCatalog: [],
+                    selectedMovie: null,
+                    mangaTab: 'JP',
+                    fcTab: 'JP'
                 }
             },
-            async init() {
-                try {
-                    this.loading = true;
-                    const [mRes, jpRes, hkRes] = await Promise.all([
-                        fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/電影動畫"),
-                        fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP"),
-                        fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK") 
-                    ]);
-    
-                    this.mangaCatalog = await jpRes.json();
-                    this.hkCatalog = await hkRes.json(); 
-                    const data = await mRes.json();
-    
-                    this.movies = data.map(i => {
-                        const d = this.getVal(i, 'JP Release Date').toString();
-                        const y = d.match(/\d{4}/);
-                        return {
-                            id: this.getVal(i, 'Media ID').toString().trim(),
-                            jpTitle: this.getVal(i, 'JP Title'),
-                            hkTitle: this.getVal(i, 'HK Title'),
-                            enTitle: this.getVal(i, 'EN Title'),
-                            jpDate: d,
-                            jpYear: y ? y[0] : 'TBA',
-                            hkDate: this.getVal(i, 'HK Release Date'),
-                            jpImage: this.getVal(i, 'JP Image'),
-                            hkImage: this.getVal(i, 'HK Image'),
-                            mangaRaw: this.getVal(i, 'Manga ISBN'),
-                            filmComicRaw: this.getVal(i, 'Film Comics'),
-                            searchStr: (this.getVal(i, 'JP Title') + " " + this.getVal(i, 'HK Title')).toLowerCase()
-                        };
+            computed: {
+                sortedMovies: function() {
+                    if (!this.movies || this.movies.length === 0) return [];
+                    var self = this;
+                    var filtered = this.movies.filter(function(m) {
+                        if (!self.searchQuery) return true;
+                        return m.searchStr.indexOf(self.searchQuery.toLowerCase()) !== -1;
                     });
-    
-                    this.checkUrlParam();
-                    window.onpopstate = () => this.checkUrlParam();
-    
-                } catch (err) {
-                    console.error("Init failed:", err);
-                } finally {
-                    this.loading = false;
+                    return filtered.sort(function(a, b) {
+                        var yA = parseInt(a.jpYear) || 0;
+                        var yB = parseInt(b.jpYear) || 0;
+                        return self.sortOrder === 'asc' ? yA - yB : yB - yA;
+                    });
+                },
+                mappedManga: function() { 
+                    if (!this.selectedMovie || !this.selectedMovie.mangaRaw) return null;
+                    var data = this.lookup(this.selectedMovie.mangaRaw);
+                    if (!data) return null;
+                    var current = this.mangaTab === 'JP' ? data.jp : data.hk;
+                    return { current: current, hasHk: !!data.hk };
+                },
+                mappedFilmComic: function() { 
+                    if (!this.selectedMovie || !this.selectedMovie.filmComicRaw) return null;
+                    var data = this.lookup(this.selectedMovie.filmComicRaw);
+                    if (!data) return null;
+                    var current = this.fcTab === 'JP' ? data.jp : data.hk;
+                    return { current: current, hasHk: !!data.hk };
                 }
+            },
+            methods: {
+                getVal: function(obj, key) {
+                    if (!obj) return '';
+                    var targetKey = key.trim().toLowerCase();
+                    var keys = Object.keys(obj);
+                    for (var i = 0; i < keys.length; i++) {
+                        if (keys[i].trim().toLowerCase() === targetKey) return obj[keys[i]];
+                    }
+                    return '';
+                },
+                lookup: function(isbn) {
+                    if (!isbn) return null;
+                    var self = this;
+                    var cleanIsbn = isbn.toString().replace(/[-\s]/g, '').trim();
+                    if (!cleanIsbn) return null;
+        
+                    var jpFound = this.mangaCatalog.find(function(item) {
+                        var iIsbn = self.getVal(item, 'ISBN').toString().replace(/[-\s]/g, '').trim();
+                        return iIsbn === cleanIsbn;
+                    });
+                    if (!jpFound) return null;
+        
+                    var hkMatches = this.hkCatalog.filter(function(item) {
+                        var hkIsbnJp = self.getVal(item, 'ISBN_JP').toString().replace(/[-\s]/g, '').trim();
+                        return hkIsbnJp === cleanIsbn;
+                    });
+                    
+                    var hkFound = null;
+                    if (hkMatches.length > 0) {
+                        hkFound = hkMatches.sort(function(a, b) {
+                            return new Date(self.getVal(b, 'IssueDate')) - new Date(self.getVal(a, 'IssueDate'));
+                        })[0];
+                    }
+        
+                    return {
+                        jp: { 
+                            title: this.getVal(jpFound, '標題'), 
+                            image: this.getVal(jpFound, 'image'), 
+                            isbnParam: this.getVal(jpFound, 'ISBN').trim(), 
+                            series: this.getVal(jpFound, '類').trim(),
+                            region: 'JP'
+                        },
+                        hk: hkFound ? { 
+                            title: this.getVal(hkFound, 'Title'), 
+                            image: this.getVal(hkFound, 'Image'), 
+                            isbnParam: this.getVal(hkFound, 'ISBN').trim(), 
+                            series: this.getVal(hkFound, 'Title').trim(),
+                            region: 'HK'
+                        } : null
+                    };
+                },
+                generateUrl: function(item) {
+                    if (!item) return '#';
+                    return 'manga-database.html?region=' + (item.region || 'JP') + 
+                           '&isbn=' + encodeURIComponent(item.isbnParam || '') + 
+                           '&series=' + encodeURIComponent(item.series || '');
+                },
+                selectMovie: function(m) { 
+                    this.selectedMovie = m;
+                    this.mangaTab = 'JP'; 
+                    this.fcTab = 'JP'; 
+                    var newUrl = window.location.pathname + '?mediaid=' + encodeURIComponent(m.id);
+                    window.history.pushState({ mediaid: m.id }, '', newUrl);
+                    this.$nextTick(function() { window.scrollTo(0, 0); }); 
+                },
+                closeDetail: function() { 
+                    this.selectedMovie = null; 
+                    window.history.pushState({ mediaid: null }, '', window.location.pathname);
+                },
+                checkUrlParam: function() {
+                    var params = new URLSearchParams(window.location.search);
+                    var mid = params.get('mediaid');
+                    if (mid && this.movies.length > 0) {
+                        var self = this;
+                        var target = this.movies.find(function(m) {
+                            return m.id.toLowerCase() === mid.toLowerCase().trim();
+                        });
+                        if (target) this.selectedMovie = target;
+                    }
+                },
+                init: async function() {
+                    try {
+                        var res = await Promise.all([
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/電影動畫"),
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP"),
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK") 
+                        ]);
+        
+                        this.mangaCatalog = await res[1].json();
+                        this.hkCatalog = await res[2].json(); 
+                        var movieData = await res[0].json();
+        
+                        var self = this;
+                        this.movies = movieData.map(function(i) {
+                            var d = self.getVal(i, 'JP Release Date').toString();
+                            var yMatch = d.match(/\d{4}/);
+                            return {
+                                id: self.getVal(i, 'Media ID').toString().trim(),
+                                jpTitle: self.getVal(i, 'JP Title'),
+                                hkTitle: self.getVal(i, 'HK Title'),
+                                enTitle: self.getVal(i, 'EN Title'),
+                                jpDate: d,
+                                jpYear: yMatch ? yMatch[0] : 'TBA',
+                                hkDate: self.getVal(i, 'HK Release Date'),
+                                jpImage: self.getVal(i, 'JP Image'),
+                                hkImage: self.getVal(i, 'HK Image'),
+                                mangaRaw: self.getVal(i, 'Manga ISBN'),
+                                filmComicRaw: self.getVal(i, 'Film Comics'),
+                                searchStr: (self.getVal(i, 'JP Title') + " " + self.getVal(i, 'HK Title')).toLowerCase()
+                            };
+                        });
+        
+                        this.checkUrlParam();
+                        window.onpopstate = this.checkUrlParam;
+                    } catch (err) {
+                        console.error(err);
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            },
+            mounted: function() {
+                this.init();
             }
-        },
-        mounted() {
-            this.init();
-        }
-    });
-    
-    app.mount('#app');
+        }).mount('#app');
     </script>
     <div class="fixed bottom-0 left-0 bg-black/80 text-white text-[8px] p-2 z-[9999]">
       ID: {{ selectedMovie?.id || 'None' }} | Movies: {{ movies.length }}

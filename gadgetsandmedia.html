@@ -101,7 +101,7 @@
                             </template>
             
                             <template v-else>
-                                <span class="text-[11px] font-black text-indigo-500 uppercase tracking-widest mb-1 block">Gadget Identity</span>
+                                <span class="text-[11px] font-black text-indigo-500 uppercase tracking-widest mb-1 block">Gadget</span>
                                 <h2 class="text-2xl font-black text-slate-900 leading-tight flex items-baseline gap-2">
                                     <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">原文/</span>
                                     {{ group.title }}
@@ -130,6 +130,10 @@
                                             <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">港譯/</span>
                                             {{ item.hkTrans }}
                                         </h3>
+                                        <div v-if="item.culture || item.chingwin" class="flex flex-wrap gap-2 mt-2">
+                                            <span v-if="item.culture && item.culture !== '-'" class="px-3 py-1.5 text-xs font-black rounded bg-red-50 text-red-800 ring-1 ring-red-100">文傳: {{ item.culture }}</span>
+                                            <span v-if="item.chingwin && item.chingwin !== '-'" class="px-3 py-1.5 text-xs font-black rounded bg-blue-50 text-blue-800 ring-1 ring-blue-100">青文: {{ item.chingwin }}</span>
+                                        </div>
                                     </div>
                                 </div>
             

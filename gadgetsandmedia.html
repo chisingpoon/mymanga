@@ -63,7 +63,6 @@
         </nav>
 
         <main class="max-w-[1400px] mx-auto px-6 pt-10">
-            <!-- Search & Filters -->
             <div class="flex flex-wrap gap-4 mb-10">
                 <div class="flex-1 min-w-[300px] relative">
                     <input type="text" v-model.trim="searchQuery" placeholder="Search titles, translations, or publishers..." class="w-full bg-white border-2 border-slate-200 rounded-2xl pl-12 pr-12 py-4 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
@@ -74,41 +73,50 @@
                 <button @click="resetFilters" class="px-8 py-4 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-2xl transition-colors">Reset</button>
             </div>
 
-            <!-- Card Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
                 <div v-for="group in paginatedGroups" :key="group.id" class="data-card p-6 flex flex-col">
-                    <!-- Header -->
+                    
                     <div class="mb-4">
                         <span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">{{ groupBy === 'gadget' ? 'Gadget' : 'Movie' }}</span>
                         <h2 class="text-xl font-black text-slate-900 leading-tight">{{ group.title }}</h2>
-                        <p v-if="group.subtitle" class="text-sm font-bold text-slate-500 mt-1">{{ group.subtitle }}</p>
+                        <h2 v-if="groupBy === 'gadget' && group.items[0].hkTrans" class="text-xl font-black text-slate-600 leading-tight">
+                            {{ group.items[0].hkTrans }}
+                        </h2>
+                        <p v-if="groupBy === 'movie' && group.subtitle" class="text-sm font-bold text-slate-500 mt-1">{{ group.subtitle }}</p>
                     </div>
 
                     <hr class="border-slate-100 mb-4">
 
-                    <!-- Content (Nested Sub-cards) -->
                     <div class="flex-1 space-y-3">
                         <div v-for="(item, idx) in group.items" :key="idx" class="sub-card">
                             <div class="flex justify-between items-start mb-2">
                                 <span class="text-[11px] font-bold text-slate-400">#{{ idx + 1 }}</span>
-                                <div class="flex flex-wrap gap-1 justify-end">
-                                    <span v-if="item.culture" class="pub-badge pub-culture">文傳: {{ item.culture }}</span>
-                                    <span v-if="item.chingwin" class="pub-badge pub-chingwin">青文: {{ item.chingwin }}</span>
-                                </div>
                             </div>
                             
-                            <h4 class="font-black text-slate-800 text-sm mb-1">
-                                {{ groupBy === 'gadget' ? (getMovieData(item.movieId, 'JP Title')) : item.jpTitle }}
-                            </h4>
-                            <p class="text-xs font-bold text-indigo-600 mb-3">{{ item.hkTrans || 'No HK Translation' }}</p>
-                            
-                            <!-- Manga Links if grouping by Gadget -->
-                            <div v-if="groupBy === 'gadget'" class="flex flex-wrap gap-2 mt-2">
-                                <div v-for="book in getMangaDataForWork(item.workId)" :key="book.hkIsbn">
-                                    <a :href="'manga-database.html?isbn=' + book.hkIsbn" target="_blank" 
-                                       :class="['archive-link', book.isGrand ? 'manga-grand' : 'manga-standard']">
-                                        <span class="font-black">{{ book.title }}</span>
-                                    </a>
+                            <div class="mb-2">
+                                <a :href="'movie.html?mediaid=' + item.movieId" class="inline-block hover:opacity-75 transition-opacity">
+                                    <span class="bg-cyan-600 text-white px-2 py-0.5 rounded text-[10px] font-black mr-2 uppercase">
+                                        Movie {{ getYear(getMovieData(item.movieId, 'JP Release Date')) }}
+                                    </span>
+                                    <span class="font-black text-slate-800 text-sm">
+                                        {{ groupBy === 'gadget' ? (getMovieData(item.movieId, 'JP Title')) : item.jpTitle }}
+                                    </span>
+                                </a>
+                            </div>
+
+                            <div class="mt-4 pt-3 border-t border-slate-200/50">
+                                <div v-if="groupBy === 'gadget'" class="flex flex-wrap gap-2 mb-3">
+                                    <div v-for="book in getMangaDataForWork(item.workId)" :key="book.hkIsbn">
+                                        <a :href="'manga-database.html?isbn=' + book.hkIsbn" target="_blank" 
+                                           :class="['archive-link', book.isGrand ? 'manga-grand' : 'manga-standard']">
+                                            <span class="font-black text-[10px]">{{ book.title }}</span>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-wrap gap-2">
+                                    <span v-if="item.culture && item.culture !== '-'" class="pub-badge pub-culture">文傳: {{ item.culture }}</span>
+                                    <span v-if="item.chingwin && item.chingwin !== '-'" class="pub-badge pub-chingwin">青文: {{ item.chingwin }}</span>
                                 </div>
                             </div>
                         </div>
@@ -116,7 +124,6 @@
                 </div>
             </div>
 
-            <!-- Pagination -->
             <div v-if="totalPages > 1" class="flex items-center justify-center gap-2 mb-20">
                 <button v-for="p in paginationRange" :key="p" 
                     @click="p !== '...' ? changePage(p) : null" 
@@ -262,6 +269,12 @@
                 changePage(p) { 
                     this.currentPage = p; 
                     window.scrollTo({top: 0, behavior: 'smooth'}); 
+                },
+                getYear(dateStr) {
+                    if (!dateStr || dateStr === '-') return 'TBA';
+                    // Handles YYYY-MM-DD or similar formats
+                    const match = dateStr.match(/\d{4}/);
+                    return match ? match[0] : 'TBA';
                 }
             },
             watch: {

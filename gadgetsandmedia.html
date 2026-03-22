@@ -290,7 +290,7 @@
                     const isbns = this.contents.filter(c => String(c.作品番).trim() === String(workId).trim()).map(c => String(c.ISBN).trim());
                     return this.publishHk.filter(hk => isbns.includes(String(hk.ISBN_JP).trim()) && String(hk.Active).toLowerCase() === 'yes').map(book => ({
                         isbn: book.ISBN,
-                        label: `${book.Title} ${book.Volume === '-' ? '' : book.Volume}${book.Subtitle === '-' ? '' : '：'+book.Subtitle}`.trim(),
+                        label: `${book.Title} ${book.Volume === '-' ? '' : book.Volume}${book.Subtitle === '-' ? '' : ''+book.Subtitle}`.trim(),
                         type: book.Title.includes('大全集') ? 'grand' : 'standard'
                     }));
                 },

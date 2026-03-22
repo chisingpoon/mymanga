@@ -133,15 +133,9 @@
                                         </a>
                                     </div>
                                     <div v-if="(item.culture && item.culture !== '-') || (item.chingwin && item.chingwin !== '-')" 
-                                        class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-100">
-                                        <span v-if="item.culture && item.culture !== '-'" 
-                                              class="px-2 py-1 text-[10px] font-black rounded bg-red-50 text-red-700 ring-1 ring-red-100 uppercase">
-                                            文傳: {{ item.culture }}
-                                        </span>
-                                        <span v-if="item.chingwin && item.chingwin !== '-'" 
-                                              class="px-2 py-1 text-[10px] font-black rounded bg-blue-50 text-blue-700 ring-1 ring-blue-100 uppercase">
-                                            青文: {{ item.chingwin }}
-                                        </span>
+                                         class="flex flex-wrap gap-1 border-t border-slate-50 pt-2">
+                                        <span v-if="item.culture && item.culture !== '-'" class="px-2 py-0.5 text-11px] font-black bg-red-50 text-red-700 rounded">文傳: {{ item.culture }}</span>
+                                        <span v-if="item.chingwin && item.chingwin !== '-'" class="px-2 py-0.5 text-[11px] font-black bg-blue-50 text-blue-700 rounded">青文: {{ item.chingwin }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -174,6 +168,12 @@
                 <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Page {{ currentPage }} of {{ totalPages }}</p>
             </div>            
         </main>
+        <transition name="fade">
+            <button v-show="showScrollTop" @click="scrollToTop" 
+                    class="fixed bottom-8 right-8 w-14 h-14 bg-slate-900 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:bg-indigo-600 hover:-translate-y-1 transition-all z-[9999]">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </button>
+        </transition>
     </div>
     
     <script>
@@ -196,9 +196,9 @@
             },
             async mounted() {
                 await this.init();
-                // This tracks your scroll position to show the "Back to Top" button
+                // ADDED THIS:
                 window.addEventListener('scroll', () => {
-                    this.showScrollTop = window.scrollY > 400;
+                    this.showScrollTop = window.scrollY > 300; 
                 });
             },
             watch: {
@@ -255,12 +255,9 @@
                     return this.displayGroups.slice(start, start + this.itemsPerPage);
                 },
                 visiblePages() {
-                    const total = this.totalPages;
-                    const current = this.currentPage;
-                    if (total <= 7) return Array.from({length: total}, (_, i) => i + 1);
-                    if (current <= 4) return [1, 2, 3, 4, 5, '...', total];
-                    if (current >= total - 3) return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
-                    return [1, '...', current - 1, current, current + 1, '...', total];
+                    const t = this.totalPages;
+                    if (t <= 5) return Array.from({length: t}, (_, i) => i + 1);
+                    return [1, 2, '...', t]; 
                 }
             },
             methods: {

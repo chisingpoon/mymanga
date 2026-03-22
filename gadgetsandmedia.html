@@ -101,12 +101,12 @@
             
                         <hr class="border-slate-100 mb-6">
             
-                        <div class="flex-1 space-y-8">
+                        <div class="flex-1 space-y-6">
                             <div v-for="(item, idx) in group.items" :key="idx" class="border-l-4 border-indigo-200 pl-5">
                                 
-                                <div v-if="groupBy === 'movie'" class="bg-white border-2 border-slate-50 rounded-2xl p-4 mb-4 shadow-sm border-l-4 border-l-indigo-500">
+                                <div v-if="groupBy === 'movie'" class="mb-4">
                                     <span class="text-[10px] font-black text-slate-400 uppercase mb-1 block">Gadget Identity</span>
-                                    <div class="font-black text-slate-800 text-xl leading-snug">{{ item.jpTitle }}</div>
+                                    <div class="font-black text-slate-800 text-xl leading-tight">{{ item.jpTitle }}</div>
                                     <div v-if="item.hkTrans" class="font-bold text-slate-500 text-lg">{{ item.hkTrans }}</div>
                                 </div>
                         
@@ -116,18 +116,38 @@
                                         <span class="bg-cyan-600 text-white px-2 py-1 rounded-md text-[11px] font-black uppercase inline-block mb-2">
                                             Movie {{ getYear(getMovieData(item.movieId, 'JP Release Date')) }}
                                         </span>
-                                        <div class="font-black text-slate-800 text-xl group-hover:text-cyan-600 transition-colors flex items-center gap-2 leading-snug">
+                                        <div class="font-black text-slate-800 text-xl group-hover:text-cyan-600 transition-colors flex items-center gap-2">
                                             {{ getMovieData(item.movieId, 'JP Title') }} <span class="text-cyan-500 text-2xl">▶</span>
                                         </div>
                                     </a>
                                 </div>
                         
-                                <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">HK Manga</span>
-                                        <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full text-[9px] font-black">{{ getMangaDataForWork(item.workId).length }} Found</span>
+                                <div class="mt-4">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">HK Manga Tags</span>
+                                        <div class="h-px flex-1 bg-slate-100"></div>
                                     </div>
+                                    
+                                    <div class="flex flex-wrap gap-2">
+                                        <a v-for="book in getMangaDataForWork(item.workId)" 
+                                           :key="book.isbn"
+                                           :href="'manga-database.html?isbn=' + book.isbn + '&region=HK'"
+                                           target="_blank"
+                                           :class="[
+                                             'px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all hover:-translate-y-0.5 shadow-sm',
+                                             book.type === 'grand' ? 'bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-400 hover:text-indigo-600'
+                                           ]">
+                                            {{ book.label }}
+                                        </a>
+                                        
+                                        <span v-if="getMangaDataForWork(item.workId).length === 0" class="text-[10px] font-bold text-slate-300 italic">No Manga recorded</span>
                                     </div>
+                        
+                                    <div v-if="item.culture || item.chingwin" class="flex flex-wrap gap-2 mt-4 pt-3 border-t border-slate-100">
+                                        <span v-if="item.culture && item.culture !== '-'" class="px-3 py-1.5 text-xs font-black rounded bg-red-50 text-red-800 ring-1 ring-red-100">文傳: {{ item.culture }}</span>
+                                        <span v-if="item.chingwin && item.chingwin !== '-'" class="px-3 py-1.5 text-xs font-black rounded bg-blue-50 text-blue-800 ring-1 ring-blue-100">青文: {{ item.chingwin }}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -260,18 +280,15 @@
                         const volume = (book.Volume || '').trim(); 
                         const subtitle = (book.Subtitle || '').trim();
                         
-                        // Your corrected label logic
                         let labelItems = [title];
                         if (volume && volume !== '-') labelItems.push(volume);
-                        
                         let label = labelItems.join(' ');
                         if (subtitle && subtitle !== '-') label += `：${subtitle}`;
-
+                
                         return {
                             isbn: String(book.ISBN).trim(),
                             label: label || 'Untitled',
-                            type: (book.Title || '').trim().includes('大全集') ? 'grand' : 'standard',
-                            publisher: (book.Publisher || '').trim()
+                            type: (book.Title || '').trim().includes('大全集') ? 'grand' : 'standard'
                         };
                     });
                 },

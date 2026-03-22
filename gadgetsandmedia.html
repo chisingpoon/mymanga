@@ -132,6 +132,17 @@
                                             {{ book.label }}
                                         </a>
                                     </div>
+                                    <div v-if="(item.culture && item.culture !== '-') || (item.chingwin && item.chingwin !== '-')" 
+                                        class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-100">
+                                        <span v-if="item.culture && item.culture !== '-'" 
+                                              class="px-2 py-1 text-[10px] font-black rounded bg-red-50 text-red-700 ring-1 ring-red-100 uppercase">
+                                            文傳: {{ item.culture }}
+                                        </span>
+                                        <span v-if="item.chingwin && item.chingwin !== '-'" 
+                                              class="px-2 py-1 text-[10px] font-black rounded bg-blue-50 text-blue-700 ring-1 ring-blue-100 uppercase">
+                                            青文: {{ item.chingwin }}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

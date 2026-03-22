@@ -62,17 +62,36 @@
                     </a>
                     <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Gadget Archive</h1>
                 </div>
-                <div class="flex items-center gap-4">
-                    <select v-model="groupBy" class="bg-indigo-50 border-2 border-indigo-200 rounded-xl px-4 py-2 text-xs font-black text-indigo-700 uppercase outline-none">
-                        <option value="gadget">Group by Gadget</option>
-                        <option value="movie">Group by Movie</option>
-                    </select>
-                    <span class="counter-badge">{{ displayGroups.length }} Groups</span>
-                </div>
             </div>
         </nav>
 
         <main class="max-w-[1400px] mx-auto px-6 pt-10">
+            <div class="flex flex-wrap items-center gap-4 mb-8 bg-white/50 p-4 rounded-2xl backdrop-blur-sm border border-white/20">
+                <div class="flex-1 min-w-[300px] relative">
+                    <input type="text" v-model.trim="searchQuery" placeholder="Search gadgets, movies, or publishers..." 
+                           class="w-full bg-white border-2 border-slate-200 rounded-xl pl-12 pr-4 py-3 text-sm font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
+                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3" stroke-linecap="round"></path></svg>
+                    </div>
+                </div>
+            
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-black text-slate-500 uppercase tracking-wider">Group By:</span>
+                    <select v-model="groupBy" class="bg-white border-2 border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-indigo-500 cursor-pointer">
+                        <option value="gadget">Gadget</option>
+                        <option value="movie">Movie</option>
+                    </select>
+                </div>
+            
+                <div class="bg-indigo-600 text-white px-6 py-3 rounded-xl shadow-lg shadow-indigo-200 flex items-center gap-2">
+                    <span class="text-xs font-black uppercase opacity-80">Total Groups</span>
+                    <span class="text-lg font-black leading-none">{{ displayGroups.length }}</span>
+                </div>
+            
+                <button @click="resetFilters" class="p-3 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded-xl transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </button>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
                 <template v-for="group in paginatedGroups" :key="group.id">
                     <div class="data-card p-6 flex flex-col border-2 border-slate-100 shadow-sm">
@@ -115,31 +134,19 @@
                                         <div v-for="book in getMangaDataForWork(item.workId)" :key="book.isbn">
                                             <a :href="'manga-database.html?isbn=' + book.isbn + '&region=HK'" target="_blank" 
                                                :class="[
-                                                 'flex items-center justify-between p-3 rounded-lg border transition-all group shadow-sm',
-                                                 book.type === 'grand' 
-                                                    ? 'bg-amber-50 border-amber-200 hover:border-amber-400' 
-                                                    : 'bg-white border-slate-200 hover:border-indigo-400'
+                                                 'flex items-center justify-between p-2.5 rounded-lg border transition-all group mb-2',
+                                                 book.type === 'grand' ? 'bg-amber-50 border-amber-200' : 'bg-white border-slate-200'
                                                ]">
-                                                
-                                                <div class="flex flex-col flex-1 pr-3 overflow-hidden">
-                                                    <span class="text-[8px] font-black uppercase mb-0.5 opacity-70"
-                                                          :class="book.type === 'grand' ? 'text-amber-800' : 'text-indigo-600'">
+                                                <div class="flex flex-col flex-1 pr-2 overflow-hidden">
+                                                    <span class="text-[8px] font-black uppercase opacity-60" :class="book.type === 'grand' ? 'text-amber-800' : 'text-indigo-600'">
                                                         {{ book.publisher }}
                                                     </span>
-                                                    
-                                                    <span :class="[
-                                                        'font-bold text-sm leading-tight truncate',
-                                                        book.type === 'grand' ? 'text-amber-900' : 'text-slate-800 group-hover:text-indigo-700'
-                                                    ]">
+                                                    <span class="font-bold text-xs text-slate-800 group-hover:text-indigo-600 truncate">
                                                         {{ book.label }}
                                                     </span>
                                                 </div>
-                                
-                                                <svg :class="[
-                                                    'w-4 h-4 flex-shrink-0',
-                                                    book.type === 'grand' ? 'text-amber-400' : 'text-slate-300 group-hover:text-indigo-500'
-                                                ]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                <svg class="w-3.5 h-3.5 flex-shrink-0 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
                                                 </svg>
                                             </a>
                                         </div>
@@ -269,12 +276,10 @@
                 getMangaDataForWork(workId) {
                     if (!workId || workId === '-' || !this.contents || !this.publishHk) return [];
                     
-                    // 1. Bridge: Get the reference ISBNs from '書籍收錄作品'
                     const sourceIsbns = this.contents
                         .filter(c => String(c.作品番).trim() === String(workId).trim())
                         .map(c => String(c.ISBN).trim());
                 
-                    // 2. Target: Filter '出版目録HK' by ISBN_JP and Active status
                     const hkMatches = this.publishHk.filter(hk => 
                         sourceIsbns.includes(String(hk.ISBN_JP).trim()) && 
                         String(hk.Active).toLowerCase() === 'yes'
@@ -282,28 +287,23 @@
                 
                     return hkMatches.map(book => {
                         const title = (book.Title || '').trim();
-                        const volume = (book.巻 || '').trim(); // Ensure this matches your HK sheet column name
+                        const volume = (book.巻 || '').trim(); // Updated to ensure it picks up the volume field
                         const subtitle = (book.副題 || '').trim();
                         const category = (book.類 || '').trim();
+                        const publisher = (book.Publisher || '').trim();
                         
-                        // 3. Construct Label: Title + Vol + Subtitle
-                        let label = title;
+                        // Constructing: Title + Vol + Subtitle
+                        let labelItems = [title];
+                        if (volume && volume !== '-') labelItems.push(volume);
                         
-                        // Append Volume if exists
-                        if (volume && volume !== '-' && volume !== '') {
-                            label += ` ${volume}`; 
-                        }
-                        
-                        // Append Subtitle if exists
-                        if (subtitle && subtitle !== '-' && subtitle !== '') {
-                            label += `：${subtitle}`;
-                        }
+                        let label = labelItems.join(' ');
+                        if (subtitle && subtitle !== '-') label += `：${subtitle}`;
                 
                         return {
                             isbn: String(book.ISBN).trim(),
-                            label: label || 'Untitled Volume',
+                            label: label || 'Untitled',
                             type: category.includes('大全集') ? 'grand' : 'standard',
-                            publisher: (book.Publisher || '').trim()
+                            publisher: publisher
                         };
                     });
                 },

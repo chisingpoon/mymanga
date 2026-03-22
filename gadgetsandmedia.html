@@ -271,7 +271,25 @@
                             fetch(base + "書籍收錄作品").then(r => r.json()),
                             fetch(base + "出版目録HK").then(r => r.json())
                         ]);
-                        this.gadgetsMaster = g; this.gadgetMedia = gm; this.movies = m; this.contents = s; this.publishHk = hk;
+                        this.gadgetsMaster = g; 
+                        this.gadgetMedia = gm; 
+                        this.movies = m; 
+                        this.contents = s; 
+                        this.publishHk = hk;
+                
+                        // --- ADDED: URL Parameter Logic ---
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const movieIdParam = urlParams.get('movieid');
+                        
+                        if (movieIdParam) {
+                            const movie = this.movies.find(x => String(x['Media ID']) === String(movieIdParam));
+                            if (movie) {
+                                this.groupBy = 'movie'; // Switch to movie view
+                                this.searchQuery = movie['JP Title']; // Filter by movie name
+                            }
+                        }
+                        // ----------------------------------
+                
                         this.loading = false;
                     } catch (e) { console.error(e); }
                 },

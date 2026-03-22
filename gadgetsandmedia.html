@@ -117,12 +117,21 @@
             
                         <div class="flex-1 space-y-8">
                             <div v-for="(item, idx) in group.items" :key="idx" class="border-l-4 border-indigo-200 pl-5">
-                                <div v-if="groupBy === 'movie'">
-                                    <div class="bg-white border-2 border-slate-50 rounded-2xl p-4 mb-2 shadow-sm">
-                                        <span class="text-[10px] font-black text-slate-400 uppercase mb-1 block">Gadget #{{ idx + 1 }}</span>
-                                        <span class="text-[10px] font-black text-slate-400 uppercase mb-1 block">Gadget</span>
-                                        <div class="font-black text-slate-800 text-xl">{{ item.jpTitle }}</div>
-                                        <div v-if="item.hkTrans" class="font-bold text-slate-500 text-lg">{{ item.hkTrans }}</div>
+                                <div v-if="groupBy === 'movie'" class="space-y-4">
+                                    <div class="mb-4">
+                                        <span class="text-[9px] font-black text-cyan-600 uppercase tracking-widest bg-cyan-50 px-2 py-0.5 rounded mb-2 inline-block">
+                                            Gadget #{{ item.id }}
+                                        </span>
+                                        
+                                        <h3 class="text-xl font-black text-slate-800 leading-tight flex items-baseline gap-2">
+                                            <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">原文 〉</span>
+                                            {{ item.title }}
+                                        </h3>
+                                        
+                                        <h3 v-if="item.hkTrans" class="text-xl font-black text-slate-500 leading-tight flex items-baseline gap-2 mt-1">
+                                            <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">港譯 〉</span>
+                                            {{ item.hkTrans }}
+                                        </h3>
                                     </div>
                                     <div v-if="item.culture || item.chingwin" class="flex flex-wrap gap-2 mt-2">
                                         <span v-if="item.culture && item.culture !== '-'" class="px-3 py-1.5 text-xs font-black rounded bg-red-50 text-red-800 ring-1 ring-red-100">文傳: {{ item.culture }}</span>

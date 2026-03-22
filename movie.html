@@ -134,14 +134,19 @@
             box-shadow: 0 4px 12px rgba(190, 18, 60, 0.4); 
         }
         .toggle-btn.active { color: white; }
+        [v-cloak] { display: none !important; }
+        #app:not([v-cloak]) { display: block; }
     </style>
 </head>
 <body class="bg-grid">
     <div id="app" v-cloak>
         
-        <div v-if="loading" class="loader-wrapper">
-            <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Loading Archive...</p>
+        <div v-if="!loading">
+            <main v-if="!selectedMovie" key="grid" class="max-w-[1920px] mx-auto px-6 pt-8 fade-content">
+                </main>
+        
+            <main v-else key="detail" class="max-w-[1920px] mx-auto px-6 pt-6 pb-20 fade-content">
+                </main>
         </div>
 
         <nav class="top-nav">
@@ -379,25 +384,21 @@
                     window.history.pushState({ mediaid: null }, '', newUrl);
                 },
                 checkUrlParam() {
-                    if (!this.movies || this.movies.length === 0) return;
-                
                     const urlParams = new URLSearchParams(window.location.search);
                     const mediaIdParam = urlParams.get('mediaid');
                     
-                    if (mediaIdParam) {
-                        const cleanParam = decodeURIComponent(mediaIdParam).trim().toLowerCase();
-                        const target = this.movies.find(m => m.id.toLowerCase() === cleanParam);
+                    if (mediaIdParam && this.movies.length > 0) {
+                        const target = this.movies.find(m => m.id.toLowerCase() === mediaIdParam.trim().toLowerCase());
                         if (target) {
-                            this.selectedMovie = target;
-                            // Reset tabs to default when loading via URL
+                            // Set these FIRST
                             this.mangaTab = 'JP';
                             this.fcTab = 'JP';
-                        } else {
-                            this.selectedMovie = null;
+                            // Then assign the movie
+                            this.selectedMovie = target;
+                            return;
                         }
-                    } else {
-                        this.selectedMovie = null;
                     }
+                    this.selectedMovie = null;
                 },
                 async init() {
                     try {

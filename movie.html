@@ -134,6 +134,8 @@
             box-shadow: 0 4px 12px rgba(190, 18, 60, 0.4); 
         }
         .toggle-btn.active { color: white; }
+        [v-cloak] > * { display: none; }
+        [v-cloak]::before { content: 'Loading...'; padding: 20px; display: block; text-align: center; }
     </style>
 </head>
 <body class="bg-grid">

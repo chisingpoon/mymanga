@@ -392,7 +392,8 @@ createApp({
         async init() {
             this.loading = true;
             try {
-                const [hk, jp, contents, master] = await Promise.all([
+                // We are fetching 5 items now, so we need 5 variables in the array: [hk, jp, contents, master, movies]
+                const [hk, jp, contents, master, movies] = await Promise.all([
                     fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json()),
                     fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP").then(r => r.json()),
                     fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
@@ -400,23 +401,30 @@ createApp({
                     fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/電影動畫").then(r => r.json())
                 ]);
         
-                this.db = { hk, jp, contents, master };
+                // Assign all 5 to your database object
+                this.db = { hk, jp, contents, master, movies };
                 
-                // Final check: Wait for the DOM to be ready
+                // Ensure loading stops even if the URL check fails
                 setTimeout(() => {
                     this.checkUrlParameters();
                     this.loading = false;
-                    
-                    // If it STILL says NONE, try one more time 1 second later
-                    if (this.debugInfo.urlIsbn === 'REGEX FAILED') {
-                        setTimeout(() => this.checkUrlParameters(), 1000);
-                    }
-                }, 200);
+                }, 500);
         
             } catch (e) {
-                console.error(e);
-                this.loading = false;
+                console.error("Database Sync Failed:", e);
+                this.loading = false; // Stop the spinner so user can see the error
             }
+        },
+        
+        // Add this new method to your methods: { ... } section
+        getMovieUrl(isbn) {
+            if (!isbn || !this.db.movies) return null;
+            // Look for the ISBN in the movies sheet
+            const match = this.db.movies.find(m => m["Manga ISBN"] == isbn);
+            if (match && match["Media ID"]) {
+                return `movie.html?mediaid=${match["Media ID"]}`;
+            }
+            return null;
         },
         checkUrlParameters() {
             // 1. Get the RAW string from the browser (The most reliable source)

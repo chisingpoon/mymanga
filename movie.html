@@ -211,7 +211,7 @@
                             <a :href="'charactersandthings.html?movieid=' + selectedMovie.id" 
                                class="flex items-center justify-center gap-3 py-4 px-6 bg-slate-900 hover:bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all shadow-lg hover:shadow-indigo-200 group">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z""M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                 </svg>
                                 <span>相關角色與事理</span>
                                 <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7l5 5m0 0l-5 5m5-5H6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -298,10 +298,10 @@
     </div>
 
     <script>
-        const { createApp } = Vue;
+        var createApp = Vue.createApp;
         
         createApp({
-            data() {
+            data: function() {
                 return {
                     loading: true,
                     searchQuery: '',
@@ -312,84 +312,90 @@
                     selectedMovie: null,
                     mangaTab: 'JP',
                     fcTab: 'JP'
-                }
+                };
             },
             computed: {
                 sortedMovies: function() {
-                    if (!this.movies || this.movies.length === 0) return [];
                     var self = this;
-                    var filtered = this.movies.filter(function(m) {
-                        if (!self.searchQuery) return true;
-                        return m.searchStr.indexOf(self.searchQuery.toLowerCase()) !== -1;
-                    });
-                    return filtered.sort(function(a, b) {
+                    var list = this.movies || [];
+                    if (this.searchQuery) {
+                        var q = this.searchQuery.toLowerCase();
+                        list = list.filter(function(m) {
+                            return m.searchStr.indexOf(q) !== -1;
+                        });
+                    }
+                    return list.slice().sort(function(a, b) {
                         var yA = parseInt(a.jpYear) || 0;
                         var yB = parseInt(b.jpYear) || 0;
                         return self.sortOrder === 'asc' ? yA - yB : yB - yA;
                     });
                 },
-                mappedManga: function() { 
+                mappedManga: function() {
                     if (!this.selectedMovie || !this.selectedMovie.mangaRaw) return null;
-                    var data = this.lookup(this.selectedMovie.mangaRaw);
-                    if (!data) return null;
-                    var current = this.mangaTab === 'JP' ? data.jp : data.hk;
-                    return { current: current, hasHk: !!data.hk };
+                    var res = this.lookup(this.selectedMovie.mangaRaw);
+                    if (!res) return null;
+                    var current = this.mangaTab === 'JP' ? res.jp : res.hk;
+                    if (!current) current = res.jp; // Fallback
+                    return { current: current, hasHk: !!res.hk };
                 },
-                mappedFilmComic: function() { 
+                mappedFilmComic: function() {
                     if (!this.selectedMovie || !this.selectedMovie.filmComicRaw) return null;
-                    var data = this.lookup(this.selectedMovie.filmComicRaw);
-                    if (!data) return null;
-                    var current = this.fcTab === 'JP' ? data.jp : data.hk;
-                    return { current: current, hasHk: !!data.hk };
+                    var res = this.lookup(this.selectedMovie.filmComicRaw);
+                    if (!res) return null;
+                    var current = this.fcTab === 'JP' ? res.jp : res.hk;
+                    if (!current) current = res.jp; // Fallback
+                    return { current: current, hasHk: !!res.hk };
                 }
             },
             methods: {
                 getVal: function(obj, key) {
                     if (!obj) return '';
-                    var targetKey = key.trim().toLowerCase();
+                    var tk = key.trim().toLowerCase();
                     var keys = Object.keys(obj);
                     for (var i = 0; i < keys.length; i++) {
-                        if (keys[i].trim().toLowerCase() === targetKey) return obj[keys[i]];
+                        if (keys[i].trim().toLowerCase() === tk) return obj[keys[i]];
                     }
                     return '';
                 },
                 lookup: function(isbn) {
                     if (!isbn) return null;
                     var self = this;
-                    var cleanIsbn = isbn.toString().replace(/[-\s]/g, '').trim();
-                    if (!cleanIsbn) return null;
+                    var clean = isbn.toString().replace(/[-\s]/g, '').trim();
+                    if (!clean) return null;
         
-                    var jpFound = this.mangaCatalog.find(function(item) {
-                        var iIsbn = self.getVal(item, 'ISBN').toString().replace(/[-\s]/g, '').trim();
-                        return iIsbn === cleanIsbn;
+                    var jp = this.mangaCatalog.find(function(item) {
+                        return self.getVal(item, 'ISBN').toString().replace(/[-\s]/g, '').trim() === clean;
                     });
-                    if (!jpFound) return null;
+                    if (!jp) return null;
         
-                    var hkMatches = this.hkCatalog.filter(function(item) {
-                        var hkIsbnJp = self.getVal(item, 'ISBN_JP').toString().replace(/[-\s]/g, '').trim();
-                        return hkIsbnJp === cleanIsbn;
+                    var hkList = this.hkCatalog.filter(function(item) {
+                        return self.getVal(item, 'ISBN_JP').toString().replace(/[-\s]/g, '').trim() === clean;
                     });
                     
-                    var hkFound = null;
-                    if (hkMatches.length > 0) {
-                        hkFound = hkMatches.sort(function(a, b) {
+                    var hk = null;
+                    if (hkList.length > 0) {
+                        hk = hkList.sort(function(a, b) {
                             return new Date(self.getVal(b, 'IssueDate')) - new Date(self.getVal(a, 'IssueDate'));
                         })[0];
                     }
         
                     return {
                         jp: { 
-                            title: this.getVal(jpFound, '標題'), 
-                            image: this.getVal(jpFound, 'image'), 
-                            isbnParam: this.getVal(jpFound, 'ISBN').trim(), 
-                            series: this.getVal(jpFound, '類').trim(),
+                            title: this.getVal(jp, '標題'), 
+                            subtitle: this.getVal(jp, '副標題'),
+                            author: this.getVal(jp, '著'),
+                            image: this.getVal(jp, 'image'), 
+                            isbnParam: this.getVal(jp, 'ISBN').trim(), 
+                            series: this.getVal(jp, '類').trim(),
                             region: 'JP'
                         },
-                        hk: hkFound ? { 
-                            title: this.getVal(hkFound, 'Title'), 
-                            image: this.getVal(hkFound, 'Image'), 
-                            isbnParam: this.getVal(hkFound, 'ISBN').trim(), 
-                            series: this.getVal(hkFound, 'Title').trim(),
+                        hk: hk ? { 
+                            title: this.getVal(hk, 'Title'), 
+                            subtitle: this.getVal(hk, 'Subtitle'),
+                            author: this.getVal(hk, 'Author'),
+                            image: this.getVal(hk, 'Image'), 
+                            isbnParam: this.getVal(hk, 'ISBN').trim(), 
+                            series: this.getVal(hk, 'Title').trim(),
                             region: 'HK'
                         } : null
                     };
@@ -400,68 +406,73 @@
                            '&isbn=' + encodeURIComponent(item.isbnParam || '') + 
                            '&series=' + encodeURIComponent(item.series || '');
                 },
-                selectMovie: function(m) { 
+                selectMovie: function(m) {
                     this.selectedMovie = m;
-                    this.mangaTab = 'JP'; 
-                    this.fcTab = 'JP'; 
-                    var newUrl = window.location.pathname + '?mediaid=' + encodeURIComponent(m.id);
-                    window.history.pushState({ mediaid: m.id }, '', newUrl);
-                    this.$nextTick(function() { window.scrollTo(0, 0); }); 
+                    this.mangaTab = 'JP';
+                    this.fcTab = 'JP';
+                    var url = window.location.pathname + '?mediaid=' + encodeURIComponent(m.id);
+                    window.history.pushState({ mid: m.id }, '', url);
+                    window.scrollTo(0, 0);
                 },
-                closeDetail: function() { 
-                    this.selectedMovie = null; 
-                    window.history.pushState({ mediaid: null }, '', window.location.pathname);
+                closeDetail: function() {
+                    this.selectedMovie = null;
+                    window.history.pushState({}, '', window.location.pathname);
                 },
-                checkUrlParam: function() {
-                    var params = new URLSearchParams(window.location.search);
-                    var mid = params.get('mediaid');
-                    if (mid && this.movies.length > 0) {
-                        var self = this;
-                        var target = this.movies.find(function(m) {
-                            return m.id.toLowerCase() === mid.toLowerCase().trim();
-                        });
-                        if (target) this.selectedMovie = target;
-                    }
-                },
-                init: async function() {
-                    try {
-                        var res = await Promise.all([
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/電影動畫"),
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP"),
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK") 
-                        ]);
+                init: function() {
+                    var self = this;
+                    var urls = [
+                        "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/電影動畫",
+                        "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP",
+                        "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK"
+                    ];
         
-                        this.mangaCatalog = await res[1].json();
-                        this.hkCatalog = await res[2].json(); 
-                        var movieData = await res[0].json();
+                    Promise.all(urls.map(function(u) { return fetch(u).then(function(r) { return r.json(); }); }))
+                        .then(function(results) {
+                            self.mangaCatalog = results[1];
+                            self.hkCatalog = results[2];
+                            self.movies = results[0].map(function(i) {
+                                var d = self.getVal(i, 'JP Release Date').toString();
+                                var y = d.match(/\d{4}/);
+                                return {
+                                    id: self.getVal(i, 'Media ID').toString().trim(),
+                                    jpTitle: self.getVal(i, 'JP Title'),
+                                    hkTitle: self.getVal(i, 'HK Title'),
+                                    enTitle: self.getVal(i, 'EN Title'),
+                                    jpDate: d,
+                                    jpYear: y ? y[0] : 'TBA',
+                                    hkDate: self.getVal(i, 'HK Release Date'),
+                                    jpImage: self.getVal(i, 'JP Image'),
+                                    hkImage: self.getVal(i, 'HK Image'),
+                                    mangaRaw: self.getVal(i, 'Manga ISBN'),
+                                    filmComicRaw: self.getVal(i, 'Film Comics'),
+                                    searchStr: (self.getVal(i, 'JP Title') + " " + self.getVal(i, 'HK Title')).toLowerCase()
+                                };
+                            });
         
-                        var self = this;
-                        this.movies = movieData.map(function(i) {
-                            var d = self.getVal(i, 'JP Release Date').toString();
-                            var yMatch = d.match(/\d{4}/);
-                            return {
-                                id: self.getVal(i, 'Media ID').toString().trim(),
-                                jpTitle: self.getVal(i, 'JP Title'),
-                                hkTitle: self.getVal(i, 'HK Title'),
-                                enTitle: self.getVal(i, 'EN Title'),
-                                jpDate: d,
-                                jpYear: yMatch ? yMatch[0] : 'TBA',
-                                hkDate: self.getVal(i, 'HK Release Date'),
-                                jpImage: self.getVal(i, 'JP Image'),
-                                hkImage: self.getVal(i, 'HK Image'),
-                                mangaRaw: self.getVal(i, 'Manga ISBN'),
-                                filmComicRaw: self.getVal(i, 'Film Comics'),
-                                searchStr: (self.getVal(i, 'JP Title') + " " + self.getVal(i, 'HK Title')).toLowerCase()
+                            // Check URL
+                            var p = new URLSearchParams(window.location.search);
+                            var mid = p.get('mediaid');
+                            if (mid) {
+                                var target = self.movies.find(function(m) { return m.id.toLowerCase() === mid.toLowerCase().trim(); });
+                                if (target) self.selectedMovie = target;
+                            }
+        
+                            window.onpopstate = function() {
+                                var p2 = new URLSearchParams(window.location.search);
+                                var mid2 = p2.get('mediaid');
+                                if (!mid2) self.selectedMovie = null;
+                                else {
+                                    var t2 = self.movies.find(function(m) { return m.id.toLowerCase() === mid2.toLowerCase().trim(); });
+                                    self.selectedMovie = t2 || null;
+                                }
                             };
-                        });
         
-                        this.checkUrlParam();
-                        window.onpopstate = this.checkUrlParam;
-                    } catch (err) {
-                        console.error(err);
-                    } finally {
-                        this.loading = false;
-                    }
+                            self.loading = false;
+                        })
+                        .catch(function(err) {
+                            console.error(err);
+                            self.loading = false;
+                        });
                 }
             },
             mounted: function() {

@@ -191,18 +191,18 @@
                     movies: [],
                     contents: [],
                     publishHk: [],
-                    showScrollTop: false
+                    showScrollTop: false // State for the floating button
                 }
             },
             async mounted() {
                 await this.init();
-                // Listen for scroll events to show/hide the button
+                // This tracks your scroll position to show the "Back to Top" button
                 window.addEventListener('scroll', () => {
-                    this.showScrollTop = window.scrollY > 500;
+                    this.showScrollTop = window.scrollY > 400;
                 });
             },
-            // Reset to page 1 whenever search or grouping changes
             watch: {
+                // Reset to page 1 if user searches or changes view
                 searchQuery() { this.currentPage = 1; },
                 groupBy() { this.currentPage = 1; }
             },
@@ -274,20 +274,19 @@
                             fetch(base + "書籍收錄作品").then(r => r.json()),
                             fetch(base + "出版目録HK").then(r => r.json())
                         ]);
-                        this.gadgetsMaster = g; 
-                        this.gadgetMedia = gm; 
-                        this.movies = m; 
-                        this.contents = s; 
-                        this.publishHk = hk;
+                        this.gadgetsMaster = g; this.gadgetMedia = gm; this.movies = m; this.contents = s; this.publishHk = hk;
                         this.loading = false;
                     } catch (e) { console.error(e); }
                 },
-                // THE MISSING METHOD
                 changePage(page) {
                     if (page >= 1 && page <= this.totalPages) {
                         this.currentPage = page;
+                        // Move to top so the user sees the start of the new page
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
+                },
+                scrollToTop() {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 },
                 getMangaDataForWork(workId) {
                     if (!workId || workId === '-') return [];
@@ -303,16 +302,7 @@
                     return m ? m[field] : (field === 'JP Release Date' ? '-' : 'Unknown');
                 },
                 getYear(d) { const m = d.match(/\d{4}/); return m ? m[0] : 'TBA'; },
-                resetFilters() { 
-                    this.searchQuery = ''; 
-                    this.currentPage = 1;
-                },
-                scrollToTop() {
-                    window.scrollTo({
-                        top: 0,
-                        behavior: 'smooth'
-                    });
-                },
+                resetFilters() { this.searchQuery = ''; this.currentPage = 1; }
             }
         }).mount('#app');
     </script>

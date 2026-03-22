@@ -307,12 +307,7 @@
 
 <script>
 const { createApp } = Vue;
-getYear(dateStr) {
-    if (!dateStr) return 'N/A';
-    const d = new Date(dateStr);
-    // If the date is valid, return the year, otherwise return the original string
-    return isNaN(d.getTime()) ? dateStr : d.getFullYear();
-},
+
 createApp({
     data() {
         return {
@@ -427,7 +422,12 @@ createApp({
                 this.loading = false; // Stop the spinner so user can see the error
             }
         },
-        
+        getYear(dateStr) {
+            if (!dateStr) return 'N/A';
+            const d = new Date(dateStr);
+            // If the date is valid, return the year, otherwise return the original string
+            return isNaN(d.getTime()) ? dateStr : d.getFullYear();
+        },
         // Add this new method to your methods: { ... } section
         getMovieUrl(isbn) {
             if (!isbn || !this.db.movies) return null;

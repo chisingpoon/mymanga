@@ -105,37 +105,38 @@
             
                                 <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4">
                                     <div class="flex items-center justify-between mb-4">
-                                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">HK Editions</span>
+                                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">HK Manga Editions</span>
                                         <span class="bg-indigo-600 text-white px-3 py-1 rounded-full text-[10px] font-black">
                                             {{ getMangaDataForWork(item.workId).length }} Found
                                         </span>
                                     </div>
                                     
-                                    <div class="space-y-3">
+                                    <div class="space-y-4">
                                         <div v-for="book in getMangaDataForWork(item.workId)" :key="book.isbn">
                                             <a :href="'manga-database.html?isbn=' + book.isbn + '&region=HK'" target="_blank" 
                                                :class="[
-                                                 'flex items-center justify-between p-4 rounded-xl border-2 transition-all group',
+                                                 'flex items-center justify-between p-5 rounded-xl border-2 transition-all group shadow-sm',
                                                  book.type === 'grand' 
-                                                    ? 'bg-amber-50 border-amber-200 hover:border-amber-500' 
-                                                    : 'bg-white border-slate-100 hover:border-indigo-500'
+                                                    ? 'bg-amber-50 border-amber-200 hover:border-amber-500 hover:shadow-md' 
+                                                    : 'bg-white border-slate-100 hover:border-indigo-500 hover:shadow-md'
                                                ]">
                                                 
-                                                <div class="flex flex-col">
-                                                    <span class="text-[9px] font-black uppercase opacity-60 mb-1"
-                                                          :class="book.type === 'grand' ? 'text-amber-800' : 'text-indigo-600'">
-                                                        {{ book.publisher }}
+                                                <div class="flex flex-col flex-1 pr-4">
+                                                    <span class="text-[10px] font-black uppercase tracking-tighter mb-1"
+                                                          :class="book.type === 'grand' ? 'text-amber-800/60' : 'text-indigo-500/60'">
+                                                        {{ book.publisher }} Edition
                                                     </span>
+                                                    
                                                     <span :class="[
-                                                        'font-black text-base',
-                                                        book.type === 'grand' ? 'text-amber-700' : 'text-slate-700 group-hover:text-indigo-600'
+                                                        'font-black text-base md:text-lg leading-tight',
+                                                        book.type === 'grand' ? 'text-amber-900' : 'text-slate-800 group-hover:text-indigo-700'
                                                     ]">
                                                         {{ book.label }}
                                                     </span>
                                                 </div>
                                 
                                                 <svg :class="[
-                                                    'w-5 h-5',
+                                                    'w-6 h-6 flex-shrink-0',
                                                     book.type === 'grand' ? 'text-amber-400' : 'text-slate-300 group-hover:text-indigo-500'
                                                 ]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -144,10 +145,10 @@
                                         </div>
                                 
                                         <div v-if="item.culture || item.chingwin" class="flex flex-wrap gap-3 mt-4 pt-4 border-t border-slate-200">
-                                            <span v-if="item.culture && item.culture !== '-'" class="pub-badge pub-culture px-4 py-2 text-xs font-black uppercase">
+                                            <span v-if="item.culture && item.culture !== '-'" class="pub-badge pub-culture px-4 py-2 text-xs font-black uppercase shadow-sm ring-1 ring-red-100">
                                                 文傳: {{ item.culture }}
                                             </span>
-                                            <span v-if="item.chingwin && item.chingwin !== '-'" class="pub-badge pub-chingwin px-4 py-2 text-xs font-black uppercase">
+                                            <span v-if="item.chingwin && item.chingwin !== '-'" class="pub-badge pub-chingwin px-4 py-2 text-xs font-black uppercase shadow-sm ring-1 ring-blue-100">
                                                 青文: {{ item.chingwin }}
                                             </span>
                                         </div>
@@ -279,20 +280,25 @@
                     );
                 
                     return hkMatches.map(book => {
-                        const category = (book.類 || '').trim();
+                        const title = (book.Title || '').trim();
                         const volume = (book.巻 || '').trim();
+                        const subtitle = (book.副題 || '').trim();
+                        const category = (book.類 || '').trim();
                         
-                        // 3. Construct Label: Category + Vol. (if exists)
-                        let label = category;
+                        // 3. Construct Label: Title + (Vol. X) + Subtitle
+                        let label = title;
                         if (volume && volume !== '-' && volume !== '') {
                             label += ` Vol. ${volume}`;
                         }
+                        if (subtitle && subtitle !== '-' && subtitle !== '') {
+                            label += `：${subtitle}`;
+                        }
                 
                         return {
-                            isbn: String(book.ISBN).trim(), // The actual HK ISBN for the link
-                            label: label || 'HK Manga Record',
+                            isbn: String(book.ISBN).trim(),
+                            label: label || 'Untitled Volume',
                             type: category.includes('大全集') ? 'grand' : 'standard',
-                            publisher: (book.Publisher || '').trim() // To help with the badge logic
+                            publisher: (book.Publisher || '').trim()
                         };
                     });
                 },

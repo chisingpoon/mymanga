@@ -19,6 +19,8 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
         .data-card { background: white; border-radius: 20px; border: 1px solid #e2e8f0; transition: all 0.3s ease; }
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease, transform 0.3s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(20px); }
     </style>
 </head>
 <body class="bg-grid">
@@ -178,13 +180,20 @@
                     movies: [],
                     contents: [],
                     publishHk: [],
-                    showScrollTop: false,
-                    currentPage: 1,
-                    itemsPerPage: 12,
+                    showScrollTop: false
                 }
             },
             async mounted() {
                 await this.init();
+                // Listen for scroll events to show/hide the button
+                window.addEventListener('scroll', () => {
+                    this.showScrollTop = window.scrollY > 500;
+                });
+            },
+            // Reset to page 1 whenever search or grouping changes
+            watch: {
+                searchQuery() { this.currentPage = 1; },
+                groupBy() { this.currentPage = 1; }
             },
             computed: {
                 processedData() {
@@ -221,11 +230,11 @@
                         }
                         groups[key].items.push(item);
                     });
-                    return Object.values(groups).sort((a, b) => this.groupBy === 'movie' ? this.getMovieData(b.id, 'JP Release Date').localeCompare(this.getMovieData(a.id, 'JP Release Date')) : a.title.localeCompare(b.title, 'zh-Hant'));
-                },
-                paginatedGroups() {
-                    const start = (this.currentPage - 1) * this.itemsPerPage;
-                    return this.displayGroups.slice(start, start + this.itemsPerPage);
+                    return Object.values(groups).sort((a, b) => 
+                        this.groupBy === 'movie' 
+                        ? this.getMovieData(b.id, 'JP Release Date').localeCompare(this.getMovieData(a.id, 'JP Release Date')) 
+                        : a.title.localeCompare(b.title, 'zh-Hant')
+                    );
                 },
                 totalPages() {
                     return Math.ceil(this.displayGroups.length / this.itemsPerPage);
@@ -237,7 +246,6 @@
                 visiblePages() {
                     const total = this.totalPages;
                     const current = this.currentPage;
-                    // Logic to show [1, 2, 3, 4, 5, '...', 20] instead of all 20 buttons
                     if (total <= 7) return Array.from({length: total}, (_, i) => i + 1);
                     if (current <= 4) return [1, 2, 3, 4, 5, '...', total];
                     if (current >= total - 3) return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
@@ -255,9 +263,20 @@
                             fetch(base + "書籍收錄作品").then(r => r.json()),
                             fetch(base + "出版目録HK").then(r => r.json())
                         ]);
-                        this.gadgetsMaster = g; this.gadgetMedia = gm; this.movies = m; this.contents = s; this.publishHk = hk;
+                        this.gadgetsMaster = g; 
+                        this.gadgetMedia = gm; 
+                        this.movies = m; 
+                        this.contents = s; 
+                        this.publishHk = hk;
                         this.loading = false;
                     } catch (e) { console.error(e); }
+                },
+                // THE MISSING METHOD
+                changePage(page) {
+                    if (page >= 1 && page <= this.totalPages) {
+                        this.currentPage = page;
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
                 },
                 getMangaDataForWork(workId) {
                     if (!workId || workId === '-') return [];
@@ -273,7 +292,16 @@
                     return m ? m[field] : (field === 'JP Release Date' ? '-' : 'Unknown');
                 },
                 getYear(d) { const m = d.match(/\d{4}/); return m ? m[0] : 'TBA'; },
-                resetFilters() { this.searchQuery = ''; }
+                resetFilters() { 
+                    this.searchQuery = ''; 
+                    this.currentPage = 1;
+                },
+                scrollToTop() {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                },
             }
         }).mount('#app');
     </script>

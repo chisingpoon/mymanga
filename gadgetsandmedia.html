@@ -104,31 +104,31 @@
                                 </div>
             
                                 <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">HK Manga Editions</span>
-                                        <span class="bg-indigo-600 text-white px-3 py-1 rounded-full text-[10px] font-black">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">HK Editions</span>
+                                        <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full text-[9px] font-black">
                                             {{ getMangaDataForWork(item.workId).length }} Found
                                         </span>
                                     </div>
                                     
-                                    <div class="space-y-4">
+                                    <div class="space-y-2">
                                         <div v-for="book in getMangaDataForWork(item.workId)" :key="book.isbn">
                                             <a :href="'manga-database.html?isbn=' + book.isbn + '&region=HK'" target="_blank" 
                                                :class="[
-                                                 'flex items-center justify-between p-5 rounded-xl border-2 transition-all group shadow-sm',
+                                                 'flex items-center justify-between p-3 rounded-lg border transition-all group shadow-sm',
                                                  book.type === 'grand' 
-                                                    ? 'bg-amber-50 border-amber-200 hover:border-amber-500 hover:shadow-md' 
-                                                    : 'bg-white border-slate-100 hover:border-indigo-500 hover:shadow-md'
+                                                    ? 'bg-amber-50 border-amber-200 hover:border-amber-400' 
+                                                    : 'bg-white border-slate-200 hover:border-indigo-400'
                                                ]">
                                                 
-                                                <div class="flex flex-col flex-1 pr-4">
-                                                    <span class="text-[10px] font-black uppercase tracking-tighter mb-1"
-                                                          :class="book.type === 'grand' ? 'text-amber-800/60' : 'text-indigo-500/60'">
-                                                        {{ book.publisher }} Edition
+                                                <div class="flex flex-col flex-1 pr-3 overflow-hidden">
+                                                    <span class="text-[8px] font-black uppercase mb-0.5 opacity-70"
+                                                          :class="book.type === 'grand' ? 'text-amber-800' : 'text-indigo-600'">
+                                                        {{ book.publisher }}
                                                     </span>
                                                     
                                                     <span :class="[
-                                                        'font-black text-base md:text-lg leading-tight',
+                                                        'font-bold text-sm leading-tight truncate',
                                                         book.type === 'grand' ? 'text-amber-900' : 'text-slate-800 group-hover:text-indigo-700'
                                                     ]">
                                                         {{ book.label }}
@@ -136,19 +136,19 @@
                                                 </div>
                                 
                                                 <svg :class="[
-                                                    'w-6 h-6 flex-shrink-0',
+                                                    'w-4 h-4 flex-shrink-0',
                                                     book.type === 'grand' ? 'text-amber-400' : 'text-slate-300 group-hover:text-indigo-500'
                                                 ]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
                                                 </svg>
                                             </a>
                                         </div>
                                 
-                                        <div v-if="item.culture || item.chingwin" class="flex flex-wrap gap-3 mt-4 pt-4 border-t border-slate-200">
-                                            <span v-if="item.culture && item.culture !== '-'" class="pub-badge pub-culture px-4 py-2 text-xs font-black uppercase shadow-sm ring-1 ring-red-100">
+                                        <div v-if="item.culture || item.chingwin" class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-200">
+                                            <span v-if="item.culture && item.culture !== '-'" class="px-2 py-1 text-[10px] font-bold rounded bg-red-50 text-red-800 ring-1 ring-red-100">
                                                 文傳: {{ item.culture }}
                                             </span>
-                                            <span v-if="item.chingwin && item.chingwin !== '-'" class="pub-badge pub-chingwin px-4 py-2 text-xs font-black uppercase shadow-sm ring-1 ring-blue-100">
+                                            <span v-if="item.chingwin && item.chingwin !== '-'" class="px-2 py-1 text-[10px] font-bold rounded bg-blue-50 text-blue-800 ring-1 ring-blue-100">
                                                 青文: {{ item.chingwin }}
                                             </span>
                                         </div>

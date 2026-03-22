@@ -14,22 +14,11 @@
             font-family: 'Inter', 'Noto Sans TC', 'Noto Sans JP', system-ui, sans-serif; color: #1e293b;
         }
         .bg-grid { background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px); background-size: 40px 40px; }
-        
         .loader-wrapper { position: fixed; inset: 0; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
         .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid #4f46e5; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
         .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
-        
         .data-card { background: white; border-radius: 20px; border: 1px solid #e2e8f0; transition: all 0.3s ease; }
-        .data-card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -10px rgba(0,0,0,0.1); }
-        .sub-card { background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 12px; padding: 12px; margin-top: 8px; }
-
-        .archive-link { display: flex; flex-direction: column; padding: 6px 10px; border-radius: 8px; text-decoration: none !important; transition: 0.2s; line-height: 1.2; font-size: 12px; }
-        
-        /* Fade transition for Jump to Top button */
-        .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
-        .fade-enter-from, .fade-leave-to { opacity: 0; }
     </style>
 </head>
 <body class="bg-grid">
@@ -76,7 +65,7 @@
                     <span class="text-base font-black text-indigo-700">{{ displayGroups.length }}</span>
                 </div>
             
-                <button @click="resetFilters" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl transition-colors" title="Reset Filters">
+                <button @click="resetFilters" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                 </button>
             </div>
@@ -90,64 +79,53 @@
                                     Movie Appearance ({{ getYear(getMovieData(group.id, 'JP Release Date')) }})
                                 </span>
                                 <a :href="'movie.html?mediaid=' + group.id" class="group flex items-center gap-2">
-                                    <h2 class="text-2xl font-black text-slate-900 leading-tight group-hover:text-cyan-600 transition-colors">
-                                        {{ group.title }}
-                                    </h2>
+                                    <h2 class="text-2xl font-black text-slate-900 leading-tight group-hover:text-cyan-600 transition-colors">{{ group.title }}</h2>
                                     <span class="text-cyan-500 text-2xl group-hover:translate-x-1 transition-transform">▶</span>
                                 </a>
-                    
+                                <!-- Tags show ONCE here for Movie Grouping -->
                                 <div class="mt-4 flex flex-wrap gap-2">
-                                    <a v-for="book in getMangaDataForWork(group.workId)" 
-                                       :key="book.isbn"
-                                       :href="'manga-database.html?isbn=' + book.isbn + '&region=HK'"
-                                       target="_blank"
-                                       :class="[
-                                         'px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all shadow-sm',
-                                         book.type === 'grand' ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-white border-slate-200 text-slate-700'
-                                       ]">
+                                    <a v-for="book in getMangaDataForWork(group.workId)" :key="book.isbn" 
+                                       :href="'manga-database.html?isbn=' + book.isbn + '&region=HK'" target="_blank"
+                                       :class="['px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all shadow-sm', book.type === 'grand' ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-white border-slate-200 text-slate-700']">
                                         {{ book.label }}
                                     </a>
                                 </div>
                             </template>
-                    
+            
                             <template v-else>
                                 <span class="text-[11px] font-black text-indigo-500 uppercase tracking-widest mb-1 block">Gadget Identity</span>
                                 <h2 class="text-2xl font-black text-slate-900 leading-tight">{{ group.title }}</h2>
                                 <h2 v-if="group.hkTrans" class="text-2xl font-black text-slate-500 leading-tight">{{ group.hkTrans }}</h2>
                             </template>
                         </div>
-                    
+            
                         <hr class="border-slate-100 mb-6">
-                    
+            
                         <div class="flex-1 space-y-8">
                             <div v-for="(item, idx) in group.items" :key="idx" class="border-l-4 border-indigo-200 pl-5">
-                                
                                 <div v-if="groupBy === 'movie'">
                                     <div class="bg-white border-2 border-slate-50 rounded-2xl p-4 mb-2 shadow-sm">
                                         <span class="text-[10px] font-black text-slate-400 uppercase mb-1 block">Gadget</span>
                                         <div class="font-black text-slate-800 text-xl">{{ item.jpTitle }}</div>
                                         <div v-if="item.hkTrans" class="font-bold text-slate-500 text-lg">{{ item.hkTrans }}</div>
                                     </div>
-                                    
                                     <div v-if="item.culture || item.chingwin" class="flex flex-wrap gap-2 mt-2">
                                         <span v-if="item.culture && item.culture !== '-'" class="px-3 py-1.5 text-xs font-black rounded bg-red-50 text-red-800 ring-1 ring-red-100">文傳: {{ item.culture }}</span>
                                         <span v-if="item.chingwin && item.chingwin !== '-'" class="px-3 py-1.5 text-xs font-black rounded bg-blue-50 text-blue-800 ring-1 ring-blue-100">青文: {{ item.chingwin }}</span>
                                     </div>
                                 </div>
-                    
+            
                                 <div v-else>
                                     <div class="bg-white border-2 border-slate-50 rounded-2xl p-4 mb-4 shadow-sm hover:border-cyan-300 transition-all">
                                         <a :href="'movie.html?mediaid=' + item.movieId" class="group block">
-                                            <span class="bg-cyan-600 text-white px-2 py-1 rounded-md text-[11px] font-black uppercase inline-block mb-2">
-                                                Movie {{ getYear(getMovieData(item.movieId, 'JP Release Date')) }}
-                                            </span>
-                                            <div class="font-black text-slate-800 text-xl group-hover:text-cyan-600 transition-colors flex items-center gap-2">
-                                                {{ getMovieData(item.movieId, 'JP Title') }} <span class="text-cyan-500 text-2xl">▶</span>
-                                            </div>
+                                            <span class="bg-cyan-600 text-white px-2 py-1 rounded-md text-[11px] font-black uppercase inline-block mb-2">Movie {{ getYear(getMovieData(item.movieId, 'JP Release Date')) }}</span>
+                                            <div class="font-black text-slate-800 text-xl group-hover:text-cyan-600 transition-colors flex items-center gap-2">{{ item.movieTitle }} <span class="text-cyan-500 text-2xl">▶</span></div>
                                         </a>
                                     </div>
                                     <div class="flex flex-wrap gap-2 mt-2">
-                                        <a v-for="book in getMangaDataForWork(item.workId)" :key="book.isbn" :href="'...'" class="...">
+                                        <a v-for="book in getMangaDataForWork(item.workId)" :key="book.isbn" 
+                                           :href="'manga-database.html?isbn=' + book.isbn + '&region=HK'" target="_blank"
+                                           :class="['px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all shadow-sm', book.type === 'grand' ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-white border-slate-200 text-slate-700']">
                                             {{ book.label }}
                                         </a>
                                     </div>
@@ -158,13 +136,6 @@
                 </template>
             </div>
         </main>
-
-        <transition name="fade">
-            <button v-show="showScrollTop" @click="scrollToTop" 
-                    class="fixed bottom-8 right-8 w-14 h-14 bg-indigo-600 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:bg-indigo-700 hover:-translate-y-1 transition-all z-50">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-            </button>
-        </transition>
     </div>
     
     <script>
@@ -181,45 +152,31 @@
                     gadgetMedia: [],
                     movies: [],
                     contents: [],
-                    publishJp: [],
                     publishHk: [],
                     showScrollTop: false
                 }
             },
             async mounted() {
                 await this.init();
-                window.addEventListener('scroll', () => {
-                    this.showScrollTop = window.scrollY > 400;
-                });
             },
             computed: {
                 processedData() {
                     if (this.loading) return [];
                     const q = this.searchQuery.toLowerCase().trim();
-                    
-                    let flatList = this.gadgetMedia.map(m => {
+                    return this.gadgetMedia.map(m => {
                         const gadget = this.gadgetsMaster.find(g => String(g['Gadget ID']) === String(m['Gadget ID']));
-                        const movieTitle = this.getMovieData(m['Movie ID'], 'JP Title');
-                        
                         return {
                             gadgetId: m['Gadget ID'],
                             movieId: m['Movie ID'],
                             workId: m['Work ID'],
                             jpTitle: gadget ? gadget['JP Title'] : 'Unknown',
-                            movieTitle: movieTitle,
+                            movieTitle: this.getMovieData(m['Movie ID'], 'JP Title'),
                             active: gadget ? gadget['Active'] : 'yes',
                             hkTrans: m['HK Translation'],
                             culture: m['CultureCom Trans'],
                             chingwin: m['HKChingWin Trans']
                         };
-                    }).filter(item => item.active.toLowerCase() === 'yes');
-                
-                    if (q) {
-                        flatList = flatList.filter(i => 
-                            (i.jpTitle + i.hkTrans + i.culture + i.chingwin + i.movieTitle).toLowerCase().includes(q)
-                        );
-                    }
-                    return flatList;
+                    }).filter(i => i.active.toLowerCase() === 'yes' && (!q || (i.jpTitle + i.hkTrans + i.culture + i.chingwin + i.movieTitle).toLowerCase().includes(q)));
                 },
                 displayGroups() {
                     const groups = {};
@@ -231,79 +188,49 @@
                                 id: key,
                                 title: this.groupBy === 'gadget' ? item.jpTitle : item.movieTitle,
                                 hkTrans: this.groupBy === 'gadget' ? item.hkTrans : '',
-                                // Store the first workId found for this movie to load movie-wide tags
-                                workId: item.workId, 
+                                workId: item.workId,
                                 items: []
                             };
                         }
                         groups[key].items.push(item);
                     });
-                    
-                    return Object.values(groups).sort((a, b) => {
-                        if (this.groupBy === 'movie') {
-                            const dateA = this.getMovieData(a.id, 'JP Release Date');
-                            const dateB = this.getMovieData(b.id, 'JP Release Date');
-                            return dateB.localeCompare(dateA); 
-                        }
-                        return a.title.localeCompare(b.title, 'zh-Hant');
-                    });
+                    return Object.values(groups).sort((a, b) => this.groupBy === 'movie' ? this.getMovieData(b.id, 'JP Release Date').localeCompare(this.getMovieData(a.id, 'JP Release Date')) : a.title.localeCompare(b.title, 'zh-Hant'));
                 },
+                paginatedGroups() {
+                    const start = (this.currentPage - 1) * this.itemsPerPage;
+                    return this.displayGroups.slice(start, start + this.itemsPerPage);
+                }
+            },
             methods: {
                 async init() {
+                    const base = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
                     try {
-                        const base = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
-                        const [g, gm, m, s, jp, hk] = await Promise.all([
+                        const [g, gm, m, s, hk] = await Promise.all([
                             fetch(base + "法寶").then(r => r.json()),
                             fetch(base + "媒體與法寶").then(r => r.json()),
                             fetch(base + "電影動畫").then(r => r.json()),
                             fetch(base + "書籍收錄作品").then(r => r.json()),
-                            fetch(base + "出版目録JP").then(r => r.json()),
                             fetch(base + "出版目録HK").then(r => r.json())
                         ]);
-                        this.gadgetsMaster = g;
-                        this.gadgetMedia = gm;
-                        this.movies = m;
-                        this.contents = s;
-                        this.publishJp = jp;
-                        this.publishHk = hk; 
+                        this.gadgetsMaster = g; this.gadgetMedia = gm; this.movies = m; this.contents = s; this.publishHk = hk;
                         this.loading = false;
-                    } catch (e) { console.error("Archive Load Error:", e); this.loading = false; }
+                    } catch (e) { console.error(e); }
                 },
                 getMangaDataForWork(workId) {
-                    if (!workId || workId === '-' || !this.contents || !this.publishHk) return [];
-                    const sourceIsbns = this.contents.filter(c => String(c.作品番).trim() === String(workId).trim()).map(c => String(c.ISBN).trim());
-                    const hkMatches = this.publishHk.filter(hk => sourceIsbns.includes(String(hk.ISBN_JP).trim()) && String(hk.Active).toLowerCase() === 'yes');
-                    
-                    return hkMatches.map(book => {
-                        const title = (book.Title || '').trim();
-                        const volume = (book.Volume || '').trim(); 
-                        const subtitle = (book.Subtitle || '').trim();
-                        
-                        let labelItems = [title];
-                        if (volume && volume !== '-') labelItems.push(volume);
-                        let label = labelItems.join(' ');
-                        if (subtitle && subtitle !== '-') label += `：${subtitle}`;
-                
-                        return {
-                            isbn: String(book.ISBN).trim(),
-                            label: label || 'Untitled',
-                            type: (book.Title || '').trim().includes('大全集') ? 'grand' : 'standard'
-                        };
-                    });
+                    if (!workId || workId === '-') return [];
+                    const isbns = this.contents.filter(c => String(c.作品番).trim() === String(workId).trim()).map(c => String(c.ISBN).trim());
+                    return this.publishHk.filter(hk => isbns.includes(String(hk.ISBN_JP).trim()) && String(hk.Active).toLowerCase() === 'yes').map(book => ({
+                        isbn: book.ISBN,
+                        label: `${book.Title} ${book.Volume === '-' ? '' : book.Volume}${book.Subtitle === '-' ? '' : '：'+book.Subtitle}`.trim(),
+                        type: book.Title.includes('大全集') ? 'grand' : 'standard'
+                    }));
                 },
                 getMovieData(id, field) {
-                    const m = this.movies.find(x => String(x['Media ID']).trim() === String(id).trim());
-                    if (!m) return field === 'JP Release Date' ? '-' : 'Unknown';
-                    return m[field] || '-';
+                    const m = this.movies.find(x => String(x['Media ID']) === String(id));
+                    return m ? m[field] : (field === 'JP Release Date' ? '-' : 'Unknown');
                 },
-                getYear(dateStr) {
-                    if (!dateStr || dateStr === '-') return 'TBA';
-                    const match = dateStr.match(/\d{4}/);
-                    return match ? match[0] : 'TBA';
-                },
-                resetFilters() { this.searchQuery = ''; this.currentPage = 1; },
-                scrollToTop() { window.scrollTo({top: 0, behavior: 'smooth'}); },
-                changePage(p) { this.currentPage = p; this.scrollToTop(); }
+                getYear(d) { const m = d.match(/\d{4}/); return m ? m[0] : 'TBA'; },
+                resetFilters() { this.searchQuery = ''; }
             }
         }).mount('#app');
     </script>

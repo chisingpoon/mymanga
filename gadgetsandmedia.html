@@ -105,6 +105,7 @@
                             <div v-for="(item, idx) in group.items" :key="idx" class="border-l-4 border-indigo-200 pl-5">
                                 <div v-if="groupBy === 'movie'">
                                     <div class="bg-white border-2 border-slate-50 rounded-2xl p-4 mb-2 shadow-sm">
+                                        <span class="text-[10px] font-black text-slate-400 uppercase mb-1 block">Gadget #{{ idx + 1 }}</span>
                                         <span class="text-[10px] font-black text-slate-400 uppercase mb-1 block">Gadget</span>
                                         <div class="font-black text-slate-800 text-xl">{{ item.jpTitle }}</div>
                                         <div v-if="item.hkTrans" class="font-bold text-slate-500 text-lg">{{ item.hkTrans }}</div>
@@ -135,6 +136,30 @@
                     </div>
                 </template>
             </div>
+            <div v-if="totalPages > 1" class="flex flex-col items-center gap-4 py-12 border-t border-slate-200">
+                <div class="flex items-center gap-2">
+                    <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" 
+                            class="px-4 py-2 rounded-xl font-bold transition-all border-2 border-slate-200 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed">
+                        PREV
+                    </button>
+                    
+                    <div class="flex items-center gap-1">
+                        <template v-for="page in visiblePages" :key="page">
+                            <button v-if="page !== '...'" @click="changePage(page)" 
+                                    :class="['w-10 h-10 rounded-xl font-black transition-all', currentPage === page ? 'bg-slate-900 text-white' : 'hover:bg-white border-2 border-transparent hover:border-slate-200']">
+                                {{ page }}
+                            </button>
+                            <span v-else class="px-2 text-slate-400 font-bold">...</span>
+                        </template>
+                    </div>
+            
+                    <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" 
+                            class="px-4 py-2 rounded-xl font-bold transition-all border-2 border-slate-200 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed">
+                        NEXT
+                    </button>
+                </div>
+                <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Page {{ currentPage }} of {{ totalPages }}</p>
+            </div>            
         </main>
     </div>
     
@@ -153,7 +178,9 @@
                     movies: [],
                     contents: [],
                     publishHk: [],
-                    showScrollTop: false
+                    showScrollTop: false,
+                    currentPage: 1,
+                    itemsPerPage: 12,
                 }
             },
             async mounted() {
@@ -199,6 +226,22 @@
                 paginatedGroups() {
                     const start = (this.currentPage - 1) * this.itemsPerPage;
                     return this.displayGroups.slice(start, start + this.itemsPerPage);
+                },
+                totalPages() {
+                    return Math.ceil(this.displayGroups.length / this.itemsPerPage);
+                },
+                paginatedGroups() {
+                    const start = (this.currentPage - 1) * this.itemsPerPage;
+                    return this.displayGroups.slice(start, start + this.itemsPerPage);
+                },
+                visiblePages() {
+                    const total = this.totalPages;
+                    const current = this.currentPage;
+                    // Logic to show [1, 2, 3, 4, 5, '...', 20] instead of all 20 buttons
+                    if (total <= 7) return Array.from({length: total}, (_, i) => i + 1);
+                    if (current <= 4) return [1, 2, 3, 4, 5, '...', total];
+                    if (current >= total - 3) return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
+                    return [1, '...', current - 1, current, current + 1, '...', total];
                 }
             },
             methods: {

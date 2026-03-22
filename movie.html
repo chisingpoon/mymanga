@@ -369,7 +369,6 @@
                     this.selectedMovie = m;
                     this.mangaTab = 'JP'; 
                     this.fcTab = 'JP'; 
-                    // Push state only if the current URL doesn't already have this ID (prevents history bloating)
                     const urlParams = new URLSearchParams(window.location.search);
                     if (urlParams.get('mediaid') !== m.id) {
                         const newUrl = window.location.pathname + '?mediaid=' + encodeURIComponent(m.id);
@@ -379,51 +378,41 @@
                 },
                 closeDetail() { 
                     this.selectedMovie = null; 
-                    // Clear URL parameters when returning to list
                     const newUrl = window.location.pathname;
                     window.history.pushState({ mediaid: null }, '', newUrl);
                 },
                 checkUrlParam() {
+                    // Check only if movies have finished loading
+                    if (this.movies.length === 0) return;
+        
                     const urlParams = new URLSearchParams(window.location.search);
                     const mediaIdParam = urlParams.get('mediaid');
-                    
-                    if (mediaIdParam && this.movies.length > 0) {
+                    if (mediaIdParam) {
                         const target = this.movies.find(m => m.id.toLowerCase() === mediaIdParam.trim().toLowerCase());
-                        if (target) {
-                            // Set these FIRST
-                            this.mangaTab = 'JP';
-                            this.fcTab = 'JP';
-                            // Then assign the movie
-                            this.selectedMovie = target;
-                            return;
-                        }
+                        this.selectedMovie = target || null;
+                    } else {
+                        this.selectedMovie = null;
                     }
-                    this.selectedMovie = null;
                 },
                 async init() {
                     try {
-                        this.loading = true;
                         const [mRes, jpRes, hkRes] = await Promise.all([
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/電影動畫"),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP"),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK") 
                         ]);
-                
                         this.mangaCatalog = await jpRes.json();
                         this.hkCatalog = await hkRes.json(); 
                         const data = await mRes.json();
-                
-                        // Map the movies fully BEFORE doing anything with the URL
                         this.movies = data.map(i => {
-                            const rawDate = (this.getVal(i, 'JP Release Date') || "").toString();
-                            const yearMatch = rawDate.match(/\d{4}/);
+                            const rawDate = this.getVal(i, 'JP Release Date').toString();
                             return {
-                                id: (this.getVal(i, 'Media ID') || "").toString().trim(),
+                                id: this.getVal(i, 'Media ID').toString().trim(),
                                 jpTitle: this.getVal(i, 'JP Title'),
                                 hkTitle: this.getVal(i, 'HK Title'),
                                 enTitle: this.getVal(i, 'EN Title'),
                                 jpDate: rawDate,
-                                jpYear: yearMatch ? yearMatch[0] : 'TBA',
+                                jpYear: (rawDate.match(/\d{4}/) || [])[0] || 'TBA',
                                 hkDate: this.getVal(i, 'HK Release Date'),
                                 jpImage: this.getVal(i, 'JP Image'),
                                 hkImage: this.getVal(i, 'HK Image'),
@@ -432,20 +421,16 @@
                                 searchStr: `${this.getVal(i, 'JP Title')} ${this.getVal(i, 'HK Title')}`.toLowerCase()
                             };
                         });
-                
-                        // Data is now ready. Now check the URL.
+                        
+                        // CRITICAL FIX: Run URL check AFTER data mapping is done
                         this.checkUrlParam();
-                
-                        // Set up the listener for back/forward buttons
+        
+                        // Listen for browser Back/Forward navigation
                         window.onpopstate = () => {
                             this.checkUrlParam();
                         };
-                
-                    } catch (e) { 
-                        console.error("Initialization Error:", e); 
-                    } finally { 
-                        this.loading = false; 
-                    }
+        
+                    } catch (e) { console.error(e); } finally { this.loading = false; }
                 }
             },
             mounted() { this.init(); }

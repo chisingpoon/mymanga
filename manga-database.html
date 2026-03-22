@@ -506,8 +506,22 @@ createApp({
             this.updateView('books', { series: name }); 
         },
         selectBook(book) { 
-            this.updateView('detail', { isbn: (book.ISBN || book.ISBN_JP), series: this.selectedSeries });
+/*            this.updateView('detail', { isbn: (book.ISBN || book.ISBN_JP), series: this.selectedSeries });
             this.tableQuery = ''; 
+*/
+            // 1. Set the book object
+            this.selectedBook = book;
+            
+            // 2. Explicitly switch the view to 'detail'
+            this.view = 'detail';
+            
+            // 3. Update the URL so the back button/refresh works
+            const isbn = this.region === 'HK' ? book.ISBN : (book.ISBN || book.ISBN_JP);
+            const newUrl = `?region=${this.region}&isbn=${isbn}`;
+            window.history.pushState({ path: newUrl }, '', newUrl);
+        
+            // 4. Scroll to top so the user doesn't stay at the bottom of the page
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         },
         getMovieUrl(isbn) {
             if (!isbn) return null;

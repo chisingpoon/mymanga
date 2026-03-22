@@ -269,11 +269,12 @@
                 getMangaDataForWork(workId) {
                     if (!workId || workId === '-' || !this.contents || !this.publishHk) return [];
                     
-                    // 1. Get the reference ISBN from '書籍收錄作品'
-                    const sourceEntries = this.contents.filter(c => String(c.作品番).trim() === String(workId).trim());
-                    const sourceIsbns = sourceEntries.map(c => String(c.ISBN).trim());
+                    // 1. Bridge: Get the reference ISBNs from '書籍收錄作品'
+                    const sourceIsbns = this.contents
+                        .filter(c => String(c.作品番).trim() === String(workId).trim())
+                        .map(c => String(c.ISBN).trim());
                 
-                    // 2. Filter '出版目録HK' based on ISBN_JP matching and Active status
+                    // 2. Target: Filter '出版目録HK' by ISBN_JP and Active status
                     const hkMatches = this.publishHk.filter(hk => 
                         sourceIsbns.includes(String(hk.ISBN_JP).trim()) && 
                         String(hk.Active).toLowerCase() === 'yes'
@@ -281,15 +282,19 @@
                 
                     return hkMatches.map(book => {
                         const title = (book.Title || '').trim();
-                        const volume = (book.巻 || '').trim();
+                        const volume = (book.巻 || '').trim(); // Ensure this matches your HK sheet column name
                         const subtitle = (book.副題 || '').trim();
                         const category = (book.類 || '').trim();
                         
-                        // 3. Construct Label: Title + (Vol. X) + Subtitle
+                        // 3. Construct Label: Title + Vol + Subtitle
                         let label = title;
+                        
+                        // Append Volume if exists
                         if (volume && volume !== '-' && volume !== '') {
-                            label += ` Vol. ${volume}`;
+                            label += ` ${volume}`; 
                         }
+                        
+                        // Append Subtitle if exists
                         if (subtitle && subtitle !== '-' && subtitle !== '') {
                             label += `：${subtitle}`;
                         }

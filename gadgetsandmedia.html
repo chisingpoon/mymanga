@@ -131,8 +131,8 @@
                                             {{ item.hkTrans }}
                                         </h3>
                                         <div v-if="item.culture || item.chingwin" class="flex flex-wrap gap-2 mt-2">
-                                            <span v-if="item.culture && item.culture !== '-'" class="px-3 py-1.5 text-xs font-black rounded bg-red-50 text-red-800 ring-1 ring-red-100">文傳: {{ item.culture }}</span>
-                                            <span v-if="item.chingwin && item.chingwin !== '-'" class="px-3 py-1.5 text-xs font-black rounded bg-blue-50 text-blue-800 ring-1 ring-blue-100">青文: {{ item.chingwin }}</span>
+                                            <span v-if="item.culture && item.culture !== '-'" class="px-3 py-1.5 text-[10px] font-black rounded bg-red-50 text-red-800 ring-1 ring-red-100">文傳: {{ item.culture }}</span>
+                                            <span v-if="item.chingwin && item.chingwin !== '-'" class="px-3 py-1.5 text-[10px] font-black rounded bg-blue-50 text-blue-800 ring-1 ring-blue-100">青文: {{ item.chingwin }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -158,8 +158,8 @@
                                 
                                         <div v-if="(item.culture && item.culture !== '-') || (item.chingwin && item.chingwin !== '-')" 
                                              class="flex flex-wrap gap-1 pt-2 border-t border-slate-200/50">
-                                            <span v-if="item.culture && item.culture !== '-'" class="px-2 py-0.5 text-[9px] font-black bg-red-50 text-red-700 rounded ring-1 ring-red-100/50">文傳: {{ item.culture }}</span>
-                                            <span v-if="item.chingwin && item.chingwin !== '-'" class="px-2 py-0.5 text-[9px] font-black bg-blue-50 text-blue-700 rounded ring-1 ring-blue-100/50">青文: {{ item.chingwin }}</span>
+                                            <span v-if="item.culture && item.culture !== '-'" class="px-2 py-0.5 text-[10px] font-black bg-red-50 text-red-700 rounded ring-1 ring-red-100/50">文傳: {{ item.culture }}</span>
+                                            <span v-if="item.chingwin && item.chingwin !== '-'" class="px-2 py-0.5 text-[10px] font-black bg-blue-50 text-blue-700 rounded ring-1 ring-blue-100/50">青文: {{ item.chingwin }}</span>
                                         </div>
                                     </div>
                                 </div>

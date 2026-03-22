@@ -381,16 +381,18 @@
                 checkUrlParam() {
                     const urlParams = new URLSearchParams(window.location.search);
                     const mediaIdParam = urlParams.get('mediaid');
-                    if (mediaIdParam) {
-                        const target = this.movies.find(m => m.id.toLowerCase() === mediaIdParam.trim().toLowerCase());
+                    
+                    if (mediaIdParam && this.movies.length > 0) {
+                        // Decode the param in case it was encoded with special characters
+                        const decodedParam = decodeURIComponent(mediaIdParam).trim().toLowerCase();
+                        const target = this.movies.find(m => m.id.toLowerCase() === decodedParam);
+                        
                         if (target) {
                             this.selectedMovie = target;
-                        } else {
-                            this.selectedMovie = null; // ID not found, show list
+                            return;
                         }
-                    } else {
-                        this.selectedMovie = null; // No param, show list
                     }
+                    this.selectedMovie = null;
                 },
                 async init() {
                     try {
@@ -402,33 +404,27 @@
                         this.mangaCatalog = await jpRes.json();
                         this.hkCatalog = await hkRes.json(); 
                         const data = await mRes.json();
+                        
                         this.movies = data.map(i => {
-                            const rawDate = this.getVal(i, 'JP Release Date').toString();
+                            // ... (keep your existing mapping logic here)
                             return {
                                 id: this.getVal(i, 'Media ID').toString().trim(),
-                                jpTitle: this.getVal(i, 'JP Title'),
-                                hkTitle: this.getVal(i, 'HK Title'),
-                                enTitle: this.getVal(i, 'EN Title'),
-                                jpDate: rawDate,
-                                jpYear: (rawDate.match(/\d{4}/) || [])[0] || '',
-                                hkDate: this.getVal(i, 'HK Release Date'),
-                                jpImage: this.getVal(i, 'JP Image'),
-                                hkImage: this.getVal(i, 'HK Image'),
-                                mangaRaw: this.getVal(i, 'Manga ISBN'),
-                                filmComicRaw: this.getVal(i, 'Film Comics'),
-                                searchStr: `${this.getVal(i, 'JP Title')} ${this.getVal(i, 'HK Title')}`.toLowerCase()
+                                // ... rest of the fields
                             };
                         });
-    
-                        // Initial check on page load
+                
+                        // 1. Initial check happens here after data is mapped
                         this.checkUrlParam();
-    
-                        // Listen for browser Back/Forward navigation
+                
+                    } catch (e) { 
+                        console.error(e); 
+                    } finally { 
+                        this.loading = false; 
+                        // 2. ONLY start listening for back/forward after everything is loaded
                         window.onpopstate = () => {
                             this.checkUrlParam();
                         };
-    
-                    } catch (e) { console.error(e); } finally { this.loading = false; }
+                    }
                 }
             },
             mounted() { this.init(); }

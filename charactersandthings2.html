@@ -44,7 +44,11 @@
                 <div class="flex-1 min-w-[280px] relative">
                     <input type="text" v-model.trim="searchQuery" placeholder="Search objects or movies..." 
                            class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-11 pr-10 py-2.5 text-sm font-bold outline-none focus:border-indigo-500 focus:bg-white transition-all">
+                    <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </button>
                 </div>
+            
                 <div class="flex items-center gap-2">
                     <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">View By</span>
                     <select v-model="groupBy" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2.5 text-sm font-black outline-none cursor-pointer">
@@ -52,6 +56,7 @@
                         <option value="movie">Movie</option>
                     </select>
                 </div>
+            
                 <div class="bg-indigo-50 border border-indigo-100 px-4 py-2.5 rounded-xl flex items-center gap-3">
                     <span class="text-[10px] font-black text-indigo-400 uppercase">Results</span>
                     <span class="text-base font-black text-indigo-700">{{ displayGroups.length }}</span>
@@ -159,9 +164,9 @@
                         const obj = this.objectsMaster.find(o => String(o['Object ID']) === String(m['Object ID']));
                         const movie = this.movies.find(mov => String(mov['Media ID']) === String(m['Movie ID']));
                         
-                        // Original Mapping Logic for Manga Refs
+                        // Cross-reference Manga Logic
                         const refs = this.contents
-                            .filter(c => String(c['Work ID']) === String(m['Work ID']))
+                            .filter(c => String(c['Work ID']) === String(m['Work ID']) && c['Work ID'] !== '-')
                             .map(c => {
                                 const book = this.publishHk.find(p => String(p['Book ID']) === String(c['Book ID']));
                                 return {
@@ -237,7 +242,7 @@
                             }
                         }
                         this.loading = false;
-                    } catch (e) { console.error("Fetch failed:", e); }
+                    } catch (e) { console.error(e); }
                 },
                 changePage(p) { if(p > 0 && p <= this.totalPages) { this.currentPage = p; window.scrollTo(0,0); }}
             },

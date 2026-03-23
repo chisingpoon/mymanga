@@ -236,7 +236,7 @@
                     if (this.loading) return [];
                     const q = this.searchQuery.toLowerCase().trim();
                     return this.objectMedia.map(m => {
-                        const object = this.objectsMaster.find(g => String(g['Object ID']) === String(m['Object ID']));
+                        const object = this.objectsMaster.find(o => String(o['Object ID']) === String(m['Object ID']));
                         return {
                             objectId: m['Object ID'],
                             movieId: m['Movie ID'],

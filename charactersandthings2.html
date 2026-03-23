@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Archive | Characters and Things</title>
+    <title>Master Archive | Characters and Objects</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -15,183 +15,104 @@
         }
         .bg-grid { background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px); background-size: 40px 40px; }
         .loader-wrapper { position: fixed; inset: 0; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
-        .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid #4f46e5; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #cbd5e1; border-top: 5px solid #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
-        .data-card { background: white; border-radius: 20px; border: 1px solid #e2e8f0; transition: all 0.3s ease; }
-        .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease, transform 0.3s ease; }
-        .fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(20px); }
+        .top-nav { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .data-card { background: white; border-radius: 20px; border: 2px solid #f1f5f9; transition: all 0.3s ease; height: 100%; }
+        .data-card:hover { border-color: #e2e8f0; transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); }
     </style>
 </head>
 <body class="bg-grid">
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Processing Archive...</p>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Syncing with Archive...</p>
         </div>
 
         <nav class="top-nav">
             <div class="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between">
-                <div class="flex items-center gap-6">
-                    <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                    </a>
-                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Characters and Things</h1>
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </div>
+                    <h1 class="font-black text-xl tracking-tight text-slate-800 uppercase">Characters & Things</h1>
                 </div>
             </div>
         </nav>
 
-        <main class="max-w-[1400px] mx-auto px-6 pt-10">
-            <div class="flex flex-wrap items-center gap-4 mb-8 bg-white/80 p-4 rounded-2xl backdrop-blur-md border border-slate-200 sticky top-24 z-30 shadow-sm">
-                <div class="flex-1 min-w-[280px] relative">
-                    <input type="text" v-model.trim="searchQuery" placeholder="Search objects or movies..." 
-                           class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-11 pr-10 py-2.5 text-sm font-bold outline-none focus:border-indigo-500 focus:bg-white transition-all">
-                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3" stroke-linecap="round"></path></svg>
+        <main class="max-w-[1400px] mx-auto px-6 pt-10 pb-20">
+            <div class="flex flex-wrap items-center gap-4 mb-10 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm sticky top-24 z-30">
+                <div class="flex-1 min-w-[300px] relative">
+                    <input type="text" v-model.trim="searchQuery" placeholder="Search names, translations, or movies..." 
+                           class="w-full bg-slate-50 border-2 border-slate-50 rounded-xl pl-12 pr-4 py-3 text-sm font-bold outline-none focus:border-indigo-500 focus:bg-white transition-all">
+                    <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5" stroke-linecap="round"></path></svg>
+                </div>
+            
+                <div class="flex items-center gap-3">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Group By</span>
+                    <div class="flex bg-slate-100 p-1 rounded-xl">
+                        <button @click="groupBy = 'object'" :class="groupBy === 'object' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-4 py-2 rounded-lg text-xs font-black transition-all">OBJECT</button>
+                        <button @click="groupBy = 'movie'" :class="groupBy === 'movie' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-4 py-2 rounded-lg text-xs font-black transition-all">MOVIE</button>
                     </div>
-                    <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 p-1">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                    </button>
                 </div>
-            
-                <div class="flex items-center gap-2">
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">View By</span>
-                    <select v-model="groupBy" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2.5 text-sm font-black outline-none focus:border-indigo-500 cursor-pointer">
-                        <option value="object">Object</option>
-                        <option value="movie">Movie</option>
-                    </select>
+
+                <div class="px-4 py-2 bg-slate-900 rounded-xl text-white">
+                    <span class="text-[10px] font-bold opacity-60 mr-2">TOTAL</span>
+                    <span class="text-sm font-black">{{ displayGroups.length }}</span>
                 </div>
-            
-                <div class="bg-indigo-50 border border-indigo-100 px-4 py-2.5 rounded-xl flex items-center gap-3">
-                    <span class="text-[10px] font-black text-indigo-400 uppercase">Results</span>
-                    <span class="text-base font-black text-indigo-700">{{ displayGroups.length }}</span>
-                </div>
-            
-                <button @click="resetFilters" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                </button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-                <template v-for="group in paginatedGroups" :key="group.id">
-                    <div class="data-card p-6 flex flex-col border-2 border-slate-100 shadow-sm">
-                        <div class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div v-for="group in paginatedGroups" :key="group.id" class="data-card p-6 flex flex-col">
+                    <div class="mb-5">
+                        <template v-if="groupBy === 'movie'">
+                            <p class="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-1">Source Material</p>
+                            <h2 class="text-xl font-black text-slate-900 leading-tight">{{ group.title }}</h2>
+                        </template>
+                        <template v-else>
+                            <p class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Subject Entry</p>
+                            <h2 class="text-xl font-black text-slate-900 leading-tight">{{ group.title }}</h2>
+                            <p v-if="group.hkTrans" class="text-lg font-bold text-slate-400 mt-1">{{ group.hkTrans }}</p>
+                        </template>
+                    </div>
+
+                    <div class="space-y-3 mt-auto">
+                        <div v-for="(item, idx) in group.items" :key="idx" class="p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-indigo-200 transition-colors">
                             <template v-if="groupBy === 'movie'">
-                                <span class="text-[11px] font-black text-cyan-600 uppercase tracking-widest mb-1 block">
-                                    Movie ({{ getYear(getMovieData(group.id, 'JP Release Date')) }})
-                                </span>
-                                <a :href="'movie.html?mediaid=' + group.id" class="group flex items-center gap-2">
-                                    <h2 class="text-2xl font-black text-slate-900 leading-tight group-hover:text-cyan-600 transition-colors">{{ group.title }}</h2>
-                                    <span class="text-cyan-500 text-2xl group-hover:translate-x-1 transition-transform">▶</span>
-                                </a>
-                                <div v-if="getMangaDataForWork(group.workId).length > 0" class="mt-4 bg-slate-50/80 rounded-xl p-3 border border-slate-200/60">
-                                    <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">Manga Reference</h4>
-                                    <div class="flex flex-wrap gap-2">
-                                        <a v-for="book in getMangaDataForWork(group.workId)" :key="book.isbn" 
-                                           :href="'manga-database.html?isbn=' + book.isbn + '&region=HK'" target="_blank"
-                                           :class="['px-2 py-1 rounded-lg text-[10px] font-bold border transition-all shadow-sm', book.type === 'grand' ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-white border-slate-200 text-slate-700']">
-                                             {{ book.label }}
-                                        </a>
-                                    </div>
+                                <div class="flex justify-between items-start mb-1">
+                                    <span class="text-[9px] font-black text-slate-400 uppercase">ID: {{ item.objectId }}</span>
+                                    <span v-if="item.type" class="text-[9px] font-bold bg-white px-1.5 py-0.5 rounded border border-slate-200 uppercase">{{ item.type }}</span>
                                 </div>
+                                <p class="font-black text-slate-800 leading-snug">{{ item.jpTitle }}</p>
+                                <p v-if="item.hkTrans" class="text-sm font-bold text-indigo-600 mt-1">港譯: {{ item.hkTrans }}</p>
                             </template>
-            
                             <template v-else>
-                                <span class="text-[11px] font-black text-indigo-500 uppercase tracking-widest mb-1 block">Object</span>
-                                <h2 class="text-2xl font-black text-slate-900 leading-tight flex items-baseline gap-2">
-                                    <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">原文/</span>
-                                    {{ group.title }}
-                                </h2>
-                                <h2 v-if="group.hkTrans" class="text-2xl font-black text-slate-500 leading-tight flex items-baseline gap-2">
-                                    <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">港譯/</span>
-                                    {{ group.hkTrans }}
-                                </h2>
+                                <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Featured In</p>
+                                <p class="font-bold text-slate-800 leading-tight">{{ item.movieTitle }}</p>
                             </template>
-                        </div>
-            
-                        <hr class="border-slate-100 mb-6">
-            
-                        <div class="flex-1 space-y-8">
-                            <div v-for="(item, idx) in group.items" :key="idx" class="border-l-4 border-indigo-200 pl-5">
-                                <div v-if="groupBy === 'movie'" class="space-y-4">
-                                    <div class="bg-white border-2 border-slate-50 rounded-2xl p-4 shadow-sm hover:border-cyan-300 transition-all">
-                                        <span class="text-[9px] font-black text-cyan-600 uppercase tracking-widest bg-cyan-50 px-2 py-0.5 rounded mb-2 inline-block">Object #{{ item.objectId }}</span>
-                                        <h3 class="text-xl font-black text-slate-800 leading-tight flex items-baseline gap-2">
-                                            <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">原文/</span>
-                                            {{ item.jpTitle }}
-                                        </h3>
-                                        <h3 v-if="item.hkTrans" class="text-xl font-black text-slate-500 leading-tight flex items-baseline gap-2 mt-1">
-                                            <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">港譯/</span>
-                                            {{ item.hkTrans }}
-                                        </h3>
-                                        <div v-if="item.culture || item.chingwin" class="flex flex-wrap gap-2 mt-2">
-                                            <span v-if="item.culture && item.culture !== '-'" class="px-3 py-1.5 text-[10px] font-black rounded bg-red-50 text-red-800 ring-1 ring-red-100">文傳: {{ item.culture }}</span>
-                                            <span v-if="item.chingwin && item.chingwin !== '-'" class="px-3 py-1.5 text-[10px] font-black rounded bg-blue-50 text-blue-800 ring-1 ring-blue-100">青文: {{ item.chingwin }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-            
-                                <div v-else>
-                                    <div class="bg-white border-2 border-slate-50 rounded-2xl p-4 mb-3 shadow-sm hover:border-cyan-300 transition-all">
-                                        <a :href="'movie.html?mediaid=' + item.movieId" class="group block">
-                                            <span class="bg-cyan-600 text-white px-2 py-1 rounded-md text-[11px] font-black uppercase inline-block mb-2">Movie {{ getYear(getMovieData(item.movieId, 'JP Release Date')) }}</span>
-                                            <div class="font-black text-slate-800 text-xl group-hover:text-cyan-600 transition-colors flex items-center gap-2">{{ item.movieTitle }} <span class="text-cyan-500 text-2xl">▶</span></div>
-                                        </a>
-                                    </div>
-                                    <div v-if="getMangaDataForWork(item.workId).length > 0 || item.culture || item.chingwin" class="bg-slate-50/50 rounded-xl p-3 border border-slate-100 shadow-inner">
-                                        <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">Manga Reference</h4>
-                                        <div class="flex flex-wrap gap-2 mb-2">
-                                            <a v-for="book in getMangaDataForWork(item.workId)" :key="book.isbn" 
-                                               :href="'manga-database.html?isbn=' + book.isbn + '&region=HK'" target="_blank"
-                                               class="px-2 py-1 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600">
-                                                 {{ book.label }}
-                                            </a>
-                                        </div>
-                                        <div v-if="(item.culture && item.culture !== '-') || (item.chingwin && item.chingwin !== '-')" 
-                                             class="flex flex-wrap gap-1 pt-2 border-t border-slate-200/50">
-                                            <span v-if="item.culture && item.culture !== '-'" class="px-2 py-0.5 text-[10px] font-black bg-red-50 text-red-700 rounded ring-1 ring-red-100/50">文傳: {{ item.culture }}</span>
-                                            <span v-if="item.chingwin && item.chingwin !== '-'" class="px-2 py-0.5 text-[10px] font-black bg-blue-50 text-blue-700 rounded ring-1 ring-blue-100/50">青文: {{ item.chingwin }}</span>
-                                        </div>
-                                    </div>
-                                </div>
+
+                            <div v-if="item.culture || item.chingwin" class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-200/50">
+                                <span v-if="item.culture && item.culture !== '-'" class="text-[9px] font-black bg-rose-50 text-rose-700 px-2 py-1 rounded">文傳: {{ item.culture }}</span>
+                                <span v-if="item.chingwin && item.chingwin !== '-'" class="text-[9px] font-black bg-sky-50 text-sky-700 px-2 py-1 rounded">青文: {{ item.chingwin }}</span>
                             </div>
                         </div>
                     </div>
-                </template>
-            </div>
-            <div v-if="totalPages > 1" class="flex flex-col items-center gap-4 py-12 border-t border-slate-200">
-                <div class="flex items-center gap-2">
-                    <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" 
-                            class="px-4 py-2 rounded-xl font-bold transition-all border-2 border-slate-200 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed">
-                        PREV
-                    </button>
-                    <div class="flex items-center gap-1">
-                        <template v-for="page in visiblePages" :key="page">
-                            <button v-if="page !== '...'" @click="changePage(page)" 
-                                    :class="['w-10 h-10 rounded-xl font-black transition-all', currentPage === page ? 'bg-slate-900 text-white' : 'hover:bg-white border-2 border-transparent hover:border-slate-200']">
-                                {{ page }}
-                            </button>
-                            <span v-else class="px-2 text-slate-400 font-bold">...</span>
-                        </template>
-                    </div>
-                    <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" 
-                            class="px-4 py-2 rounded-xl font-bold transition-all border-2 border-slate-200 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed">
-                        NEXT
-                    </button>
                 </div>
-                <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Page {{ currentPage }} of {{ totalPages }}</p>
-            </div>            
+            </div>
+
+            <div v-if="totalPages > 1" class="mt-12 flex flex-col items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" class="w-12 h-12 flex items-center justify-center rounded-xl border-2 border-slate-200 bg-white font-black hover:border-indigo-500 disabled:opacity-30 disabled:hover:border-slate-200 transition-all">←</button>
+                    <div class="px-6 py-2 bg-white border-2 border-slate-200 rounded-xl font-black text-sm">PAGE {{ currentPage }} / {{ totalPages }}</div>
+                    <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" class="w-12 h-12 flex items-center justify-center rounded-xl border-2 border-slate-200 bg-white font-black hover:border-indigo-500 disabled:opacity-30 disabled:hover:border-slate-200 transition-all">→</button>
+                </div>
+            </div>
         </main>
-        <transition name="fade">
-            <button v-show="showScrollTop" @click="scrollToTop" 
-                    class="fixed bottom-8 right-8 w-14 h-14 bg-slate-900 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:bg-indigo-600 hover:-translate-y-1 transition-all z-[9999]">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-            </button>
-        </transition>
     </div>
-    
+
     <script>
         const { createApp } = Vue;
+
         createApp({
             data() {
                 return {
@@ -200,64 +121,58 @@
                     groupBy: 'object',
                     currentPage: 1,
                     itemsPerPage: 12,
-                    objectsMaster: [],
-                    objectMedia: [],
-                    movies: [],
-                    contents: [],
-                    publishHk: [],
-                    showScrollTop: false
+                    objectsMaster: [], // Data from '人物'
+                    objectMedia: [],   // Data from '媒體與人物'
+                    movies: []         // Data from '電影動畫'
                 }
-            },
-            async mounted() {
-                await this.init();
-                window.addEventListener('scroll', () => {
-                    this.showScrollTop = window.scrollY > 300; 
-                });
-            },
-            watch: {
-                searchQuery() { this.currentPage = 1; },
-                groupBy() { this.currentPage = 1; }
             },
             computed: {
                 processedData() {
                     if (this.loading) return [];
-                    const q = this.searchQuery.toLowerCase().trim();
+                    const q = this.searchQuery.toLowerCase();
+
                     return this.objectMedia.map(m => {
-                        const obj = this.objectsMaster.find(o => String(o['Object ID']) === String(m['Object ID']));
+                        // MATCHING LOGIC: Find character info in '人物' sheet using 'Object ID'
+                        const masterEntry = this.objectsMaster.find(o => String(o['Object ID']) === String(m['Object ID']));
+                        const movieEntry = this.movies.find(mov => String(mov['Media ID']) === String(m['Movie ID']));
+
                         return {
                             objectId: m['Object ID'],
                             movieId: m['Movie ID'],
-                            workId: m['Work ID'],
-                            jpTitle: obj ? obj['JP Title'] : 'Unknown',
-                            movieTitle: this.getMovieData(m['Movie ID'], 'JP Title'),
-                            active: obj ? obj['Active'] : 'yes',
+                            type: m['Object Type'],
+                            jpTitle: masterEntry ? masterEntry['JP Title'] : 'Unknown',
+                            movieTitle: movieEntry ? movieEntry['JP Title'] : 'Unknown Movie',
+                            active: masterEntry ? (masterEntry['Active'] || 'yes') : 'yes',
                             hkTrans: m['HK Translation'],
                             culture: m['CultureCom Trans'],
                             chingwin: m['HKChingWin Trans']
                         };
-                    }).filter(i => i.active.toLowerCase() === 'yes' && (!q || (i.jpTitle + i.hkTrans + i.culture + i.chingwin + i.movieTitle).toLowerCase().includes(q)));
+                    }).filter(item => {
+                        // Filter logic
+                        const isActive = String(item.active).toLowerCase() === 'yes';
+                        const matchText = (item.jpTitle + item.hkTrans + item.movieTitle + item.culture + item.chingwin).toLowerCase();
+                        return isActive && (!q || matchText.includes(q));
+                    });
                 },
                 displayGroups() {
                     const groups = {};
                     this.processedData.forEach(item => {
                         const key = this.groupBy === 'object' ? item.objectId : item.movieId;
                         if (!key || key === '-') return;
+
                         if (!groups[key]) {
                             groups[key] = {
                                 id: key,
                                 title: this.groupBy === 'object' ? item.jpTitle : item.movieTitle,
                                 hkTrans: this.groupBy === 'object' ? item.hkTrans : '',
-                                workId: item.workId,
                                 items: []
                             };
                         }
                         groups[key].items.push(item);
                     });
-                    return Object.values(groups).sort((a, b) => 
-                        this.groupBy === 'movie' 
-                        ? this.getMovieData(b.id, 'JP Release Date').localeCompare(this.getMovieData(a.id, 'JP Release Date')) 
-                        : a.title.localeCompare(b.title, 'zh-Hant')
-                    );
+                    
+                    // Sort alphabetically by title
+                    return Object.values(groups).sort((a, b) => a.title.localeCompare(b.title, 'zh-Hant'));
                 },
                 totalPages() {
                     return Math.ceil(this.displayGroups.length / this.itemsPerPage);
@@ -265,68 +180,35 @@
                 paginatedGroups() {
                     const start = (this.currentPage - 1) * this.itemsPerPage;
                     return this.displayGroups.slice(start, start + this.itemsPerPage);
-                },
-                visiblePages() {
-                    const t = this.totalPages;
-                    if (t <= 5) return Array.from({length: t}, (_, i) => i + 1);
-                    return [1, 2, '...', t]; 
                 }
             },
             methods: {
                 async init() {
                     const base = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
                     try {
-                        const [o, om, m, s, hk] = await Promise.all([
+                        const [o, om, m] = await Promise.all([
                             fetch(base + "人物").then(r => r.json()),
                             fetch(base + "媒體與人物").then(r => r.json()),
-                            fetch(base + "電影動畫").then(r => r.json()),
-                            fetch(base + "書籍收錄作品").then(r => r.json()),
-                            fetch(base + "出版目録HK").then(r => r.json())
+                            fetch(base + "電影動畫").then(r => r.json())
                         ]);
-                        this.objectsMaster = o; 
-                        this.objectMedia = om; 
-                        this.movies = m; 
-                        this.contents = s; 
-                        this.publishHk = hk;
-                
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const movieIdParam = urlParams.get('movieid');
+
+                        this.objectsMaster = Array.isArray(o) ? o : [];
+                        this.objectMedia = Array.isArray(om) ? om : [];
+                        this.movies = Array.isArray(m) ? m : [];
                         
-                        if (movieIdParam) {
-                            const movie = this.movies.find(x => String(x['Media ID']) === String(movieIdParam));
-                            if (movie) {
-                                this.groupBy = 'movie';
-                                this.searchQuery = movie['JP Title'];
-                            }
-                        }
-                
                         this.loading = false;
-                    } catch (e) { console.error(e); }
-                },
-                changePage(page) {
-                    if (page >= 1 && page <= this.totalPages) {
-                        this.currentPage = page;
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    } catch (e) {
+                        console.error("Archive Load Error:", e);
+                        alert("Could not load data. Check sheet naming or privacy settings.");
                     }
                 },
-                scrollToTop() {
+                changePage(p) {
+                    this.currentPage = p;
                     window.scrollTo({ top: 0, behavior: 'smooth' });
-                },
-                getMangaDataForWork(workId) {
-                    if (!workId || workId === '-') return [];
-                    const isbns = this.contents.filter(c => String(c.作品番).trim() === String(workId).trim()).map(c => String(c.ISBN).trim());
-                    return this.publishHk.filter(hk => isbns.includes(String(hk.ISBN_JP).trim()) && String(hk.Active).toLowerCase() === 'yes').map(book => ({
-                        isbn: book.ISBN,
-                        label: `${book.Title} ${book.Volume === '-' ? '' : book.Volume}${book.Subtitle === '-' ? '' : ''+book.Subtitle}`.trim(),
-                        type: book.Title.includes('大全集') ? 'grand' : 'standard'
-                    }));
-                },
-                getMovieData(id, field) {
-                    const m = this.movies.find(x => String(x['Media ID']) === String(id));
-                    return m ? m[field] : (field === 'JP Release Date' ? '-' : 'Unknown');
-                },
-                getYear(d) { const m = d.match(/\d{4}/); return m ? m[0] : 'TBA'; },
-                resetFilters() { this.searchQuery = ''; this.currentPage = 1; }
+                }
+            },
+            mounted() {
+                this.init();
             }
         }).mount('#app');
     </script>

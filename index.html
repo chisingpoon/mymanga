@@ -6,11 +6,7 @@
     <title>叮噹多啦A夢漫畫資訊</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Security: Disable Selection */
-        body {
-            -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
-        }
-
+        body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
         .bg-grid {
             background-color: #f8fafc;
             background-image: 
@@ -18,31 +14,17 @@
                 linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
             background-size: 40px 40px;
         }
-
         .watermark {
             position: fixed; bottom: -20px; right: -20px; font-size: 12rem; font-weight: 900;
             color: rgba(0, 0, 0, 0.03); pointer-events: none; z-index: -1; transform: rotate(-15deg);
         }
-
-        .hover-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .hover-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px -10px rgba(0,0,0,0.1);
-            border-color: #3b82f6; background-color: #ffffff;
-        }
+        .viewport-container { width: 100%; overflow: hidden; position: relative; }
+        .tab-slider { display: flex; transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1); width: 300%; }
+        .tab-pane { width: 33.333%; flex-shrink: 0; }
         
-        /* Slide Animation Logic */
-        .viewport-container {
-            width: 100%; overflow: hidden; position: relative;
-        }
-        .tab-slider {
-            display: flex; transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
-            width: 300%;
-        }
-        .tab-pane {
-            width: 33.333%;
-            flex-shrink: 0;
-        }
+        /* Smooth scale effect for links */
+        .btn-link { transition: all 0.3s ease; }
+        .btn-link:hover { transform: translateY(-2px); filter: brightness(1.1); }
     </style>
 </head>
 <body class="bg-grid text-slate-900 font-sans min-h-screen py-12 px-4 relative overflow-x-hidden" oncontextmenu="return false;">
@@ -53,31 +35,30 @@
         
         <header class="text-center space-y-2 mb-8">
             <div class="relative inline-block">
-                <div class="absolute -inset-1 bg-blue-500 rounded-2xl blur opacity-20"></div>
-                <div class="relative w-16 h-16 bg-blue-600 rounded-2xl text-white text-3xl flex items-center justify-center font-black italic shadow-xl">M</div>
+                <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur opacity-30"></div>
+                <div class="relative w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl text-white text-3xl flex items-center justify-center font-black italic shadow-xl">M</div>
             </div>
             <h1 class="text-3xl font-black tracking-tight text-slate-900 uppercase mt-4">Archive Portal</h1>
             <p class="text-slate-400 font-bold text-xs uppercase tracking-[0.2em]">叮噹多啦A夢漫畫資訊</p>
         </header>
 
-        <div class="flex p-1 bg-slate-200/50 backdrop-blur-md rounded-2xl mb-8 gap-1">
-            <button onclick="switchTab('manga')" id="btn-manga" class="flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-blue-600 text-white shadow-md">
+        <div class="flex p-1.5 bg-white/80 backdrop-blur-md border border-slate-200 rounded-2xl mb-8 gap-1.5 shadow-sm">
+            <button onclick="switchTab('manga')" id="btn-manga" class="flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-200">
                 Manga / 漫畫
             </button>
-            <button onclick="switchTab('gadgets')" id="btn-gadgets" class="flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all text-slate-500 hover:text-slate-700">
+            <button onclick="switchTab('gadgets')" id="btn-gadgets" class="flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all text-slate-500 hover:bg-slate-50">
                 Gadgets / 法寶
             </button>
-            <button onclick="switchTab('animate')" id="btn-animate" class="flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all text-slate-500 hover:text-slate-700">
-                Movies-Anime / 電影動畫
+            <button onclick="switchTab('animate')" id="btn-animate" class="flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all text-slate-500 hover:bg-slate-50">
+                Movies / 電影動畫
             </button>
         </div>
 
         <div class="viewport-container">
             <div id="tab-slider" class="tab-slider">
                 
-                <!-- Tab 1: Manga -->
-                <div class="tab-pane space-y-8 pr-2">
-                    <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
+                <div class="tab-pane space-y-6 pr-2">
+                    <section class="bg-white/90 backdrop-blur-sm rounded-[2rem] p-8 border border-slate-200 shadow-sm space-y-6">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <span class="w-2 h-8 bg-blue-600 rounded-full"></span>
@@ -85,13 +66,13 @@
                             </div>
                             <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase">HK Edition</span>
                         </div>
-                        <a href="manga-database.html?region=HK" class="group flex items-center justify-between bg-blue-600 p-5 rounded-2xl text-white font-black transition-all hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-200">
+                        <a href="manga-database.html?region=HK" class="btn-link group flex items-center justify-between bg-gradient-to-r from-blue-600 to-indigo-600 p-5 rounded-2xl text-white font-black shadow-lg shadow-blue-100">
                             <span class="tracking-tight text-lg">香港版漫畫資訊列表</span>
                             <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
                         </a>
                     </section>
 
-                    <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
+                    <section class="bg-white/90 backdrop-blur-sm rounded-[2rem] p-8 border border-slate-200 shadow-sm space-y-6">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <span class="w-2 h-8 bg-red-600 rounded-full"></span>
@@ -99,63 +80,45 @@
                             </div>
                             <span class="text-[10px] font-black text-red-600 bg-red-50 px-3 py-1 rounded-full uppercase">JP Edition</span>
                         </div>
-                        <a href="manga-database.html?region=JP" class="group flex items-center justify-between bg-red-600 p-5 rounded-2xl text-white font-black transition-all hover:bg-red-700 hover:shadow-lg hover:shadow-red-200">
+                        <a href="manga-database.html?region=JP" class="btn-link group flex items-center justify-between bg-gradient-to-r from-red-600 to-rose-600 p-5 rounded-2xl text-white font-black shadow-lg shadow-red-100">
                             <span class="tracking-tight text-lg">日本版漫畫資料列表</span>
-                            <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
-                        </a>
-                    </section>
-
-                    <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <span class="w-2 h-8 bg-green-800 rounded-full"></span>
-                                <h2 class="text-xl font-black text-slate-800">所有日本原作</h2>
-                            </div>
-                            <span class="text-[10px] font-black text-green-600 bg-green-100 px-3 py-1 rounded-full uppercase">Originals</span>
-                        </div>
-                        <a href="originalworks.html" class="group flex items-center justify-between bg-green-800 p-5 rounded-2xl text-white font-black transition-all hover:bg-green-900 hover:shadow-lg hover:shadow-green-200">
-                            <span class="tracking-tight text-lg">所有日本原作作品列表與搜尋</span>
                             <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
                         </a>
                     </section>
                 </div>
 
-                <!-- Tab 2: Gadgets (Modern purple theme) -->
-                <div class="tab-pane space-y-8 px-2">
-                    <!-- Target Link changed to gadgetsandmedia.html -->
-                    <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
+                <div class="tab-pane space-y-6 px-2">
+                    <section class="bg-white/90 backdrop-blur-sm rounded-[2rem] p-8 border border-slate-200 shadow-sm space-y-6">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
-                                <span class="w-2 h-8 bg-rose-600 rounded-full"></span>
+                                <span class="w-2 h-8 bg-emerald-500 rounded-full"></span>
                                 <h2 class="text-xl font-black text-slate-800">法寶記錄</h2>
                             </div>
-                            <span class="text-[10px] font-black text-rose-600 bg-rose-50 px-3 py-1 rounded-full uppercase">Gadget Archive</span>
+                            <span class="text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full uppercase">Gadget</span>
                         </div>
-                        <a href="gadgetsandmedia.html" class="group flex items-center justify-between bg-rose-600 p-5 rounded-2xl text-white font-black transition-all hover:bg-rose-700 hover:shadow-lg hover:shadow-rose-200">
+                        <a href="gadgetsandmedia.html" class="btn-link group flex items-center justify-between bg-gradient-to-r from-emerald-500 to-teal-600 p-5 rounded-2xl text-white font-black shadow-lg shadow-emerald-100">
                             <span class="tracking-tight text-lg">法寶記錄搜尋</span>
                             <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
                         </a>
                     </section>
 
-                    <!-- Characters & Things moved here from Tab 3 -->
-                    <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
+                    <section class="bg-white/90 backdrop-blur-sm rounded-[2rem] p-8 border border-slate-200 shadow-sm space-y-6">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <span class="w-2 h-8 bg-violet-600 rounded-full"></span>
                                 <h2 class="text-xl font-black text-slate-800">角色人物</h2>
                             </div>
-                            <span class="text-[10px] font-black text-violet-600 bg-violet-50 px-3 py-1 rounded-full uppercase">Lore & NPCs</span>
+                            <span class="text-[10px] font-black text-violet-600 bg-violet-50 px-3 py-1 rounded-full uppercase">Lore</span>
                         </div>
-                        <a href="charactersandthings.html" class="group flex items-center justify-between bg-violet-600 p-5 rounded-2xl text-white font-black transition-all hover:bg-violet-700 hover:shadow-lg hover:shadow-violet-200">
-                            <span class="tracking-tight text-lg">角色人物事理列表與搜尋</span>
+                        <a href="charactersandthings.html" class="btn-link group flex items-center justify-between bg-gradient-to-r from-violet-600 to-indigo-700 p-5 rounded-2xl text-white font-black shadow-lg shadow-indigo-100">
+                            <span class="tracking-tight text-lg">角色人物事理列表</span>
                             <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
                         </a>
                     </section>
                 </div>
 
-                <!-- Tab 3: Movies & Anime (Modern Rose/Amber theme) -->
-                <div class="tab-pane space-y-8 pl-2">
-                    <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
+                <div class="tab-pane space-y-6 pl-2">
+                    <section class="bg-white/90 backdrop-blur-sm rounded-[2rem] p-8 border border-slate-200 shadow-sm space-y-6">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <span class="w-2 h-8 bg-rose-600 rounded-full"></span>
@@ -163,22 +126,8 @@
                             </div>
                             <span class="text-[10px] font-black text-rose-600 bg-rose-50 px-3 py-1 rounded-full uppercase">Cinema</span>
                         </div>
-                        <a href="movie.html" class="group flex items-center justify-between bg-rose-600 p-5 rounded-2xl text-white font-black transition-all hover:bg-rose-700 hover:shadow-lg hover:shadow-rose-200">
+                        <a href="movie.html" class="btn-link group flex items-center justify-between bg-gradient-to-r from-rose-600 to-pink-600 p-5 rounded-2xl text-white font-black shadow-lg shadow-rose-100">
                             <span class="tracking-tight text-lg">電影作品列表</span>
-                            <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
-                        </a>
-                    </section>
-
-                    <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <span class="w-2 h-8 bg-amber-500 rounded-full"></span>
-                                <h2 class="text-xl font-black text-slate-800">動畫作品</h2>
-                            </div>
-                            <span class="text-[10px] font-black text-amber-600 bg-amber-50 px-3 py-1 rounded-full uppercase">Animation</span>
-                        </div>
-                        <a href="animate.html" class="group flex items-center justify-between bg-amber-500 p-5 rounded-2xl text-white font-black transition-all hover:bg-amber-600 hover:shadow-lg hover:shadow-amber-200">
-                            <span class="tracking-tight text-lg">動畫作品列表</span>
                             <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
                         </a>
                     </section>
@@ -187,7 +136,7 @@
             </div>
         </div>
 
-        <footer class="text-center space-y-4 pt-8 pb-12">
+        <footer class="text-center pt-8 pb-12">
             <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
                 Last Updated: <span id="current-date"></span>
             </p>
@@ -201,27 +150,26 @@
             const animateBtn = document.getElementById('btn-animate');
             const slider = document.getElementById('tab-slider');
 
-            [mangaBtn, gadgetsBtn, animateBtn].forEach(btn => {
-                btn.className = 'flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all text-slate-500 hover:text-slate-700';
-            });
+            const inactive = 'flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all text-slate-500 hover:bg-slate-50';
+            const activeBase = 'flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all text-white shadow-lg ';
+
+            mangaBtn.className = inactive;
+            gadgetsBtn.className = inactive;
+            animateBtn.className = inactive;
 
             if (tab === 'manga') {
                 slider.style.transform = 'translateX(0%)';
-                mangaBtn.className = 'flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-blue-600 text-white shadow-md';
+                mangaBtn.className = activeBase + 'bg-gradient-to-r from-blue-600 to-indigo-600 shadow-blue-200';
             } else if (tab === 'gadgets') {
                 slider.style.transform = 'translateX(-33.333%)';
-                gadgetsBtn.className = 'flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-indigo-600 text-white shadow-md';
+                gadgetsBtn.className = activeBase + 'bg-gradient-to-r from-emerald-500 to-teal-600 shadow-emerald-200';
             } else if (tab === 'animate') {
                 slider.style.transform = 'translateX(-66.666%)';
-                animateBtn.className = 'flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-rose-600 text-white shadow-md';
+                animateBtn.className = activeBase + 'bg-gradient-to-r from-rose-600 to-pink-600 shadow-rose-200';
             }
         }
 
         document.getElementById('current-date').innerText = new Date().toLocaleDateString('zh-HK', { year: 'numeric', month: 'long', day: 'numeric' });
-
-        window.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && ['c','s','p','u','a'].includes(e.key)) e.preventDefault();
-        });
     </script>
 </body>
 </html>

@@ -120,12 +120,12 @@
                 <div>
                     <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Group Results By</label>
                     <select v-model="groupBy" class="filter-select h-[58px]">
-                        <option value="none">No Grouping (Flat List)</option>
+                        <option value="none">No Grouping</option>
                         <option value="Movie ID">By Movie ID</option>
                         <option value="Anime ID">By Anime ID</option>
                         <option value="Work ID">By Manga Work ID</option>
-                    </select>
-                </div>                
+                        <option value="ISBN">By Manga</option> </select>
+                </div>               
             </div>
 
             <div class="main-card">
@@ -302,36 +302,47 @@
                     }
                 
                     const groups = {};
-                    data.forEach(item => {
-                        const val = item[this.groupBy];
-                        let groupKey = (val && val !== "-") ? val : "N/A / No Reference";
-                        let displayLabel = groupKey;
                 
-                        // 1. Logic for Movie OR Anime IDs
-                        if ((this.groupBy === 'Movie ID' || this.groupBy === 'Anime ID') && this.movieMap[groupKey]) {
-                            const media = this.movieMap[groupKey];
-                            displayLabel = `${media['JP Title']} (${media['HK Title'] || groupKey})`;
-                        } 
-                        // 2. Logic for Work ID (Manga)
-                        else if (this.groupBy === 'Work ID') {
-                            const mangaList = this.getMappingList(groupKey);
+                    data.forEach(item => {
+                        let displayLabel = "N/A / No Reference";
+                        const val = item[this.groupBy];
+                        const workId = item['Work ID'];
+                
+                        // CASE 1: Grouping by Manga# (ISBN)
+                        if (this.groupBy === 'ISBN') {
+                            const mangaList = this.getMappingList(workId);
                             if (mangaList && mangaList.length > 0) {
-                                // Use the first (most recent) title from the manga mapping
-                                displayLabel = `Manga: ${mangaList[0].title} [ID: ${groupKey}]`;
+                                // Group by the primary (first) ISBN's full title and volume
+                                const primary = mangaList[0];
+                                displayLabel = `${primary.title} ${primary.sub} (ISBN: ${primary.hkIsbn})`;
                             } else {
-                                displayLabel = `Work ID: ${groupKey}`;
+                                displayLabel = "No Manga# Reference";
                             }
+                        } 
+                        // CASE 2: Movie or Anime IDs
+                        else if ((this.groupBy === 'Movie ID' || this.groupBy === 'Anime ID') && this.movieMap[val]) {
+                            const media = this.movieMap[val];
+                            displayLabel = `${media['JP Title']} (${media['HK Title'] || val})`;
+                        } 
+                        // CASE 3: Work ID
+                        else if (this.groupBy === 'Work ID') {
+                            const mangaList = this.getMappingList(workId);
+                            displayLabel = mangaList ? `Manga ID: ${workId} - ${mangaList[0].title}` : `Work ID: ${workId}`;
+                        }
+                        // DEFAULT: Use raw value
+                        else {
+                            displayLabel = (val && val !== "-") ? val : "N/A / No Reference";
                         }
                 
                         if (!groups[displayLabel]) groups[displayLabel] = [];
                         groups[displayLabel].push(item);
                     });
                 
-                    // Convert object to sorted array of groups
+                    // Convert to array and sort alphabetically
                     return Object.keys(groups).map(key => ({
                         label: key,
                         items: groups[key]
-                    }));
+                    })).sort((a, b) => a.label.localeCompare(b.label, 'zh-Hant'));
                 },
                 
                 paginatedGroups() {
@@ -364,7 +375,8 @@
             watch: {
                 searchQuery() { this.currentPage = 1; },
                 selectedMovie() { this.currentPage = 1; },
-                selectedManga() { this.currentPage = 1; }
+                selectedManga() { this.currentPage = 1; },
+                groupBy() { this.currentPage = 1; } // Added this
             },
             methods: {
                 async init() {

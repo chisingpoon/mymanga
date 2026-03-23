@@ -117,15 +117,6 @@
                         <option v-for="title in uniqueManga" :key="title" :value="title">{{ title }}</option>
                     </select>
                 </div>
-                <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Group Results By</label>
-                    <select v-model="groupBy" class="filter-select h-[58px]">
-                        <option value="none">No Grouping</option>
-                        <option value="Movie ID">By Movie ID</option>
-                        <option value="Anime ID">By Anime ID</option>
-                        <option value="Work ID">By Manga Work ID</option>
-                        <option value="ISBN">By Manga</option> </select>
-                </div>               
             </div>
 
             <div class="main-card">
@@ -142,16 +133,8 @@
                                 <th class="w-1/4">Description</th>
                             </tr>
                         </thead>
-                        <tbody v-for="group in paginatedGroups" :key="group.label">
-                            <tr v-if="groupBy !== 'none'" class="bg-slate-100">
-                                <td colspan="7" class="py-2 px-4 border-l-4 border-indigo-500">
-                                    <span class="text-[10px] font-black uppercase text-slate-500 tracking-widest">Grouping:</span>
-                                    <span class="ml-2 font-black text-slate-800">{{ group.label }}</span>
-                                    <span class="ml-2 counter-badge">{{ group.items.length }} Items</span>
-                                </td>
-                            </tr>
-                            
-                            <tr v-for="row in group.items" :key="row['Obj ID']">
+                        <tbody>
+                            <tr v-for="row in paginatedData" :key="row['Obj ID']">
                                 <td>
                                     <span class="type-badge" :class="row['Obj Type'] === 'Character' ? 'badge-char' : 'badge-obj'">
                                         {{ row['Obj Type'] }}
@@ -219,60 +202,37 @@
         createApp({
             data() {
                 return {
-                    loading: true,
-                    searchQuery: '',
-                    selectedMovie: '',
-                    selectedManga: '',
-                    currentPage: 1,
-                    itemsPerPage: 40,
-                    showScrollBtn: false,
-                    characters: [],
-                    movies: [],
-                    contents: [],
-                    publishHk: [],
-                    // New "Cache" objects to speed things up
-                    mangaMap: {}, 
-                    movieMap: {},
-                    groupBy: 'none'
+                    loading: true, searchQuery: '', selectedMovie: '', selectedManga: '',
+                    currentPage: 1, itemsPerPage: 40, showScrollBtn: false,
+                    characters: [], movies: [], contents: [], publishHk: []
                 }
             },
             computed: {
-                isFiltered() { 
-                    return this.searchQuery !== '' || this.selectedMovie !== '' || this.selectedManga !== ''; 
-                },
+                isFiltered() { return this.searchQuery !== '' || this.selectedMovie !== '' || this.selectedManga !== ''; },
                 uniqueMovies() {
                     const ids = [...new Set(this.characters.map(c => c['Movie ID']).filter(id => id && id !== "-"))];
                     return ids.map(id => {
-                        const m = this.movieMap[id];
+                        const m = this.movies.find(movie => movie['Media ID'] === id);
                         return { id, label: m ? `${m['JP Title']} (${m['HK Title']})` : id };
                     }).sort((a,b) => a.label.localeCompare(b.label, 'zh-Hant'));
                 },
                 uniqueManga() {
-                    const titles = new Set();
-                    Object.values(this.mangaMap).forEach(list => {
-                        list.forEach(m => titles.add(m.title));
+                    const titles = this.characters.flatMap(c => {
+                        const list = this.getMappingList(c['Work ID']);
+                        return list ? list.map(m => m.title) : [];
                     });
-                    return [...titles].sort((a,b) => a.localeCompare(b, 'zh-Hant'));
+                    return [...new Set(titles)].sort((a,b) => a.localeCompare(b, 'zh-Hant'));
                 },
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
-                    const sm = this.selectedMovie;
-                    const sn = this.selectedManga;
-        
                     return this.characters.filter(r => {
-                        const rowMovieId = r['Movie ID'];
-                        const mangaList = this.mangaMap[r['Work ID']] || [];
-        
-                        // 1. Movie Filter logic
-                        if (sm && rowMovieId !== sm) return false;
-        
-                        // 2. Manga Filter logic
-                        if (sn && !mangaList.some(m => m.title === sn)) return false;
-        
-                        // 3. Search logic
-                        if (!q) return true;
-        
-                        const movie = this.movieMap[rowMovieId] || {};
+                        if (!r['Movie ID'] || r['Movie ID'] === "-") return false;
+                        const movie = this.movies.find(m => m['Media ID'] === r['Movie ID']) || {};
+                        const mangaList = this.getMappingList(r['Work ID']) || [];
+                        
+                        if (this.selectedMovie && r['Movie ID'] !== this.selectedMovie) return false;
+                        if (this.selectedManga && !mangaList.some(m => m.title === this.selectedManga)) return false;
+
                         const searchFields = [
                             r['JP Title'], r['HK Title'], r['Description'], 
                             r['CultureCom Trans'], r['HKChingWin Trans'],
@@ -280,7 +240,7 @@
                             ...mangaList.map(m => m.title + m.sub)
                         ].join(' ').toLowerCase();
                         
-                        return searchFields.includes(q);
+                        return !q || searchFields.includes(q);
                     });
                 },
                 totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
@@ -294,89 +254,12 @@
                     const res = []; let l;
                     for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
                     return res;
-                },
-                groupedData() {
-                    const data = this.filteredData;
-                    if (this.groupBy === 'none') {
-                        return [{ label: 'All Records', items: data }];
-                    }
-                
-                    const groups = {};
-                
-                    data.forEach(item => {
-                        let displayLabel = "N/A / No Reference";
-                        const val = item[this.groupBy];
-                        const workId = item['Work ID'];
-                
-                        // CASE 1: Grouping by Manga# (ISBN)
-                        if (this.groupBy === 'ISBN') {
-                            const mangaList = this.getMappingList(workId);
-                            if (mangaList && mangaList.length > 0) {
-                                // Group by the primary (first) ISBN's full title and volume
-                                const primary = mangaList[0];
-                                displayLabel = `${primary.title} ${primary.sub} (ISBN: ${primary.hkIsbn})`;
-                            } else {
-                                displayLabel = "No Manga# Reference";
-                            }
-                        } 
-                        // CASE 2: Movie or Anime IDs
-                        else if ((this.groupBy === 'Movie ID' || this.groupBy === 'Anime ID') && this.movieMap[val]) {
-                            const media = this.movieMap[val];
-                            displayLabel = `${media['JP Title']} (${media['HK Title'] || val})`;
-                        } 
-                        // CASE 3: Work ID
-                        else if (this.groupBy === 'Work ID') {
-                            const mangaList = this.getMappingList(workId);
-                            displayLabel = mangaList ? `Manga ID: ${workId} - ${mangaList[0].title}` : `Work ID: ${workId}`;
-                        }
-                        // DEFAULT: Use raw value
-                        else {
-                            displayLabel = (val && val !== "-") ? val : "N/A / No Reference";
-                        }
-                
-                        if (!groups[displayLabel]) groups[displayLabel] = [];
-                        groups[displayLabel].push(item);
-                    });
-                
-                    // Convert to array and sort alphabetically
-                    return Object.keys(groups).map(key => ({
-                        label: key,
-                        items: groups[key]
-                    })).sort((a, b) => a.label.localeCompare(b.label, 'zh-Hant'));
-                },
-                
-                paginatedGroups() {
-                    const start = (this.currentPage - 1) * this.itemsPerPage;
-                    const end = start + this.itemsPerPage;
-                    
-                    let currentCount = 0;
-                    const resultGroups = [];
-                
-                    this.groupedData.forEach(group => {
-                        const groupItemsOnPage = [];
-                        group.items.forEach(item => {
-                            if (currentCount >= start && currentCount < end) {
-                                groupItemsOnPage.push(item);
-                            }
-                            currentCount++;
-                        });
-                
-                        if (groupItemsOnPage.length > 0) {
-                            resultGroups.push({ 
-                                label: group.label, 
-                                items: groupItemsOnPage 
-                            });
-                        }
-                    });
-                
-                    return resultGroups;
                 }
             },
             watch: {
                 searchQuery() { this.currentPage = 1; },
                 selectedMovie() { this.currentPage = 1; },
-                selectedManga() { this.currentPage = 1; },
-                groupBy() { this.currentPage = 1; } // Added this
+                selectedManga() { this.currentPage = 1; }
             },
             methods: {
                 async init() {
@@ -387,32 +270,48 @@
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
                         ]);
-                        this.characters = c; 
-                        this.movies = m; 
-                        this.contents = s; 
-                        this.publishHk = h;
-        
-                        // Pre-process Movie Map
-                        this.movies.forEach(movie => {
-                            this.movieMap[movie['Media ID']] = movie;
-                        });
-        
-                        // Pre-process Manga Map (One-time heavy calculation)
-                        this.characters.forEach(char => {
-                            const workId = char['Work ID'];
-                            if (workId && workId !== "-" && !this.mangaMap[workId]) {
-                                this.mangaMap[workId] = this.calculateMangaList(workId);
-                            }
-                        });
-        
+                        this.characters = c; this.movies = m; this.contents = s; this.publishHk = h;
                         this.loading = false;
                         window.addEventListener('scroll', () => { this.showScrollBtn = window.scrollY > 400; });
                     } catch (e) { console.error(e); }
                 },
-                // Moved the logic here so it only runs once per Work ID during init
-                calculateMangaList(workId) {
+                getMovieData(movieId, field) {
+                    const movie = this.movies.find(m => m['Media ID'] === movieId);
+                    if (!movie) return (field === 'Media ID' ? movieId : '-');
+                    return movie[field] || '-';
+                },
+                getMangaClass(title) {
+                    if (!title) return 'manga-other';
+                    
+                    // 1. Check for Long Stories first (Most specific)
+                    if (title.includes('大全集')) {
+                        return 'manga-grand';
+                    }
+                    
+                    // 2. Check for Movie-related manga
+                    if (title.includes('電影') || title.includes('映畫')) {
+                        return 'manga-movie';
+                    }
+                    
+                    // 3. Check for Plus or Special editions
+                    if (title.includes('PLUS') || title.includes('彩色作品集') || (title === '多啦A夢')) {
+                        return 'manga-plus';
+                    }
+                    
+                    // 4. Check for the standard series
+                    if (title.includes('文庫版') ) {
+                        return 'manga-classic';
+                    }
+                    
+                    // 5. Default
+                    return 'manga-other';
+                },
+                getMappingList(workId) {
+                    if(!workId || workId === "-") return null;
                     const idStr = workId.toString().trim();
                     const contentsMatches = this.contents.filter(item => item.作品番?.toString().trim() === idStr);
+                    if (!contentsMatches.length) return null;
+                    
                     const mapped = [];
                     contentsMatches.forEach(match => {
                         const isbnJp = match.ISBN?.trim();
@@ -426,24 +325,8 @@
                             });
                         });
                     });
+                    
                     return mapped.length ? mapped.sort((a,b) => b.date - a.date) : null;
-                },
-                // These methods remain for the Template to use
-                getMovieData(movieId, field) {
-                    const movie = this.movieMap[movieId];
-                    if (!movie) return (field === 'Media ID' ? movieId : '-');
-                    return movie[field] || '-';
-                },
-                getMappingList(workId) {
-                    return this.mangaMap[workId] || null;
-                },
-                getMangaClass(title) {
-                    if (!title) return 'manga-other';
-                    if (title.includes('大全集')) return 'manga-grand';
-                    if (title.includes('電影') || title.includes('映畫')) return 'manga-movie';
-                    if (title.includes('PLUS') || title.includes('彩色作品集') || (title === '多啦A夢')) return 'manga-plus';
-                    if (title.includes('文庫版')) return 'manga-classic';
-                    return 'manga-other';
                 },
                 resetFilters() { this.searchQuery = ''; this.selectedMovie = ''; this.selectedManga = ''; },
                 changePage(p) { this.currentPage = p; this.scrollToTop(); },

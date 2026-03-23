@@ -44,19 +44,14 @@
                 <div class="flex-1 min-w-[280px] relative">
                     <input type="text" v-model.trim="searchQuery" placeholder="Search objects or movies..." 
                            class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-11 pr-10 py-2.5 text-sm font-bold outline-none focus:border-indigo-500 focus:bg-white transition-all">
-                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3" stroke-linecap="round"></path></svg>
-                    </div>
                 </div>
-            
                 <div class="flex items-center gap-2">
                     <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">View By</span>
-                    <select v-model="groupBy" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2.5 text-sm font-black outline-none focus:border-indigo-500 cursor-pointer">
+                    <select v-model="groupBy" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2.5 text-sm font-black outline-none cursor-pointer">
                         <option value="object">Object</option>
                         <option value="movie">Movie</option>
                     </select>
                 </div>
-            
                 <div class="bg-indigo-50 border border-indigo-100 px-4 py-2.5 rounded-xl flex items-center gap-3">
                     <span class="text-[10px] font-black text-indigo-400 uppercase">Results</span>
                     <span class="text-base font-black text-indigo-700">{{ displayGroups.length }}</span>
@@ -77,16 +72,15 @@
                             <template v-else>
                                 <span class="text-[11px] font-black text-indigo-500 uppercase tracking-widest mb-1 block">Object</span>
                                 <h2 class="text-2xl font-black text-slate-900 leading-tight flex items-baseline gap-2">
-                                    <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">原文/</span>
-                                    {{ group.title }}
+                                    <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">原文/</span> {{ group.title }}
                                 </h2>
                                 <h2 v-if="group.hkTrans" class="text-2xl font-black text-slate-500 leading-tight flex items-baseline gap-2 mt-1">
-                                    <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">港譯/</span>
-                                    {{ group.hkTrans }}
+                                    <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">港譯/</span> {{ group.hkTrans }}
                                 </h2>
                             </template>
                         </div>
                         <hr class="border-slate-100 mb-6">
+                        
                         <div class="flex-1 space-y-8">
                             <div v-for="(item, idx) in group.items" :key="idx" class="border-l-4 border-indigo-200 pl-5">
                                 <div class="bg-white border-2 border-slate-50 rounded-2xl p-4 shadow-sm">
@@ -100,8 +94,8 @@
                                         </h3>
                                     </template>
                                     <template v-else>
-                                        <a :href="'movie.html?mediaid=' + item.movieId" class="group block">
-                                            <span class="bg-cyan-600 text-white px-2 py-1 rounded-md text-[11px] font-black uppercase inline-block mb-2">Movie</span>
+                                        <a :href="'movie.html?mediaid=' + item.movieId" class="group block mb-2">
+                                            <span class="bg-cyan-600 text-white px-2 py-1 rounded-md text-[11px] font-black uppercase inline-block mb-1">Source Movie</span>
                                             <div class="font-black text-slate-800 text-xl group-hover:text-cyan-600 flex items-center gap-2">{{ item.movieTitle }} <span class="text-cyan-500">▶</span></div>
                                         </a>
                                     </template>
@@ -165,8 +159,9 @@
                         const obj = this.objectsMaster.find(o => String(o['Object ID']) === String(m['Object ID']));
                         const movie = this.movies.find(mov => String(mov['Media ID']) === String(m['Movie ID']));
                         
-                        // RESTORED ORIGINAL MANGA DATA MAPPING
-                        const refs = this.contents.filter(c => String(c['Work ID']) === String(m['Work ID']))
+                        // Original Mapping Logic for Manga Refs
+                        const refs = this.contents
+                            .filter(c => String(c['Work ID']) === String(m['Work ID']))
                             .map(c => {
                                 const book = this.publishHk.find(p => String(p['Book ID']) === String(c['Book ID']));
                                 return {
@@ -236,10 +231,13 @@
                         const mId = urlParams.get('movieid');
                         if (mId) {
                             const mov = this.movies.find(x => String(x['Media ID']) === String(mId));
-                            if (mov) { this.groupBy = 'movie'; this.searchQuery = mov['JP Title']; }
+                            if (mov) { 
+                                this.groupBy = 'movie'; 
+                                this.searchQuery = mov['JP Title']; 
+                            }
                         }
                         this.loading = false;
-                    } catch (e) { console.error(e); }
+                    } catch (e) { console.error("Fetch failed:", e); }
                 },
                 changePage(p) { if(p > 0 && p <= this.totalPages) { this.currentPage = p; window.scrollTo(0,0); }}
             },

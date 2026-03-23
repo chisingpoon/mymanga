@@ -18,9 +18,7 @@
         .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid #4f46e5; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* Restoring original Nav Style */
         .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
-        
         .data-card { background: white; border-radius: 20px; border: 1px solid #e2e8f0; transition: all 0.3s ease; }
     </style>
 </head>
@@ -50,6 +48,9 @@
                     <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3" stroke-linecap="round"></path></svg>
                     </div>
+                    <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </button>
                 </div>
             
                 <div class="flex items-center gap-2">
@@ -68,7 +69,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
                 <template v-for="group in paginatedGroups" :key="group.id">
-                    <div class="data-card p-6 flex flex-col border-2 border-slate-100 shadow-sm">
+                    <div class="data-card p-6 flex flex-col border-2 border-slate-100 shadow-sm hover:border-indigo-200 transition-colors">
                         <div class="mb-6">
                             <template v-if="groupBy === 'movie'">
                                 <span class="text-[11px] font-black text-cyan-600 uppercase tracking-widest mb-1 block">Movie</span>
@@ -81,16 +82,16 @@
                             </template>
                         </div>
                         <hr class="border-slate-100 mb-6">
-                        <div class="flex-1 space-y-6">
+                        <div class="flex-1 space-y-5">
                             <div v-for="(item, idx) in group.items" :key="idx" class="border-l-4 border-indigo-200 pl-4">
-                                <div class="p-4 bg-slate-50 rounded-xl">
+                                <div class="p-4 bg-slate-50 rounded-xl hover:bg-white border border-transparent hover:border-slate-100 transition-all">
                                     <template v-if="groupBy === 'movie'">
                                         <p class="text-[10px] font-black text-slate-400 uppercase mb-1">ID: {{ item.objectId }}</p>
-                                        <p class="font-black text-slate-800">{{ item.jpTitle }}</p>
+                                        <p class="font-black text-slate-800 leading-snug">{{ item.jpTitle }}</p>
                                         <p v-if="item.hkTrans" class="text-sm font-bold text-indigo-600 mt-1">{{ item.hkTrans }}</p>
                                     </template>
                                     <template v-else>
-                                        <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Source</p>
+                                        <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Source Material</p>
                                         <p class="font-bold text-slate-800">{{ item.movieTitle }}</p>
                                     </template>
 
@@ -107,8 +108,8 @@
 
             <div v-if="totalPages > 1" class="flex flex-col items-center gap-4 py-12">
                 <div class="flex gap-2">
-                    <button @click="currentPage--" :disabled="currentPage === 1" class="px-6 py-2 rounded-xl border-2 border-slate-200 font-bold bg-white disabled:opacity-30">PREV</button>
-                    <button @click="currentPage++" :disabled="currentPage === totalPages" class="px-6 py-2 rounded-xl border-2 border-slate-200 font-bold bg-white disabled:opacity-30">NEXT</button>
+                    <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" class="px-6 py-2 rounded-xl border-2 border-slate-200 font-bold bg-white disabled:opacity-30">PREV</button>
+                    <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" class="px-6 py-2 rounded-xl border-2 border-slate-200 font-bold bg-white disabled:opacity-30">NEXT</button>
                 </div>
             </div>
         </main>
@@ -135,7 +136,6 @@
                     const q = this.searchQuery.toLowerCase().trim();
                     
                     return this.objectMedia.map(m => {
-                        // Point 3: Use 'Object ID' to link sheets
                         const obj = this.objectsMaster.find(o => String(o['Object ID']) === String(m['Object ID']));
                         const movie = this.movies.find(mov => String(mov['Media ID']) === String(m['Movie ID']));
                         
@@ -190,12 +190,25 @@
                         this.objectsMaster = o; 
                         this.objectMedia = om; 
                         this.movies = m;
+
+                        // RESTORED URL PARAMETER LOGIC
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const movieIdParam = urlParams.get('movieid');
+                        if (movieIdParam) {
+                            const foundMovie = this.movies.find(x => String(x['Media ID']) === String(movieIdParam));
+                            if (foundMovie) {
+                                this.groupBy = 'movie';
+                                this.searchQuery = foundMovie['JP Title'];
+                            }
+                        }
+
                         this.loading = false;
                     } catch (e) { 
                         console.error(e); 
-                        alert("Fetch failed. Please ensure the Google Sheet and Tab names are correct.");
+                        alert("Data fetch error. Check sheet accessibility.");
                     }
-                }
+                },
+                changePage(p) { if(p > 0 && p <= this.totalPages) { this.currentPage = p; window.scrollTo(0,0); }}
             },
             mounted() { this.init(); }
         }).mount('#app');

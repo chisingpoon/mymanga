@@ -48,7 +48,6 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3" stroke-linecap="round"></path></svg>
                     </div>
                 </div>
-            
                 <div class="flex items-center gap-2">
                     <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">View By</span>
                     <select v-model="groupBy" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2.5 text-sm font-black outline-none focus:border-indigo-500 cursor-pointer">
@@ -56,7 +55,6 @@
                         <option value="movie">Movie</option>
                     </select>
                 </div>
-            
                 <div class="bg-indigo-50 border border-indigo-100 px-4 py-2.5 rounded-xl flex items-center gap-3">
                     <span class="text-[10px] font-black text-indigo-400 uppercase">Results</span>
                     <span class="text-base font-black text-indigo-700">{{ displayGroups.length }}</span>
@@ -77,12 +75,10 @@
                             <template v-else>
                                 <span class="text-[11px] font-black text-indigo-500 uppercase tracking-widest mb-1 block">Object</span>
                                 <h2 class="text-2xl font-black text-slate-900 leading-tight flex items-baseline gap-2">
-                                    <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">原文/</span>
-                                    {{ group.title }}
+                                    <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">原文/</span>{{ group.title }}
                                 </h2>
                                 <h2 v-if="group.hkTrans" class="text-2xl font-black text-slate-500 leading-tight flex items-baseline gap-2 mt-1">
-                                    <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">港譯/</span>
-                                    {{ group.hkTrans }}
+                                    <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">港譯/</span>{{ group.hkTrans }}
                                 </h2>
                             </template>
                         </div>
@@ -113,13 +109,13 @@
 
                                     <div v-if="item.mangaRefs && item.mangaRefs.length" class="mt-4 pt-4 border-t border-slate-100">
                                         <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Manga Reference</p>
-                                        <div class="grid gap-2">
-                                            <div v-for="ref in item.mangaRefs" class="flex items-center justify-between bg-slate-50 px-3 py-2 rounded-lg border border-slate-100">
-                                                <div class="flex items-center gap-2">
-                                                    <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
-                                                    <span class="text-xs font-black text-slate-700 uppercase">{{ ref.bookTitle }}</span>
+                                        <div class="space-y-2">
+                                            <div v-for="ref in item.mangaRefs" class="flex items-center justify-between bg-slate-50 px-3 py-2 rounded-xl border border-slate-100">
+                                                <div class="flex items-center gap-2 overflow-hidden">
+                                                    <div class="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0"></div>
+                                                    <span class="text-[11px] font-black text-slate-700 truncate uppercase">{{ ref.bookTitle }}</span>
                                                 </div>
-                                                <span class="text-[11px] font-bold text-indigo-600 bg-white px-2 py-0.5 rounded shadow-sm">P.{{ ref.page }}</span>
+                                                <span class="text-[10px] font-black text-indigo-600 bg-white px-2 py-1 rounded-lg shadow-sm border border-slate-100 shrink-0 ml-2">P.{{ ref.page }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -135,7 +131,6 @@
                     <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" class="px-6 py-2 rounded-xl border-2 border-slate-200 font-bold bg-white disabled:opacity-30">PREV</button>
                     <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" class="px-6 py-2 rounded-xl border-2 border-slate-200 font-bold bg-white disabled:opacity-30">NEXT</button>
                 </div>
-                <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Page {{ currentPage }} of {{ totalPages }}</p>
             </div>
         </main>
     </div>
@@ -166,20 +161,23 @@
                         const obj = this.objectsMaster.find(o => String(o['Object ID']) === String(m['Object ID']));
                         const movie = this.movies.find(mov => String(mov['Media ID']) === String(m['Movie ID']));
                         
-                        // Manga Reference Logic
-                        const refs = this.contents.filter(c => String(c['Work ID']) === String(m['Work ID']))
-                            .map(c => {
-                                const book = this.publishHk.find(p => String(p['Book ID']) === String(c['Book ID']));
-                                return {
-                                    bookTitle: book ? book['Book Name'] : 'Unknown Vol',
-                                    page: c['Page']
-                                };
-                            });
+                        // Robust Manga Reference Logic
+                        const m_workId = String(m['Work ID'] || '');
+                        const refs = (m_workId && m_workId !== '-') 
+                            ? this.contents.filter(c => String(c['Work ID']) === m_workId)
+                                .map(c => {
+                                    const book = this.publishHk.find(p => String(p['Book ID']) === String(c['Book ID']));
+                                    return {
+                                        bookTitle: book ? book['Book Name'] : 'Vol.' + c['Book ID'],
+                                        page: c['Page'] || '??'
+                                    };
+                                })
+                            : [];
 
                         return {
                             objectId: m['Object ID'],
                             movieId: m['Movie ID'],
-                            workId: m['Work ID'],
+                            workId: m_workId,
                             jpTitle: obj ? obj['JP Title'] : 'Unknown',
                             movieTitle: movie ? movie['JP Title'] : 'Unknown Movie',
                             active: obj ? (obj['Active'] || 'yes') : 'yes',
@@ -235,13 +233,10 @@
                         this.publishHk = hk;
 
                         const urlParams = new URLSearchParams(window.location.search);
-                        const movieIdParam = urlParams.get('movieid');
-                        if (movieIdParam) {
-                            const foundMovie = this.movies.find(x => String(x['Media ID']) === String(movieIdParam));
-                            if (foundMovie) {
-                                this.groupBy = 'movie';
-                                this.searchQuery = foundMovie['JP Title'];
-                            }
+                        const mId = urlParams.get('movieid');
+                        if (mId) {
+                            const mov = this.movies.find(x => String(x['Media ID']) === String(mId));
+                            if (mov) { this.groupBy = 'movie'; this.searchQuery = mov['JP Title']; }
                         }
                         this.loading = false;
                     } catch (e) { console.error(e); }

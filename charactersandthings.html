@@ -117,6 +117,15 @@
                         <option v-for="title in uniqueManga" :key="title" :value="title">{{ title }}</option>
                     </select>
                 </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Group Results By</label>
+                    <select v-model="groupBy" class="filter-select h-[58px]">
+                        <option value="none">No Grouping (Flat List)</option>
+                        <option value="Movie ID">By Movie ID</option>
+                        <option value="Anime ID">By Anime ID</option>
+                        <option value="Work ID">By Manga Work ID</option>
+                    </select>
+                </div>                
             </div>
 
             <div class="main-card">
@@ -133,8 +142,16 @@
                                 <th class="w-1/4">Description</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr v-for="row in paginatedData" :key="row['Obj ID']">
+                        <tbody v-for="group in paginatedGroups" :key="group.label">
+                            <tr v-if="groupBy !== 'none'" class="bg-slate-100">
+                                <td colspan="7" class="py-2 px-4 border-l-4 border-indigo-500">
+                                    <span class="text-[10px] font-black uppercase text-slate-500 tracking-widest">Grouping:</span>
+                                    <span class="ml-2 font-black text-slate-800">{{ group.label }}</span>
+                                    <span class="ml-2 counter-badge">{{ group.items.length }} Items</span>
+                                </td>
+                            </tr>
+                            
+                            <tr v-for="row in group.items" :key="row['Obj ID']">
                                 <td>
                                     <span class="type-badge" :class="row['Obj Type'] === 'Character' ? 'badge-char' : 'badge-obj'">
                                         {{ row['Obj Type'] }}
@@ -215,7 +232,8 @@
                     publishHk: [],
                     // New "Cache" objects to speed things up
                     mangaMap: {}, 
-                    movieMap: {}
+                    movieMap: {},
+                    groupBy: 'none'
                 }
             },
             computed: {
@@ -276,6 +294,71 @@
                     const res = []; let l;
                     for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
                     return res;
+                },
+                groupedData() {
+                    const data = this.filteredData;
+                    if (this.groupBy === 'none') {
+                        return [{ label: 'All Records', items: data }];
+                    }
+                
+                    const groups = {};
+                    data.forEach(item => {
+                        const val = item[this.groupBy];
+                        let groupKey = (val && val !== "-") ? val : "N/A / No Reference";
+                        let displayLabel = groupKey;
+                
+                        // 1. Logic for Movie OR Anime IDs
+                        if ((this.groupBy === 'Movie ID' || this.groupBy === 'Anime ID') && this.movieMap[groupKey]) {
+                            const media = this.movieMap[groupKey];
+                            displayLabel = `${media['JP Title']} (${media['HK Title'] || groupKey})`;
+                        } 
+                        // 2. Logic for Work ID (Manga)
+                        else if (this.groupBy === 'Work ID') {
+                            const mangaList = this.getMappingList(groupKey);
+                            if (mangaList && mangaList.length > 0) {
+                                // Use the first (most recent) title from the manga mapping
+                                displayLabel = `Manga: ${mangaList[0].title} [ID: ${groupKey}]`;
+                            } else {
+                                displayLabel = `Work ID: ${groupKey}`;
+                            }
+                        }
+                
+                        if (!groups[displayLabel]) groups[displayLabel] = [];
+                        groups[displayLabel].push(item);
+                    });
+                
+                    // Convert object to sorted array of groups
+                    return Object.keys(groups).map(key => ({
+                        label: key,
+                        items: groups[key]
+                    }));
+                },
+                
+                paginatedGroups() {
+                    const start = (this.currentPage - 1) * this.itemsPerPage;
+                    const end = start + this.itemsPerPage;
+                    
+                    let currentCount = 0;
+                    const resultGroups = [];
+                
+                    this.groupedData.forEach(group => {
+                        const groupItemsOnPage = [];
+                        group.items.forEach(item => {
+                            if (currentCount >= start && currentCount < end) {
+                                groupItemsOnPage.push(item);
+                            }
+                            currentCount++;
+                        });
+                
+                        if (groupItemsOnPage.length > 0) {
+                            resultGroups.push({ 
+                                label: group.label, 
+                                items: groupItemsOnPage 
+                            });
+                        }
+                    });
+                
+                    return resultGroups;
                 }
             },
             watch: {

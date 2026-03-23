@@ -217,22 +217,31 @@
                     }).sort((a,b) => a.label.localeCompare(b.label, 'zh-Hant'));
                 },
                 uniqueManga() {
-                    const titles = this.characters.flatMap(c => {
+                    const titles = new Set();
+                    this.characters.forEach(c => {
                         const list = this.getMappingList(c['Work ID']);
-                        return list ? list.map(m => m.title) : [];
+                        if (list) {
+                            list.forEach(m => { if(m.title) titles.add(m.title); });
+                        }
                     });
-                    return [...new Set(titles)].sort((a,b) => a.localeCompare(b, 'zh-Hant'));
+                    return [...titles].sort((a, b) => a.localeCompare(b, 'zh-Hant'));
                 },
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
                     return this.characters.filter(r => {
-                        if (!r['Movie ID'] || r['Movie ID'] === "-") return false;
+                        // Prepare the data for this row
                         const movie = this.movies.find(m => m['Media ID'] === r['Movie ID']) || {};
                         const mangaList = this.getMappingList(r['Work ID']) || [];
+                
+                        // --- FILTER LOGIC ---
                         
+                        // 1. Movie Filter: If a movie is selected, row must match that ID
                         if (this.selectedMovie && r['Movie ID'] !== this.selectedMovie) return false;
+                
+                        // 2. Manga Filter: If a manga is selected, row must have that title in its mapping list
                         if (this.selectedManga && !mangaList.some(m => m.title === this.selectedManga)) return false;
-
+                
+                        // 3. Global Search Logic
                         const searchFields = [
                             r['JP Title'], r['HK Title'], r['Description'], 
                             r['CultureCom Trans'], r['HKChingWin Trans'],

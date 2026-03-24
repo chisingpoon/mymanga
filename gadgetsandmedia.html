@@ -215,8 +215,8 @@
             
                     if (movieID) {
                         this.groupBy = 'movie';
-                        // Finds the movie record where 'Media ID' matches 'EIGA2025'
-                        const match = this.movies.find(x => String(x['Media ID']) === String(movieID));
+                        // Finds the movie record where 'Movie ID' matches 'EIGA2025'
+                        const match = this.movies.find(x => String(x['Movie ID']) === String(movieID));
                         if (match) {
                             // Auto-fills the search box with the Movie Title (e.g., "のび太の絵世界物語")
                             this.searchQuery = match['JP Title']; 
@@ -241,7 +241,7 @@
                     const q = this.searchQuery.toLowerCase();
                     return this.links.map(link => {
                         const g = this.gadgets.find(x => String(x['Gadget ID']) === String(link['Gadget ID']));
-                        const m = this.movies.find(x => String(x['Media ID']) === String(link['Movie ID']));
+                        const m = this.movies.find(x => String(x['Movie ID']) === String(link['Movie ID']));
                         return {
                             gadgetId: link['Gadget ID'], movieId: link['Movie ID'], workId: link['Work ID'],
                             jpTitle: g ? g['JP Title'] : 'Unknown', movieTitle: m ? m['JP Title'] : 'Unknown',
@@ -285,7 +285,7 @@
                     }));
                 },
                 getMovieData(id, field) {
-                    const m = this.movies.find(x => String(x['Media ID']) === String(id));
+                    const m = this.movies.find(x => String(x['Movie ID']) === String(id));
                     return m ? m[field] : '-';
                 },
                 getYear(d) { const match = d?.match(/\d{4}/); return match ? match[0] : 'TBA'; },

@@ -77,6 +77,7 @@
             <div :class="['grid gap-8 mb-12', groupBy === 'movie' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3']">
                 <template v-for="group in paginatedGroups" :key="group.id">
                     <div class="data-card p-6 flex flex-col border-2 border-slate-100 shadow-sm w-full">
+                        
                         <div class="mb-6">
                             <template v-if="groupBy === 'movie'">
                                 <span class="text-[11px] font-black text-cyan-600 uppercase tracking-widest mb-1 block">
@@ -86,17 +87,6 @@
                                     <h2 class="text-3xl font-black text-slate-900 leading-tight group-hover:text-cyan-600 transition-colors">{{ group.title }}</h2>
                                     <span class="text-emerald-500 text-3xl group-hover:translate-x-1 transition-transform group-hover:text-emerald-400">▶</span>
                                 </a>
-                                
-                                <div v-if="getMangaDataForWork(group.workId).length > 0" class="mt-4 bg-slate-50/80 rounded-xl p-3 border border-slate-200/60 inline-block">
-                                    <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">Manga Reference</h4>
-                                    <div class="flex flex-wrap gap-2">
-                                        <a v-for="book in getMangaDataForWork(group.workId)" :key="book.isbn" 
-                                           :href="'manga-database.html?isbn=' + book.isbn + '&region=HK'" target="_blank"
-                                           :class="['px-2 py-1 rounded-lg text-[10px] font-bold border transition-all shadow-sm', book.type === 'grand' ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-white border-slate-200 text-slate-700']">
-                                             {{ book.label }}
-                                        </a>
-                                    </div>
-                                </div>
                             </template>
             
                             <template v-else>
@@ -109,7 +99,27 @@
                                     <span class="text-[10px] text-emerald-300 uppercase tracking-tighter shrink-0 font-bold">港譯/</span>
                                     {{ group.hkTrans }}
                                 </h2>
+                                
+                                <div v-if="group.objType || group.description" class="mt-4 pt-3 border-t border-emerald-100/50 space-y-2">
+                                    <span v-if="group.objType" class="text-[9px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded border border-emerald-100 uppercase inline-block">
+                                        {{ group.objType }}
+                                    </span>
+                                    <p v-if="group.description" class="text-xs text-slate-500 leading-relaxed italic border-l-2 border-emerald-200 pl-3">
+                                        {{ group.description }}
+                                    </p>
+                                </div>
                             </template>
+            
+                            <div v-if="groupBy === 'movie' && getMangaDataForWork(group.workId).length > 0" class="mt-5 bg-slate-50/80 rounded-xl p-3 border border-slate-200/60 inline-block">
+                                <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">Manga Reference</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <a v-for="book in getMangaDataForWork(group.workId)" :key="book.isbn" 
+                                       :href="'manga-database.html?isbn=' + book.isbn + '&region=HK'" target="_blank"
+                                       :class="['px-2 py-1 rounded-lg text-[10px] font-bold border transition-all shadow-sm', book.type === 'grand' ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-white border-slate-200 text-slate-700']">
+                                         {{ book.label }}
+                                    </a>
+                                </div>
+                            </div>
                         </div>
             
                         <hr class="border-slate-100 mb-6">
@@ -124,8 +134,8 @@
                                         <h3 class="text-lg font-black text-slate-800 leading-tight mb-1">{{ item.jpTitle }}</h3>
                                         <h3 v-if="item.hkTrans" class="text-md font-bold text-slate-500 leading-tight mb-3">{{ item.hkTrans }}</h3>
                                         
-                                        <div v-if="item.objType || item.description" class="flex-1">
-                                            <span v-if="item.objType" class="text-[9px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200 uppercase inline-block mb-2">
+                                        <div v-if="item.objType || item.description" class="flex-1 space-y-2">
+                                            <span v-if="item.objType" class="text-[9px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200 uppercase inline-block">
                                                 {{ item.objType }}
                                             </span>
                                             <p v-if="item.description" class="text-xs text-slate-500 leading-relaxed italic border-l-2 border-slate-200 pl-3">
@@ -144,18 +154,16 @@
                                     <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 mb-3 shadow-sm hover:border-cyan-300 hover:bg-white transition-all">
                                         <a :href="'movie.html?mediaid=' + item.movieId" class="group block">
                                             <span class="bg-cyan-600 text-white px-2 py-1 rounded-md text-[11px] font-black uppercase inline-block mb-2">Movie {{ getYear(getMovieData(item.movieId, 'JP Release Date')) }}</span>
-                                            <div class="font-black text-slate-800 text-xl group-hover:text-cyan-600 transition-colors flex items-center gap-2">{{ item.movieTitle }} <span class="text-cyan-500 text-2xl">▶</span></div>
+                                            <div class="font-black text-slate-800 text-xl group-hover:text-cyan-600 transition-colors flex items-center gap-2">
+                                                {{ item.movieTitle }} <span class="text-cyan-500 text-2xl">▶</span>
+                                            </div>
                                         </a>
                                     </div>
-                                    <div v-if="getMangaDataForWork(item.workId).length > 0 || item.culture || item.chingwin" class="bg-slate-50/50 rounded-xl p-3 border border-slate-100 shadow-inner">
-                                        <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Manga Reference</h4>
-                                        <div class="flex flex-wrap gap-2 mb-2">
-                                            <a v-for="book in getMangaDataForWork(item.workId)" :key="book.isbn" 
-                                               :href="'manga-database.html?isbn=' + book.isbn + '&region=HK'" target="_blank"
-                                               class="px-2 py-1 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600">
-                                                {{ book.label }}
-                                            </a>
-                                        </div>
+                                    
+                                    <div v-if="(item.culture && item.culture !== '-') || (item.chingwin && item.chingwin !== '-')" 
+                                         class="flex flex-wrap gap-2 p-1">
+                                        <span v-if="item.culture && item.culture !== '-'" class="px-2 py-1 text-[9px] font-black bg-amber-50 text-amber-700 rounded border border-amber-200">文傳: {{ item.culture }}</span>
+                                        <span v-if="item.chingwin && item.chingwin !== '-'" class="px-2 py-1 text-[9px] font-black bg-orange-50 text-orange-700 rounded border border-orange-200">青文: {{ item.chingwin }}</span>
                                     </div>
                                 </div>
             

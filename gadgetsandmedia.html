@@ -76,9 +76,9 @@
                     </select>
                 </div>
 
-                <div class="bg-emerald-50 border border-emerald-100 px-4 py-2 rounded-xl flex items-center gap-3">
-                    <span class="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Matched</span>
-                    <span :key="displayGroups.length" class="text-xl font-black text-emerald-900 leading-none counter-update">{{ displayGroups.length }}</span>
+                <div class="bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-xl flex items-center gap-3">
+                    <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Matched</span>
+                    <span :key="displayGroups.length" class="text-xl font-black text-indigo-900 leading-none counter-update">{{ displayGroups.length }}</span>
                 </div>
             
                 <button @click="resetFilters" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl transition-colors">
@@ -92,7 +92,7 @@
                         <template v-if="groupBy === 'movie'">
                             <span class="text-[11px] font-black text-indigo-600 uppercase tracking-widest mb-1 block">Movie {{ getYear(getMovieData(group.id, 'JP Release Date')) }}</span>
                             <h2 class="text-3xl font-black text-slate-900 leading-tight">
-                                {{ group.title }} <span class="text-indigo-400 text-xl ml-1">&#9656;</span>
+                                {{ group.title }} <span class="text-indigo-400 text-xl ml-1">▶</span>
                             </h2>
                             
                             <div v-if="getMangaData(group.workId).length > 0" class="mt-4 bg-slate-50/50 rounded-xl p-4 border border-slate-100">
@@ -101,7 +101,7 @@
                                     <a v-for="book in getMangaData(group.workId)" :key="book.isbn" 
                                        :href="'manga-database.html?isbn=' + book.isbn" target="_blank"
                                        :class="['px-2 py-1 rounded-lg text-[10px] font-bold border transition-colors', book.type === 'grand' ? 'bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300']">
-                                        {{ book.label }}
+                                         {{ book.label }}
                                     </a>
                                 </div>
                             </div>
@@ -134,7 +134,7 @@
 
                                 <div v-else>
                                     <a :href="'movies.html?movieID=' + item.movieId" class="font-black text-slate-800 text-lg mb-2 leading-tight block hover:text-indigo-600 transition-colors">
-                                        {{ item.movieTitle }} <span class="text-indigo-400 ml-1 text-sm">&#9656;</span>
+                                        {{ item.movieTitle }} <span class="text-indigo-400 ml-1 text-sm">▶</span>
                                     </a>
                                 </div>
 
@@ -206,7 +206,7 @@
                     ]);
                     this.gadgets = g; this.links = l; this.movies = m; this.contents = c; this.publishing = p;
                     
-                    // RESTORED URL LOGIC (MATCHING OBJECT PAGE)
+                    // FIX 2: Fixed URL parameter auto-filtering (Supports movieID and gadgetID)
                     const urlParams = new URLSearchParams(window.location.search);
                     const movieID = urlParams.get('movieID');
                     const gadgetID = urlParams.get('gadgetID');

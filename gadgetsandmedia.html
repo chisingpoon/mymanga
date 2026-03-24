@@ -81,7 +81,7 @@
                     <span :key="displayGroups.length" class="text-xl font-black text-emerald-900 leading-none counter-update">{{ displayGroups.length }}</span>
                 </div>
             
-                <button @click="searchQuery = ''" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl transition-colors">
+                <button @click="resetFilters" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                 </button>
             </div>
@@ -130,10 +130,9 @@
                                 </div>
 
                                 <div v-else>
-                                    <p class="font-black text-slate-800 text-lg mb-2 leading-tight">{{ item.movieTitle }}</p>
-                                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[9px] font-black uppercase rounded border border-emerald-100">
-                                        {{ getMovieData(item.movieId, 'Media Type') }}
-                                    </span>
+                                    <a :href="'movies.html?movieID=' + item.movieId" class="font-black text-slate-800 text-lg mb-2 leading-tight block hover:text-emerald-600 transition-colors">
+                                        {{ item.movieTitle }}
+                                    </a>
                                 </div>
 
                                 <div v-if="groupBy === 'gadget' && getMangaData(item.workId).length > 0" class="mt-4">
@@ -194,13 +193,27 @@
                 const base = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
                 try {
                     const [g, l, m, c, p] = await Promise.all([
-                        fetch(base + "法寶").then(r => r.json()),
-                        fetch(base + "媒體與法寶").then(r => r.json()),
-                        fetch(base + "電影動畫").then(r => r.json()),
-                        fetch(base + "書籍收錄作品").then(r => r.json()),
+                        fetch(base + "法寶").then(r => r.json()), fetch(base + "媒體與法寶").then(r => r.json()),
+                        fetch(base + "電影動畫").then(r => r.json()), fetch(base + "書籍收錄作品").then(r => r.json()),
                         fetch(base + "出版目録HK").then(r => r.json())
                     ]);
                     this.gadgets = g; this.links = l; this.movies = m; this.contents = c; this.publishing = p;
+                    
+                    // RESTORED: URL Parameters for Auto-Filter
+                    const params = new URLSearchParams(window.location.search);
+                    const movieID = params.get('movieID');
+                    const gadgetID = params.get('gadgetID');
+                    
+                    if (movieID) {
+                        this.groupBy = 'movie';
+                        const movie = this.movies.find(m => String(m['Media ID']) === movieID);
+                        if (movie) this.searchQuery = movie['JP Title'];
+                    } else if (gadgetID) {
+                        this.groupBy = 'gadget';
+                        const gadget = this.gadgets.find(g => String(g['Gadget ID']) === gadgetID);
+                        if (gadget) this.searchQuery = gadget['JP Title'];
+                    }
+
                     this.loading = false;
                 } catch (e) { console.error(e); }
             },
@@ -267,7 +280,8 @@
                     else this.expandedIds.push(id);
                 },
                 isExpanded(id) { return this.expandedIds.includes(id); },
-                changePage(p) { this.currentPage = p; window.scrollTo({top: 0, behavior: 'smooth'}); }
+                changePage(p) { this.currentPage = p; window.scrollTo({top: 0, behavior: 'smooth'}); },
+                resetFilters() { this.searchQuery = ''; this.groupBy = 'gadget'; }
             }
         }).mount('#app');
     </script>

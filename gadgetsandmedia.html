@@ -16,24 +16,24 @@
         .bg-grid { background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px); background-size: 40px 40px; }
         
         .loader-wrapper { position: fixed; inset: 0; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #f1f5f9; border-top: 4px solid #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid #10b981; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         @keyframes number-roll {
-            0% { transform: translateY(8px); opacity: 0; }
+            0% { transform: translateY(10px); opacity: 0; }
             100% { transform: translateY(0); opacity: 1; }
         }
-        .animate-count { display: inline-block; animation: number-roll 0.3s ease-out; }
+        .counter-update { display: inline-block; animation: number-roll 0.3s ease-out; }
 
-        .top-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
         
         .data-card { 
-            background: white; border-radius: 28px; border: 2px solid #f1f5f9; 
+            background: white; border-radius: 24px; border: 2px solid #f1f5f9; 
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .data-card:hover { border-color: #6366f1; transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.05); }
+        .data-card:hover { border-color: #10b981; transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.05); }
 
-        .expand-enter-active, .expand-leave-active { transition: all 0.3s ease-in-out; max-height: 1000px; overflow: hidden; }
+        .expand-enter-active, .expand-leave-active { transition: all 0.3s ease-in-out; max-height: 800px; overflow: hidden; }
         .expand-enter-from, .expand-leave-to { max-height: 0; opacity: 0; }
     </style>
 </head>
@@ -41,51 +41,63 @@
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Processing Archive...</p>
         </div>
 
         <nav class="top-nav">
-            <div class="max-w-[1440px] mx-auto px-8 h-20 flex items-center justify-between">
+            <div class="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between">
                 <div class="flex items-center gap-6">
-                    <a href="index.html" class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white hover:bg-indigo-600 transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </a>
-                    <h1 class="font-black text-xl tracking-tighter text-slate-800 uppercase">Gadget Archive</h1>
-                </div>
-
-                <div class="flex items-center gap-3 bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-xl">
-                    <span class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Results</span>
-                    <span :key="displayGroups.length" class="text-base font-black text-indigo-700 animate-count">{{ displayGroups.length }}</span>
+                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Gadget Archive</h1>
                 </div>
             </div>
         </nav>
 
-        <main class="max-w-[1440px] mx-auto px-8 py-10">
-            <div class="flex flex-wrap items-center gap-4 mb-10 bg-white/50 p-4 rounded-3xl border border-slate-200 backdrop-blur-sm shadow-sm sticky top-24 z-30">
-                <div class="flex-1 min-w-[300px] relative">
-                    <input type="text" v-model.trim="searchQuery" placeholder="Search entries..." 
-                           class="w-full bg-white border-2 border-slate-100 rounded-2xl pl-6 pr-12 py-3.5 text-sm font-bold outline-none focus:border-indigo-500 transition-all shadow-inner">
-                    <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-rose-500 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        <main class="max-w-[1400px] mx-auto px-6 pt-10">
+            <div class="flex flex-wrap items-center gap-4 mb-8 bg-white/80 p-4 rounded-2xl backdrop-blur-md border border-slate-200 sticky top-24 z-30 shadow-sm">
+                <div class="flex-1 min-w-[280px] relative group">
+                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3" stroke-linecap="round"></path></svg>
+                    </div>
+                    <input type="text" v-model.trim="searchQuery" placeholder="Search archive..." 
+                           class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-11 pr-12 py-2.5 text-sm font-bold outline-none focus:border-emerald-500 focus:bg-white transition-all">
+                    <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </button>
                 </div>
-                <select v-model="groupBy" class="bg-white border-2 border-slate-100 rounded-2xl px-6 py-3.5 text-sm font-black outline-none cursor-pointer hover:border-indigo-200 transition-all">
-                    <option value="gadget">By Gadget</option>
-                    <option value="movie">By Movie</option>
-                </select>
+            
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">View</span>
+                    <select v-model="groupBy" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2 text-sm font-black outline-none cursor-pointer">
+                        <option value="gadget">By Gadget</option>
+                        <option value="movie">By Movie</option>
+                    </select>
+                </div>
+
+                <div class="bg-emerald-50 border border-emerald-100 px-4 py-2 rounded-xl flex items-center gap-3">
+                    <span class="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Matched</span>
+                    <span :key="displayGroups.length" class="text-xl font-black text-emerald-900 leading-none counter-update">{{ displayGroups.length }}</span>
+                </div>
+            
+                <button @click="searchQuery = ''" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </button>
             </div>
 
-            <div :class="['grid gap-8 mb-16', groupBy === 'movie' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3']">
-                <div v-for="group in paginatedGroups" :key="group.id" class="data-card p-8 flex flex-col">
-                    <div class="mb-8">
+            <div :class="['grid gap-8 mb-12', groupBy === 'movie' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3']">
+                <div v-for="group in paginatedGroups" :key="group.id" class="data-card p-8 flex flex-col shadow-sm">
+                    <div class="mb-6">
                         <template v-if="groupBy === 'movie'">
-                            <span class="text-[11px] font-black text-indigo-500 uppercase tracking-[0.2em] mb-2 block">{{ getMovieData(group.id, 'Media Type') }}</span>
-                            <h2 class="text-3xl font-black text-slate-900 leading-tight mb-4">{{ group.title }}</h2>
+                            <span class="text-[11px] font-black text-emerald-600 uppercase tracking-widest mb-1 block">Movie {{ getYear(getMovieData(group.id, 'JP Release Date')) }}</span>
+                            <h2 class="text-3xl font-black text-slate-900 leading-tight">{{ group.title }}</h2>
                             
-                            <div v-if="getMangaData(group.workId).length > 0" class="mt-4 p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                            <div v-if="getMangaData(group.workId).length > 0" class="mt-4 bg-slate-50/50 rounded-xl p-4 border border-slate-100">
                                 <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Manga Reference ({{ getMangaData(group.workId).length }})</h4>
                                 <div class="flex flex-wrap gap-2">
                                     <span v-for="book in getMangaData(group.workId)" :key="book.isbn" 
-                                          :class="['px-2.5 py-1.5 rounded-lg text-[10px] font-bold border shadow-sm', book.type === 'grand' ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-white border-slate-200 text-slate-600']">
+                                       :class="['px-2 py-1 rounded-lg text-[10px] font-bold border', book.type === 'grand' ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-white border-slate-200 text-slate-700']">
                                         {{ book.label }}
                                     </span>
                                 </div>
@@ -93,47 +105,54 @@
                         </template>
 
                         <template v-else>
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block">Archive Group</span>
-                            <h2 class="text-2xl font-black text-slate-900 leading-tight flex items-baseline gap-2">
-                                <span class="text-[10px] text-slate-400 uppercase font-bold shrink-0">原文/</span> {{ group.title }}
+                            <h2 class="text-2xl font-black text-slate-900 flex items-baseline gap-2 mb-1">
+                                <span class="text-[10px] text-slate-400 uppercase font-bold shrink-0">原文/</span>{{ group.title }}
                             </h2>
-                            <h2 v-if="group.hkTrans" class="text-2xl font-black text-slate-400 leading-tight flex items-baseline gap-2 mt-1">
-                                <span class="text-[10px] text-slate-400 uppercase font-bold shrink-0">港譯/</span> {{ group.hkTrans }}
+                            <h2 v-if="group.hkTrans" class="text-2xl font-black text-slate-400 flex items-baseline gap-2">
+                                <span class="text-[10px] text-slate-400 uppercase font-bold shrink-0">港譯/</span>{{ group.hkTrans }}
                             </h2>
                         </template>
                     </div>
 
-                    <hr class="border-slate-100 mb-8">
+                    <hr class="border-slate-100 mb-6">
 
-                    <div :class="['flex-1', groupBy === 'movie' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-8']">
-                        <div v-for="(item, idx) in group.items" :key="idx" :class="[groupBy === 'gadget' ? 'border-l-4 border-slate-100 pl-6' : '']">
-                            <div :class="[groupBy === 'movie' ? 'bg-slate-50/50 p-6 rounded-2xl border border-slate-100 h-full' : '']">
+                    <div :class="['flex-1', groupBy === 'movie' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' : 'space-y-6']">
+                        <div v-for="(item, idx) in group.items" :key="idx">
+                            <div :class="[groupBy === 'movie' ? 'h-full bg-slate-50/50 border-2 border-slate-100 rounded-2xl p-5' : 'border-l-4 border-slate-100 pl-5']">
                                 
                                 <div v-if="groupBy === 'movie'">
                                     <h3 class="text-lg font-black text-slate-800 leading-tight flex items-baseline gap-2">
-                                        <span class="text-[10px] text-slate-400 uppercase font-bold shrink-0">原文/</span> {{ item.jpTitle }}
+                                        <span class="text-[10px] text-slate-400 uppercase font-bold shrink-0">原文/</span>{{ item.jpTitle }}
                                     </h3>
-                                    <h3 v-if="item.hkTrans" class="text-lg font-black text-slate-500 leading-tight flex items-baseline gap-2 mt-1">
-                                        <span class="text-[10px] text-slate-400 uppercase font-bold shrink-0">港譯/</span> {{ item.hkTrans }}
+                                    <h3 v-if="item.hkTrans" class="text-lg font-black text-slate-400 leading-tight flex items-baseline gap-2 mt-1">
+                                        <span class="text-[10px] text-slate-400 uppercase font-bold shrink-0">港譯/</span>{{ item.hkTrans }}
                                     </h3>
                                 </div>
-                                <p v-else class="font-black text-slate-800 text-lg mb-4">{{ item.movieTitle }}</p>
 
-                                <div v-if="groupBy === 'gadget' && getMangaData(item.workId).length > 0">
-                                    <button @click="toggleManga(item.gadgetId + '-' + item.movieId)" class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-indigo-600 transition-colors">
-                                        <svg :class="['w-3.5 h-3.5 transition-transform duration-300', isExpanded(item.gadgetId + '-' + item.movieId) ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="3" stroke-linecap="round"></path></svg>
+                                <div v-else>
+                                    <p class="font-black text-slate-800 text-lg mb-2 leading-tight">{{ item.movieTitle }}</p>
+                                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[9px] font-black uppercase rounded border border-emerald-100">
+                                        {{ getMovieData(item.movieId, 'Media Type') }}
+                                    </span>
+                                </div>
+
+                                <div v-if="groupBy === 'gadget' && getMangaData(item.workId).length > 0" class="mt-4">
+                                    <button @click="toggleManga(item.gadgetId + '-' + item.movieId)" class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-emerald-600 transition-colors">
+                                        <svg :class="['w-3 h-3 transition-transform duration-300', isExpanded(item.gadgetId + '-' + item.movieId) ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="3" stroke-linecap="round"></path></svg>
                                         Manga Reference ({{ getMangaData(item.workId).length }})
                                     </button>
                                     <transition name="expand">
-                                        <div v-show="isExpanded(item.gadgetId + '-' + item.movieId)" class="mt-4 flex flex-wrap gap-2">
-                                            <span v-for="book in getMangaData(item.workId)" class="px-2 py-1 rounded border border-slate-100 bg-white text-[9px] font-bold text-slate-500">{{ book.label }}</span>
+                                        <div v-show="isExpanded(item.gadgetId + '-' + item.movieId)" class="mt-3 bg-white rounded-xl p-3 border border-slate-100">
+                                            <div class="flex flex-wrap gap-1.5">
+                                                <span v-for="book in getMangaData(item.workId)" class="px-2 py-0.5 rounded border border-slate-100 bg-slate-50 text-[9px] font-bold text-slate-500">{{ book.label }}</span>
+                                            </div>
                                         </div>
                                     </transition>
                                 </div>
 
-                                <div v-if="(item.culture && item.culture !== '-') || (item.chingwin && item.chingwin !== '-')" class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-slate-200/50">
-                                    <span v-if="item.culture && item.culture !== '-'" class="px-2.5 py-1 text-[9px] font-black rounded-lg bg-red-50 text-red-700 border border-red-100">文傳: {{ item.culture }}</span>
-                                    <span v-if="item.chingwin && item.chingwin !== '-'" class="px-2.5 py-1 text-[9px] font-black rounded-lg bg-blue-50 text-blue-700 border border-blue-100">青文: {{ item.chingwin }}</span>
+                                <div v-if="(item.culture && item.culture !== '-') || (item.chingwin && item.chingwin !== '-')" class="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-slate-200/50">
+                                    <span v-if="item.culture && item.culture !== '-'" class="px-2 py-1 text-[9px] font-black rounded bg-red-50 text-red-800 border border-red-100">文傳: {{ item.culture }}</span>
+                                    <span v-if="item.chingwin && item.chingwin !== '-'" class="px-2 py-1 text-[9px] font-black rounded bg-blue-50 text-blue-800 border border-blue-100">青文: {{ item.chingwin }}</span>
                                 </div>
                             </div>
                         </div>
@@ -141,21 +160,19 @@
                 </div>
             </div>
 
-            <div v-if="totalPages > 1" class="flex flex-col items-center gap-6 py-10 border-t border-slate-200">
+            <div v-if="totalPages > 1" class="flex flex-col items-center gap-4 py-12 border-t border-slate-200">
                 <div class="flex items-center gap-2">
-                    <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" class="w-12 h-12 flex items-center justify-center bg-white border-2 border-slate-100 rounded-xl disabled:opacity-30 hover:border-indigo-200 transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" class="w-10 h-10 flex items-center justify-center bg-white border-2 border-slate-100 rounded-xl disabled:opacity-30 hover:border-emerald-500 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </button>
-                    
                     <div class="flex gap-2">
                         <button v-for="p in visiblePages" :key="p" @click="p !== '...' && changePage(p)"
-                                :class="['w-12 h-12 rounded-xl text-sm font-black transition-all', currentPage === p ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'bg-white border-2 border-slate-100 hover:border-indigo-100 text-slate-400']">
+                                :class="['w-10 h-10 rounded-xl text-xs font-black transition-all', currentPage === p ? 'bg-emerald-600 text-white shadow-lg' : 'bg-white border-2 border-slate-100 text-slate-400']">
                             {{ p }}
                         </button>
                     </div>
-
-                    <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" class="w-12 h-12 flex items-center justify-center bg-white border-2 border-slate-100 rounded-xl disabled:opacity-30 hover:border-indigo-200 transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" class="w-10 h-10 flex items-center justify-center bg-white border-2 border-slate-100 rounded-xl disabled:opacity-30 hover:border-emerald-500 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </button>
                 </div>
             </div>
@@ -185,7 +202,7 @@
                     ]);
                     this.gadgets = g; this.links = l; this.movies = m; this.contents = c; this.publishing = p;
                     this.loading = false;
-                } catch (e) { console.error("Data Load Fail", e); }
+                } catch (e) { console.error(e); }
             },
             watch: {
                 searchQuery() { this.currentPage = 1; },
@@ -225,11 +242,8 @@
                 visiblePages() {
                     let pages = [];
                     for(let i=1; i<=this.totalPages; i++) {
-                        if (i === 1 || i === this.totalPages || (i >= this.currentPage - 2 && i <= this.currentPage + 2)) {
-                            pages.push(i);
-                        } else if (pages[pages.length-1] !== '...') {
-                            pages.push('...');
-                        }
+                        if (i === 1 || i === this.totalPages || (i >= this.currentPage - 2 && i <= this.currentPage + 2)) pages.push(i);
+                        else if (pages[pages.length-1] !== '...') pages.push('...');
                     }
                     return pages;
                 }

@@ -200,27 +200,35 @@
                 const base = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
                 try {
                     const [g, l, m, c, p] = await Promise.all([
-                        fetch(base + "法寶").then(r => r.json()), fetch(base + "媒體與法寶").then(r => r.json()),
-                        fetch(base + "電影動畫").then(r => r.json()), fetch(base + "書籍收錄作品").then(r => r.json()),
+                        fetch(base + "法寶").then(r => r.json()), 
+                        fetch(base + "媒體與法寶").then(r => r.json()),
+                        fetch(base + "電影動畫").then(r => r.json()), 
+                        fetch(base + "書籍收錄作品").then(r => r.json()),
                         fetch(base + "出版目録HK").then(r => r.json())
                     ]);
                     this.gadgets = g; this.links = l; this.movies = m; this.contents = c; this.publishing = p;
                     
-                    // URL PARAMETER LOGIC (Referenced from Object Page)
+                    // Corrected URL Parameter Logic
                     const urlParams = new URLSearchParams(window.location.search);
-                    const mediaID = urlParams.get('mediaid');
+                    const movieID = urlParams.get('movieid'); // Matches ?movieid=EIGA2025
                     const gadgetID = urlParams.get('gadgetid');
-
-                    if (mediaID) {
+            
+                    if (movieID) {
                         this.groupBy = 'movie';
-                        const match = this.movies.find(x => String(x['Media ID']) === String(mediaID));
-                        if (match) this.searchQuery = match['JP Title'];
+                        // Finds the movie record where 'Media ID' matches 'EIGA2025'
+                        const match = this.movies.find(x => String(x['Media ID']) === String(movieID));
+                        if (match) {
+                            // Auto-fills the search box with the Movie Title (e.g., "のび太の絵世界物語")
+                            this.searchQuery = match['JP Title']; 
+                        }
                     } else if (gadgetID) {
                         this.groupBy = 'gadget';
                         const match = this.gadgets.find(x => String(x['Gadget ID']) === String(gadgetID));
-                        if (match) this.searchQuery = match['JP Title'];
+                        if (match) {
+                            this.searchQuery = match['JP Title'];
+                        }
                     }
-
+            
                     this.loading = false;
                 } catch (e) { console.error(e); this.loading = false; }
             },

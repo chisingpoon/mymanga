@@ -273,22 +273,7 @@
                     publishHk: [],
                     filterType: 'all',
                     showScrollTop: false,
-                    expandedMangaIds: []
-                }
-            },
-            async mounted() {
-                await this.init();
-                window.addEventListener('scroll', () => {
-                    this.showScrollTop = window.scrollY > 300; 
-                });
-            },
-            watch: {
-                searchQuery() { this.currentPage = 1; },
-                // MODIFIED: Watcher to update items per page based on layout
-                groupBy(newVal) { 
-                    this.currentPage = 1; 
-                    this.itemsPerPage = (newVal === 'movie') ? 24 : 12;
-                    this.scrollToTop();
+                    expandedMangaIds: [] // Track expanded states here
                 }
             },
             computed: {
@@ -300,7 +285,7 @@
                     if (this.loading) return [];
                     const q = this.searchQuery.toLowerCase().trim();
                     const fType = this.filterType;
-                
+                    
                     return this.objectMedia.map(m => {
                         const object = this.objectsMaster.find(o => String(o['Object ID']) === String(m['Object ID']));
                         return {
@@ -314,9 +299,7 @@
                             culture: m['CultureCom Trans'],
                             chingwin: m['HKChingWin Trans'],
                             objType: m['Object Type'], 
-                            description: m['Description'],
-                            // Add this line so Vue can track the open/close state
-                            showManga: false 
+                            description: m['Description']
                         };
                     }).filter(i => {
                         const matchesSearch = !q || (i.jpTitle + i.hkTrans + i.culture + i.chingwin + i.movieTitle).toLowerCase().includes(q);
@@ -362,10 +345,16 @@
                 }
             },
             methods: {
-                resetFilters() {
-                    this.searchQuery = '';
-                    this.filterType = 'all'; // Added this
-                    this.currentPage = 1;
+                toggleManga(id) {
+                    const index = this.expandedMangaIds.indexOf(id);
+                    if (index > -1) {
+                        this.expandedMangaIds.splice(index, 1);
+                    } else {
+                        this.expandedMangaIds.push(id);
+                    }
+                },
+                isExpanded(id) {
+                    return this.expandedMangaIds.includes(id);
                 },
                 async init() {
                     const base = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
@@ -382,10 +371,9 @@
                         this.movies = m; 
                         this.contents = s; 
                         this.publishHk = hk;
-                
+        
                         const urlParams = new URLSearchParams(window.location.search);
                         const movieIdParam = urlParams.get('movieid');
-                        
                         if (movieIdParam) {
                             const movie = this.movies.find(x => String(x['Media ID']) === String(movieIdParam));
                             if (movie) {
@@ -393,14 +381,19 @@
                                 this.searchQuery = movie['JP Title'];
                             }
                         }
-                
                         this.loading = false;
                     } catch (e) { console.error(e); }
+                },
+                resetFilters() { 
+                    this.searchQuery = ''; 
+                    this.filterType = 'all';
+                    this.currentPage = 1; 
+                    this.expandedMangaIds = [];
                 },
                 changePage(page) {
                     if (page >= 1 && page <= this.totalPages) {
                         this.currentPage = page;
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        this.scrollToTop();
                     }
                 },
                 scrollToTop() {
@@ -411,28 +404,29 @@
                     const isbns = this.contents.filter(c => String(c.作品番).trim() === String(workId).trim()).map(c => String(c.ISBN).trim());
                     return this.publishHk.filter(hk => isbns.includes(String(hk.ISBN_JP).trim()) && String(hk.Active).toLowerCase() === 'yes').map(book => ({
                         isbn: book.ISBN,
-                        label: `${book.Title} ${book.Volume === '-' ? '' : book.Volume}${book.Subtitle === '-' ? '' : ''+book.Subtitle}`.trim(),
+                        label: `${book.Title} ${book.Volume === '-' ? '' : book.Volume}${book.Subtitle === '-' ? '' : book.Subtitle}`.trim(),
                         type: book.Title.includes('大全集') ? 'grand' : 'standard'
                     }));
-                },
-                toggleManga(id) {
-                    const index = this.expandedMangaIds.indexOf(id);
-                    if (index > -1) {
-                        this.expandedMangaIds.splice(index, 1);
-                    } else {
-                        this.expandedMangaIds.push(id);
-                    }
-                },
-                // Checks if the ID is currently expanded
-                isExpanded(id) {
-                    return this.expandedMangaIds.includes(id);
                 },
                 getMovieData(id, field) {
                     const m = this.movies.find(x => String(x['Media ID']) === String(id));
                     return m ? m[field] : (field === 'JP Release Date' ? '-' : 'Unknown');
                 },
-                getYear(d) { const m = d.match(/\d{4}/); return m ? m[0] : 'TBA'; },
-                resetFilters() { this.searchQuery = ''; this.currentPage = 1; }
+                getYear(d) { const m = d.match(/\d{4}/); return m ? m[0] : 'TBA'; }
+            },
+            async mounted() {
+                await this.init();
+                window.addEventListener('scroll', () => {
+                    this.showScrollTop = window.scrollY > 300; 
+                });
+            },
+            watch: {
+                searchQuery() { this.currentPage = 1; },
+                groupBy(newVal) { 
+                    this.currentPage = 1; 
+                    this.itemsPerPage = (newVal === 'movie') ? 24 : 12;
+                    this.scrollToTop();
+                }
             }
         }).mount('#app');
     </script>

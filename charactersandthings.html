@@ -66,12 +66,23 @@
 
         <main class="max-w-[1400px] mx-auto px-6 pt-10">
             <div class="flex flex-wrap items-center gap-4 mb-8 bg-white/80 p-4 rounded-2xl backdrop-blur-md border border-slate-200 sticky top-24 z-30 shadow-sm">
-                <div class="flex-1 min-w-[280px] relative">
-                    <input type="text" v-model.trim="searchQuery" placeholder="Search archive..." 
-                           class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-11 pr-10 py-2.5 text-sm font-bold outline-none focus:border-emerald-500 transition-all">
+                <div class="flex-1 min-w-[280px] relative group">
                     <div class="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3" stroke-linecap="round"></path></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3" stroke-linecap="round"></path>
+                        </svg>
                     </div>
+                
+                    <input type="text" v-model.trim="searchQuery" placeholder="Search archive..." 
+                           class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-11 pr-12 py-2.5 text-sm font-bold outline-none focus:border-emerald-500 focus:bg-white transition-all">
+                
+                    <button v-if="searchQuery" @click="searchQuery = ''" 
+                            class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all"
+                            title="Clear Search">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                    </button>
                 </div>
             
                 <div class="flex items-center gap-2">

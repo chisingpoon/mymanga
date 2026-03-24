@@ -110,9 +110,9 @@
                                     <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">港譯/</span>
                                     {{ group.hkTrans }}
                                 </h2>
-                                <div v-if="item.objType || item.description" class="mt-3 pt-3 border-t border-slate-100">
-                                    <div v-if="item.objType" class="text-[10px] font-black text-indigo-500 uppercase tracking-tighter mb-1">{{ item.objType }}</div>
-                                    <p v-if="item.description" class="text-xs text-slate-500 leading-snug">{{ item.description }}</p>
+                                <div v-if="group.objType || group.description" class="mt-3 pt-3 border-t border-slate-100">
+                                    <div v-if="group.objType" class="text-[10px] font-black text-indigo-500 uppercase tracking-tighter mb-1">{{ group.objType }}</div>
+                                    <p v-if="group.description" class="text-xs text-slate-500 leading-snug">{{ group.description }}</p>
                                 </div>
                             </template>
                         </div>

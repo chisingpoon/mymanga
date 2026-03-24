@@ -15,10 +15,12 @@
         }
         .bg-grid { background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px); background-size: 40px 40px; }
         
+        /* Loading Spinner */
         .loader-wrapper { position: fixed; inset: 0; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
         .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        /* Animation for Counter */
         @keyframes number-roll {
             0% { transform: translateY(10px); opacity: 0; }
             100% { transform: translateY(0); opacity: 1; }
@@ -33,6 +35,7 @@
         }
         .data-card:hover { border-color: #6366f1; transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.05); }
 
+        /* Expansion Animation */
         .expand-enter-active, .expand-leave-active { transition: all 0.3s ease-in-out; max-height: 800px; overflow: hidden; }
         .expand-enter-from, .expand-leave-to { max-height: 0; opacity: 0; }
     </style>
@@ -206,29 +209,29 @@
                         fetch(base + "書籍收錄作品").then(r => r.json()),
                         fetch(base + "出版目録HK").then(r => r.json())
                     ]);
-                    this.gadgets = g; this.links = l; this.movies = m; this.contents = c; this.publishing = p;
                     
-                    // Corrected URL Parameter Logic
+                    this.gadgets = g; this.links = l; this.movies = m; 
+                    this.contents = c; this.publishing = p;
+                    
+                    // FIXED URL Parameter Logic
                     const urlParams = new URLSearchParams(window.location.search);
-                    const movieID = urlParams.get('movieid'); // Matches ?movieid=EIGA2025
+                    const movieID = urlParams.get('movieid'); // URL is ?movieid=EIGA2025
                     const gadgetID = urlParams.get('gadgetid');
-            
+
                     if (movieID) {
                         this.groupBy = 'movie';
-                        // Finds the movie record where 'Media ID' matches 'EIGA2025'
-                        const match = this.movies.find(x => String(x['Media ID']) === String(movieID));
+                        const match = this.movies.find(x => String(x['Media ID']).trim() === String(movieID).trim());
                         if (match) {
-                            // Auto-fills the search box with the Movie Title (e.g., "のび太の絵世界物語")
-                            this.searchQuery = match['JP Title']; 
+                            this.searchQuery = match['JP Title']; // Fills Search Box
                         }
                     } else if (gadgetID) {
                         this.groupBy = 'gadget';
-                        const match = this.gadgets.find(x => String(x['Gadget ID']) === String(gadgetID));
+                        const match = this.gadgets.find(x => String(x['Gadget ID']).trim() === String(gadgetID).trim());
                         if (match) {
-                            this.searchQuery = match['JP Title'];
+                            this.searchQuery = match['JP Title']; // Fills Search Box
                         }
                     }
-            
+
                     this.loading = false;
                 } catch (e) { console.error(e); this.loading = false; }
             },
@@ -241,14 +244,24 @@
                     const q = this.searchQuery.toLowerCase();
                     return this.links.map(link => {
                         const g = this.gadgets.find(x => String(x['Gadget ID']) === String(link['Gadget ID']));
-                        const m = this.movies.find(x => String(x['Movie ID']) === String(link['Movie ID']));
+                        const m = this.movies.find(x => String(x['Media ID']) === String(link['Movie ID']));
+                        
                         return {
-                            gadgetId: link['Gadget ID'], movieId: link['Media ID'], workId: link['Work ID'],
-                            jpTitle: g ? g['JP Title'] : 'Unknown', movieTitle: m ? m['JP Title'] : 'Unknown',
-                            hkTrans: link['HK Translation'], culture: link['CultureCom Trans'], chingwin: link['HKChingWin Trans'],
+                            gadgetId: link['Gadget ID'], 
+                            movieId: link['Movie ID'], 
+                            workId: link['Work ID'],
+                            jpTitle: g ? g['JP Title'] : 'Unknown', 
+                            movieTitle: m ? m['JP Title'] : 'Unknown',
+                            hkTrans: link['HK Translation'], 
+                            culture: link['CultureCom Trans'], 
+                            chingwin: link['HKChingWin Trans'],
                             active: g ? g['Active'] : 'yes'
                         };
-                    }).filter(i => i.active?.toLowerCase() === 'yes' && (!q || `${i.jpTitle}${i.movieTitle}${i.hkTrans}`.toLowerCase().includes(q)));
+                    }).filter(i => {
+                        const isLive = i.active?.toLowerCase() === 'yes';
+                        const matchesQuery = !q || `${i.jpTitle}${i.movieTitle}${i.hkTrans}`.toLowerCase().includes(q);
+                        return isLive && matchesQuery;
+                    });
                 },
                 displayGroups() {
                     const groups = {};
@@ -256,7 +269,13 @@
                         const key = this.groupBy === 'gadget' ? item.gadgetId : item.movieId;
                         if (!key || key === '-') return;
                         if (!groups[key]) {
-                            groups[key] = { id: key, title: this.groupBy === 'gadget' ? item.jpTitle : item.movieTitle, hkTrans: item.hkTrans, workId: item.workId, items: [] };
+                            groups[key] = { 
+                                id: key, 
+                                title: this.groupBy === 'gadget' ? item.jpTitle : item.movieTitle, 
+                                hkTrans: item.hkTrans, 
+                                workId: item.workId, 
+                                items: [] 
+                            };
                         }
                         groups[key].items.push(item);
                     });
@@ -285,7 +304,7 @@
                     }));
                 },
                 getMovieData(id, field) {
-                    const m = this.movies.find(x => String(x['Movie ID']) === String(id));
+                    const m = this.movies.find(x => String(x['Media ID']) === String(id));
                     return m ? m[field] : '-';
                 },
                 getYear(d) { const match = d?.match(/\d{4}/); return match ? match[0] : 'TBA'; },

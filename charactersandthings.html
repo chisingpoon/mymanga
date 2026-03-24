@@ -174,9 +174,9 @@
                                     </div>
                                     
                                     <div v-if="getMangaDataForWork(item.workId).length > 0" class="mt-2">
-                                        <button @click="item.showManga = !item.showManga" 
+                                        <button @click="toggleManga(item.objectId + '-' + item.movieId)" 
                                                 class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-cyan-600 transition-colors group">
-                                            <svg :class="['w-3 h-3 transition-transform', item.showManga ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg :class="['w-3 h-3 transition-transform duration-300', isExpanded(item.objectId + '-' + item.movieId) ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path d="M19 9l-7 7-7-7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
                                             </svg>
                                             Manga Reference
@@ -184,11 +184,14 @@
                                         </button>
                                     
                                         <transition name="expand">
-                                            <div v-show="item.showManga" class="mt-3 bg-slate-50/50 rounded-xl p-4 border border-slate-100 shadow-inner">
+                                            <div v-show="isExpanded(item.objectId + '-' + item.movieId)" class="mt-3 bg-slate-50/50 rounded-xl p-4 border border-slate-100 shadow-inner">
                                                 <div class="flex flex-wrap gap-2">
-                                                    <a v-for="book in getMangaDataForWork(item.workId)" :key="book.isbn" 
-                                                       :href="'manga-database.html?isbn=' + book.isbn" target="_blank"
-                                                       class="px-2 py-1 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 hover:border-cyan-400 hover:text-cyan-600 transition-all">
+                                                    <a v-for="book in getMangaDataForWork(item.workId)" 
+                                                       :key="book.isbn" 
+                                                       :href="'manga-database.html?isbn=' + book.isbn" 
+                                                       target="_blank"
+                                                       :class="['px-2 py-1 rounded-lg text-[10px] font-bold border transition-all', 
+                                                               book.type === 'grand' ? 'bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100' : 'bg-white border-slate-200 text-slate-700 hover:border-cyan-400']">
                                                         {{ book.label }}
                                                     </a>
                                                 </div>
@@ -258,7 +261,8 @@
                     contents: [],
                     publishHk: [],
                     filterType: 'all',
-                    showScrollTop: false
+                    showScrollTop: false,
+                    expandedMangaIds: []
                 }
             },
             async mounted() {
@@ -399,6 +403,18 @@
                         label: `${book.Title} ${book.Volume === '-' ? '' : book.Volume}${book.Subtitle === '-' ? '' : ''+book.Subtitle}`.trim(),
                         type: book.Title.includes('大全集') ? 'grand' : 'standard'
                     }));
+                },
+                toggleManga(id) {
+                    const index = this.expandedMangaIds.indexOf(id);
+                    if (index > -1) {
+                        this.expandedMangaIds.splice(index, 1);
+                    } else {
+                        this.expandedMangaIds.push(id);
+                    }
+                },
+                // Checks if the ID is currently expanded
+                isExpanded(id) {
+                    return this.expandedMangaIds.includes(id);
                 },
                 getMovieData(id, field) {
                     const m = this.movies.find(x => String(x['Media ID']) === String(id));

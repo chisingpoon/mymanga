@@ -215,8 +215,8 @@
             
                     if (movieID) {
                         this.groupBy = 'movie';
-                        // Finds the movie record where 'Movie ID' matches 'EIGA2025'
-                        const match = this.movies.find(x => String(x['Movie ID']) === String(movieID));
+                        // Finds the movie record where 'Media ID' matches 'EIGA2025'
+                        const match = this.movies.find(x => String(x['Media ID']) === String(movieID));
                         if (match) {
                             // Auto-fills the search box with the Movie Title (e.g., "のび太の絵世界物語")
                             this.searchQuery = match['JP Title']; 

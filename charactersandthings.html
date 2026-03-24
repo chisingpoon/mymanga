@@ -22,6 +22,28 @@
         .data-card:hover { border-color: #34d399; transform: translateY(-2px); }
         .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease, transform 0.3s ease; }
         .fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(20px); }
+        /* Counter Animation */
+        .counter-update {
+            animation: pulse-green 0.4s ease-out;
+        }
+        @keyframes pulse-green {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); color: #059669; }
+            100% { transform: scale(1); }
+        }
+        
+        /* Collapse Transition */
+        .expand-enter-active, .expand-leave-active {
+            transition: all 0.3s ease-in-out;
+            max-height: 500px;
+            overflow: hidden;
+        }
+        .expand-enter-from, .expand-leave-to {
+            max-height: 0;
+            opacity: 0;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
     </style>
 </head>
 <body class="bg-grid">
@@ -70,7 +92,9 @@
             
                 <div class="bg-emerald-50 border border-emerald-100 px-4 py-2 rounded-xl flex items-center gap-3">
                     <span class="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Matched</span>
-                    <span class="text-xl font-black text-emerald-900 leading-none">{{ displayGroups.length }}</span>
+                    <span :key="displayGroups.length" class="text-xl font-black text-emerald-900 leading-none counter-update">
+                        {{ displayGroups.length }}
+                    </span>
                 </div>
             
                 <button @click="resetFilters" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl transition-colors">
@@ -149,14 +173,27 @@
                                         </a>
                                     </div>
                                     
-                                    <div v-if="getMangaDataForWork(item.workId).length > 0" class="bg-slate-50/50 rounded-xl p-4 border border-slate-100">
-                                        <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Manga Reference</h4>
-                                        <div class="flex flex-wrap gap-2">
-                                            <a v-for="book in getMangaDataForWork(item.workId)" :key="book.isbn" :href="'manga-database.html?isbn=' + book.isbn" target="_blank"
-                                               class="px-2 py-1 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 hover:border-cyan-400">
-                                                {{ book.label }}
-                                            </a>
-                                        </div>
+                                    <div v-if="getMangaDataForWork(item.workId).length > 0" class="mt-2">
+                                        <button @click="item.showManga = !item.showManga" 
+                                                class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-cyan-600 transition-colors group">
+                                            <svg :class="['w-3 h-3 transition-transform', item.showManga ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path d="M19 9l-7 7-7-7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                                            </svg>
+                                            Manga Reference
+                                            <span class="bg-slate-100 px-1.5 py-0.5 rounded text-[9px] group-hover:bg-cyan-50">{{ getMangaDataForWork(item.workId).length }}</span>
+                                        </button>
+                                    
+                                        <transition name="expand">
+                                            <div v-show="item.showManga" class="mt-3 bg-slate-50/50 rounded-xl p-4 border border-slate-100 shadow-inner">
+                                                <div class="flex flex-wrap gap-2">
+                                                    <a v-for="book in getMangaDataForWork(item.workId)" :key="book.isbn" 
+                                                       :href="'manga-database.html?isbn=' + book.isbn" target="_blank"
+                                                       class="px-2 py-1 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 hover:border-cyan-400 hover:text-cyan-600 transition-all">
+                                                        {{ book.label }}
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </transition>
                                     </div>
             
                                     <div v-if="(item.culture && item.culture !== '-') || (item.chingwin && item.chingwin !== '-')" class="flex flex-wrap gap-2 px-1">
@@ -248,7 +285,7 @@
                     if (this.loading) return [];
                     const q = this.searchQuery.toLowerCase().trim();
                     const fType = this.filterType;
-            
+                
                     return this.objectMedia.map(m => {
                         const object = this.objectsMaster.find(o => String(o['Object ID']) === String(m['Object ID']));
                         return {
@@ -262,7 +299,9 @@
                             culture: m['CultureCom Trans'],
                             chingwin: m['HKChingWin Trans'],
                             objType: m['Object Type'], 
-                            description: m['Description']
+                            description: m['Description'],
+                            // Add this line so Vue can track the open/close state
+                            showManga: false 
                         };
                     }).filter(i => {
                         const matchesSearch = !q || (i.jpTitle + i.hkTrans + i.culture + i.chingwin + i.movieTitle).toLowerCase().includes(q);

@@ -45,27 +45,31 @@
         <main class="max-w-[1400px] mx-auto px-6 pt-10">
             <div class="flex flex-wrap items-center gap-4 mb-8 bg-white/80 p-4 rounded-2xl backdrop-blur-md border border-slate-200 sticky top-24 z-30 shadow-sm">
                 <div class="flex-1 min-w-[280px] relative">
-                    <input type="text" v-model.trim="searchQuery" placeholder="Search Characters, things or movies..." 
-                           class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-11 pr-10 py-2.5 text-sm font-bold outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 focus:bg-white transition-all">
-                    
+                    <input type="text" v-model.trim="searchQuery" placeholder="Search archive..." 
+                           class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-11 pr-10 py-2.5 text-sm font-bold outline-none focus:border-emerald-500 transition-all">
                     <div class="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3" stroke-linecap="round"></path></svg>
                     </div>
-                    <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 p-1">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                    </button>
                 </div>
             
                 <div class="flex items-center gap-2">
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">View By</span>
-                    <select v-model="groupBy" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2.5 text-sm font-black outline-none focus:border-indigo-500 cursor-pointer">
-                        <option value="object">Object</option>
-                        <option value="movie">Movie</option>
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">View</span>
+                    <select v-model="groupBy" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2 text-sm font-black outline-none cursor-pointer">
+                        <option value="object">By Object</option>
+                        <option value="movie">By Movie</option>
                     </select>
                 </div>
             
-                <div class="bg-emerald-50 border border-emerald-100 px-4 py-2.5 rounded-xl flex items-center gap-3">
-                    <span class="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Archive Records</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Type</span>
+                    <select v-model="filterType" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2 text-sm font-black outline-none cursor-pointer">
+                        <option value="all">All Types</option>
+                        <option v-for="type in uniqueTypes" :key="type" :value="type">{{ type }}</option>
+                    </select>
+                </div>
+            
+                <div class="bg-emerald-50 border border-emerald-100 px-4 py-2 rounded-xl flex items-center gap-3">
+                    <span class="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Matched</span>
                     <span class="text-xl font-black text-emerald-900 leading-none">{{ displayGroups.length }}</span>
                 </div>
             
@@ -80,46 +84,36 @@
                         
                         <div class="mb-6">
                             <template v-if="groupBy === 'movie'">
-                                <span class="text-[11px] font-black text-cyan-600 uppercase tracking-widest mb-1 block">
-                                    Movie ({{ getYear(getMovieData(group.id, 'JP Release Date')) }})
-                                </span>
+                                <span class="text-[11px] font-black text-cyan-600 uppercase tracking-widest mb-1 block">Movie ({{ getYear(getMovieData(group.id, 'JP Release Date')) }})</span>
                                 <a :href="'movie.html?mediaid=' + group.id" class="group flex items-center gap-2">
                                     <h2 class="text-3xl font-black text-slate-900 leading-tight group-hover:text-cyan-600 transition-colors">{{ group.title }}</h2>
-                                    <span class="text-emerald-500 text-3xl group-hover:translate-x-1 transition-transform group-hover:text-emerald-400">▶</span>
+                                    <span class="text-emerald-500 text-3xl group-hover:translate-x-1 transition-transform">▶</span>
                                 </a>
+                                
+                                <div v-if="getMangaDataForWork(group.workId).length > 0" class="mt-4 bg-slate-50/80 rounded-xl p-3 border border-slate-200/60 inline-block">
+                                    <div class="flex flex-wrap gap-2">
+                                        <a v-for="book in getMangaDataForWork(group.workId)" :key="book.isbn" :href="'manga-database.html?isbn=' + book.isbn" target="_blank"
+                                           :class="['px-2 py-1 rounded-lg text-[10px] font-bold border transition-all', book.type === 'grand' ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-white border-slate-200 text-slate-700']">
+                                             {{ book.label }}
+                                        </a>
+                                    </div>
+                                </div>
                             </template>
             
                             <template v-else>
                                 <span class="text-[11px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-1 block">Characters | Things</span>
                                 <h2 class="text-2xl font-black text-slate-900 leading-tight flex items-baseline gap-2">
-                                    <span class="text-[10px] text-emerald-400 uppercase tracking-tighter shrink-0 font-bold">原文/</span>
-                                    {{ group.title }}
+                                    <span class="text-[10px] text-emerald-400 uppercase tracking-tighter shrink-0 font-bold">原文/</span> {{ group.title }}
                                 </h2>
                                 <h2 v-if="group.hkTrans" class="text-2xl font-black text-emerald-700/70 leading-tight flex items-baseline gap-2 mt-1">
-                                    <span class="text-[10px] text-emerald-300 uppercase tracking-tighter shrink-0 font-bold">港譯/</span>
-                                    {{ group.hkTrans }}
+                                    <span class="text-[10px] text-emerald-300 uppercase tracking-tighter shrink-0 font-bold">港譯/</span> {{ group.hkTrans }}
                                 </h2>
                                 
                                 <div v-if="group.objType || group.description" class="mt-4 pt-3 border-t border-emerald-100/50 space-y-2">
-                                    <span v-if="group.objType" class="text-[9px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded border border-emerald-100 uppercase inline-block">
-                                        {{ group.objType }}
-                                    </span>
-                                    <p v-if="group.description" class="text-xs text-slate-500 leading-relaxed italic border-l-2 border-emerald-200 pl-3">
-                                        {{ group.description }}
-                                    </p>
+                                    <span v-if="group.objType" class="text-[9px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded border border-emerald-100 uppercase inline-block">{{ group.objType }}</span>
+                                    <p v-if="group.description" class="text-xs text-slate-500 leading-relaxed italic border-l-2 border-emerald-200 pl-3">{{ group.description }}</p>
                                 </div>
                             </template>
-            
-                            <div v-if="groupBy === 'movie' && getMangaDataForWork(group.workId).length > 0" class="mt-5 bg-slate-50/80 rounded-xl p-3 border border-slate-200/60 inline-block">
-                                <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">Manga Reference</h4>
-                                <div class="flex flex-wrap gap-2">
-                                    <a v-for="book in getMangaDataForWork(group.workId)" :key="book.isbn" 
-                                       :href="'manga-database.html?isbn=' + book.isbn + '&region=HK'" target="_blank"
-                                       :class="['px-2 py-1 rounded-lg text-[10px] font-bold border transition-all shadow-sm', book.type === 'grand' ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-white border-slate-200 text-slate-700']">
-                                         {{ book.label }}
-                                    </a>
-                                </div>
-                            </div>
                         </div>
             
                         <hr class="border-slate-100 mb-6">
@@ -128,19 +122,14 @@
                             <div v-for="(item, idx) in group.items" :key="idx" :class="groupBy === 'movie' ? '' : 'border-l-4 border-emerald-500 pl-5'">
                                 
                                 <div v-if="groupBy === 'movie'" class="h-full">
-                                    <div class="bg-white border-2 border-slate-50 rounded-2xl p-5 shadow-sm hover:border-cyan-300 hover:shadow-md transition-all h-full flex flex-col">
+                                    <div class="bg-white border-2 border-slate-50 rounded-2xl p-5 shadow-sm hover:border-cyan-300 transition-all h-full flex flex-col">
                                         <span class="text-[9px] font-black text-cyan-600 uppercase tracking-widest bg-cyan-50 px-2 py-0.5 rounded mb-3 self-start">Object #{{ item.objectId }}</span>
-                                        
                                         <h3 class="text-lg font-black text-slate-800 leading-tight mb-1">{{ item.jpTitle }}</h3>
                                         <h3 v-if="item.hkTrans" class="text-md font-bold text-slate-500 leading-tight mb-3">{{ item.hkTrans }}</h3>
                                         
                                         <div v-if="item.objType || item.description" class="flex-1 space-y-2">
-                                            <span v-if="item.objType" class="text-[9px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200 uppercase inline-block">
-                                                {{ item.objType }}
-                                            </span>
-                                            <p v-if="item.description" class="text-xs text-slate-500 leading-relaxed italic border-l-2 border-slate-200 pl-3">
-                                                {{ item.description }}
-                                            </p>
+                                            <span v-if="item.objType" class="text-[9px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200 uppercase inline-block">{{ item.objType }}</span>
+                                            <p v-if="item.description" class="text-xs text-slate-500 leading-relaxed italic border-l-2 border-slate-200 pl-3">{{ item.description }}</p>
                                         </div>
                                         
                                         <div v-if="item.culture || item.chingwin" class="flex flex-wrap gap-2 mt-4 pt-3 border-t border-slate-50">
@@ -150,8 +139,8 @@
                                     </div>
                                 </div>
             
-                                <div v-else>
-                                    <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 mb-3 shadow-sm hover:border-cyan-300 hover:bg-white transition-all">
+                                <div v-else class="space-y-4">
+                                    <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 shadow-sm hover:border-cyan-300 hover:bg-white transition-all">
                                         <a :href="'movie.html?mediaid=' + item.movieId" class="group block">
                                             <span class="bg-cyan-600 text-white px-2 py-1 rounded-md text-[11px] font-black uppercase inline-block mb-2">Movie {{ getYear(getMovieData(item.movieId, 'JP Release Date')) }}</span>
                                             <div class="font-black text-slate-800 text-xl group-hover:text-cyan-600 transition-colors flex items-center gap-2">
@@ -160,8 +149,17 @@
                                         </a>
                                     </div>
                                     
-                                    <div v-if="(item.culture && item.culture !== '-') || (item.chingwin && item.chingwin !== '-')" 
-                                         class="flex flex-wrap gap-2 p-1">
+                                    <div v-if="getMangaDataForWork(item.workId).length > 0" class="bg-slate-50/50 rounded-xl p-4 border border-slate-100">
+                                        <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Manga Reference</h4>
+                                        <div class="flex flex-wrap gap-2">
+                                            <a v-for="book in getMangaDataForWork(item.workId)" :key="book.isbn" :href="'manga-database.html?isbn=' + book.isbn" target="_blank"
+                                               class="px-2 py-1 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 hover:border-cyan-400">
+                                                {{ book.label }}
+                                            </a>
+                                        </div>
+                                    </div>
+            
+                                    <div v-if="(item.culture && item.culture !== '-') || (item.chingwin && item.chingwin !== '-')" class="flex flex-wrap gap-2 px-1">
                                         <span v-if="item.culture && item.culture !== '-'" class="px-2 py-1 text-[9px] font-black bg-amber-50 text-amber-700 rounded border border-amber-200">文傳: {{ item.culture }}</span>
                                         <span v-if="item.chingwin && item.chingwin !== '-'" class="px-2 py-1 text-[9px] font-black bg-orange-50 text-orange-700 rounded border border-orange-200">青文: {{ item.chingwin }}</span>
                                     </div>
@@ -222,6 +220,7 @@
                     movies: [],
                     contents: [],
                     publishHk: [],
+                    filterType: 'all',
                     showScrollTop: false
                 }
             },
@@ -241,9 +240,15 @@
                 }
             },
             computed: {
+                uniqueTypes() {
+                    const types = this.objectMedia.map(m => m['Object Type']).filter(t => t && t !== '-');
+                    return [...new Set(types)].sort();
+                },
                 processedData() {
                     if (this.loading) return [];
                     const q = this.searchQuery.toLowerCase().trim();
+                    const fType = this.filterType;
+            
                     return this.objectMedia.map(m => {
                         const object = this.objectsMaster.find(o => String(o['Object ID']) === String(m['Object ID']));
                         return {
@@ -259,7 +264,11 @@
                             objType: m['Object Type'], 
                             description: m['Description']
                         };
-                    }).filter(i => i.active.toLowerCase() === 'yes' && (!q || (i.jpTitle + i.hkTrans + i.culture + i.chingwin + i.movieTitle).toLowerCase().includes(q)));
+                    }).filter(i => {
+                        const matchesSearch = !q || (i.jpTitle + i.hkTrans + i.culture + i.chingwin + i.movieTitle).toLowerCase().includes(q);
+                        const matchesType = fType === 'all' || i.objType === fType;
+                        return i.active.toLowerCase() === 'yes' && matchesSearch && matchesType;
+                    });
                 },
                 displayGroups() {
                     const groups = {};
@@ -299,6 +308,11 @@
                 }
             },
             methods: {
+                resetFilters() {
+                    this.searchQuery = '';
+                    this.filterType = 'all'; // Added this
+                    this.currentPage = 1;
+                },
                 async init() {
                     const base = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
                     try {

@@ -243,7 +243,7 @@
                         const g = this.gadgets.find(x => String(x['Gadget ID']) === String(link['Gadget ID']));
                         const m = this.movies.find(x => String(x['Movie ID']) === String(link['Movie ID']));
                         return {
-                            gadgetId: link['Gadget ID'], movieId: link['Movie ID'], workId: link['Work ID'],
+                            gadgetId: link['Gadget ID'], movieId: link['Media ID'], workId: link['Work ID'],
                             jpTitle: g ? g['JP Title'] : 'Unknown', movieTitle: m ? m['JP Title'] : 'Unknown',
                             hkTrans: link['HK Translation'], culture: link['CultureCom Trans'], chingwin: link['HKChingWin Trans'],
                             active: g ? g['Active'] : 'yes'

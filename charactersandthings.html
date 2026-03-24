@@ -10,24 +10,17 @@
         [v-cloak] { display: none; }
         body { 
             -webkit-user-select: text; user-select: text;
-            min-height: 100vh; background-color: #f0f4f4; /* Slightly greenish tint */
-            font-family: 'Inter', 'Noto Sans TC', 'Noto Sans JP', system-ui, sans-serif; color: #0f172a;
+            min-height: 100vh; background-color: #f8fafc; 
+            font-family: 'Inter', 'Noto Sans TC', 'Noto Sans JP', system-ui, sans-serif; color: #1e293b;
         }
-        /* Subtle Emerald Grid */
-        .bg-grid { background-image: linear-gradient(to right, #d1fae5 1px, transparent 1px), linear-gradient(to bottom, #d1fae5 1px, transparent 1px); background-size: 40px 40px; }
-        
-        .spinner { border-top: 5px solid #059669; } /* Emerald Spinner */
-        
-        .top-nav { background: rgba(255, 255, 255, 0.9); border-bottom: 2px solid #10b981; }
-        
-        /* Unique Shadow for this page */
-        .data-card { 
-            background: white; 
-            border-radius: 20px; 
-            border: 1px solid #ccfbf1; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-        }
-        .data-card:hover { border-color: #2dd4bf; transform: translateY(-2px); }
+        .bg-grid { background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px); background-size: 40px 40px; }
+        .loader-wrapper { position: fixed; inset: 0; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid #4f46e5; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .data-card { background: white; border-radius: 20px; border: 1px solid #e2e8f0; transition: all 0.3s ease; }
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease, transform 0.3s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(20px); }
     </style>
 </head>
 <body class="bg-grid">
@@ -117,8 +110,8 @@
                                     <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">港譯/</span>
                                     {{ group.hkTrans }}
                                 </h2>
-                                <div v-if="group.objType || group.description" class="mt-3 pt-3 border-t border-emerald-50">
-                                    <div v-if="group.objType" class="inline-block px-2 py-0.5 rounded bg-emerald-100 text-[10px] font-black text-emerald-700 uppercase tracking-tighter mb-1">{{ group.objType }}</div>
+                                <div v-if="group.objType || group.description" class="mt-3 pt-3 border-t border-slate-100">
+                                    <div v-if="group.objType" class="text-[10px] font-black text-indigo-500 uppercase tracking-tighter mb-1">{{ group.objType }}</div>
                                     <p v-if="group.description" class="text-xs text-slate-500 leading-snug">{{ group.description }}</p>
                                 </div>
                             </template>
@@ -161,7 +154,7 @@
                                 <div v-else>
                                     <div class="bg-white border-2 border-slate-50 rounded-2xl p-4 mb-3 shadow-sm hover:border-cyan-300 transition-all">
                                         <a :href="'movie.html?mediaid=' + item.movieId" class="group block">
-                                            <span class="bg-teal-600 text-white px-2 py-1 rounded-md text-[11px] font-black uppercase inline-block mb-2">Movie {{ getYear(getMovieData(item.movieId, 'JP Release Date')) }}</span>
+                                            <span class="bg-cyan-600 text-white px-2 py-1 rounded-md text-[11px] font-black uppercase inline-block mb-2">Movie {{ getYear(getMovieData(item.movieId, 'JP Release Date')) }}</span>
                                             <div class="font-black text-slate-800 text-xl group-hover:text-cyan-600 transition-colors flex items-center gap-2">{{ item.movieTitle }} <span class="text-cyan-500 text-2xl">▶</span></div>
                                         </a>
                                     </div>

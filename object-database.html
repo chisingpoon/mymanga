@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archive Database | Gadgets & Objects</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        [v-cloak] { display: none; }
+        .bg-grid {
+            background-color: #f8fafc;
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="bg-grid text-slate-900 min-h-screen">
+
+    <div id="app" v-cloak>
+        <header class="bg-white/80 backdrop-blur-md border-b sticky top-0 z-40 shadow-sm">
+            <div class="max-w-[1920px] mx-auto px-6 h-20 flex items-center justify-between">
+                <div class="flex items-center gap-6">
+                    <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl hover:bg-indigo-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                    </a>
+                    <h1 @click="mode = 'Gadget'; searchQuery = ''" class="font-black text-2xl tracking-tighter text-slate-800 uppercase cursor-pointer">Archive Database</h1>
+                </div>
+
+                <div class="flex bg-slate-200/50 p-1 rounded-xl border border-slate-200">
+                    <button @click="toggleObject('Gadget')" 
+                        :class="mode === 'Gadget' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'" 
+                        class="px-6 py-1.5 rounded-lg text-xs font-black transition-all uppercase">
+                        Gadget
+                    </button>
+                    <button @click="toggleObject('Object')" 
+                        :class="mode === 'Object' ? 'bg-white shadow-sm text-red-600' : 'text-slate-500'" 
+                        class="px-6 py-1.5 rounded-lg text-xs font-black transition-all uppercase">
+                        Characters and Things
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-[1920px] mx-auto py-8 px-6">
+            
+            <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div>
+                    <h2 class="text-4xl font-black text-slate-900 uppercase tracking-tight">
+                        {{ mode === 'Gadget' ? 'Secret Gadgets' : 'Characters & Things' }}
+                    </h2>
+                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">
+                        Showing {{ filteredData.length }} Active Entries
+                    </p>
+                </div>
+                
+                <div class="relative w-full md:w-96">
+                    <input type="text" v-model="searchQuery" placeholder="Search by name, ID or translation..." 
+                        class="w-full bg-white border border-slate-200 rounded-2xl py-3 px-5 text-sm font-bold shadow-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                </div>
+            </div>
+
+            <div v-if="loading" class="flex flex-col items-center justify-center py-40 animate-pulse">
+                <div class="w-12 h-12 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                <p class="mt-4 font-black text-slate-400 uppercase tracking-widest text-[10px]">Synchronizing Sheets...</p>
+            </div>
+
+            <div v-else class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                                <th class="px-8 py-5">ID</th>
+                                <th class="px-8 py-5">JP Title</th>
+                                <th class="px-8 py-5 text-blue-600">HK Translation</th>
+                                <th class="px-8 py-5">Publishers</th>
+                                <th v-if="mode === 'Object'" class="px-8 py-5">Type</th>
+                                <th v-if="mode === 'Object'" class="px-8 py-5">Description</th>
+                                <th class="px-8 py-5 text-center">Work ID</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-[14px]">
+                            <tr v-for="item in filteredData" :key="item.UniqueKey" class="hover:bg-slate-50/80 transition-colors group">
+                                <td class="px-8 py-6 font-mono font-bold text-slate-400">#{{ item.displayId }}</td>
+                                <td class="px-8 py-6 font-black text-slate-900 group-hover:text-indigo-600 transition-colors">
+                                    {{ item['JP Title'] }}
+                                </td>
+                                <td class="px-8 py-6 font-bold text-blue-600 italic">
+                                    {{ item['HK Translation'] || '---' }}
+                                </td>
+                                <td class="px-8 py-6">
+                                    <div class="flex flex-col gap-1 text-[10px] font-black uppercase">
+                                        <span class="text-slate-400">文化: <span class="text-slate-700">{{ item['CultureCom Trans'] || '-' }}</span></span>
+                                        <span class="text-slate-400">正文: <span class="text-slate-700">{{ item['HKChingWin Trans'] || '-' }}</span></span>
+                                    </div>
+                                </td>
+                                <td v-if="mode === 'Object'" class="px-8 py-6">
+                                    <span v-if="item['Object Type']" class="bg-red-100 text-red-600 px-2 py-1 rounded text-[9px] font-black uppercase whitespace-nowrap">
+                                        {{ item['Object Type'] }}
+                                    </span>
+                                </td>
+                                <td v-if="mode === 'Object'" class="px-8 py-6 max-w-xs">
+                                    <p class="text-xs text-slate-500 line-clamp-2 italic leading-relaxed">
+                                        {{ item['Description'] || 'No description available.' }}
+                                    </p>
+                                </td>
+                                <td class="px-8 py-6 text-center font-mono text-[11px] text-slate-400">
+                                    {{ item['Work ID'] || '---' }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div v-if="filteredData.length === 0" class="py-20 text-center">
+                    <p class="font-black text-slate-300 uppercase tracking-widest text-xs">No matching entries found</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    mode: 'Gadget', // Tracks which dataset to show
+                    loading: true,
+                    searchQuery: '',
+                    db: {
+                        gadgetMaster: [],
+                        gadgetMedia: [],
+                        objectMaster: [],
+                        objectMedia: []
+                    }
+                }
+            },
+            computed: {
+                filteredData() {
+                    let master = [];
+                    let media = [];
+                    let idKey = '';
+
+                    // Choose dataset based on mode
+                    if (this.mode === 'Gadget') {
+                        master = this.db.gadgetMaster;
+                        media = this.db.gadgetMedia;
+                        idKey = 'Gadget ID';
+                    } else {
+                        master = this.db.objectMaster;
+                        media = this.db.objectMedia;
+                        idKey = 'Object ID';
+                    }
+
+                    // 1. Filter only Active entries first
+                    const activeMaster = master.filter(item => 
+                        item.Active?.toString().toLowerCase().trim() === 'yes'
+                    );
+
+                    // 2. Perform the JOIN with Media sheet
+                    const joined = activeMaster.map((mItem, index) => {
+                        const mediaMatch = media.find(med => 
+                            med[idKey]?.toString().trim() === mItem[idKey]?.toString().trim()
+                        ) || {};
+
+                        return {
+                            ...mItem,
+                            ...mediaMatch,
+                            displayId: mItem[idKey],
+                            UniqueKey: `${this.mode}-${index}` // For Vue list rendering
+                        };
+                    });
+
+                    // 3. Apply Search Filter
+                    if (!this.searchQuery.trim()) return joined;
+
+                    const q = this.searchQuery.toLowerCase();
+                    return joined.filter(i => 
+                        (i['JP Title'] || '').toLowerCase().includes(q) ||
+                        (i['HK Translation'] || '').toLowerCase().includes(q) ||
+                        (i['CultureCom Trans'] || '').toLowerCase().includes(q) ||
+                        (i['HKChingWin Trans'] || '').toLowerCase().includes(q) ||
+                        (i.displayId || '').toString().toLowerCase().includes(q)
+                    );
+                }
+            },
+            methods: {
+                async init() {
+                    this.loading = true;
+                    // REPLACE THIS WITH YOUR ACTUAL GOOGLE SHEET ID
+                    const SHEET_ID = "1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8";
+                    const base = `https://opensheet.elk.sh/${SHEET_ID}/`;
+
+                    try {
+                        const [gMaster, gMedia, oMaster, oMedia] = await Promise.all([
+                            fetch(base + "法寶").then(r => r.json()),
+                            fetch(base + "媒體與法寶").then(r => r.json()),
+                            fetch(base + "人物").then(r => r.json()),
+                            fetch(base + "媒體與人物").then(r => r.json())
+                        ]);
+
+                        this.db.gadgetMaster = gMaster;
+                        this.db.gadgetMedia = gMedia;
+                        this.db.objectMaster = oMaster;
+                        this.db.objectMedia = oMedia;
+
+                    } catch (e) {
+                        console.error("Database Sync Failed:", e);
+                    } finally {
+                        setTimeout(() => { this.loading = false; }, 600);
+                    }
+                },
+                toggleObject(type) {
+                    this.mode = type;
+                    this.searchQuery = '';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            },
+            mounted() {
+                this.init();
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

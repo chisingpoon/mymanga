@@ -14,79 +14,72 @@
             font-family: 'Inter', 'Noto Sans TC', 'Noto Sans JP', system-ui, sans-serif; color: #1e293b;
         }
         .bg-grid { background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px); background-size: 40px 40px; }
+        
         .loader-wrapper { position: fixed; inset: 0; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
         .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* 1. Result Count Animation */
+        @keyframes number-roll {
+            0% { transform: translateY(10px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        .animate-count { display: inline-block; animation: number-roll 0.3s ease-out; }
+
         .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
         
-        /* Updated Data Card Styles */
         .data-card { 
-            background: white; 
-            border-radius: 24px; 
-            border: 2px solid #f1f5f9; 
+            background: white; border-radius: 24px; border: 2px solid #f1f5f9; 
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .data-card:hover {
-            border-color: #6366f1;
-            transform: translateY(-4px);
-            shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-        }
+        .data-card:hover { border-color: #6366f1; transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.05); }
 
-        .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease, transform 0.3s ease; }
-        .fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(20px); }
-        
-        /* Transition for Manga Collapse */
-        .expand-enter-active, .expand-leave-active { transition: all 0.3s ease-in-out; max-height: 500px; overflow: hidden; }
+        .expand-enter-active, .expand-leave-active { transition: all 0.3s ease-in-out; max-height: 800px; overflow: hidden; }
         .expand-enter-from, .expand-leave-to { max-height: 0; opacity: 0; }
+        
+        .manga-tag { transition: all 0.2s; }
+        .manga-tag:hover { transform: scale(1.05); }
     </style>
 </head>
 <body class="bg-grid">
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Processing Gadget Archive...</p>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Processing Archive...</p>
         </div>
 
         <nav class="top-nav">
             <div class="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between">
                 <div class="flex items-center gap-6">
                     <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl hover:bg-indigo-600 transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round"></path></svg>
                     </a>
                     <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Gadget Archive</h1>
+                </div>
+                <div class="bg-indigo-50 border border-indigo-100 px-4 py-2.5 rounded-xl flex items-center gap-3">
+                    <span class="text-[10px] font-black text-indigo-400 uppercase">Total Results</span>
+                    <span :key="displayGroups.length" class="text-base font-black text-indigo-700 animate-count">{{ displayGroups.length }}</span>
                 </div>
             </div>
         </nav>
 
         <main class="max-w-[1400px] mx-auto px-6 pt-10">
             <div class="flex flex-wrap items-center gap-4 mb-8 bg-white/80 p-4 rounded-2xl backdrop-blur-md border border-slate-200 sticky top-24 z-30 shadow-sm">
-                <div class="flex-1 min-w-[280px] relative">
-                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-500">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3" stroke-linecap="round"></path></svg>
-                    </div>
-                    <input type="text" v-model.trim="searchQuery" placeholder="Search gadgets or movies..." 
-                           class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-11 pr-12 py-2.5 text-sm font-bold outline-none focus:border-indigo-500 focus:bg-white transition-all">
-                    <button v-if="searchQuery" @click="searchQuery = ''" 
-                            class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                    </button>
+                <div class="flex-1 min-w-[280px] relative group">
+                    <input type="text" v-model.trim="searchQuery" placeholder="Search gadgets, movies, or translations..." 
+                           class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-6 pr-12 py-3 text-sm font-bold outline-none focus:border-indigo-500 focus:bg-white transition-all">
                 </div>
             
                 <div class="flex items-center gap-2">
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">View By</span>
-                    <select v-model="groupBy" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2.5 text-sm font-black outline-none focus:border-indigo-500 cursor-pointer">
-                        <option value="gadget">Gadget</option>
-                        <option value="movie">Movie</option>
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Group By</span>
+                    <select v-model="groupBy" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-black outline-none cursor-pointer focus:border-indigo-500">
+                        <option value="gadget">By Gadget</option>
+                        <option value="movie">By Movie</option>
                     </select>
                 </div>
-            
-                <div class="bg-indigo-50 border border-indigo-100 px-4 py-2.5 rounded-xl flex items-center gap-3">
-                    <span class="text-[10px] font-black text-indigo-400 uppercase">Results</span>
-                    <span class="text-base font-black text-indigo-700">{{ displayGroups.length }}</span>
-                </div>
-            
-                <button @click="resetFilters" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+
+                <button @click="resetFilters" class="p-3 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="2.5" stroke-linecap="round"></path></svg>
                 </button>
             </div>
 
@@ -96,96 +89,57 @@
                         <div class="mb-6">
                             <template v-if="groupBy === 'movie'">
                                 <span class="text-[11px] font-black text-indigo-600 uppercase tracking-widest mb-1 block">
-                                    Movie ({{ getYear(getMovieData(group.id, 'JP Release Date')) }})
+                                    {{ getMovieData(group.id, 'Media Type') }} ({{ getYear(getMovieData(group.id, 'JP Release Date')) }})
                                 </span>
-                                <a :href="'movie.html?mediaid=' + group.id" class="group flex items-center gap-2 w-fit">
-                                    <h2 class="text-3xl font-black text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors">{{ group.title }}</h2>
-                                    <span class="text-indigo-500 text-2xl group-hover:translate-x-1 transition-transform">▶</span>
-                                </a>
+                                <h2 class="text-3xl font-black text-slate-900 leading-tight mb-4">{{ group.title }}</h2>
                                 
-                                <div v-if="getMangaDataForWork(group.workId).length > 0" class="mt-4">
-                                    <button @click="toggleManga('movie-' + group.id)" 
-                                            class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-indigo-600 transition-colors group/btn">
-                                        <svg :class="['w-3 h-3 transition-transform duration-300', isExpanded('movie-' + group.id) ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                                        Manga Reference
-                                        <span class="bg-slate-100 px-1.5 py-0.5 rounded text-[9px] group-hover/btn:bg-indigo-50">{{ getMangaDataForWork(group.workId).length }}</span>
-                                    </button>
-                                    <transition name="expand">
-                                        <div v-show="isExpanded('movie-' + group.id)" class="mt-3 bg-slate-50/50 rounded-xl p-4 border border-slate-100">
-                                            <div class="flex flex-wrap gap-2">
-                                                <a v-for="book in getMangaDataForWork(group.workId)" :key="book.isbn" 
-                                                   :href="'manga-database.html?isbn=' + book.isbn + '&region=HK'" target="_blank"
-                                                   :class="['px-2 py-1 rounded-lg text-[10px] font-bold border transition-all shadow-sm hover:scale-105', book.type === 'grand' ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-white border-slate-200 text-slate-700']">
-                                                    {{ book.label }}
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </transition>
+                                <div v-if="getMangaDataForWork(group.workId).length > 0" class="bg-slate-50/80 rounded-2xl p-5 border border-slate-100">
+                                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Manga Reference (Expanded)</h4>
+                                    <div class="flex flex-wrap gap-2">
+                                        <a v-for="book in getMangaDataForWork(group.workId)" :key="book.isbn" 
+                                           :href="'manga-database.html?isbn=' + book.isbn + '&region=HK'" target="_blank"
+                                           :class="['manga-tag px-2.5 py-1.5 rounded-lg text-[10px] font-bold border shadow-sm', book.type === 'grand' ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-white border-slate-200 text-slate-700']">
+                                            {{ book.label }}
+                                        </a>
+                                    </div>
                                 </div>
                             </template>
 
                             <template v-else>
-                                <span class="text-[11px] font-black text-indigo-500 uppercase tracking-widest mb-1 block">Gadget Card</span>
-                                <h2 class="text-2xl font-black text-slate-900 leading-tight flex items-baseline gap-2">
-                                    <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">原文/</span>
-                                    {{ group.title }}
-                                </h2>
-                                <h2 v-if="group.hkTrans" class="text-2xl font-black text-slate-500 leading-tight flex items-baseline gap-2">
-                                    <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">港譯/</span>
-                                    {{ group.hkTrans }}
-                                </h2>
+                                <span class="text-[11px] font-black text-indigo-500 uppercase tracking-widest mb-1 block">Gadget ID: {{ group.id }}</span>
+                                <h2 class="text-2xl font-black text-slate-900 leading-tight">原文/ {{ group.title }}</h2>
+                                <h2 v-if="group.hkTrans" class="text-2xl font-black text-slate-400 leading-tight">港譯/ {{ group.hkTrans }}</h2>
                             </template>
                         </div>
 
                         <hr class="border-slate-100 mb-6">
 
                         <div :class="['flex-1', groupBy === 'movie' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' : 'space-y-6']">
-                            <div v-for="(item, idx) in group.items" :key="idx" 
-                                 :class="[groupBy === 'gadget' ? 'border-l-4 border-indigo-200 pl-5' : '']">
-                                
-                                <div v-if="groupBy === 'movie'" class="h-full bg-slate-50/50 border-2 border-transparent rounded-2xl p-5 hover:border-indigo-400 hover:bg-white hover:shadow-md transition-all group/sub">
-                                    <span class="text-[9px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2 py-0.5 rounded mb-3 inline-block">Gadget #{{ item.gadgetId }}</span>
-                                    <h3 class="text-lg font-black text-slate-800 leading-tight flex items-baseline gap-2 group-hover/sub:text-indigo-600 transition-colors">
-                                        <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">原文/</span>
-                                        {{ item.jpTitle }}
-                                    </h3>
-                                    <h3 v-if="item.hkTrans" class="text-lg font-black text-slate-500 leading-tight flex items-baseline gap-2 mt-1">
-                                        <span class="text-[10px] text-slate-400 uppercase tracking-tighter shrink-0 font-bold">港譯/</span>
-                                        {{ item.hkTrans }}
-                                    </h3>
-                                    <div v-if="item.culture || item.chingwin" class="flex flex-wrap gap-1.5 mt-3">
-                                        <span v-if="item.culture && item.culture !== '-'" class="px-2 py-1 text-[9px] font-black rounded bg-red-50 text-red-800 ring-1 ring-red-100">文傳: {{ item.culture }}</span>
-                                        <span v-if="item.chingwin && item.chingwin !== '-'" class="px-2 py-1 text-[9px] font-black rounded bg-blue-50 text-blue-800 ring-1 ring-blue-100">青文: {{ item.chingwin }}</span>
-                                    </div>
-                                </div>
-
-                                <div v-else>
-                                    <div class="bg-white border-2 border-slate-50 rounded-2xl p-4 mb-3 shadow-sm hover:border-indigo-400 transition-all group/item">
-                                        <a :href="'movie.html?mediaid=' + item.movieId" class="group block">
-                                            <span class="bg-indigo-600 text-white px-2 py-1 rounded-md text-[11px] font-black uppercase inline-block mb-2">Movie {{ getYear(getMovieData(item.movieId, 'JP Release Date')) }}</span>
-                                            <div class="font-black text-slate-800 text-xl group-hover:text-indigo-600 transition-colors flex items-center gap-2">{{ item.movieTitle }} <span class="text-indigo-500 text-2xl group-hover:translate-x-1 transition-transform">▶</span></div>
-                                        </a>
-                                    </div>
+                            <div v-for="(item, idx) in group.items" :key="idx">
+                                <div :class="[groupBy === 'gadget' ? 'border-l-4 border-indigo-100 pl-5' : 'bg-slate-50/50 p-5 rounded-2xl border border-slate-100 h-full']">
                                     
-                                    <div v-if="getMangaDataForWork(item.workId).length > 0 || item.culture || item.chingwin" class="mt-2">
+                                    <p v-if="groupBy === 'gadget'" class="font-black text-slate-800 text-lg mb-2 leading-tight">{{ item.movieTitle }}</p>
+                                    <p v-else class="font-black text-indigo-600 text-lg mb-2 leading-tight">{{ item.jpTitle }}</p>
+
+                                    <div v-if="(item.culture && item.culture !== '-') || (item.chingwin && item.chingwin !== '-')" class="flex flex-wrap gap-1.5 mb-3">
+                                        <span v-if="item.culture && item.culture !== '-'" class="px-2 py-1 text-[9px] font-black rounded bg-rose-50 text-rose-700 border border-rose-100">文傳: {{ item.culture }}</span>
+                                        <span v-if="item.chingwin && item.chingwin !== '-'" class="px-2 py-1 text-[9px] font-black rounded bg-sky-50 text-sky-700 border border-sky-100">青文: {{ item.chingwin }}</span>
+                                    </div>
+
+                                    <div v-if="groupBy === 'gadget' && getMangaDataForWork(item.workId).length > 0" class="mt-4">
                                         <button @click="toggleManga(item.gadgetId + '-' + item.movieId)" 
-                                                class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-indigo-600 transition-colors group/btn">
-                                            <svg :class="['w-3 h-3 transition-transform duration-300', isExpanded(item.gadgetId + '-' + item.movieId) ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                                            Manga Reference
+                                                class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-indigo-600 transition-colors">
+                                            <svg :class="['w-3 h-3 transition-transform duration-300', isExpanded(item.gadgetId + '-' + item.movieId) ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="3" stroke-linecap="round"></path></svg>
+                                            Manga Ref
                                         </button>
                                         <transition name="expand">
-                                            <div v-show="isExpanded(item.gadgetId + '-' + item.movieId)" class="mt-3 bg-slate-50/50 rounded-xl p-4 border border-slate-100 shadow-inner">
-                                                <div class="flex flex-wrap gap-2 mb-2">
+                                            <div v-show="isExpanded(item.gadgetId + '-' + item.movieId)" class="mt-3 bg-white rounded-xl p-3 border border-slate-100 shadow-inner">
+                                                <div class="flex flex-wrap gap-1.5">
                                                     <a v-for="book in getMangaDataForWork(item.workId)" :key="book.isbn" 
-                                                       :href="'manga-database.html?isbn=' + book.isbn + '&region=HK'" target="_blank"
-                                                       :class="['px-2 py-1 rounded-lg text-[10px] font-bold border transition-all shadow-sm', book.type === 'grand' ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-white border-slate-200 text-slate-700']">
+                                                       :href="'manga-database.html?isbn=' + book.isbn" target="_blank"
+                                                       class="px-2 py-0.5 rounded border border-slate-100 bg-slate-50 text-[9px] font-bold text-slate-500 hover:border-indigo-300 transition-all">
                                                         {{ book.label }}
                                                     </a>
-                                                </div>
-                                                <div v-if="(item.culture && item.culture !== '-') || (item.chingwin && item.chingwin !== '-')" 
-                                                     class="flex flex-wrap gap-1 pt-2 border-t border-slate-200/50">
-                                                    <span v-if="item.culture && item.culture !== '-'" class="px-2 py-0.5 text-[10px] font-black bg-red-50 text-red-700 rounded ring-1 ring-red-100/50">文傳: {{ item.culture }}</span>
-                                                    <span v-if="item.chingwin && item.chingwin !== '-'" class="px-2 py-0.5 text-[10px] font-black bg-blue-50 text-blue-700 rounded ring-1 ring-blue-100/50">青文: {{ item.chingwin }}</span>
                                                 </div>
                                             </div>
                                         </transition>
@@ -197,92 +151,86 @@
                 </template>
             </div>
 
-            <div v-if="totalPages > 1" class="flex flex-col items-center gap-4 py-12 border-t border-slate-200">
-                <div class="flex items-center gap-2">
-                    <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" 
-                            class="px-4 py-2 rounded-xl font-bold transition-all border-2 border-slate-200 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed">
-                        PREV
-                    </button>
-                    <div class="flex items-center gap-1">
-                        <template v-for="page in visiblePages" :key="page">
-                            <button v-if="page !== '...'" @click="changePage(page)" 
-                                    :class="['w-10 h-10 rounded-xl font-black transition-all', currentPage === page ? 'bg-slate-900 text-white' : 'hover:bg-white border-2 border-transparent hover:border-slate-200']">
-                                {{ page }}
-                            </button>
-                            <span v-else class="px-2 text-slate-400 font-bold">...</span>
-                        </template>
+            <div v-if="totalPages > 1" class="flex flex-col items-center gap-6 py-12 border-t border-slate-200">
+                <div class="flex items-center gap-3">
+                    <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" class="px-6 py-3 bg-white border-2 border-slate-100 rounded-xl font-black text-sm disabled:opacity-30 hover:border-indigo-500 transition-all">PREV</button>
+                    <div class="flex gap-2">
+                        <button v-for="p in visiblePages" :key="p" @click="p !== '...' && changePage(p)"
+                                :class="['w-12 h-12 rounded-xl font-black text-sm transition-all', currentPage === p ? 'bg-slate-900 text-white shadow-lg' : 'bg-white border-2 border-slate-100 hover:border-indigo-200']">
+                            {{ p }}
+                        </button>
                     </div>
-                    <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" 
-                            class="px-4 py-2 rounded-xl font-bold transition-all border-2 border-slate-200 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed">
-                        NEXT
-                    </button>
+                    <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" class="px-6 py-3 bg-white border-2 border-slate-100 rounded-xl font-black text-sm disabled:opacity-30 hover:border-indigo-500 transition-all">NEXT</button>
                 </div>
-                <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Page {{ currentPage }} of {{ totalPages }}</p>
-            </div>            
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Page {{ currentPage }} of {{ totalPages }}</p>
+            </div>
         </main>
-
-        <transition name="fade">
-            <button v-show="showScrollTop" @click="scrollToTop" 
-                    class="fixed bottom-8 right-8 w-14 h-14 bg-slate-900 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:bg-indigo-600 hover:-translate-y-1 transition-all z-[9999]">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-            </button>
-        </transition>
     </div>
-    
+
     <script>
         const { createApp } = Vue;
         createApp({
             data() {
                 return {
-                    loading: true,
-                    searchQuery: '',
-                    groupBy: 'gadget',
-                    currentPage: 1,
-                    itemsPerPage: 12,
-                    gadgetsMaster: [],
-                    gadgetMedia: [],
-                    movies: [],
-                    contents: [],
-                    publishHk: [],
-                    showScrollTop: false,
-                    expandedMangaIds: [] // Requirement: track collapse state
+                    loading: true, searchQuery: '', groupBy: 'gadget',
+                    currentPage: 1, itemsPerPage: 12,
+                    gadgetsMaster: [], gadgetMedia: [], movies: [], contents: [], publishHk: [],
+                    expandedIds: []
                 }
             },
             async mounted() {
-                await this.init();
-                window.addEventListener('scroll', () => {
-                    this.showScrollTop = window.scrollY > 300; 
-                });
+                const base = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
+                try {
+                    const [g, gm, m, c, hk] = await Promise.all([
+                        fetch(base + "法寶").then(r => r.json()),
+                        fetch(base + "媒體與法寶").then(r => r.json()),
+                        fetch(base + "電影動畫").then(r => r.json()),
+                        fetch(base + "書籍收錄作品").then(r => r.json()),
+                        fetch(base + "出版目録HK").then(r => r.json())
+                    ]);
+                    this.gadgetsMaster = g; this.gadgetMedia = gm; this.movies = m;
+                    this.contents = c; this.publishHk = hk;
+
+                    // Handle URL entry
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const movieParam = urlParams.get('movieid');
+                    if (movieParam) {
+                        this.groupBy = 'movie';
+                        const movie = this.movies.find(x => String(x['Media ID']) === String(movieParam));
+                        if (movie) this.searchQuery = movie['JP Title'];
+                    }
+                    this.loading = false;
+                } catch (e) { console.error("Archive System Error", e); }
             },
             watch: {
                 searchQuery() { this.currentPage = 1; },
-                groupBy(newVal) { 
-                    this.currentPage = 1; 
-                    this.itemsPerPage = (newVal === 'movie') ? 8 : 12; // Adjust page size for single column
-                }
+                groupBy() { this.currentPage = 1; this.expandedIds = []; }
             },
             computed: {
-                processedData() {
+                processedItems() {
                     if (this.loading) return [];
-                    const q = this.searchQuery.toLowerCase().trim();
+                    const q = this.searchQuery.toLowerCase();
                     return this.gadgetMedia.map(m => {
                         const gadget = this.gadgetsMaster.find(g => String(g['Gadget ID']) === String(m['Gadget ID']));
+                        const movie = this.movies.find(mov => String(mov['Media ID']) === String(m['Movie ID']));
                         return {
                             gadgetId: m['Gadget ID'],
                             movieId: m['Movie ID'],
                             workId: m['Work ID'],
                             jpTitle: gadget ? gadget['JP Title'] : 'Unknown',
-                            movieTitle: this.getMovieData(m['Movie ID'], 'JP Title'),
-                            active: gadget ? gadget['Active'] : 'yes',
+                            movieTitle: movie ? movie['JP Title'] : 'Unknown',
                             hkTrans: m['HK Translation'],
                             culture: m['CultureCom Trans'],
-                            chingwin: m['HKChingWin Trans']
+                            chingwin: m['HKChingWin Trans'],
+                            active: gadget ? gadget['Active'] : 'yes'
                         };
-                    }).filter(i => i.active.toLowerCase() === 'yes' && (!q || (i.jpTitle + i.hkTrans + i.culture + i.chingwin + i.movieTitle).toLowerCase().includes(q)));
+                    }).filter(i => i.active?.toLowerCase() === 'yes' && 
+                        (!q || `${i.jpTitle}${i.movieTitle}${i.hkTrans}${i.culture}${i.chingwin}`.toLowerCase().includes(q))
+                    );
                 },
                 displayGroups() {
                     const groups = {};
-                    this.processedData.forEach(item => {
+                    this.processedItems.forEach(item => {
                         const key = this.groupBy === 'gadget' ? item.gadgetId : item.movieId;
                         if (!key || key === '-') return;
                         if (!groups[key]) {
@@ -296,94 +244,52 @@
                         }
                         groups[key].items.push(item);
                     });
-                    return Object.values(groups).sort((a, b) => 
-                        this.groupBy === 'movie' 
-                        ? this.getMovieData(b.id, 'JP Release Date').localeCompare(this.getMovieData(a.id, 'JP Release Date')) 
-                        : a.title.localeCompare(b.title, 'zh-Hant')
-                    );
+                    const result = Object.values(groups);
+                    return this.groupBy === 'movie' 
+                        ? result.sort((a,b) => this.getMovieData(b.id, 'JP Release Date').localeCompare(this.getMovieData(a.id, 'JP Release Date')))
+                        : result.sort((a,b) => a.title.localeCompare(b.title, 'zh-Hant'));
                 },
-                totalPages() {
-                    return Math.ceil(this.displayGroups.length / this.itemsPerPage);
-                },
+                totalPages() { return Math.ceil(this.displayGroups.length / this.itemsPerPage); },
                 paginatedGroups() {
                     const start = (this.currentPage - 1) * this.itemsPerPage;
                     return this.displayGroups.slice(start, start + this.itemsPerPage);
                 },
                 visiblePages() {
-                    const t = this.totalPages;
-                    if (t <= 5) return Array.from({length: t}, (_, i) => i + 1);
-                    return [1, 2, '...', t]; 
+                    const pages = [];
+                    for(let i=1; i<=this.totalPages; i++) {
+                        if (i === 1 || i === this.totalPages || (i >= this.currentPage - 1 && i <= this.currentPage + 1)) {
+                            pages.push(i);
+                        } else if (pages[pages.length-1] !== '...') {
+                            pages.push('...');
+                        }
+                    }
+                    return pages;
                 }
             },
             methods: {
-                // Requirement 2: Collapse Logic
-                toggleManga(id) {
-                    const index = this.expandedMangaIds.indexOf(id);
-                    if (index > -1) {
-                        this.expandedMangaIds.splice(index, 1);
-                    } else {
-                        this.expandedMangaIds.push(id);
-                    }
-                },
-                isExpanded(id) {
-                    return this.expandedMangaIds.includes(id);
-                },
-                async init() {
-                    const base = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
-                    try {
-                        const [g, gm, m, s, hk] = await Promise.all([
-                            fetch(base + "法寶").then(r => r.json()),
-                            fetch(base + "媒體與法寶").then(r => r.json()),
-                            fetch(base + "電影動畫").then(r => r.json()),
-                            fetch(base + "書籍收錄作品").then(r => r.json()),
-                            fetch(base + "出版目録HK").then(r => r.json())
-                        ]);
-                        this.gadgetsMaster = g; 
-                        this.gadgetMedia = gm; 
-                        this.movies = m; 
-                        this.contents = s; 
-                        this.publishHk = hk;
-
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const movieIdParam = urlParams.get('movieid');
-                        if (movieIdParam) {
-                            const movie = this.movies.find(x => String(x['Media ID']) === String(movieIdParam));
-                            if (movie) {
-                                this.groupBy = 'movie';
-                                this.searchQuery = movie['JP Title'];
-                            }
-                        }
-                        this.loading = false;
-                    } catch (e) { console.error(e); }
-                },
-                changePage(page) {
-                    if (page >= 1 && page <= this.totalPages) {
-                        this.currentPage = page;
-                        this.scrollToTop();
-                    }
-                },
-                scrollToTop() {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                },
                 getMangaDataForWork(workId) {
                     if (!workId || workId === '-') return [];
-                    const isbns = this.contents.filter(c => String(c.作品番).trim() === String(workId).trim()).map(c => String(c.ISBN).trim());
-                    return this.publishHk.filter(hk => isbns.includes(String(hk.ISBN_JP).trim()) && String(hk.Active).toLowerCase() === 'yes').map(book => ({
-                        isbn: book.ISBN,
-                        label: `${book.Title} ${book.Volume === '-' ? '' : book.Volume}${book.Subtitle === '-' ? '' : book.Subtitle}`.trim(),
-                        type: book.Title.includes('大全集') ? 'grand' : 'standard'
-                    }));
+                    const isbns = this.contents.filter(c => String(c.作品番) === String(workId)).map(c => String(c.ISBN).trim());
+                    return this.publishHk.filter(h => isbns.includes(String(h.ISBN_JP).trim()))
+                        .map(h => ({
+                            isbn: h.ISBN,
+                            label: `${h.Title} ${h.Volume !== '-' ? h.Volume : ''}`.trim(),
+                            type: h.Title.includes('大全集') ? 'grand' : 'standard'
+                        }));
                 },
                 getMovieData(id, field) {
                     const m = this.movies.find(x => String(x['Media ID']) === String(id));
-                    return m ? m[field] : (field === 'JP Release Date' ? '-' : 'Unknown');
+                    return m ? m[field] : '-';
                 },
-                getYear(d) { const m = d.match(/\d{4}/); return m ? m[0] : 'TBA'; },
-                resetFilters() { 
-                    this.searchQuery = ''; 
-                    this.currentPage = 1; 
-                    this.expandedMangaIds = [];
-                }
+                getYear(d) { const match = d.match(/\d{4}/); return match ? match[0] : 'TBA'; },
+                toggleManga(id) {
+                    const idx = this.expandedIds.indexOf(id);
+                    if (idx > -1) this.expandedIds.splice(idx, 1);
+                    else this.expandedIds.push(id);
+                },
+                isExpanded(id) { return this.expandedIds.includes(id); },
+                changePage(p) { this.currentPage = p; window.scrollTo({top: 0, behavior: 'smooth'}); },
+                resetFilters() { this.searchQuery = ''; this.currentPage = 1; this.groupBy = 'gadget'; }
             }
         }).mount('#app');
     </script>

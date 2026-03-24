@@ -15,110 +15,123 @@
             background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
             background-size: 20px 20px;
         }
+        /* Smooth scale effect for cards */
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-5px); }
     </style>
 </head>
-<body class="bg-grid text-slate-900 min-h-screen">
+<body class="bg-grid text-slate-900 min-h-screen pb-20">
 
     <div id="app" v-cloak>
         <header class="bg-white/80 backdrop-blur-md border-b sticky top-0 z-40 shadow-sm">
-            <div class="max-w-[1920px] mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between">
                 <div class="flex items-center gap-6">
-                    <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl hover:bg-indigo-600 transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="index.html" class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg hover:bg-indigo-600 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
                         </svg>
                     </a>
-                    <h1 @click="mode = 'Gadget'; searchQuery = ''" class="font-black text-2xl tracking-tighter text-slate-800 uppercase cursor-pointer">Archive Database</h1>
+                    <h1 class="font-black text-xl tracking-tighter text-slate-800 uppercase">Archive <span class="text-indigo-600">DB</span></h1>
                 </div>
 
                 <div class="flex bg-slate-200/50 p-1 rounded-xl border border-slate-200">
                     <button @click="toggleObject('Gadget')" 
                         :class="mode === 'Gadget' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'" 
-                        class="px-6 py-1.5 rounded-lg text-xs font-black transition-all uppercase">
+                        class="px-5 py-1.5 rounded-lg text-xs font-black transition-all uppercase">
                         Gadget
                     </button>
                     <button @click="toggleObject('Object')" 
                         :class="mode === 'Object' ? 'bg-white shadow-sm text-red-600' : 'text-slate-500'" 
-                        class="px-6 py-1.5 rounded-lg text-xs font-black transition-all uppercase">
-                        Characters and Things
+                        class="px-5 py-1.5 rounded-lg text-xs font-black transition-all uppercase">
+                        Characters / Things
                     </button>
                 </div>
             </div>
         </header>
 
-        <main class="max-w-[1920px] mx-auto py-8 px-6">
+        <main class="max-w-[1400px] mx-auto py-10 px-6">
             
-            <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div class="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-8">
                 <div>
-                    <h2 class="text-4xl font-black text-slate-900 uppercase tracking-tight">
+                    <h2 class="text-4xl font-black text-slate-900 uppercase tracking-tighter">
                         {{ mode === 'Gadget' ? 'Secret Gadgets' : 'Characters & Things' }}
                     </h2>
-                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">
-                        Showing {{ filteredData.length }} Active Entries
-                    </p>
+                    <div class="flex items-center gap-3 mt-2">
+                        <span class="h-1 w-12 bg-indigo-600 rounded-full"></span>
+                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                            Found {{ filteredData.length }} Indexed Entries
+                        </p>
+                    </div>
                 </div>
                 
-                <div class="relative w-full md:w-96">
-                    <input type="text" v-model="searchQuery" placeholder="Search by name, ID or translation..." 
-                        class="w-full bg-white border border-slate-200 rounded-2xl py-3 px-5 text-sm font-bold shadow-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                <div class="relative w-full md:w-80">
+                    <input type="text" v-model="searchQuery" placeholder="Search entries..." 
+                        class="w-full bg-white border border-slate-200 rounded-2xl py-4 px-6 text-sm font-bold shadow-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                    <div class="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5"></path></svg>
+                    </div>
                 </div>
             </div>
 
-            <div v-if="loading" class="flex flex-col items-center justify-center py-40 animate-pulse">
-                <div class="w-12 h-12 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
-                <p class="mt-4 font-black text-slate-400 uppercase tracking-widest text-[10px]">Synchronizing Sheets...</p>
+            <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div v-for="i in 6" class="h-64 bg-white/50 rounded-[2rem] border border-slate-200 animate-pulse"></div>
             </div>
 
-            <div v-else class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 border-b text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                                <th class="px-8 py-5">ID</th>
-                                <th class="px-8 py-5">JP Title</th>
-                                <th class="px-8 py-5 text-blue-600">HK Translation</th>
-                                <th class="px-8 py-5">Publishers</th>
-                                <th v-if="mode === 'Object'" class="px-8 py-5">Type</th>
-                                <th v-if="mode === 'Object'" class="px-8 py-5">Description</th>
-                                <th class="px-8 py-5 text-center">Work ID</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 text-[14px]">
-                            <tr v-for="item in filteredData" :key="item.UniqueKey" class="hover:bg-slate-50/80 transition-colors group">
-                                <td class="px-8 py-6 font-mono font-bold text-slate-400">#{{ item.displayId }}</td>
-                                <td class="px-8 py-6 font-black text-slate-900 group-hover:text-indigo-600 transition-colors">
-                                    {{ item['JP Title'] }}
-                                </td>
-                                <td class="px-8 py-6 font-bold text-blue-600 italic">
-                                    {{ item['HK Translation'] || '---' }}
-                                </td>
-                                <td class="px-8 py-6">
-                                    <div class="flex flex-col gap-1 text-[10px] font-black uppercase">
-                                        <span class="text-slate-400">文化: <span class="text-slate-700">{{ item['CultureCom Trans'] || '-' }}</span></span>
-                                        <span class="text-slate-400">正文: <span class="text-slate-700">{{ item['HKChingWin Trans'] || '-' }}</span></span>
-                                    </div>
-                                </td>
-                                <td v-if="mode === 'Object'" class="px-8 py-6">
-                                    <span v-if="item['Object Type']" class="bg-red-100 text-red-600 px-2 py-1 rounded text-[9px] font-black uppercase whitespace-nowrap">
-                                        {{ item['Object Type'] }}
-                                    </span>
-                                </td>
-                                <td v-if="mode === 'Object'" class="px-8 py-6 max-w-xs">
-                                    <p class="text-xs text-slate-500 line-clamp-2 italic leading-relaxed">
-                                        {{ item['Description'] || 'No description available.' }}
-                                    </p>
-                                </td>
-                                <td class="px-8 py-6 text-center font-mono text-[11px] text-slate-400">
-                                    {{ item['Work ID'] || '---' }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div v-for="item in filteredData" :key="item.UniqueKey" 
+                    class="bg-white rounded-[2rem] border border-slate-200 p-8 card-hover shadow-sm hover:shadow-xl flex flex-col relative overflow-hidden group">
+                    
+                    <div class="flex justify-between items-start mb-6">
+                        <span class="text-[10px] font-black text-slate-300 font-mono tracking-tighter">#{{ item.displayId }}</span>
+                        <span class="text-[9px] font-black px-2 py-1 bg-slate-100 rounded text-slate-400 uppercase tracking-widest group-hover:bg-indigo-50 group-hover:text-indigo-500 transition-colors">
+                            {{ item['Work ID'] || 'NO-WORK-ID' }}
+                        </span>
+                    </div>
 
-                <div v-if="filteredData.length === 0" class="py-20 text-center">
-                    <p class="font-black text-slate-300 uppercase tracking-widest text-xs">No matching entries found</p>
+                    <div class="mb-6">
+                        <h3 class="text-xl font-black text-slate-900 leading-tight mb-1">{{ item['JP Title'] }}</h3>
+                        <p class="text-lg font-bold text-blue-600 italic tracking-tight">{{ item['HK Translation'] || '---' }}</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 mb-6">
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <p class="text-[8px] font-black text-slate-400 uppercase mb-1">文化傳信</p>
+                            <p class="text-[11px] font-black text-slate-700 truncate">{{ item['CultureCom Trans'] || '---' }}</p>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <p class="text-[8px] font-black text-slate-400 uppercase mb-1">正文社</p>
+                            <p class="text-[11px] font-black text-slate-700 truncate">{{ item['HKChingWin Trans'] || '---' }}</p>
+                        </div>
+                    </div>
+
+                    <div v-if="mode === 'Object'" class="mt-auto space-y-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                            <span class="text-[10px] font-black text-red-600 uppercase tracking-widest">{{ item['Object Type'] || 'General' }}</span>
+                        </div>
+                        <p class="text-xs text-slate-500 leading-relaxed line-clamp-3 bg-slate-50/50 p-3 rounded-xl italic">
+                            {{ item['Description'] || 'No additional description available.' }}
+                        </p>
+                    </div>
+
+                    <div v-if="mode === 'Gadget'" class="mt-auto flex items-center gap-3">
+                        <div v-if="item['Movie ID']" class="w-7 h-7 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center" title="Movie Appearance">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"></path></svg>
+                        </div>
+                        <div v-if="item['Anime ID']" class="w-7 h-7 bg-sky-100 text-sky-600 rounded-lg flex items-center justify-center" title="Anime Appearance">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <span v-if="!item['Movie ID'] && !item['Anime ID']" class="text-[9px] font-bold text-slate-300 uppercase italic">Archived Only</span>
+                    </div>
+
                 </div>
+            </div>
+
+            <div v-if="!loading && filteredData.length === 0" class="py-40 text-center">
+                <div class="bg-white w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 shadow-sm">
+                    <svg class="w-8 h-8 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5"></path></svg>
+                </div>
+                <p class="font-black text-slate-300 uppercase tracking-widest text-xs">No entries match your search</p>
             </div>
         </main>
     </div>
@@ -129,7 +142,7 @@
         createApp({
             data() {
                 return {
-                    mode: 'Gadget', // Tracks which dataset to show
+                    mode: 'Gadget', 
                     loading: true,
                     searchQuery: '',
                     db: {
@@ -146,7 +159,6 @@
                     let media = [];
                     let idKey = '';
 
-                    // Choose dataset based on mode
                     if (this.mode === 'Gadget') {
                         master = this.db.gadgetMaster;
                         media = this.db.gadgetMedia;
@@ -157,12 +169,12 @@
                         idKey = 'Object ID';
                     }
 
-                    // 1. Filter only Active entries first
+                    // 1. Filter only Active entries
                     const activeMaster = master.filter(item => 
                         item.Active?.toString().toLowerCase().trim() === 'yes'
                     );
 
-                    // 2. Perform the JOIN with Media sheet
+                    // 2. Perform Join
                     const joined = activeMaster.map((mItem, index) => {
                         const mediaMatch = media.find(med => 
                             med[idKey]?.toString().trim() === mItem[idKey]?.toString().trim()
@@ -172,19 +184,16 @@
                             ...mItem,
                             ...mediaMatch,
                             displayId: mItem[idKey],
-                            UniqueKey: `${this.mode}-${index}` // For Vue list rendering
+                            UniqueKey: `${this.mode}-${index}`
                         };
                     });
 
-                    // 3. Apply Search Filter
+                    // 3. Search
                     if (!this.searchQuery.trim()) return joined;
-
                     const q = this.searchQuery.toLowerCase();
                     return joined.filter(i => 
                         (i['JP Title'] || '').toLowerCase().includes(q) ||
                         (i['HK Translation'] || '').toLowerCase().includes(q) ||
-                        (i['CultureCom Trans'] || '').toLowerCase().includes(q) ||
-                        (i['HKChingWin Trans'] || '').toLowerCase().includes(q) ||
                         (i.displayId || '').toString().toLowerCase().includes(q)
                     );
                 }
@@ -192,7 +201,7 @@
             methods: {
                 async init() {
                     this.loading = true;
-                    // REPLACE THIS WITH YOUR ACTUAL GOOGLE SHEET ID
+                    // YOUR ACTUAL SHEET ID
                     const SHEET_ID = "1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8";
                     const base = `https://opensheet.elk.sh/${SHEET_ID}/`;
 

@@ -92,7 +92,7 @@
                         <template v-if="groupBy === 'movie'">
                             <span class="text-[11px] font-black text-indigo-600 uppercase tracking-widest mb-1 block">Movie {{ getYear(getMovieData(group.id, 'JP Release Date')) }}</span>
                             <h2 class="text-3xl font-black text-slate-900 leading-tight">
-                                {{ group.title }} <span class="text-indigo-400 text-xl ml-1">&#9656;</span>
+                                {{ group.title }} <span class="text-indigo-400 text-2xl ml-1 font-normal">&#9656;</span>
                             </h2>
                             
                             <div v-if="getMangaData(group.workId).length > 0" class="mt-4 bg-slate-50/50 rounded-xl p-4 border border-slate-100">
@@ -122,6 +122,7 @@
                     <div :class="['flex-1', groupBy === 'movie' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' : 'space-y-6']">
                         <div v-for="(item, idx) in group.items" :key="idx">
                             <div :class="[groupBy === 'movie' ? 'h-full bg-slate-50/50 border-2 border-slate-100 rounded-2xl p-5' : 'border-l-4 border-slate-100 pl-5']">
+                                
                                 <div v-if="groupBy === 'movie'">
                                     <h3 class="text-lg font-black text-slate-800 leading-tight flex items-baseline gap-2">
                                         <span class="text-[10px] text-slate-400 uppercase font-bold shrink-0">原文/</span>{{ item.jpTitle }}
@@ -130,9 +131,10 @@
                                         <span class="text-[10px] text-slate-400 uppercase font-bold shrink-0">港譯/</span>{{ item.hkTrans }}
                                     </h3>
                                 </div>
+
                                 <div v-else>
-                                    <a :href="'movies.html?movieID=' + item.movieId" class="font-black text-slate-800 text-lg mb-2 leading-tight block hover:text-indigo-600 transition-colors">
-                                        {{ item.movieTitle }} <span class="text-indigo-400 ml-1 text-sm">&#9656;</span>
+                                    <a :href="'movie.html?mediaid=' + item.movieId" class="font-black text-slate-800 text-lg mb-2 leading-tight block hover:text-indigo-600 transition-colors">
+                                        {{ item.movieTitle }} <span class="text-indigo-400 text-2xl ml-1 font-normal">&#9656;</span>
                                     </a>
                                 </div>
 
@@ -204,21 +206,21 @@
                     ]);
                     this.gadgets = g; this.links = l; this.movies = m; this.contents = c; this.publishing = p;
                     
-                    // Fix 2: URL parameter auto-filling (Fills search box like Object/Thing pages)
+                    // URL PARAMETER LOGIC (Referenced from Object Page)
                     const urlParams = new URLSearchParams(window.location.search);
-                    const movieID = urlParams.get('movieID');
-                    const gadgetID = urlParams.get('gadgetID');
+                    const mediaID = urlParams.get('mediaid');
+                    const gadgetID = urlParams.get('gadgetid');
 
-                    if (movieID) {
+                    if (mediaID) {
                         this.groupBy = 'movie';
-                        const found = this.movies.find(item => String(item['Media ID']) === String(movieID));
-                        if (found) this.searchQuery = found['JP Title']; // Fills the search box
+                        const match = this.movies.find(x => String(x['Media ID']) === String(mediaID));
+                        if (match) this.searchQuery = match['JP Title'];
                     } else if (gadgetID) {
                         this.groupBy = 'gadget';
-                        const found = this.gadgets.find(item => String(item['Gadget ID']) === String(gadgetID));
-                        if (found) this.searchQuery = found['JP Title']; // Fills the search box
+                        const match = this.gadgets.find(x => String(x['Gadget ID']) === String(gadgetID));
+                        if (match) this.searchQuery = match['JP Title'];
                     }
-                    
+
                     this.loading = false;
                 } catch (e) { console.error(e); this.loading = false; }
             },

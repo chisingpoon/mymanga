@@ -276,6 +276,8 @@
                                 id: key,
                                 title: this.groupBy === 'object' ? item.jpTitle : item.movieTitle,
                                 hkTrans: this.groupBy === 'object' ? item.hkTrans : '',
+                                objType: this.groupBy === 'object' ? item.objType : '',
+                                description: this.groupBy === 'object' ? item.description : '',                                
                                 workId: item.workId,
                                 items: []
                             };

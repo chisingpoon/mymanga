@@ -26,7 +26,6 @@
         .scroll-area { max-height: 320px; overflow-y: auto; scrollbar-width: thin; padding-right: 4px; }
         mark { background: #fef08a; color: #854d0e; padding: 0 2px; border-radius: 2px; font-weight: bold; }
         
-        /* Back to Top Button Styles */
         .back-to-top {
             position: fixed; bottom: 32px; right: 32px;
             width: 52px; height: 52px;
@@ -198,16 +197,35 @@
                     this.parentData = parents; this.movieChild = mChild; this.movieMeta = mMeta;
                     this.mangaChild = manChild; this.workInclude = works; this.pubCatalog = pubs;
                     this.loading = false;
+                    
                     await nextTick();
                     const params = new URLSearchParams(window.location.search);
                     const movieID = params.get('movieid');
                     const isbn = params.get('isbn');
+
                     if (movieID) {
                         const movie = this.movieMeta.find(m => String(m['Media ID']) === String(movieID));
-                        if (movie && movie['JP Title']) { this.searchQuery = movie['JP Title']; if(this.$refs.searchInput) this.$refs.searchInput.value = movie['JP Title']; }
+                        if (movie && movie['JP Title']) { 
+                            this.searchQuery = movie['JP Title']; 
+                            if(this.$refs.searchInput) this.$refs.searchInput.value = movie['JP Title']; 
+                        }
                     } else if (isbn) {
                         const pub = this.pubCatalog.find(p => String(p['ISBN']) === String(isbn));
-                        if (pub) { const val = `${pub['類']} ${pub['標題']}`; this.searchQuery = val; if(this.$refs.searchInput) this.$refs.searchInput.value = val; }
+                        if (pub) { 
+                            // Concatenating Category, Title, and Volume
+                            const val = `[${pub['類']}] ${pub['標題']} ${pub['巻'] || ''}`.trim();
+                            this.searchQuery = val; 
+                            if(this.$refs.searchInput) this.$refs.searchInput.value = val;
+                            
+                            // Find which Object ID this ISBN belongs to and force that card to 'manga' tab
+                            const workItem = this.workInclude.find(w => String(w['ISBN']) === String(isbn));
+                            if (workItem) {
+                                const mangaInfo = this.mangaChild.find(m => String(m['Work ID']) === String(workItem['作品番']));
+                                if (mangaInfo) {
+                                    this.tabStates[mangaInfo['Object ID']] = 'manga';
+                                }
+                            }
+                        }
                     }
                 } catch (e) { this.loading = false; }
             },
@@ -241,9 +259,25 @@
                         const matchType = this.selectedType === 'All' || p['Object Type'] === this.selectedType;
                         if (!(matchClass && matchType)) return false;
                         if (!q) return true;
+                        
+                        // Check Titles & Descriptions
                         if ((p['JP Title'] || '').toLowerCase().includes(q) || (p['Description'] || '').toLowerCase().includes(q)) return true;
+                        
+                        // Check Manga translations & manga list items
                         const manInfo = this.mangaChild.find(c => String(c['Object ID']) === String(p['Object ID']));
-                        if (manInfo && ((manInfo['CultureCom Trans'] || '').toLowerCase().includes(q) || (manInfo['HKChingWin Trans'] || '').toLowerCase().includes(q))) return true;
+                        if (manInfo) {
+                            if ((manInfo['CultureCom Trans'] || '').toLowerCase().includes(q) || (manInfo['HKChingWin Trans'] || '').toLowerCase().includes(q)) return true;
+                            
+                            // Check the nested manga record strings
+                            const subRecords = this.workInclude.filter(w => String(w['作品番']) === String(manInfo['Work ID']));
+                            if (subRecords.some(w => {
+                                const pub = this.pubCatalog.find(pc => String(pc['ISBN']) === String(w['ISBN']));
+                                const fullString = `[${pub?.['類']}] ${pub?.['標題']} ${pub?.['巻']}`.toLowerCase();
+                                return fullString.includes(q);
+                            })) return true;
+                        }
+                        
+                        // Check Movie Appearances
                         return this.movieChild.filter(c => String(c['Object ID']) === String(p['Object ID'])).some(c => {
                             const meta = this.movieMeta.find(m => String(m['Media ID']) === String(c['Movie ID']));
                             return meta && (meta['JP Title'] || '').toLowerCase().includes(q);

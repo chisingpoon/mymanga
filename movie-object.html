@@ -27,7 +27,7 @@
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Syncing Archive...</p>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Updating Archive...</p>
         </div>
 
         <nav class="top-nav">
@@ -44,7 +44,7 @@
         <main class="max-w-[1400px] mx-auto px-6 pt-10">
             <div class="flex flex-wrap items-center gap-4 mb-8 bg-white/80 p-4 rounded-2xl backdrop-blur-md border border-slate-200 sticky top-24 z-30 shadow-sm">
                 <div class="flex-1 min-w-[250px] relative">
-                    <input type="text" v-model.trim="searchQuery" placeholder="Search Database..." 
+                    <input type="text" v-model.trim="searchQuery" placeholder="Search Title, Movie or Description..." 
                            class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-4 pr-12 py-2.5 text-sm font-bold outline-none focus:border-indigo-500 transition-all">
                     <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round"></path></svg>
@@ -161,9 +161,7 @@
                         fetch(base + "電影人物法寶").then(r => r.json()),
                         fetch(base + "電影動畫").then(r => r.json())
                     ]);
-                    this.parentData = Array.isArray(parents) ? parents : [];
-                    this.childData = Array.isArray(children) ? children : [];
-                    this.movieData = Array.isArray(movies) ? movies : [];
+                    this.parentData = parents; this.childData = children; this.movieData = movies;
                     this.loading = false;
                 } catch (e) { console.error(e); this.loading = false; }
             },
@@ -183,7 +181,21 @@
                             const active = p['Active']?.toLowerCase() === 'yes';
                             const matchClass = this.selectedClass === 'All' || p['Object Classification'] === this.selectedClass;
                             const matchType = this.selectedType === 'All' || p['Object Type'] === this.selectedType;
-                            const matchSearch = !q || (p['JP Title'] || '').toLowerCase().includes(q) || (p['Description'] || '').toLowerCase().includes(q);
+                            
+                            // Get children first to check their data for search
+                            const appearances = this.childData.filter(c => String(c['Object ID']) === String(p['Object ID']));
+                            
+                            // SEARCH LOGIC: Check Parent fields + Children HK translation + Linked Movie Title
+                            const matchSearch = !q || 
+                                (p['JP Title'] || '').toLowerCase().includes(q) || 
+                                (p['Description'] || '').toLowerCase().includes(q) ||
+                                appearances.some(c => {
+                                    const m = this.movieData.find(movie => String(movie['Media ID']) === String(c['Movie ID']));
+                                    const movieTitleMatch = m ? (m['JP Title'] || '').toLowerCase().includes(q) : false;
+                                    const hkTransMatch = (c['HK Translation'] || '').toLowerCase().includes(q);
+                                    return hkTransMatch || movieTitleMatch;
+                                });
+
                             return active && matchClass && matchType && matchSearch;
                         })
                         .map(p => {
@@ -200,7 +212,6 @@
                                 });
                             return { ...p, children: appearances };
                         });
-                        // Filter for p.children.length > 0 was removed to show all gadget cards.
                 },
                 paginatedData() {
                     const start = (this.currentPage - 1) * this.itemsPerPage;

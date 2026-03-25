@@ -17,15 +17,12 @@
         .loader-wrapper { position: fixed; inset: 0; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
         .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
         .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
         .data-card { background: white; border-radius: 24px; border: 2px solid #f1f5f9; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); min-height: 520px; display: flex; flex-direction: column; }
         .data-card:hover { border-color: #6366f1; transform: translateY(-4px); }
-        
         .tab-btn { transition: all 0.2s ease-in-out; border-bottom: 3px solid transparent; cursor: pointer; }
         .tab-btn:hover:not(.active) { background-color: #f1f5f9; color: #1e293b; border-radius: 8px 8px 0 0; }
         .tab-btn.active { border-color: #6366f1; color: #6366f1; font-weight: 900; }
-        
         .scroll-area { max-height: 320px; overflow-y: auto; scrollbar-width: thin; padding-right: 4px; }
         mark { background: #fef08a; color: #854d0e; padding: 0 2px; border-radius: 2px; font-weight: bold; }
     </style>
@@ -91,18 +88,9 @@
 
                     <div class="mt-auto pt-4 border-t border-slate-100">
                         <div class="flex border-b border-slate-200 mb-4 gap-4">
-                            <button @click="setTab(parent['Object ID'], 'movie')" 
-                                    :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'movie' ? 'active' : 'text-slate-400']">
-                                Movie ({{ parent.movieAppearances.length }})
-                            </button>
-                            <button @click="setTab(parent['Object ID'], 'manga')" 
-                                    :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'manga' ? 'active' : 'text-slate-400']">
-                                Manga ({{ parent.mangaRecords.length }})
-                            </button>
-                            <button @click="setTab(parent['Object ID'], 'anime')" 
-                                    :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'anime' ? 'active' : 'text-slate-400']">
-                                Anime (0)
-                            </button>
+                            <button @click="setTab(parent['Object ID'], 'movie')" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'movie' ? 'active' : 'text-slate-400']">Movie ({{ parent.movieAppearances.length }})</button>
+                            <button @click="setTab(parent['Object ID'], 'manga')" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'manga' ? 'active' : 'text-slate-400']">Manga ({{ parent.mangaRecords.length }})</button>
+                            <button @click="setTab(parent['Object ID'], 'anime')" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'anime' ? 'active' : 'text-slate-400']">Anime (0)</button>
                         </div>
 
                         <div class="tab-content">
@@ -157,8 +145,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="3" stroke-linecap="round"></path></svg>
                     </button>
                     <div class="flex gap-2">
-                        <button v-for="p in totalPages" :key="p" @click="changePage(p)"
-                                :class="['w-10 h-10 rounded-xl text-xs font-black transition-all', currentPage === p ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white border-2 border-slate-100 text-slate-400']">{{ p }}</button>
+                        <button v-for="p in totalPages" :key="p" @click="changePage(p)" :class="['w-10 h-10 rounded-xl text-xs font-black transition-all', currentPage === p ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white border-2 border-slate-100 text-slate-400']">{{ p }}</button>
                     </div>
                     <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" class="w-10 h-10 flex items-center justify-center bg-white border-2 border-slate-100 rounded-xl disabled:opacity-30">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round"></path></svg>
@@ -193,16 +180,13 @@
                     this.movieChild = mChild; this.movieMeta = mMeta;
                     this.mangaChild = manChild; this.workInclude = works; this.pubCatalog = pubs;
 
-                    // UPDATED: URL Parameter logic only
+                    // URL Logic: Map ID to Title and trigger search
                     const params = new URLSearchParams(window.location.search);
-                    const movieID = params.get('movieid');
-                    const isbn = params.get('isbn');
-
-                    if (movieID) {
-                        const movie = this.movieMeta.find(m => String(m['Media ID']) === String(movieID));
+                    if (params.get('movieid')) {
+                        const movie = this.movieMeta.find(m => String(m['Media ID']) === String(params.get('movieid')));
                         if (movie) this.searchQuery = movie['JP Title'];
-                    } else if (isbn) {
-                        const pub = this.pubCatalog.find(p => String(p['ISBN']) === String(isbn));
+                    } else if (params.get('isbn')) {
+                        const pub = this.pubCatalog.find(p => String(p['ISBN']) === String(params.get('isbn')));
                         if (pub) this.searchQuery = `${pub['類']} ${pub['標題']}`;
                     }
 
@@ -234,26 +218,33 @@
                         if (p['Active']?.toLowerCase() !== 'yes') return false;
                         const matchClass = this.selectedClass === 'All' || p['Object Classification'] === this.selectedClass;
                         const matchType = this.selectedType === 'All' || p['Object Type'] === this.selectedType;
-                        
-                        // UPDATED: Extended search to include Manga [類] and [標題]
+                        if (!(matchClass && matchType)) return false;
+                        if (!q) return true;
+
+                        // Check Parent Fields
+                        if ((p['JP Title'] || '').toLowerCase().includes(q) || (p['Description'] || '').toLowerCase().includes(q)) return true;
+
+                        // Check Manga Trans & Manga JP Title/Category
                         const manInfo = this.mangaChild.find(c => String(c['Object ID']) === String(p['Object ID']));
-                        let mangaSearchMatch = false;
                         if (manInfo) {
+                            if ((manInfo['CultureCom Trans'] || '').toLowerCase().includes(q) || (manInfo['HKChingWin Trans'] || '').toLowerCase().includes(q)) return true;
                             const relatedWorks = this.workInclude.filter(w => String(w['作品番']) === String(manInfo['Work ID']));
-                            mangaSearchMatch = relatedWorks.some(w => {
+                            if (relatedWorks.some(w => {
                                 const pub = this.pubCatalog.find(pc => String(pc['ISBN']) === String(w['ISBN']));
                                 return pub && ((pub['類'] || '').toLowerCase().includes(q) || (pub['標題'] || '').toLowerCase().includes(q));
-                            });
+                            })) return true;
                         }
 
-                        const matchSearch = !q || 
-                            (p['JP Title'] || '').toLowerCase().includes(q) || 
-                            (p['Description'] || '').toLowerCase().includes(q) ||
-                            (manInfo && ((manInfo['CultureCom Trans'] || '').toLowerCase().includes(q) || (manInfo['HKChingWin Trans'] || '').toLowerCase().includes(q))) ||
-                            mangaSearchMatch;
+                        // Check Movie JP Title (matches movieid query)
+                        const relatedMovies = this.movieChild.filter(c => String(c['Object ID']) === String(p['Object ID']));
+                        if (relatedMovies.some(c => {
+                            const meta = this.movieMeta.find(m => String(m['Media ID']) === String(c['Movie ID']));
+                            return meta && (meta['JP Title'] || '').toLowerCase().includes(q);
+                        })) return true;
 
-                        return matchClass && matchType && matchSearch;
+                        return false;
                     }).map(p => {
+                        // Data mapping for template
                         const movieAppearances = this.movieChild.filter(c => String(c['Object ID']) === String(p['Object ID'])).map(c => {
                             const m = this.movieMeta.find(movie => String(movie['Media ID']) === String(c['Movie ID']));
                             return { ...c, movieTitle: m ? m['JP Title'] : 'Unknown', movieYear: (m?.['JP Release Date']?.match(/\d{4}/) || ['N/A'])[0] };

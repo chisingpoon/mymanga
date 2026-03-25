@@ -110,22 +110,22 @@
                         </thead>
                         <tbody>
                             <tr v-for="row in paginatedData" :key="row['Media ID']">
-                                <td class="font-mono text-slate-400 text-[13px] font-bold">{{ row['Media ID'] }}</td>
+                                <td class="font-mono text-slate-400 text-[13px] font-bold" v-html="highlight(row['Media ID'])"></td>
                                 <td class="font-black text-slate-900">
-                                    <div class="text-[16px]">{{ row['JP Title'] }}</div>
-                                    <div class="text-indigo-600 text-[13px] tracking-tight">{{ row['HK Title'] }}</div>
+                                    <div class="text-[16px]" v-html="highlight(row['JP Title'])"></div>
+                                    <div class="text-indigo-600 text-[13px] tracking-tight" v-html="highlight(row['HK Title'])"></div>
                                 </td>
                                 <td>
                                     <div class="flex flex-col gap-1">
-                                        <div class="flex items-center gap-2 text-[9px] text-slate-400 font-black">CH <span class="id-badge">{{ row['JP Chapter ID'] || '-' }}</span></div>
-                                        <div class="flex items-center gap-2 text-[9px] text-slate-400 font-black">SH <span class="id-badge">{{ row['JP Show ID'] || '-' }}</span></div>
+                                        <div class="flex items-center gap-2 text-[9px] text-slate-400 font-black">CH <span class="id-badge" v-html="highlight(row['JP Chapter ID'] || '-')"></span></div>
+                                        <div class="flex items-center gap-2 text-[9px] text-slate-400 font-black">SH <span class="id-badge" v-html="highlight(row['JP Show ID'] || '-')"></span></div>
                                     </div>
                                 </td>
                                 <td class="text-[12px] whitespace-nowrap">
                                     <div class="flex items-center gap-2 font-bold"><span class="w-4 text-slate-300">🇯🇵</span> {{ row['JP Show Date'] || '-' }}</div>
                                     <div class="flex items-center gap-2 mt-1 font-bold text-slate-500"><span class="w-4 text-slate-300">🇭🇰</span> {{ row['HK Show Date'] || '-' }}</div>
                                 </td>
-
+                        
                                 <td>
                                     <a v-if="m = getMapping(row['Work ID'], ['45卷', 'カラー作品集', 'プラス'])" 
                                        :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
@@ -136,7 +136,7 @@
                                         <span class="main-label">Vol. {{m.vol}} Ch.{{m.chapter}}</span>
                                     </a>
                                 </td>
-
+                        
                                 <td>
                                     <a v-if="m = getMapping(row['Work ID'], ['大全集', '大長編大全集'])" 
                                        :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
@@ -146,8 +146,8 @@
                                         <span class="main-label">Vol. {{m.vol}} Ch.{{m.chapter}}</span>
                                     </a>
                                 </td>
-
-                                <td class="text-slate-400 italic text-[13px] max-w-[200px] leading-snug">{{ row.Note }}</td>
+                        
+                                <td class="text-slate-400 italic text-[13px] max-w-[200px] leading-snug" v-html="highlight(row.Note)"></td>
                             </tr>
                         </tbody>
                     </table>
@@ -237,10 +237,31 @@
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
                         ]);
-                        this.anime = a; this.contents = c; this.publishHk = h;
+                        this.anime = a; 
+                        this.contents = c; 
+                        this.publishHk = h;
+            
+                        // Handle URL Parameters
+                        const params = new URLSearchParams(window.location.search);
+                        const mediaID = params.get('mediaid');
+                        if (mediaID) {
+                            const target = this.anime.find(r => String(r['Media ID']) === String(mediaID));
+                            if (target) {
+                                // Default to JP Title for the search box
+                                this.searchQuery = target['JP Title'] || '';
+                            }
+                        }
+            
                         this.loading = false;
                         window.addEventListener('scroll', () => { this.showScrollBtn = window.scrollY > 400; });
                     } catch (e) { console.error(e); }
+                },
+                highlight(text) {
+                    if (!text) return '-';
+                    if (!this.searchQuery) return text;
+                    const q = this.searchQuery.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                    const regex = new RegExp(`(${q})`, 'gi');
+                    return String(text).replace(regex, '<mark class="bg-yellow-200 text-yellow-900 px-0.5 rounded">$1</mark>');
                 },
                 toggleYear(year) {
                     const decade = parseInt(year);

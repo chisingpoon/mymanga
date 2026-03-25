@@ -88,7 +88,19 @@
                     <span class="text-xl font-black text-indigo-900">{{ displayData.length }}</span>
                 </div>
             </div>
-
+            <div v-if="displayData.length === 0 && !loading" class="flex flex-col items-center justify-center py-32 bg-white rounded-3xl border-2 border-dashed border-slate-200 mb-12">
+                <div class="w-20 h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mb-6">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight">No Archive Records Found</h3>
+                <p class="text-slate-400 font-medium mt-2">Try adjusting your search query or category filters.</p>
+                <button @click="searchQuery = ''; selectedClass = 'All'; selectedType = 'All';" 
+                        class="mt-8 px-8 py-3 bg-indigo-600 text-white text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-slate-900 shadow-xl shadow-indigo-200 transition-all active:scale-95">
+                    Clear All Filters
+                </button>
+            </div>
             <div class="grid gap-8 mb-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                 <div v-for="parent in paginatedData" :key="parent['Object ID']" class="data-card p-8 shadow-sm">
                     <div class="mb-6">

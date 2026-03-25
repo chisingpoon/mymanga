@@ -196,12 +196,16 @@
                 yearStats() {
                     const stats = {};
                     this.anime.forEach(r => {
-                        const yrStr = r['JP Show Date']?.split('/')[0];
-                        if (yrStr && yrStr.length === 4) {
-                            const decade = Math.floor(parseInt(yrStr) / 10) * 10;
+                        const dateStr = String(r['JP Show Date'] || '');
+                        // This looks for any 4-digit number (the year)
+                        const match = dateStr.match(/\d{4}/); 
+                        if (match) {
+                            const year = parseInt(match[0]);
+                            const decade = Math.floor(year / 10) * 10;
                             stats[decade] = (stats[decade] || 0) + 1;
                         }
                     });
+                    // Sort decades (1970, 1980, 1990...)
                     const sorted = {};
                     Object.keys(stats).sort().forEach(k => sorted[k] = stats[k]);
                     return sorted;
@@ -214,8 +218,15 @@
                         
                         let matchesYear = true;
                         if (this.activeYears.length > 0) {
-                            const year = parseInt(r['JP Show Date']?.split('/')[0]);
-                            matchesYear = year && this.activeYears.includes(Math.floor(year/10)*10);
+                            const dateStr = String(r['JP Show Date'] || '');
+                            const match = dateStr.match(/\d{4}/);
+                            if (match) {
+                                const year = parseInt(match[0]);
+                                const decade = Math.floor(year / 10) * 10;
+                                matchesYear = this.activeYears.includes(decade);
+                            } else {
+                                matchesYear = false;
+                            }
                         }
                         return matchesSearch && matchesYear;
                     });

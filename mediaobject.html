@@ -22,11 +22,10 @@
         .data-card { background: white; border-radius: 24px; border: 2px solid #f1f5f9; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .data-card:hover { border-color: #6366f1; transform: translateY(-4px); }
         
-        .movie-scroll-area { max-height: 400px; overflow-y: auto; scrollbar-width: thin; }
+        .scroll-area { max-height: 400px; overflow-y: auto; scrollbar-width: thin; }
         
         mark { background: #fef08a; color: #854d0e; padding: 0 2px; border-radius: 2px; font-weight: bold; }
         
-        /* 2. TAB HOVER EFFECTS */
         .tab-btn { transition: all 0.2s ease-in-out; border-bottom: 3px solid transparent; }
         .tab-btn:hover:not(.active) { background-color: #f1f5f9; transform: translateY(-1px); color: #1e293b; border-radius: 8px 8px 0 0; }
         .tab-btn.active { border-color: #6366f1; color: #6366f1; }
@@ -53,7 +52,7 @@
         <main class="max-w-[1400px] mx-auto px-6 pt-10">
             <div class="flex flex-wrap items-center gap-4 mb-8 bg-white/80 p-4 rounded-2xl backdrop-blur-md border border-slate-200 sticky top-24 z-30 shadow-sm">
                 <div class="flex-1 min-w-[250px] relative">
-                    <input type="text" v-model.trim="searchQuery" placeholder="Search..." 
+                    <input type="text" v-model.trim="searchQuery" placeholder="搜尋標題、描述、翻譯或書籍..." 
                            class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-4 pr-12 py-2.5 text-sm font-bold outline-none focus:border-indigo-500 transition-all">
                     <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-500 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -62,18 +61,18 @@
                 
                 <div class="flex gap-4">
                     <select v-model="selectedClass" @change="handleClassChange" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2 text-sm font-black outline-none cursor-pointer">
-                        <option value="All">All Class</option>
+                        <option value="All">所有分類</option>
                         <option v-for="cls in classifications" :key="cls" :value="cls">{{ cls }}</option>
                     </select>
 
                     <select v-model="selectedType" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2 text-sm font-black outline-none cursor-pointer">
-                        <option value="All">All Types</option>
+                        <option value="All">所有類型</option>
                         <option v-for="t in filteredObjectTypes" :key="t" :value="t">{{ t }}</option>
                     </select>
                 </div>
 
                 <div class="bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-xl flex items-center gap-3 ml-auto">
-                    <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Matched</span>
+                    <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">結果數</span>
                     <span class="text-xl font-black text-indigo-900">{{ displayData.length }}</span>
                 </div>
             </div>
@@ -85,9 +84,7 @@
                             <span class="px-3 py-1 bg-slate-100 text-slate-600 text-[9px] font-black rounded-lg uppercase">{{ parent['Object Classification'] }}</span>
                             <span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded">{{ parent['Object Type'] }}</span>
                         </div>
-                        
                         <h2 class="text-2xl font-black text-slate-900 leading-tight mb-2" v-html="highlight(parent['JP Title'])"></h2>
-                        
                         <div v-if="parent['Description'] && parent['Description'] !== '-'" class="bg-slate-50 border-l-4 border-indigo-500 p-4 rounded-r-xl mb-4">
                             <p class="text-sm text-slate-600 leading-relaxed font-medium" v-html="highlight(parent['Description'])"></p>
                         </div>
@@ -96,10 +93,10 @@
                     <div class="mt-auto pt-4 border-t border-slate-100">
                         <div class="flex border-b border-slate-200 mb-4 gap-4">
                             <button @click="parent.activeTab = 'movie'" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', parent.activeTab === 'movie' ? 'active' : 'text-slate-400']">
-                                Movie ({{ parent.children.length }})
+                                Movie ({{ parent.movieAppearances.length }})
                             </button>
                             <button @click="parent.activeTab = 'manga'" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', parent.activeTab === 'manga' ? 'active' : 'text-slate-400']">
-                                Manga (0)
+                                Manga ({{ parent.mangaRecords.length }})
                             </button>
                             <button @click="parent.activeTab = 'anime'" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', parent.activeTab === 'anime' ? 'active' : 'text-slate-400']">
                                 Anime (0)
@@ -107,12 +104,10 @@
                         </div>
 
                         <div v-show="parent.activeTab === 'movie'">
-                            <div v-if="parent.children.length > 0" class="movie-scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
-                                <div v-for="(child, idx) in parent.children" :key="idx" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition-all">
+                            <div v-if="parent.movieAppearances.length > 0" class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
+                                <div v-for="(child, idx) in parent.movieAppearances" :key="idx" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition-all">
                                     <div class="flex flex-col gap-2">
-                                        <div class="flex">
-                                            <span class="text-[8px] font-black bg-slate-900 text-white px-2 py-0.5 rounded uppercase">Movie {{ child.movieYear }}</span>
-                                        </div>
+                                        <span class="text-[8px] font-black bg-slate-900 text-white px-2 py-0.5 rounded w-fit">MOVIE {{ child.movieYear }}</span>
                                         <span class="text-sm font-black text-slate-800" v-html="'<span class=\'text-[9px] text-slate-400 uppercase font-bold mr-1\'>港譯/</span>' + highlight(child['HK Translation'])"></span>
                                         <a :href="'movie.html?mediaid=' + encodeURIComponent(child['Movie ID'])" target="_blank" 
                                            class="text-[11px] font-bold text-indigo-500 hover:text-indigo-700 flex items-center gap-1" v-html="highlight(child.movieTitle)"></a>
@@ -121,7 +116,28 @@
                             </div>
                             <p v-else class="text-[10px] font-bold text-slate-300 italic py-4 text-center uppercase">No Movie Data</p>
                         </div>
-                        <div v-show="parent.activeTab === 'manga'" class="py-8 text-center text-slate-300 text-[10px] font-bold uppercase italic">Manga Data Coming Soon</div>
+
+                        <div v-show="parent.activeTab === 'manga'">
+                            <div v-if="parent.mangaInfo" class="mb-3 px-1">
+                                <div class="text-[10px] font-bold text-slate-500">
+                                    文傳譯: <span class="text-slate-800" v-html="highlight(parent.mangaInfo['CultureCom Trans'])"></span>
+                                </div>
+                                <div class="text-[10px] font-bold text-slate-500">
+                                    青文譯: <span class="text-slate-800" v-html="highlight(parent.mangaInfo['HKChingWin Trans'])"></span>
+                                </div>
+                            </div>
+                            
+                            <div v-if="parent.mangaRecords.length > 0" class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
+                                <div v-for="(rec, idx) in parent.mangaRecords" :key="idx" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition-all">
+                                    <a :href="'manga-database.html?region=JP&isbn=' + rec.isbn" target="_blank" class="block">
+                                        <div class="text-xs font-black text-slate-800 hover:text-indigo-600 transition-colors" v-html="highlight(rec.title + ' ' + rec.vol)"></div>
+                                        <div class="text-[9px] text-slate-400 mt-1 font-mono">{{ rec.isbn }}</div>
+                                    </a>
+                                </div>
+                            </div>
+                            <p v-else class="text-[10px] font-bold text-slate-300 italic py-4 text-center uppercase">No Manga Data</p>
+                        </div>
+
                         <div v-show="parent.activeTab === 'anime'" class="py-8 text-center text-slate-300 text-[10px] font-bold uppercase italic">Anime Data Coming Soon</div>
                     </div>
                 </div>
@@ -134,9 +150,7 @@
                     </button>
                     <div class="flex gap-2">
                         <button v-for="p in totalPages" :key="p" @click="changePage(p)"
-                                :class="['w-10 h-10 rounded-xl text-xs font-black transition-all', currentPage === p ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white border-2 border-slate-100 text-slate-400']">
-                            {{ p }}
-                        </button>
+                                :class="['w-10 h-10 rounded-xl text-xs font-black transition-all', currentPage === p ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white border-2 border-slate-100 text-slate-400']">{{ p }}</button>
                     </div>
                     <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" class="w-10 h-10 flex items-center justify-center bg-white border-2 border-slate-100 rounded-xl disabled:opacity-30">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round"></path></svg>
@@ -152,20 +166,24 @@
             data() {
                 return {
                     loading: true, searchQuery: '', selectedClass: 'All', selectedType: 'All', currentPage: 1, itemsPerPage: 12,
-                    parentData: [], childData: [], movieData: []
+                    parentData: [], movieChild: [], movieMeta: [],
+                    mangaChild: [], workInclude: [], pubCatalog: []
                 }
             },
             async mounted() {
                 const base = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
                 try {
-                    const [parents, children, movies] = await Promise.all([
+                    const [parents, mChild, mMeta, manChild, works, pubs] = await Promise.all([
                         fetch(base + "人物法寶").then(r => r.json()),
                         fetch(base + "電影人物法寶").then(r => r.json()),
-                        fetch(base + "電影動畫").then(r => r.json())
+                        fetch(base + "電影動畫").then(r => r.json()),
+                        fetch(base + "漫畫人物法寶").then(r => r.json()),
+                        fetch(base + "書籍收錄作品").then(r => r.json()),
+                        fetch(base + "出版目録JP").then(r => r.json())
                     ]);
-                    this.parentData = parents.map(p => ({ ...p, activeTab: 'movie' }));
-                    this.childData = children;
-                    this.movieData = movies;
+                    this.parentData = parents;
+                    this.movieChild = mChild; this.movieMeta = mMeta;
+                    this.mangaChild = manChild; this.workInclude = works; this.pubCatalog = pubs;
                     this.loading = false;
                 } catch (e) { this.loading = false; }
             },
@@ -176,50 +194,47 @@
                     return String(text).replace(regex, '<mark>$1</mark>');
                 },
                 changePage(p) { this.currentPage = p; window.scrollTo({ top: 0, behavior: 'smooth' }); },
-                handleClassChange() {
-                    // Reset Type filter if current selection is no longer valid
-                    this.selectedType = 'All';
-                    this.currentPage = 1;
-                }
+                handleClassChange() { this.selectedType = 'All'; this.currentPage = 1; }
             },
             computed: {
                 classifications() {
                     return [...new Set(this.parentData.filter(i => i['Active']?.toLowerCase() === 'yes').map(i => i['Object Classification']))].sort();
                 },
-                // 3. FILTER LOGIC FOR OBJECT TYPE SELECTOR
                 filteredObjectTypes() {
                     let allTypes = [...new Set(this.parentData.filter(i => i['Active']?.toLowerCase() === 'yes').map(i => i['Object Type']))].sort();
-                    
-                    if (this.selectedClass === '法寶') {
-                        return allTypes.filter(t => t === '法寶');
-                    } else if (this.selectedClass === '人物') {
-                        return allTypes.filter(t => t !== '法寶');
-                    }
+                    if (this.selectedClass === '法寶') return allTypes.filter(t => t === '法寶');
+                    if (this.selectedClass === '人物') return allTypes.filter(t => t !== '法寶');
                     return allTypes;
                 },
                 displayData() {
                     const q = this.searchQuery.toLowerCase();
                     return this.parentData
                         .filter(p => {
-                            const active = p['Active']?.toLowerCase() === 'yes';
+                            if (p['Active']?.toLowerCase() !== 'yes') return false;
                             const matchClass = this.selectedClass === 'All' || p['Object Classification'] === this.selectedClass;
                             const matchType = this.selectedType === 'All' || p['Object Type'] === this.selectedType;
                             
-                            const appearances = this.childData.filter(c => String(c['Object ID']) === String(p['Object ID']));
+                            // 預先取得該法寶的所有關聯資料以便搜尋
+                            const mAppearances = this.movieChild.filter(c => String(c['Object ID']) === String(p['Object ID']));
+                            const manInfo = this.mangaChild.find(c => String(c['Object ID']) === String(p['Object ID']));
+                            
                             const matchSearch = !q || 
                                 (p['JP Title'] || '').toLowerCase().includes(q) || 
                                 (p['Description'] || '').toLowerCase().includes(q) ||
-                                appearances.some(c => {
-                                    const m = this.movieData.find(movie => String(movie['Media ID']) === String(c['Movie ID']));
-                                    return (c['HK Translation'] || '').toLowerCase().includes(q) || (m ? (m['JP Title'] || '').toLowerCase().includes(q) : false);
+                                (manInfo && ((manInfo['CultureCom Trans'] || '').toLowerCase().includes(q) || (manInfo['HKChingWin Trans'] || '').toLowerCase().includes(q))) ||
+                                mAppearances.some(c => {
+                                    const m = this.movieMeta.find(movie => String(movie['Media ID']) === String(c['Movie ID']));
+                                    return (c['HK Translation'] || '').toLowerCase().includes(q) || (m && (m['JP Title'] || '').toLowerCase().includes(q));
                                 });
-                            return active && matchClass && matchType && matchSearch;
+
+                            return matchClass && matchType && matchSearch;
                         })
                         .map(p => {
-                            const appearances = this.childData
+                            // 電影關聯
+                            const movieAppearances = this.movieChild
                                 .filter(c => String(c['Object ID']) === String(p['Object ID']))
                                 .map(c => {
-                                    const m = this.movieData.find(movie => String(movie['Media ID']) === String(c['Movie ID']));
+                                    const m = this.movieMeta.find(movie => String(movie['Media ID']) === String(c['Movie ID']));
                                     let year = 'N/A';
                                     if (m && m['JP Release Date']) {
                                         const found = m['JP Release Date'].match(/\d{4}/);
@@ -227,7 +242,30 @@
                                     }
                                     return { ...c, movieTitle: m ? m['JP Title'] : 'Unknown', movieYear: year };
                                 });
-                            return { ...p, children: appearances };
+
+                            // 漫畫關聯
+                            const manInfo = this.mangaChild.find(c => String(c['Object ID']) === String(p['Object ID']));
+                            let mangaRecords = [];
+                            if (manInfo) {
+                                // 找作品番對應的書籍
+                                const relatedWorks = this.workInclude.filter(w => String(w['作品番']) === String(manInfo['Work ID']));
+                                mangaRecords = relatedWorks.map(w => {
+                                    const pub = this.pubCatalog.find(pc => String(pc['ISBN']) === String(w['ISBN']));
+                                    return {
+                                        isbn: w['ISBN'],
+                                        title: pub ? pub['標題'] : 'Unknown Title',
+                                        vol: pub ? pub['巻'] : ''
+                                    };
+                                });
+                            }
+
+                            return { 
+                                ...p, 
+                                activeTab: 'movie', 
+                                movieAppearances, 
+                                mangaInfo: manInfo, 
+                                mangaRecords 
+                            };
                         });
                 },
                 paginatedData() {

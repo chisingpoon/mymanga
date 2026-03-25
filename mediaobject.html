@@ -12,6 +12,7 @@
             -webkit-user-select: text; user-select: text;
             min-height: 100vh; background-color: #f8fafc; 
             font-family: 'Inter', 'Noto Sans TC', 'Noto Sans JP', system-ui, sans-serif; color: #1e293b;
+            scroll-behavior: smooth;
         }
         .bg-grid { background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px); background-size: 40px 40px; }
         .loader-wrapper { position: fixed; inset: 0; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
@@ -21,14 +22,30 @@
         .data-card { background: white; border-radius: 24px; border: 2px solid #f1f5f9; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); min-height: 520px; display: flex; flex-direction: column; }
         .data-card:hover { border-color: #6366f1; transform: translateY(-4px); }
         .tab-btn { transition: all 0.2s ease-in-out; border-bottom: 3px solid transparent; cursor: pointer; }
-        .tab-btn:hover:not(.active) { background-color: #f1f5f9; color: #1e293b; border-radius: 8px 8px 0 0; }
         .tab-btn.active { border-color: #6366f1; color: #6366f1; font-weight: 900; }
         .scroll-area { max-height: 320px; overflow-y: auto; scrollbar-width: thin; padding-right: 4px; }
         mark { background: #fef08a; color: #854d0e; padding: 0 2px; border-radius: 2px; font-weight: bold; }
+        
+        /* Back to Top Button Styles */
+        .back-to-top {
+            position: fixed; bottom: 32px; right: 32px;
+            width: 52px; height: 52px;
+            background: #1e293b; color: white;
+            border-radius: 16px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+            cursor: pointer; z-index: 50; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0; pointer-events: none; transform: translateY(10px);
+        }
+        .back-to-top.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        .back-to-top:hover { background: #6366f1; transform: translateY(-3px); }
     </style>
 </head>
 <body class="bg-grid">
     <div id="app" v-cloak>
+        <div class="back-to-top" :class="{ 'show': showBackToTop }" @click="scrollToTop">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </div>
+
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
             <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Syncing Archive...</p>
@@ -100,9 +117,9 @@
                                         <div class="flex flex-col gap-2">
                                             <span class="text-[8px] font-black bg-slate-900 text-white px-2 py-0.5 rounded w-fit uppercase">Movie {{ child.movieYear }}</span>
                                             <span class="text-sm font-black text-slate-800" v-html="'<span class=\'text-[9px] text-slate-400 uppercase font-bold mr-1\'>港譯/</span>' + highlight(child['HK Translation'])"></span>
-                                            <a :href="'movie.html?mediaid=' + encodeURIComponent(child['Movie ID'])" target="_blank" class="text-[11px] font-bold text-indigo-500 hover:text-indigo-700 flex items-center gap-1 group">
+                                            <a :href="'movie.html?mediaid=' + encodeURIComponent(child['Movie ID'])" target="_blank" class="text-[11px] font-bold text-indigo-500 hover:text-indigo-700 flex items-center justify-between group">
                                                 <span v-html="highlight(child.movieTitle)"></span>
-                                                <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round"></path></svg>
+                                                <svg class="w-3.5 h-3.5 shrink-0 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round"></path></svg>
                                             </a>
                                         </div>
                                     </div>
@@ -123,11 +140,9 @@
                                 </div>
                                 <div v-if="parent.mangaRecords.length > 0" class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
                                     <div v-for="(rec, idx) in parent.mangaRecords" :key="idx" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition-all">
-                                        <a :href="'manga-database.html?region=JP&isbn=' + encodeURIComponent(rec.isbn)" target="_blank" class="block group">
-                                            <div class="text-xs font-black text-slate-800 flex items-center justify-between">
-                                                <span v-html="highlight(`[${rec.type}] ${rec.title} ${rec.vol}`)"></span>
-                                                <svg class="w-3.5 h-3.5 text-indigo-500 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round"></path></svg>
-                                            </div>
+                                        <a :href="'manga-database.html?region=JP&isbn=' + encodeURIComponent(rec.isbn)" target="_blank" class="text-[11px] font-bold text-indigo-500 hover:text-indigo-700 flex items-center justify-between group">
+                                            <span v-html="highlight(`[${rec.type}] ${rec.title} ${rec.vol}`)"></span>
+                                            <svg class="w-3.5 h-3.5 shrink-0 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round"></path></svg>
                                         </a>
                                     </div>
                                 </div>
@@ -165,13 +180,11 @@
                 return {
                     loading: true, searchQuery: '', selectedClass: 'All', selectedType: 'All', currentPage: 1, itemsPerPage: 12,
                     parentData: [], movieChild: [], movieMeta: [], mangaChild: [], workInclude: [], pubCatalog: [],
-                    tabStates: reactive({}) 
+                    tabStates: reactive({}), showBackToTop: false
                 }
             },
-            watch: {
-                searchQuery() { this.currentPage = 1; }
-            },
             async mounted() {
+                window.addEventListener('scroll', this.handleScroll);
                 const base = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
                 try {
                     const [parents, mChild, mMeta, manChild, works, pubs] = await Promise.all([
@@ -182,40 +195,26 @@
                         fetch(base + "書籍收錄作品").then(r => r.json()),
                         fetch(base + "出版目録JP").then(r => r.json())
                     ]);
-                    
-                    this.parentData = parents;
-                    this.movieChild = mChild; 
-                    this.movieMeta = mMeta;
-                    this.mangaChild = manChild; 
-                    this.workInclude = works; 
-                    this.pubCatalog = pubs;
-
-                    this.loading = false; 
-
-                    await nextTick(); 
-                    
+                    this.parentData = parents; this.movieChild = mChild; this.movieMeta = mMeta;
+                    this.mangaChild = manChild; this.workInclude = works; this.pubCatalog = pubs;
+                    this.loading = false;
+                    await nextTick();
                     const params = new URLSearchParams(window.location.search);
                     const movieID = params.get('movieid');
                     const isbn = params.get('isbn');
-
                     if (movieID) {
                         const movie = this.movieMeta.find(m => String(m['Media ID']) === String(movieID));
-                        if (movie && movie['JP Title']) {
-                            this.searchQuery = movie['JP Title'];
-                            if(this.$refs.searchInput) this.$refs.searchInput.value = movie['JP Title'];
-                        }
+                        if (movie && movie['JP Title']) { this.searchQuery = movie['JP Title']; if(this.$refs.searchInput) this.$refs.searchInput.value = movie['JP Title']; }
                     } else if (isbn) {
                         const pub = this.pubCatalog.find(p => String(p['ISBN']) === String(isbn));
-                        if (pub) { 
-                            const val = `${pub['類']} ${pub['標題']}`;
-                            this.searchQuery = val; 
-                            if(this.$refs.searchInput) this.$refs.searchInput.value = val;
-                        }
+                        if (pub) { const val = `${pub['類']} ${pub['標題']}`; this.searchQuery = val; if(this.$refs.searchInput) this.$refs.searchInput.value = val; }
                     }
-
                 } catch (e) { this.loading = false; }
             },
+            unmounted() { window.removeEventListener('scroll', this.handleScroll); },
             methods: {
+                handleScroll() { this.showBackToTop = window.scrollY > 300; },
+                scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },
                 highlight(text) {
                     if (!this.searchQuery) return text;
                     const regex = new RegExp(`(${this.searchQuery.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
@@ -242,21 +241,13 @@
                         const matchType = this.selectedType === 'All' || p['Object Type'] === this.selectedType;
                         if (!(matchClass && matchType)) return false;
                         if (!q) return true;
-
                         if ((p['JP Title'] || '').toLowerCase().includes(q) || (p['Description'] || '').toLowerCase().includes(q)) return true;
-
                         const manInfo = this.mangaChild.find(c => String(c['Object ID']) === String(p['Object ID']));
-                        if (manInfo) {
-                            if ((manInfo['CultureCom Trans'] || '').toLowerCase().includes(q) || (manInfo['HKChingWin Trans'] || '').toLowerCase().includes(q)) return true;
-                        }
-
-                        const apps = this.movieChild.filter(c => String(c['Object ID']) === String(p['Object ID']));
-                        if (apps.some(c => {
+                        if (manInfo && ((manInfo['CultureCom Trans'] || '').toLowerCase().includes(q) || (manInfo['HKChingWin Trans'] || '').toLowerCase().includes(q))) return true;
+                        return this.movieChild.filter(c => String(c['Object ID']) === String(p['Object ID'])).some(c => {
                             const meta = this.movieMeta.find(m => String(m['Media ID']) === String(c['Movie ID']));
                             return meta && (meta['JP Title'] || '').toLowerCase().includes(q);
-                        })) return true;
-
-                        return false;
+                        });
                     }).map(p => {
                         const movieAppearances = this.movieChild.filter(c => String(c['Object ID']) === String(p['Object ID'])).map(c => {
                             const m = this.movieMeta.find(movie => String(movie['Media ID']) === String(c['Movie ID']));

@@ -306,7 +306,11 @@
                         });
                         const animeAppearances = this.animeChild.filter(c => String(c['Object ID']) === String(p['Object ID'])).map(c => {
                             const a = this.animeMeta.find(ani => String(ani['Media ID']) === String(c['Anime ID']));
-                            return { ...c, animeTitle: a ? a['JP Title'] : 'Unknown', animeDate: (a?.['JP Show Date']?.match(/\d{4}/) || ['N/A'])[0] };
+                            return { 
+                                ...c, 
+                                animeTitle: a ? a['JP Title'] : 'Unknown', 
+                                animeDate: a && a['JP Show Date'] ? a['JP Show Date'] : 'N/A' 
+                            };
                         });
                         const manInfo = this.mangaChild.find(c => String(c['Object ID']) === String(p['Object ID']));
                         let mangaRecords = [];

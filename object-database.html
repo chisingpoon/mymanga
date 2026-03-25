@@ -15,8 +15,7 @@
             background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
             background-size: 20px 20px;
         }
-        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .card-hover:hover { transform: translateY(-5px); }
+        .group-card { transition: all 0.3s ease; }
     </style>
 </head>
 <body class="bg-grid text-slate-900 min-h-screen pb-20">
@@ -42,16 +41,10 @@
 
         <main class="max-w-[1920px] mx-auto py-10 px-6">
             
-            <div class="mb-12 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                <div class="flex-shrink-0">
-                    <h2 class="text-4xl font-black text-slate-900 uppercase tracking-tighter">
-                        {{ object === 'Gadget' ? 'Secret Gadgets' : 'Characters & Things' }}
-                    </h2>
-                    <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-1 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-                        Showing {{ filteredData.length }} Individual Entries
-                    </p>
-                </div>
+            <div class="mb-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <h2 class="text-4xl font-black text-slate-900 uppercase tracking-tighter whitespace-nowrap">
+                    {{ object === 'Gadget' ? 'Secret Gadgets' : 'Characters & Things' }}
+                </h2>
                 
                 <div class="relative w-full max-w-3xl">
                     <div class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300">
@@ -59,62 +52,78 @@
                     </div>
                     <input type="text" v-model="searchQuery" placeholder="Search by name, ID, or movie..." 
                         class="w-full bg-white border border-slate-200 rounded-2xl py-4 pl-14 pr-12 text-sm font-bold shadow-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
-                    
-                    <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </button>
                 </div>
             </div>
 
-            <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div v-for="i in 8" class="h-64 bg-white/50 rounded-[2rem] border border-slate-200 animate-pulse"></div>
+            <div class="mb-10 flex items-center gap-4">
+                <span class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Group By:</span>
+                <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+                    <button @click="groupBy = 'id'" :class="groupBy === 'id' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-4 py-1 rounded-md text-[10px] font-black uppercase transition-all">
+                        {{ object }} ID
+                    </button>
+                    <button @click="groupBy = 'movie'" :class="groupBy === 'movie' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-4 py-1 rounded-md text-[10px] font-black uppercase transition-all">
+                        Movie
+                    </button>
+                </div>
             </div>
 
-            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-                <div v-for="(item, idx) in filteredData" :key="idx" 
-                    class="bg-white rounded-[2rem] border border-slate-200 p-8 card-hover shadow-sm hover:shadow-xl flex flex-col group h-full">
+            <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div v-for="i in 6" class="h-80 bg-white/50 rounded-[2.5rem] border border-slate-200 animate-pulse"></div>
+            </div>
+
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
+                <div v-for="(group, key) in groupedData" :key="key" 
+                    class="bg-white rounded-[2.5rem] border-2 border-slate-100 p-8 group-card shadow-sm flex flex-col h-full">
                     
-                    <div class="flex justify-between items-start mb-6">
-                        <span class="text-[10px] font-black text-slate-300 font-mono">#{{ item.displayId }}</span>
-                        <span class="text-[9px] font-black px-2 py-1 bg-slate-50 rounded text-slate-400 uppercase tracking-widest">
-                            {{ item['Work ID'] || 'N/A' }}
-                        </span>
-                    </div>
-
-                    <div class="mb-6">
-                        <h3 class="text-xl font-black text-slate-900 leading-tight mb-1">{{ item['JP Title'] }}</h3>
-                        <p class="text-lg font-bold text-blue-600 italic tracking-tight">{{ item['HK Translation'] || '---' }}</p>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3 mb-6">
-                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                            <p class="text-[8px] font-black text-slate-400 uppercase mb-1 text-center">文化傳信</p>
-                            <p class="text-[11px] font-black text-slate-700 truncate text-center">{{ item['CultureCom Trans'] || '---' }}</p>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                            <p class="text-[8px] font-black text-slate-400 uppercase mb-1 text-center">正文社</p>
-                            <p class="text-[11px] font-black text-slate-700 truncate text-center">{{ item['HKChingWin Trans'] || '---' }}</p>
-                        </div>
-                    </div>
-
-                    <div v-if="item['Movie ID']" class="mb-6 pt-4 border-t border-slate-50">
-                        <p class="text-[8px] font-black text-slate-400 uppercase mb-2 tracking-widest">Featured In Movie</p>
-                        <a :href="'movie.html?mediaid=' + item['Movie ID']" 
-                           class="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 transition-colors">
-                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"></path></svg>
-                            <span class="text-xs font-black underline decoration-2 underline-offset-4 leading-snug">
-                                {{ getMovieTitle(item['Movie ID']) }}
+                    <div class="mb-6 pb-6 border-b border-slate-50">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full">
+                                {{ groupBy === 'id' ? 'ID Group' : 'Movie Group' }}
                             </span>
-                        </a>
+                            <span class="text-[10px] font-black text-slate-300 font-mono tracking-tighter">#{{ key }}</span>
+                        </div>
+                        <h3 class="text-2xl font-black text-slate-900 tracking-tight leading-tight">
+                            {{ groupBy === 'id' ? group[0]['JP Title'] : (getMovieTitle(key) || 'No Movie Assigned') }}
+                        </h3>
                     </div>
 
-                    <div v-if="object === 'Character'" class="mt-auto pt-4 border-t border-slate-50">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-[9px] font-black text-red-500 uppercase tracking-widest">{{ item['Object Type'] || 'General' }}</span>
+                    <div class="space-y-4 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar">
+                        <div v-for="(item, idx) in group" :key="idx" 
+                            class="bg-slate-50/80 rounded-2xl p-5 border border-slate-100 hover:bg-white hover:shadow-md hover:border-indigo-200 transition-all group/sub">
+                            
+                            <div class="flex justify-between items-start mb-3">
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Work ID: {{ item['Work ID'] || '---' }}</p>
+                                <a v-if="groupBy === 'id' && item['Movie ID']" :href="'movie.html?mediaid=' + item['Movie ID']" class="text-indigo-500">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"></path></svg>
+                                </a>
+                            </div>
+
+                            <h4 class="font-black text-slate-800 text-sm mb-1">{{ item['JP Title'] }}</h4>
+                            <p class="font-bold text-blue-600 text-sm italic mb-4">{{ item['HK Translation'] || '---' }}</p>
+
+                            <div class="grid grid-cols-2 gap-2 mb-3">
+                                <div class="bg-white/50 p-2 rounded-lg border border-slate-100">
+                                    <p class="text-[7px] font-black text-slate-400 uppercase">文化</p>
+                                    <p class="text-[10px] font-black text-slate-600 truncate">{{ item['CultureCom Trans'] || '-' }}</p>
+                                </div>
+                                <div class="bg-white/50 p-2 rounded-lg border border-slate-100">
+                                    <p class="text-[7px] font-black text-slate-400 uppercase">正文</p>
+                                    <p class="text-[10px] font-black text-slate-600 truncate">{{ item['HKChingWin Trans'] || '-' }}</p>
+                                </div>
+                            </div>
+
+                            <p v-if="object === 'Character' && item['Description']" class="text-[10px] text-slate-500 italic leading-relaxed line-clamp-2">
+                                {{ item['Description'] }}
+                            </p>
                         </div>
-                        <p class="text-xs text-slate-500 italic leading-relaxed">
-                            {{ item['Description'] || 'No additional details.' }}
-                        </p>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-50 flex items-center justify-between">
+                        <span class="text-[9px] font-black text-slate-400 uppercase">{{ group.length }} Versions Found</span>
+                        <div v-if="groupBy === 'movie' && key !== 'none'" class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
                     </div>
                 </div>
             </div>
@@ -123,61 +132,49 @@
 
     <script>
         const { createApp } = Vue;
-
         createApp({
             data() {
                 return {
-                    object: 'Gadget', 
+                    object: 'Gadget',
+                    groupBy: 'id', // 'id' or 'movie'
                     loading: true,
                     searchQuery: '',
-                    db: {
-                        gadgetMaster: [],
-                        gadgetMedia: [],
-                        objectMaster: [],
-                        objectMedia: [],
-                        movies: []
-                    }
+                    db: { gadgetMaster: [], gadgetMedia: [], objectMaster: [], objectMedia: [], movies: [] }
                 }
             },
             computed: {
                 filteredData() {
-                    let master = [];
-                    let media = [];
-                    let idKey = '';
-
+                    let master = [], media = [], idKey = '';
                     if (this.object === 'Gadget') {
-                        master = this.db.gadgetMaster;
-                        media = this.db.gadgetMedia;
-                        idKey = 'Gadget ID';
+                        master = this.db.gadgetMaster; media = this.db.gadgetMedia; idKey = 'Gadget ID';
                     } else {
-                        master = this.db.objectMaster;
-                        media = this.db.objectMedia;
-                        idKey = 'Object ID';
+                        master = this.db.objectMaster; media = this.db.objectMedia; idKey = 'Object ID';
                     }
 
-                    // 1. Create a flattened list. 
-                    // Instead of finding 1 master for 1 media, we map the MEDIA sheet directly
-                    // and "lookup" the master info. This ensures duplicate IDs are NOT grouped.
-                    const entries = media.map(mItem => {
-                        const masterInfo = master.find(mst => mst[idKey] === mItem[idKey]) || {};
-                        
-                        // Only include if the master record is "Active"
-                        if (masterInfo.Active?.toString().toLowerCase() !== 'yes') return null;
-
-                        return {
-                            ...masterInfo,
-                            ...mItem,
-                            displayId: mItem[idKey]
-                        };
-                    }).filter(x => x !== null);
-
-                    if (!this.searchQuery.trim()) return entries;
-                    const q = this.searchQuery.toLowerCase();
-                    return entries.filter(i => 
-                        (i['JP Title'] || '').toLowerCase().includes(q) ||
-                        (i['HK Translation'] || '').toLowerCase().includes(q) ||
-                        (i.displayId || '').toString().toLowerCase().includes(q)
-                    );
+                    return media.map(mItem => {
+                        const mst = master.find(mst => mst[idKey] === mItem[idKey]) || {};
+                        if (mst.Active?.toString().toLowerCase() !== 'yes') return null;
+                        return { ...mst, ...mItem, displayId: mItem[idKey] };
+                    }).filter(x => {
+                        if (!x) return false;
+                        if (!this.searchQuery.trim()) return true;
+                        const q = this.searchQuery.toLowerCase();
+                        return (x['JP Title'] || '').toLowerCase().includes(q) || 
+                               (x['HK Translation'] || '').toLowerCase().includes(q) ||
+                               (x.displayId || '').toString().toLowerCase().includes(q);
+                    });
+                },
+                groupedData() {
+                    const data = this.filteredData;
+                    const groups = {};
+                    const idKey = this.object === 'Gadget' ? 'Gadget ID' : 'Object ID';
+                    
+                    data.forEach(item => {
+                        const groupKey = this.groupBy === 'id' ? item[idKey] : (item['Movie ID'] || 'none');
+                        if (!groups[groupKey]) groups[groupKey] = [];
+                        groups[groupKey].push(item);
+                    });
+                    return groups;
                 }
             },
             methods: {
@@ -186,38 +183,25 @@
                     const SHEET_ID = "1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8";
                     const base = `https://opensheet.elk.sh/${SHEET_ID}/`;
                     try {
-                        const [gMaster, gMedia, oMaster, oMedia, movies] = await Promise.all([
+                        const [gM, gMed, oM, oMed, mov] = await Promise.all([
                             fetch(base + "法寶").then(r => r.json()),
                             fetch(base + "媒體與法寶").then(r => r.json()),
                             fetch(base + "人物").then(r => r.json()),
                             fetch(base + "媒體與人物").then(r => r.json()),
                             fetch(base + "電影動畫").then(r => r.json())
                         ]);
-                        this.db.gadgetMaster = gMaster;
-                        this.db.gadgetMedia = gMedia;
-                        this.db.objectMaster = oMaster;
-                        this.db.objectMedia = oMedia;
-                        this.db.movies = movies;
-                    } finally {
-                        this.loading = false;
-                    }
+                        this.db = { gadgetMaster: gM, gadgetMedia: gMed, objectMaster: oM, objectMedia: oMed, movies: mov };
+                    } finally { this.loading = false; }
                 },
-                getMovieTitle(movieId) {
-                    if (!movieId) return 'Movie Details';
-                    const movie = this.db.movies.find(m => m['Media ID'] === movieId);
-                    return movie ? movie['JP Title'] : 'Movie Details';
+                getMovieTitle(id) {
+                    if (id === 'none') return 'Other Appearances';
+                    const m = this.db.movies.find(m => m['Media ID'] === id);
+                    return m ? m['JP Title'] : 'Unknown Movie';
                 },
-                toggleObject(type) {
-                    this.object = type;
-                    this.searchQuery = '';
-                },
-                updateView(view) {
-                    window.location.href = 'index.html';
-                }
+                toggleObject(type) { this.object = type; this.searchQuery = ''; },
+                updateView(v) { window.location.href = 'index.html'; }
             },
-            mounted() {
-                this.init();
-            }
+            mounted() { this.init(); }
         }).mount('#app');
     </script>
 </body>

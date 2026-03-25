@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movie Gadget Archive | 人物法寶</title>
+    <title>Movie Gadget Archive</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -14,32 +14,19 @@
             font-family: 'Inter', 'Noto Sans TC', 'Noto Sans JP', system-ui, sans-serif; color: #1e293b;
         }
         .bg-grid { background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px); background-size: 40px 40px; }
-        
-        /* Loading Spinner */
         .loader-wrapper { position: fixed; inset: 0; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
         .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
         .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
-        
-        .data-card { 
-            background: white; border-radius: 24px; border: 2px solid #f1f5f9; 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .data-card { background: white; border-radius: 24px; border: 2px solid #f1f5f9; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .data-card:hover { border-color: #6366f1; transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.05); }
-
-        .counter-update { display: inline-block; animation: number-roll 0.3s ease-out; }
-        @keyframes number-roll {
-            0% { transform: translateY(10px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
     </style>
 </head>
 <body class="bg-grid">
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Accessing Movie Archives...</p>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Loading Gadget Data...</p>
         </div>
 
         <nav class="top-nav">
@@ -56,67 +43,77 @@
         <main class="max-w-[1400px] mx-auto px-6 pt-10">
             <div class="flex flex-wrap items-center gap-4 mb-8 bg-white/80 p-4 rounded-2xl backdrop-blur-md border border-slate-200 sticky top-24 z-30 shadow-sm">
                 
-                <div class="flex-1 min-w-[280px] relative">
+                <div class="flex-1 min-w-[280px] relative group">
                     <div class="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-500">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3" stroke-linecap="round"></path></svg>
                     </div>
-                    <input type="text" v-model.trim="searchQuery" placeholder="Search Title or ID..." 
-                           class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-11 pr-4 py-2.5 text-sm font-bold outline-none focus:border-indigo-500 focus:bg-white transition-all">
+                    
+                    <input type="text" v-model.trim="searchQuery" placeholder="Search Gadget or Description..." 
+                           class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-11 pr-12 py-2.5 text-sm font-bold outline-none focus:border-indigo-500 focus:bg-white transition-all">
+                    
+                    <button v-if="searchQuery" @click="searchQuery = ''" 
+                            class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </button>
                 </div>
             
                 <div class="flex items-center gap-2">
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Classification</span>
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Category</span>
                     <select v-model="selectedClass" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2 text-sm font-black outline-none cursor-pointer">
-                        <option value="All">All Categories</option>
+                        <option value="All">All Classifications</option>
                         <option v-for="cls in classifications" :key="cls" :value="cls">{{ cls }}</option>
                     </select>
                 </div>
 
                 <div class="bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-xl flex items-center gap-3">
-                    <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Gadgets</span>
-                    <span :key="displayData.length" class="text-xl font-black text-indigo-900 leading-none counter-update">{{ displayData.length }}</span>
+                    <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Results</span>
+                    <span class="text-xl font-black text-indigo-900 leading-none">{{ displayData.length }}</span>
                 </div>
-            
-                <button @click="resetFilters" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                </button>
             </div>
 
             <div class="grid gap-8 mb-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                 <div v-for="parent in paginatedData" :key="parent['Object ID']" class="data-card p-8 flex flex-col shadow-sm">
                     <div class="mb-4">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="px-3 py-1 bg-indigo-100 text-indigo-700 text-[10px] font-black rounded-full uppercase tracking-wider">
-                                {{ parent['Object Type'] }}
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="px-3 py-1 bg-slate-100 text-slate-600 text-[9px] font-black rounded-lg uppercase tracking-wider">
+                                {{ parent['Object Classification'] }}
                             </span>
-                            <span class="text-[10px] font-bold text-slate-400">#{{ parent['Object ID'] }}</span>
+                            <span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded">{{ parent['Object Type'] }}</span>
                         </div>
-                        <h2 class="text-2xl font-black text-slate-900 leading-tight mb-1">{{ parent['JP Title'] }}</h2>
-                        <p class="text-sm text-slate-500 font-medium line-clamp-2">{{ parent['Description'] }}</p>
+                        <h2 class="text-2xl font-black text-slate-900 leading-tight mb-2">{{ parent['JP Title'] }}</h2>
+                        <p class="text-sm text-slate-500 font-medium leading-relaxed">{{ parent['Description'] }}</p>
                     </div>
 
-                    <div class="mt-auto pt-6 border-t border-slate-100">
-                        <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Movie Appearances</h4>
-                        <div class="space-y-3">
-                            <div v-for="(child, idx) in parent.children" :key="idx" class="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                                <div class="flex justify-between items-start">
-                                    <span class="text-xs font-black text-slate-800">{{ child['HK Translation'] }}</span>
-                                    <span class="text-[9px] font-bold bg-slate-200 px-1.5 py-0.5 rounded text-slate-600">{{ child['Movie ID'] }}</span>
-                                </div>
-                                <p v-if="child['Remark'] && child['Remark'] !== '-'" class="text-[10px] text-slate-400 mt-1 italic">
-                                    {{ child['Remark'] }}
-                                </p>
-                            </div>
+                    <div class="mt-auto pt-6 border-t border-slate-100 space-y-3">
+                        <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Movie Appearances</h4>
+                        <div v-for="(child, idx) in parent.children" :key="idx" class="flex items-center justify-between bg-slate-50/50 p-3 rounded-xl border border-slate-100">
+                            <span class="text-xs font-black text-slate-700">{{ child['HK Translation'] }}</span>
+                            <span class="text-[9px] font-bold text-slate-400">ID: {{ child['Movie ID'] }}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div v-if="totalPages > 1" class="flex justify-center gap-2 py-12 border-t border-slate-200">
-                <button v-for="p in totalPages" :key="p" @click="currentPage = p"
-                        :class="['w-10 h-10 rounded-xl text-xs font-black transition-all', currentPage === p ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white border-2 border-slate-100 text-slate-400']">
-                    {{ p }}
-                </button>
+            <div v-if="totalPages > 1" class="flex flex-col items-center gap-6 py-12 border-t border-slate-200">
+                <div class="flex items-center gap-2">
+                    <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" 
+                            class="w-10 h-10 flex items-center justify-center bg-white border-2 border-slate-100 rounded-xl disabled:opacity-30 hover:border-indigo-500 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </button>
+
+                    <div class="flex gap-2">
+                        <button v-for="p in totalPages" :key="p" @click="changePage(p)"
+                                :class="['w-10 h-10 rounded-xl text-xs font-black transition-all', currentPage === p ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white border-2 border-slate-100 text-slate-400 hover:border-indigo-300']">
+                            {{ p }}
+                        </button>
+                    </div>
+
+                    <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" 
+                            class="w-10 h-10 flex items-center justify-center bg-white border-2 border-slate-100 rounded-xl disabled:opacity-30 hover:border-indigo-500 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </button>
+                </div>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Page {{ currentPage }} of {{ totalPages }}</p>
             </div>
         </main>
     </div>
@@ -130,9 +127,9 @@
                     searchQuery: '',
                     selectedClass: 'All',
                     currentPage: 1,
-                    itemsPerPage: 9,
-                    parentData: [], // 人物法寶
-                    childData: [],  // 電影人物法寶
+                    itemsPerPage: 12,
+                    parentData: [],
+                    childData: [],
                 }
             },
             async mounted() {
@@ -142,18 +139,13 @@
                         fetch(base + "人物法寶").then(r => r.json()),
                         fetch(base + "電影人物法寶").then(r => r.json())
                     ]);
-                    
                     this.parentData = parents;
                     this.childData = children;
                     this.loading = false;
-                } catch (e) {
-                    console.error("Data fetch error:", e);
-                    this.loading = false;
-                }
+                } catch (e) { console.error(e); this.loading = false; }
             },
             computed: {
                 classifications() {
-                    // Extract unique classifications from Active records
                     const classes = this.parentData
                         .filter(item => item['Active']?.toLowerCase() === 'yes' && item['Object Classification'])
                         .map(item => item['Object Classification']);
@@ -161,22 +153,17 @@
                 },
                 displayData() {
                     const q = this.searchQuery.toLowerCase();
-                    
                     return this.parentData
                         .filter(p => {
                             const isActive = p['Active']?.toLowerCase() === 'yes';
                             const matchesClass = this.selectedClass === 'All' || p['Object Classification'] === this.selectedClass;
-                            const matchesSearch = !q || 
-                                (p['JP Title'] + p['Object ID'] + p['Description']).toLowerCase().includes(q);
+                            const matchesSearch = !q || (p['JP Title'] + p['Description']).toLowerCase().includes(q);
                             return isActive && matchesClass && matchesSearch;
                         })
                         .map(p => {
-                            // Join logic: Find all children matching the Object ID
                             const children = this.childData.filter(c => String(c['Object ID']) === String(p['Object ID']));
                             return { ...p, children };
-                        })
-                        // Only show parents that have movie appearances
-                        .filter(p => p.children.length > 0);
+                        });
                 },
                 paginatedData() {
                     const start = (this.currentPage - 1) * this.itemsPerPage;
@@ -187,6 +174,10 @@
                 }
             },
             methods: {
+                changePage(p) {
+                    this.currentPage = p;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
                 resetFilters() {
                     this.searchQuery = '';
                     this.selectedClass = 'All';

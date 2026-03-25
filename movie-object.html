@@ -55,6 +55,9 @@
                 <div class="flex-1 min-w-[250px] relative">
                     <input type="text" v-model.trim="searchQuery" placeholder="Search across all fields..." 
                            class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-4 pr-12 py-2.5 text-sm font-bold outline-none focus:border-indigo-500 transition-all">
+                    <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-500 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </button>
                 </div>
                 
                 <div class="flex gap-4">
@@ -125,10 +128,21 @@
                 </div>
             </div>
 
-            <div v-if="totalPages > 1" class="flex justify-center gap-2 py-12 border-t border-slate-200">
-                <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" class="w-10 h-10 border-2 rounded-xl disabled:opacity-20">Prev</button>
-                <button v-for="p in totalPages" @click="changePage(p)" :class="['w-10 h-10 rounded-xl text-xs font-black', currentPage === p ? 'bg-indigo-600 text-white' : 'bg-white border-2 border-slate-100 text-slate-400']">{{p}}</button>
-                <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" class="w-10 h-10 border-2 rounded-xl disabled:opacity-20">Next</button>
+            <div v-if="totalPages > 1" class="flex flex-col items-center gap-4 py-12 border-t border-slate-200">
+                <div class="flex items-center gap-2">
+                    <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" class="w-10 h-10 flex items-center justify-center bg-white border-2 border-slate-100 rounded-xl disabled:opacity-30">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="3" stroke-linecap="round"></path></svg>
+                    </button>
+                    <div class="flex gap-2">
+                        <button v-for="p in totalPages" :key="p" @click="changePage(p)"
+                                :class="['w-10 h-10 rounded-xl text-xs font-black transition-all', currentPage === p ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white border-2 border-slate-100 text-slate-400']">
+                            {{ p }}
+                        </button>
+                    </div>
+                    <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" class="w-10 h-10 flex items-center justify-center bg-white border-2 border-slate-100 rounded-xl disabled:opacity-30">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round"></path></svg>
+                    </button>
+                </div>
             </div>
         </main>
     </div>
@@ -150,7 +164,6 @@
                         fetch(base + "電影人物法寶").then(r => r.json()),
                         fetch(base + "電影動畫").then(r => r.json())
                     ]);
-                    // Add local 'activeTab' property to each object
                     this.parentData = parents.map(p => ({ ...p, activeTab: 'movie' }));
                     this.childData = children;
                     this.movieData = movies;
@@ -158,10 +171,9 @@
                 } catch (e) { this.loading = false; }
             },
             methods: {
-                // 1. HIGHLIGHTING METHOD
                 highlight(text) {
                     if (!this.searchQuery) return text;
-                    const regex = new RegExp(`(${this.searchQuery})`, 'gi');
+                    const regex = new RegExp(`(${this.searchQuery.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
                     return String(text).replace(regex, '<mark>$1</mark>');
                 },
                 changePage(p) { this.currentPage = p; window.scrollTo({ top: 0, behavior: 'smooth' }); }
@@ -211,6 +223,11 @@
                     return this.displayData.slice(start, start + this.itemsPerPage);
                 },
                 totalPages() { return Math.ceil(this.displayData.length / this.itemsPerPage); }
+            },
+            watch: {
+                searchQuery() { this.currentPage = 1; },
+                selectedClass() { this.currentPage = 1; },
+                selectedType() { this.currentPage = 1; }
             }
         }).mount('#app');
     </script>

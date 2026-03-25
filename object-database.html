@@ -90,6 +90,17 @@
                         </div>
                     </div>
 
+                    <div v-if="item['Movie ID']" class="mb-6 pt-4 border-t border-slate-50">
+                        <p class="text-[8px] font-black text-slate-400 uppercase mb-2 tracking-widest">Featured In Movie</p>
+                        <a :href="'movie.html?mediaid=' + item['Movie ID']" 
+                           class="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"></path></svg>
+                            <span class="text-xs font-black underline decoration-2 underline-offset-4 leading-snug">
+                                {{ getMovieTitle(item['Movie ID']) }}
+                            </span>
+                        </a>
+                    </div>
+
                     <div v-if="object === 'Character'" class="mt-auto pt-4 border-t border-slate-50">
                         <span class="text-[9px] font-black text-red-500 uppercase tracking-widest block mb-2">{{ item['Object Type'] || 'General' }}</span>
                         <p class="text-xs text-slate-500 line-clamp-3 italic leading-relaxed">
@@ -107,14 +118,15 @@
         createApp({
             data() {
                 return {
-                    object: 'Gadget', // Matches your toggle logic
+                    object: 'Gadget', 
                     loading: true,
                     searchQuery: '',
                     db: {
                         gadgetMaster: [],
                         gadgetMedia: [],
                         objectMaster: [],
-                        objectMedia: []
+                        objectMedia: [],
+                        movies: [] // New sheet
                     }
                 }
             },
@@ -160,26 +172,32 @@
                     const SHEET_ID = "1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8";
                     const base = `https://opensheet.elk.sh/${SHEET_ID}/`;
                     try {
-                        const [gMaster, gMedia, oMaster, oMedia] = await Promise.all([
+                        const [gMaster, gMedia, oMaster, oMedia, movies] = await Promise.all([
                             fetch(base + "法寶").then(r => r.json()),
                             fetch(base + "媒體與法寶").then(r => r.json()),
                             fetch(base + "人物").then(r => r.json()),
-                            fetch(base + "媒體與人物").then(r => r.json())
+                            fetch(base + "媒體與人物").then(r => r.json()),
+                            fetch(base + "電影動畫").then(r => r.json())
                         ]);
                         this.db.gadgetMaster = gMaster;
                         this.db.gadgetMedia = gMedia;
                         this.db.objectMaster = oMaster;
                         this.db.objectMedia = oMedia;
+                        this.db.movies = movies;
                     } finally {
                         this.loading = false;
                     }
+                },
+                getMovieTitle(movieId) {
+                    if (!movieId) return 'Unknown Movie';
+                    const movie = this.db.movies.find(m => m['Media ID'] === movieId);
+                    return movie ? movie['JP Title'] : 'Movie Details';
                 },
                 toggleObject(type) {
                     this.object = type;
                     this.searchQuery = '';
                 },
                 updateView(view) {
-                    // Logic for home link if needed
                     window.location.href = 'index.html';
                 }
             },

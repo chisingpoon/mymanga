@@ -53,9 +53,6 @@
                 <div class="flex-1 min-w-[250px] relative">
                     <input type="text" v-model.trim="searchQuery" placeholder="Search across all fields..." 
                            class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-4 pr-12 py-2.5 text-sm font-bold outline-none focus:border-indigo-500 transition-all">
-                    <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-500 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                    </button>
                 </div>
                 
                 <div class="flex gap-4">
@@ -63,7 +60,6 @@
                         <option value="All">All Class</option>
                         <option v-for="cls in classifications" :key="cls" :value="cls">{{ cls }}</option>
                     </select>
-
                     <select v-model="selectedType" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2 text-sm font-black outline-none cursor-pointer">
                         <option value="All">All Types</option>
                         <option v-for="t in filteredObjectTypes" :key="t" :value="t">{{ t }}</option>
@@ -79,9 +75,9 @@
             <div class="grid gap-8 mb-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                 <div v-for="parent in paginatedData" :key="parent['Object ID']" class="data-card p-8 shadow-sm">
                     <div class="mb-6">
-                        <div class="flex justify-between items-start mb-3">
-                            <span class="px-3 py-1 bg-slate-100 text-slate-600 text-[9px] font-black rounded-lg uppercase">{{ parent['Object Classification'] }}</span>
-                            <span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded">{{ parent['Object Type'] }}</span>
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="px-4 py-1.5 bg-slate-100 text-slate-700 text-xs font-black rounded-xl uppercase tracking-wider">{{ parent['Object Classification'] }}</span>
+                            <span class="text-xs font-black text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-xl uppercase tracking-wider">{{ parent['Object Type'] }}</span>
                         </div>
                         <h2 class="text-2xl font-black text-slate-900 leading-tight mb-2" v-html="highlight(parent['JP Title'])"></h2>
                         <div v-if="parent['Description'] && parent['Description'] !== '-'" class="bg-slate-50 border-l-4 border-indigo-500 p-4 rounded-r-xl mb-4">
@@ -124,9 +120,15 @@
                             </div>
 
                             <div v-if="getTab(parent['Object ID']) === 'manga'">
-                                <div v-if="parent.mangaInfo" class="mb-3 px-1 space-y-2 border-b border-slate-100 pb-3">
-                                    <div class="text-xs font-bold text-slate-400 uppercase">文傳譯: <span class="text-sm text-slate-900 font-black ml-1 block mt-0.5" v-html="highlight(parent.mangaInfo['CultureCom Trans'] || '-')"></span></div>
-                                    <div class="text-xs font-bold text-slate-400 uppercase">青文譯: <span class="text-sm text-slate-900 font-black ml-1 block mt-0.5" v-html="highlight(parent.mangaInfo['HKChingWin Trans'] || '-')"></span></div>
+                                <div v-if="parent.mangaInfo" class="mb-4 px-1 space-y-2 border-b border-slate-100 pb-3">
+                                    <div class="flex items-center gap-2 whitespace-nowrap overflow-hidden">
+                                        <span class="text-[11px] font-black text-slate-400 uppercase tracking-tighter shrink-0">文傳譯:</span>
+                                        <span class="text-base text-slate-900 font-black truncate" v-html="highlight(parent.mangaInfo['CultureCom Trans'] || '-')"></span>
+                                    </div>
+                                    <div class="flex items-center gap-2 whitespace-nowrap overflow-hidden">
+                                        <span class="text-[11px] font-black text-slate-400 uppercase tracking-tighter shrink-0">青文譯:</span>
+                                        <span class="text-base text-slate-900 font-black truncate" v-html="highlight(parent.mangaInfo['HKChingWin Trans'] || '-')"></span>
+                                    </div>
                                 </div>
                                 
                                 <div v-if="parent.mangaRecords.length > 0" class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
@@ -149,21 +151,7 @@
                 </div>
             </div>
 
-            <div v-if="totalPages > 1" class="flex flex-col items-center gap-4 py-12 border-t border-slate-200">
-                <div class="flex items-center gap-2">
-                    <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" class="w-10 h-10 flex items-center justify-center bg-white border-2 border-slate-100 rounded-xl disabled:opacity-30">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="3" stroke-linecap="round"></path></svg>
-                    </button>
-                    <div class="flex gap-2">
-                        <button v-for="p in totalPages" :key="p" @click="changePage(p)"
-                                :class="['w-10 h-10 rounded-xl text-xs font-black transition-all', currentPage === p ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white border-2 border-slate-100 text-slate-400']">{{ p }}</button>
-                    </div>
-                    <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" class="w-10 h-10 flex items-center justify-center bg-white border-2 border-slate-100 rounded-xl disabled:opacity-30">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round"></path></svg>
-                    </button>
-                </div>
-            </div>
-        </main>
+            </main>
     </div>
 
     <script>
@@ -199,15 +187,12 @@
                     const regex = new RegExp(`(${this.searchQuery.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
                     return String(text).replace(regex, '<mark>$1</mark>');
                 },
-                changePage(p) { this.currentPage = p; window.scrollTo({ top: 0, behavior: 'smooth' }); },
-                handleClassChange() { this.selectedType = 'All'; this.currentPage = 1; },
                 getTab(id) { return this.tabStates[id] || 'movie'; },
-                setTab(id, tab) { this.tabStates[id] = tab; }
+                setTab(id, tab) { this.tabStates[id] = tab; },
+                handleClassChange() { this.selectedType = 'All'; this.currentPage = 1; }
             },
             computed: {
-                classifications() {
-                    return [...new Set(this.parentData.filter(i => i['Active']?.toLowerCase() === 'yes').map(i => i['Object Classification']))].sort();
-                },
+                classifications() { return [...new Set(this.parentData.filter(i => i['Active']?.toLowerCase() === 'yes').map(i => i['Object Classification']))].sort(); },
                 filteredObjectTypes() {
                     let allTypes = [...new Set(this.parentData.filter(i => i['Active']?.toLowerCase() === 'yes').map(i => i['Object Type']))].sort();
                     if (this.selectedClass === '法寶') return allTypes.filter(t => t === '法寶');
@@ -216,61 +201,29 @@
                 },
                 displayData() {
                     const q = this.searchQuery.toLowerCase();
-                    return this.parentData
-                        .filter(p => {
-                            if (p['Active']?.toLowerCase() !== 'yes') return false;
-                            const matchClass = this.selectedClass === 'All' || p['Object Classification'] === this.selectedClass;
-                            const matchType = this.selectedType === 'All' || p['Object Type'] === this.selectedType;
-                            
-                            const manInfo = this.mangaChild.find(c => String(c['Object ID']) === String(p['Object ID']));
-                            const mAppears = this.movieChild.filter(c => String(c['Object ID']) === String(p['Object ID']));
-
-                            const matchSearch = !q || 
-                                (p['JP Title'] || '').toLowerCase().includes(q) || 
-                                (p['Description'] || '').toLowerCase().includes(q) ||
-                                (manInfo && ((manInfo['CultureCom Trans'] || '').toLowerCase().includes(q) || (manInfo['HKChingWin Trans'] || '').toLowerCase().includes(q))) ||
-                                mAppears.some(c => {
-                                    const m = this.movieMeta.find(movie => String(movie['Media ID']) === String(c['Movie ID']));
-                                    return (c['HK Translation'] || '').toLowerCase().includes(q) || (m && (m['JP Title'] || '').toLowerCase().includes(q));
-                                });
-
-                            return matchClass && matchType && matchSearch;
-                        })
-                        .map(p => {
-                            const movieAppearances = this.movieChild
-                                .filter(c => String(c['Object ID']) === String(p['Object ID']))
-                                .map(c => {
-                                    const m = this.movieMeta.find(movie => String(movie['Media ID']) === String(c['Movie ID']));
-                                    let year = 'N/A';
-                                    if (m && m['JP Release Date']) {
-                                        const found = m['JP Release Date'].match(/\d{4}/);
-                                        if (found) year = found[0];
-                                    }
-                                    return { ...c, movieTitle: m ? m['JP Title'] : 'Unknown', movieYear: year };
-                                });
-
-                            const manInfo = this.mangaChild.find(c => String(c['Object ID']) === String(p['Object ID']));
-                            let mangaRecords = [];
-                            if (manInfo) {
-                                const relatedWorks = this.workInclude.filter(w => String(w['作品番']) === String(manInfo['Work ID']));
-                                mangaRecords = relatedWorks.map(w => {
-                                    const pub = this.pubCatalog.find(pc => String(pc['ISBN']) === String(w['ISBN']));
-                                    return { 
-                                        isbn: w['ISBN'], 
-                                        type: pub ? pub['類'] : 'N/A',
-                                        title: pub ? pub['標題'] : 'Unknown', 
-                                        vol: pub ? pub['巻'] : '' 
-                                    };
-                                });
-                            }
-                            return { ...p, movieAppearances, mangaInfo: manInfo, mangaRecords };
+                    return this.parentData.filter(p => {
+                        if (p['Active']?.toLowerCase() !== 'yes') return false;
+                        const matchClass = this.selectedClass === 'All' || p['Object Classification'] === this.selectedClass;
+                        const matchType = this.selectedType === 'All' || p['Object Type'] === this.selectedType;
+                        const matchSearch = !q || (p['JP Title'] || '').toLowerCase().includes(q) || (p['Description'] || '').toLowerCase().includes(q);
+                        return matchClass && matchType && matchSearch;
+                    }).map(p => {
+                        const movieAppearances = this.movieChild.filter(c => String(c['Object ID']) === String(p['Object ID'])).map(c => {
+                            const m = this.movieMeta.find(movie => String(movie['Media ID']) === String(c['Movie ID']));
+                            return { ...c, movieTitle: m ? m['JP Title'] : 'Unknown', movieYear: (m?.['JP Release Date']?.match(/\d{4}/) || ['N/A'])[0] };
                         });
+                        const manInfo = this.mangaChild.find(c => String(c['Object ID']) === String(p['Object ID']));
+                        let mangaRecords = [];
+                        if (manInfo) {
+                            mangaRecords = this.workInclude.filter(w => String(w['作品番']) === String(manInfo['Work ID'])).map(w => {
+                                const pub = this.pubCatalog.find(pc => String(pc['ISBN']) === String(w['ISBN']));
+                                return { isbn: w['ISBN'], type: pub?.['類'] || 'N/A', title: pub?.['標題'] || 'Unknown', vol: pub?.['巻'] || '' };
+                            });
+                        }
+                        return { ...p, movieAppearances, mangaInfo: manInfo, mangaRecords };
+                    });
                 },
-                paginatedData() {
-                    const start = (this.currentPage - 1) * this.itemsPerPage;
-                    return this.displayData.slice(start, start + this.itemsPerPage);
-                },
-                totalPages() { return Math.ceil(this.displayData.length / this.itemsPerPage); }
+                paginatedData() { return this.displayData.slice((this.currentPage - 1) * 12, this.currentPage * 12); }
             }
         }).mount('#app');
     </script>

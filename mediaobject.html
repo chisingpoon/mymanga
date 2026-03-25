@@ -220,6 +220,12 @@
                     const movieID = params.get('movieid');
                     const isbn = params.get('isbn');
                     const animeID = params.get('animeid');
+                    const fClass = params.get('filterclass');
+
+                    if (fClass === '法寶' || fClass === '人物') {
+                        this.selectedClass = fClass;
+                        this.handleClassChange(); // Resets Type and Page via your existing method
+                    }
 
                     if (movieID) {
                         const movie = this.movieMeta.find(m => String(m['Media ID']) === String(movieID));

@@ -15,6 +15,23 @@
             background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
             background-size: 20px 20px;
         }
+        /* Hover Effects */
+        .hover-card { 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .hover-card:hover { 
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            border-color: #e2e8f0;
+        }
+        .sub-card-hover {
+            transition: all 0.2s ease;
+        }
+        .sub-card-hover:hover {
+            background-color: #ffffff;
+            border-color: #cbd5e1;
+            transform: scale(1.01);
+        }
     </style>
 </head>
 <body class="bg-grid text-slate-900 min-h-screen pb-20">
@@ -52,7 +69,7 @@
                     <input type="text" v-model="searchQuery" placeholder="Search entries..." 
                         class="w-full bg-white border border-slate-200 rounded-2xl py-4 pl-14 pr-12 text-sm font-bold shadow-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
                     <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </button>
                 </div>
 
@@ -62,14 +79,17 @@
                         <button @click="groupBy = 'id'" :class="groupBy === 'id' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-3 py-1.5 rounded-md text-[9px] font-black uppercase transition-all">By {{ object }}</button>
                         <button @click="groupBy = 'movie'" :class="groupBy === 'movie' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-3 py-1.5 rounded-md text-[9px] font-black uppercase transition-all">By Movie</button>
                     </div>
-                    <span class="bg-slate-900 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg">{{ filteredData.length }}</span>
+                    <div class="flex items-center gap-2">
+                        <span class="bg-slate-900 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg">{{ filteredData.length }}</span>
+                        <span class="text-[9px] font-black uppercase text-slate-400 tracking-widest">Matched</span>
+                    </div>
                 </div>
             </div>
 
             <div v-if="!loading" :class="groupBy === 'movie' ? 'flex flex-col gap-10' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8'">
                 
                 <div v-for="(group, key) in groupedData" :key="key" 
-                    class="bg-white rounded-[2.5rem] border border-slate-200 p-8 shadow-sm flex flex-col hover:shadow-md transition-shadow">
+                    class="bg-white rounded-[2.5rem] border border-slate-200 p-8 shadow-sm flex flex-col hover-card">
                     
                     <div class="mb-6 pb-6 border-b border-slate-100 flex justify-between items-start">
                         <div class="flex-grow">
@@ -81,23 +101,28 @@
                                 </a>
                             </div>
                             <div v-else>
-                                <h3 class="text-2xl font-black text-slate-900 leading-tight mb-1">{{ group[0]['JP Title'] }}</h3>
-                                <p v-if="object === 'Gadget'" class="text-lg font-bold text-blue-600 italic">{{ group[0]['HK Translation'] || '---' }}</p>
+                                <h3 class="text-2xl font-black text-slate-900 leading-tight mb-1">
+                                    <span class="text-xs font-bold text-slate-400 align-middle mr-1 uppercase">原文/</span>{{ group[0]['JP Title'] }}
+                                </h3>
+                                <p v-if="object === 'Gadget'" class="text-lg font-bold text-blue-600 italic">
+                                    <span class="text-[10px] font-black text-blue-400 not-italic uppercase mr-1">港譯/</span>{{ group[0]['HK Translation'] || '---' }}
+                                </p>
                                 <div v-if="object === 'Character'" class="mt-3">
                                     <span class="text-[10px] font-black text-red-500 bg-red-50 px-2 py-1 rounded uppercase tracking-widest inline-block mb-2">{{ group[0]['Object Type'] || 'General' }}</span>
                                     <p class="text-xs text-slate-500 leading-relaxed italic border-l-2 border-slate-100 pl-3">{{ group[0]['Description'] || 'No additional details.' }}</p>
                                 </div>
                             </div>
                         </div>
+                        
                         <div class="shrink-0 ml-4">
                             <span class="text-[11px] font-black bg-slate-50 text-slate-400 border border-slate-100 px-3 py-1 rounded-full uppercase tracking-widest">
-                                {{ group.length }} {{ group.length > 1 ? 'Records' : 'Record' }}
+                                {{ group.length }} {{ groupBy === 'movie' ? 'Movies' : 'Items' }}
                             </span>
                         </div>
                     </div>
 
                     <div :class="groupBy === 'movie' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4' : 'flex-grow space-y-3 overflow-y-auto max-h-[400px] pr-2'">
-                        <div v-for="(item, idx) in group" :key="idx" class="bg-slate-50 rounded-2xl p-5 border border-slate-100 flex flex-col justify-between">
+                        <div v-for="(item, idx) in group" :key="idx" class="bg-slate-50 rounded-2xl p-5 border border-slate-100 flex flex-col justify-between sub-card-hover">
                             
                             <div>
                                 <div v-if="groupBy === 'id'" class="mb-3 border-b border-slate-200 pb-2">
@@ -108,7 +133,9 @@
                                     <span v-else class="text-[10px] font-black text-slate-400 uppercase italic">Misc. Appearance</span>
                                 </div>
 
-                                <h4 v-if="groupBy === 'movie'" class="font-black text-slate-800 text-sm mb-1">{{ item['JP Title'] }}</h4>
+                                <h4 v-if="groupBy === 'movie'" class="font-black text-slate-800 text-sm mb-1">
+                                    <span class="text-[9px] font-bold text-slate-400 uppercase mr-1">原文/</span>{{ item['JP Title'] }}
+                                </h4>
 
                                 <div class="grid grid-cols-2 gap-2 text-[10px] font-black mt-2">
                                     <div><span class="text-slate-400 block text-[7px] uppercase">文化傳信</span><span class="text-slate-700">{{ item['CultureCom Trans'] || '-' }}</span></div>
@@ -118,7 +145,9 @@
 
                             <div v-if="groupBy === 'movie'" class="mt-4 pt-3 border-t border-slate-200">
                                 <span class="text-[8px] font-black text-slate-400 uppercase block mb-1 tracking-tighter">Work ID: {{ item['Work ID'] || 'N/A' }}</span>
-                                <p class="text-[11px] font-bold text-blue-600 italic">{{ item['HK Translation'] }}</p>
+                                <p class="text-[11px] font-bold text-blue-600 italic">
+                                    <span class="text-[9px] font-black text-blue-400 not-italic uppercase mr-1">港譯/</span>{{ item['HK Translation'] }}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -155,7 +184,8 @@
                         const q = this.searchQuery.toLowerCase();
                         return (x['JP Title'] || '').toLowerCase().includes(q) || 
                                (x['HK Translation'] || '').toLowerCase().includes(q) ||
-                               (x.movieTitle || '').toLowerCase().includes(q);
+                               (x.movieTitle || '').toLowerCase().includes(q) ||
+                               (x.displayId || '').toString().toLowerCase().includes(q);
                     });
                 },
                 groupedData() {

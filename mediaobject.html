@@ -179,18 +179,28 @@
                         fetch(base + "書籍收錄作品").then(r => r.json()),
                         fetch(base + "出版目録JP").then(r => r.json())
                     ]);
+                    
+                    // Critical Fix: Store data first
                     this.parentData = parents;
-                    this.movieChild = mChild; this.movieMeta = mMeta;
-                    this.mangaChild = manChild; this.workInclude = works; this.pubCatalog = pubs;
+                    this.movieChild = mChild; 
+                    this.movieMeta = mMeta;
+                    this.mangaChild = manChild; 
+                    this.workInclude = works; 
+                    this.pubCatalog = pubs;
 
+                    // Trigger Search ONLY after data is stored
                     const params = new URLSearchParams(window.location.search);
-                    if (params.get('movieid')) {
-                        const movie = this.movieMeta.find(m => String(m['Media ID']) === String(params.get('movieid')));
-                        if (movie) { this.searchQuery = movie['JP Title']; this.currentPage = 1; }
-                    } else if (params.get('isbn')) {
-                        const pub = this.pubCatalog.find(p => String(p['ISBN']) === String(params.get('isbn')));
-                        if (pub) { this.searchQuery = `${pub['類']} ${pub['標題']}`; this.currentPage = 1; }
+                    const movieID = params.get('movieid');
+                    const isbn = params.get('isbn');
+
+                    if (movieID) {
+                        const movie = this.movieMeta.find(m => String(m['Media ID']) === String(movieID));
+                        if (movie) { this.searchQuery = movie['JP Title']; }
+                    } else if (isbn) {
+                        const pub = this.pubCatalog.find(p => String(p['ISBN']) === String(isbn));
+                        if (pub) { this.searchQuery = `${pub['類']} ${pub['標題']}`; }
                     }
+
                     this.loading = false;
                 } catch (e) { this.loading = false; }
             },
@@ -209,7 +219,7 @@
                 classifications() { return [...new Set(this.parentData.filter(i => i['Active']?.toLowerCase() === 'yes').map(i => i['Object Classification']))].sort(); },
                 filteredObjectTypes() {
                     let allTypes = [...new Set(this.parentData.filter(i => i['Active']?.toLowerCase() === 'yes').map(i => i['Object Type']))].sort();
-                    if (this.selectedClass === '法寶') return allTypes.filter(t => t === '法BOR'); // Maintain your specific logic
+                    if (this.selectedClass === '法寶') return allTypes.filter(t => t === '法寶');
                     if (this.selectedClass === '人物') return allTypes.filter(t => t !== '法寶');
                     return allTypes;
                 },
@@ -222,10 +232,10 @@
                         if (!(matchClass && matchType)) return false;
                         if (!q) return true;
 
-                        // Check Basic Info
+                        // 1. Check Titles/Description
                         if ((p['JP Title'] || '').toLowerCase().includes(q) || (p['Description'] || '').toLowerCase().includes(q)) return true;
 
-                        // Check Manga Trans & Manga JP Fields
+                        // 2. Check Manga/Publisher related titles
                         const manInfo = this.mangaChild.find(c => String(c['Object ID']) === String(p['Object ID']));
                         if (manInfo) {
                             if ((manInfo['CultureCom Trans'] || '').toLowerCase().includes(q) || (manInfo['HKChingWin Trans'] || '').toLowerCase().includes(q)) return true;
@@ -236,9 +246,9 @@
                             })) return true;
                         }
 
-                        // Check Movie Titles
-                        const apprs = this.movieChild.filter(c => String(c['Object ID']) === String(p['Object ID']));
-                        if (apprs.some(c => {
+                        // 3. Check Movie JP Titles
+                        const apps = this.movieChild.filter(c => String(c['Object ID']) === String(p['Object ID']));
+                        if (apps.some(c => {
                             const meta = this.movieMeta.find(m => String(m['Media ID']) === String(c['Movie ID']));
                             return meta && (meta['JP Title'] || '').toLowerCase().includes(q);
                         })) return true;

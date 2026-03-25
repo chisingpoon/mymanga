@@ -30,7 +30,7 @@
                             <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
                         </svg>
                     </a>
-                    <h1 @click="updateView('series')" class="font-black text-2xl tracking-tighter text-slate-800 uppercase cursor-pointer">Media Archive</h1>
+                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase cursor-pointer">Media Archive</h1>
                 </div>
 
                 <div class="flex bg-slate-200/50 p-1 rounded-xl border border-slate-200">
@@ -42,102 +42,85 @@
 
         <main class="max-w-[1920px] mx-auto py-10 px-6">
             
-            <div class="mb-8">
-                <h2 class="text-4xl font-black text-slate-900 uppercase tracking-tighter">
+            <div class="mb-10 flex flex-wrap lg:flex-nowrap items-center gap-6">
+                <h2 class="text-3xl font-black text-slate-900 uppercase tracking-tighter whitespace-nowrap">
                     {{ object === 'Gadget' ? 'Secret Gadgets' : 'Characters & Things' }}
                 </h2>
-            </div>
 
-            <div class="mb-10 flex flex-col lg:flex-row items-center gap-6">
-                <div class="relative flex-grow max-w-3xl w-full">
+                <div class="relative flex-grow min-w-[300px]">
                     <div class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5"></path></svg>
                     </div>
-                    <input type="text" v-model="searchQuery" placeholder="Search entries..." 
+                    <input type="text" v-model="searchQuery" placeholder="Search by name, ID, or movie..." 
                         class="w-full bg-white border border-slate-200 rounded-2xl py-4 pl-14 pr-12 text-sm font-bold shadow-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
                     <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </button>
                 </div>
 
-                <div class="flex items-center gap-4 bg-white px-6 py-3 rounded-2xl border border-slate-200 shadow-sm whitespace-nowrap">
-                    <span class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Group By:</span>
-                    <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
-                        <button @click="groupBy = 'id'" :class="groupBy === 'id' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-4 py-1.5 rounded-md text-[10px] font-black uppercase transition-all">
-                            {{ object }} ID
+                <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm shrink-0">
+                    <span class="text-[9px] font-black uppercase text-slate-400 tracking-widest">Group:</span>
+                    <div class="flex bg-slate-100 p-1 rounded-lg">
+                        <button @click="groupBy = 'id'" :class="groupBy === 'id' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-3 py-1.5 rounded-md text-[9px] font-black uppercase transition-all">
+                            By {{ object }}
                         </button>
-                        <button @click="groupBy = 'movie'" :class="groupBy === 'movie' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-4 py-1.5 rounded-md text-[10px] font-black uppercase transition-all">
-                            Movie
+                        <button @click="groupBy = 'movie'" :class="groupBy === 'movie' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-3 py-1.5 rounded-md text-[9px] font-black uppercase transition-all">
+                            By Movie
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div v-for="i in 6" class="h-96 bg-white/50 rounded-[2.5rem] border border-slate-200 animate-pulse"></div>
-            </div>
-
-            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div v-if="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 <div v-for="(group, key) in groupedData" :key="key" 
                     class="bg-white rounded-[2.5rem] border border-slate-200 p-8 shadow-sm flex flex-col h-full hover:shadow-md transition-shadow">
                     
                     <div class="mb-6 pb-6 border-b border-slate-100">
                         <div class="flex justify-between items-start mb-4">
                             <span class="text-[10px] font-black text-slate-300 font-mono tracking-tighter">#{{ key }}</span>
-                            <span v-if="groupBy === 'movie'" class="text-[9px] font-black bg-emerald-50 text-emerald-600 px-2 py-1 rounded-full uppercase tracking-widest">Movie Group</span>
+                            <span class="text-[9px] font-black bg-slate-50 text-slate-500 px-2 py-1 rounded-full uppercase tracking-widest">{{ groupBy === 'id' ? 'Master' : 'Movie' }} Group</span>
                         </div>
 
-                        <h3 class="text-2xl font-black text-slate-900 leading-tight mb-1">
-                            {{ groupBy === 'id' ? group[0]['JP Title'] : getMovieTitle(key) }}
-                        </h3>
-                        
-                        <div v-if="groupBy === 'id'" class="mt-2">
-                            <p v-if="object === 'Gadget'" class="text-lg font-bold text-blue-600 italic">
-                                {{ group[0]['HK Translation'] || '---' }}
-                            </p>
-                            <div v-if="object === 'Character'" class="flex flex-col gap-2 mt-3">
-                                <span class="text-[10px] font-black text-red-500 bg-red-50 self-start px-2 py-1 rounded uppercase tracking-widest">
-                                    {{ group[0]['Object Type'] || 'General' }}
-                                </span>
-                                <p class="text-xs text-slate-500 leading-relaxed italic border-l-2 border-slate-100 pl-3">
-                                    {{ group[0]['Description'] || 'No additional details.' }}
-                                </p>
+                        <div v-if="groupBy === 'movie'">
+                            <a :href="'movie.html?mediaid=' + key" class="text-2xl font-black text-indigo-600 hover:underline leading-tight block">
+                                {{ getMovieTitle(key) }}
+                            </a>
+                        </div>
+                        <div v-else>
+                            <h3 class="text-2xl font-black text-slate-900 leading-tight mb-1">{{ group[0]['JP Title'] }}</h3>
+                            <p v-if="object === 'Gadget'" class="text-lg font-bold text-blue-600 italic">{{ group[0]['HK Translation'] || '---' }}</p>
+                            <div v-if="object === 'Character'" class="mt-3">
+                                <span class="text-[10px] font-black text-red-500 bg-red-50 px-2 py-1 rounded uppercase tracking-widest inline-block mb-2">{{ group[0]['Object Type'] || 'General' }}</span>
+                                <p class="text-xs text-slate-500 leading-relaxed italic border-l-2 border-slate-100 pl-3">{{ group[0]['Description'] || 'No additional details.' }}</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="flex-grow space-y-3 overflow-y-auto max-h-[350px] pr-2 custom-scrollbar">
-                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Media Occurrences ({{ group.length }})</p>
-                        
-                        <div v-for="(item, idx) in group" :key="idx" 
-                            class="bg-slate-50 rounded-2xl p-4 border border-slate-100 group">
+                        <div v-for="(item, idx) in group" :key="idx" class="bg-slate-50 rounded-2xl p-5 border border-slate-100">
                             
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-[9px] font-black text-slate-400 uppercase">Work: {{ item['Work ID'] || 'N/A' }}</span>
-                                <a v-if="item['Movie ID']" :href="'movie.html?mediaid=' + item['Movie ID']" class="text-indigo-400 hover:text-indigo-600">
-                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"></path></svg>
+                            <div class="mb-3 border-b border-slate-200 pb-2">
+                                <a v-if="item['Movie ID']" :href="'movie.html?mediaid=' + item['Movie ID']" class="text-xs font-black text-indigo-600 hover:text-indigo-800 transition-colors uppercase flex items-center gap-2">
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"></path></svg>
+                                    {{ getMovieTitle(item['Movie ID']) }}
                                 </a>
+                                <span v-else class="text-[10px] font-black text-slate-400 uppercase italic">Misc. Appearance</span>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-2 text-[10px] font-black">
-                                <div class="truncate">
-                                    <span class="text-slate-400 block text-[7px] uppercase">文化</span>
-                                    <span class="text-slate-700">{{ item['CultureCom Trans'] || '-' }}</span>
-                                </div>
-                                <div class="truncate border-l border-slate-200 pl-2">
-                                    <span class="text-slate-400 block text-[7px] uppercase">正文</span>
-                                    <span class="text-slate-700">{{ item['HKChingWin Trans'] || '-' }}</span>
-                                </div>
+                            <h4 v-if="groupBy === 'movie'" class="font-black text-slate-800 text-sm mb-1">{{ item['JP Title'] }}</h4>
+
+                            <div class="grid grid-cols-2 gap-2 text-[10px] font-black mt-2">
+                                <div><span class="text-slate-400 block text-[7px] uppercase">文化</span><span class="text-slate-700">{{ item['CultureCom Trans'] || '-' }}</span></div>
+                                <div class="border-l border-slate-200 pl-2"><span class="text-slate-400 block text-[7px] uppercase">正文</span><span class="text-slate-700">{{ item['HKChingWin Trans'] || '-' }}</span></div>
                             </div>
-                            <p v-if="groupBy === 'movie'" class="mt-2 text-[11px] font-bold text-blue-600 italic border-t border-slate-200 pt-2">
-                                {{ item['HK Translation'] }}
-                            </p>
+
+                            <p v-if="groupBy === 'movie'" class="mt-2 text-[11px] font-bold text-blue-600 italic border-t border-slate-200 pt-2">{{ item['HK Translation'] }}</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
-    </div>
+        </div>
+    </main>
 
     <script>
         const { createApp } = Vue;
@@ -156,11 +139,9 @@
                     } else {
                         master = this.db.objectMaster; media = this.db.objectMedia; idKey = 'Object ID';
                     }
-
                     return media.map(mItem => {
                         const mst = master.find(mst => mst[idKey] === mItem[idKey]) || {};
                         if (mst.Active?.toString().toLowerCase() !== 'yes') return null;
-                        // Join Movie Info for searchability
                         const movie = this.db.movies.find(mov => mov['Media ID'] === mItem['Movie ID']) || {};
                         return { ...mst, ...mItem, movieTitle: movie['JP Title'], displayId: mItem[idKey] };
                     }).filter(x => {
@@ -169,8 +150,7 @@
                         const q = this.searchQuery.toLowerCase();
                         return (x['JP Title'] || '').toLowerCase().includes(q) || 
                                (x['HK Translation'] || '').toLowerCase().includes(q) ||
-                               (x.movieTitle || '').toLowerCase().includes(q) ||
-                               (x.displayId || '').toString().toLowerCase().includes(q);
+                               (x.movieTitle || '').toLowerCase().includes(q);
                     });
                 },
                 groupedData() {

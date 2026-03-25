@@ -225,28 +225,36 @@
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
                     
-                    // Convert UI strings to comparable Date objects
                     const parse = (val) => val ? new Date(val).getTime() : null;
                     const f = {
                         js: parse(this.filters.jpStart), je: parse(this.filters.jpEnd),
                         hs: parse(this.filters.hkStart), he: parse(this.filters.hkEnd)
                     };
-        
+                
                     return this.anime.filter(r => {
-                        // 1. Global Search Logic
-                        const combined = [r['Media ID'], r['JP Title'], r['HK Title'], r['Work ID'], r['Note'], r['JP Chapter ID'], r['JP Show ID']].join(' ').toLowerCase();
+                        // 1. Search Logic - Restored all IDs
+                        const combined = [
+                            r['Media ID'], 
+                            r['JP Title'], 
+                            r['HK Title'], 
+                            r['Work ID'], 
+                            r['Note'], 
+                            r['JP Chapter ID'], 
+                            r['JP Show ID']
+                        ].join(' ').toLowerCase();
+                        
                         if (q && !combined.includes(q)) return false;
                         
-                        // 2. Japan Date Logic
+                        // 2. Japan Date Logic (M/D/YYYY safe)
                         if (f.js || f.je) {
                             const dStr = r['JP Show Date'];
                             const d = dStr ? new Date(dStr).getTime() : null;
-                            if (!d || isNaN(d)) return false; // Hide rows with invalid/empty dates if filter is active
+                            if (!d || isNaN(d)) return false;
                             if (f.js && d < f.js) return false;
                             if (f.je && d > f.je) return false;
                         }
-        
-                        // 3. HK Date Logic
+                
+                        // 3. HK Date Logic (M/D/YYYY safe)
                         if (f.hs || f.he) {
                             const dStr = r['HK Show Date'];
                             const d = dStr ? new Date(dStr).getTime() : null;
@@ -254,7 +262,7 @@
                             if (f.hs && d < f.hs) return false;
                             if (f.he && d > f.he) return false;
                         }
-        
+                
                         return true;
                     });
                 },
@@ -282,6 +290,18 @@
                         this.anime = a; 
                         this.contents = c; 
                         this.publishHk = h;
+                        const params = new URLSearchParams(window.location.search);
+                        const mediaID = params.get('mediaid');
+                        const queryParam = params.get('q'); // Added support for ?q=Title
+                
+                        if (mediaID) {
+                            const target = this.anime.find(r => String(r['Media ID']) === String(mediaID));
+                            if (target) {
+                                // Prioritize JP Title for the search filter
+                                this.searchQuery = target['JP Title'] || target['HK Title'] || '';
+                            }
+                        } else if (queryParam) {
+                            this.searchQuery = decodeURIComponent(queryParam);
                         this.loading = false;
                         window.addEventListener('scroll', () => { this.showScrollBtn = window.scrollY > 400; });
                     } catch (e) { console.error(e); }

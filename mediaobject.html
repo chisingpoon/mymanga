@@ -212,19 +212,22 @@
                     } else if (isbn) {
                         const pub = this.pubCatalog.find(p => String(p['ISBN']) === String(isbn));
                         if (pub) { 
-                            // Concatenating Category, Title, and Volume
+                            // 1. Set the search query
                             const val = `[${pub['類']}] ${pub['標題']} ${pub['巻'] || ''}`.trim();
                             this.searchQuery = val; 
                             if(this.$refs.searchInput) this.$refs.searchInput.value = val;
                             
-                            // Find which Object ID this ISBN belongs to and force that card to 'manga' tab
-                            const workItem = this.workInclude.find(w => String(w['ISBN']) === String(isbn));
-                            if (workItem) {
-                                const mangaInfo = this.mangaChild.find(m => String(m['Work ID']) === String(workItem['作品番']));
-                                if (mangaInfo) {
-                                    this.tabStates[mangaInfo['Object ID']] = 'manga';
+                            // 2. Identify all Work IDs associated with this ISBN
+                            const matchingWorkIds = this.workInclude
+                                .filter(w => String(w['ISBN']) === String(isbn))
+                                .map(w => String(w['作品番']));
+                    
+                            // 3. Find ALL Objects that point to these Work IDs and switch their tabs
+                            this.mangaChild.forEach(m => {
+                                if (matchingWorkIds.includes(String(m['Work ID']))) {
+                                    this.tabStates[m['Object ID']] = 'manga';
                                 }
-                            }
+                            });
                         }
                     }
                 } catch (e) { this.loading = false; }

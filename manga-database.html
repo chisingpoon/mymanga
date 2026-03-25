@@ -103,25 +103,25 @@
                             </button>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        <div v-if="searchedSeries.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                            <div v-for="s in searchedSeries" :key="s.name" @click="selectSeries(s.name)" 
-                                class="bg-white/80 p-5 rounded-3xl border border-slate-200 cursor-pointer transition-all hover:border-blue-500 hover:shadow-xl text-center group flex flex-col items-center justify-center">
-                                
-                                <h3 class="font-black text-lg text-slate-700 group-hover:text-blue-600 uppercase transition-colors leading-tight">
-                                    {{ s.name }}
-                                </h3>
-                    
-                               <div class="mt-3 inline-flex items-center bg-slate-100 group-hover:bg-blue-600 group-hover:text-white transition-all px-4 py-1.5 rounded-full text-[11px] font-black tracking-widest uppercase whitespace-nowrap">
-                                    {{ s.count }} Items
-                                </div>
-                             </div>
-                        </div>
 
-                        <div v-else class="py-20 text-center border-2 border-dashed border-slate-200 rounded-[3rem]">
-                            <p class="text-slate-400 font-black uppercase tracking-widest text-xs">No series found matching "{{ seriesSearchQuery }}"</p>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <div v-for="s in searchedSeries" :key="s.name" @click="selectSeries(s.name)" 
+                            class="bg-white/80 p-5 rounded-3xl border border-slate-200 cursor-pointer transition-all hover:border-blue-500 hover:shadow-xl text-center group flex flex-col items-center justify-center">
+                            
+                            <h3 class="font-black text-lg text-slate-700 group-hover:text-blue-600 uppercase transition-colors leading-tight">
+                                {{ s.name }}
+                            </h3>
+                
+                            <div class="mt-3 inline-flex items-center bg-slate-100 group-hover:bg-blue-600 group-hover:text-white transition-all px-4 py-1.5 rounded-full text-[11px] font-black tracking-widest uppercase whitespace-nowrap">
+                                {{ s.count }} Items
+                            </div>
+                            
                         </div>
                     </div>
+                    <div v-if="searchedSeries.length === 0" class="mt-8 p-12 text-center bg-white/50 rounded-[2rem] border-2 border-dashed border-slate-200">
+                        <p class="text-slate-400 font-black uppercase tracking-widest text-[10px]">No series matching your search</p>
+                    </div>
+
                 </div>
 
                 <div v-if="view === 'books'" class="animate-in fade-in duration-500">
@@ -154,6 +154,11 @@
                                 </template>
                             </div>
                         </div>
+                    </div>
+
+                    <div v-if="filteredBooks.length === 0" class="mt-12 py-20 text-center bg-white/50 rounded-[3rem] border-2 border-dashed border-slate-200">
+                        <svg class="w-12 h-12 mx-auto text-slate-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18 18.246 18.477 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        <p class="text-slate-400 font-black uppercase tracking-widest text-[10px]">No active volumes found in this series</p>
                     </div>
                 </div>
 
@@ -277,6 +282,20 @@
                                         <td class="px-6 py-6 text-center font-black text-slate-400 whitespace-nowrap" data-label="Pages">{{ story.收錄頁 || '-' }}</td>
                                         <td class="px-6 py-6" data-label="Notes">
                                             <div class="text-[12px] text-slate-500 font-medium">{{ story.出版備考 || '-' }}</div>
+                                        </td>
+                                    </tr>
+
+                                    <tr v-if="searchedTableStories.length === 0">
+                                        <td colspan="7" class="py-24 text-center">
+                                            <div class="flex flex-col items-center justify-center space-y-3">
+                                                <span class="text-slate-300 font-black uppercase tracking-tighter text-lg">No Chapters Found</span>
+                                                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest" v-if="tableQuery">
+                                                    No match for "{{ tableQuery }}"
+                                                </p>
+                                                <button v-if="tableQuery" @click="tableQuery = ''" class="text-blue-600 text-[10px] font-black uppercase underline">
+                                                    Clear Search Filter
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>

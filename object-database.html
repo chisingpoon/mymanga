@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archive Database | Gadgets & Objects</title>
+    <title>Media Archive</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -30,7 +30,7 @@
                             <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
                         </svg>
                     </a>
-                    <h1 @click="updateView('series')" class="font-black text-2xl tracking-tighter text-slate-800 uppercase cursor-pointer">Manga Database</h1>
+                    <h1 @click="updateView('series')" class="font-black text-2xl tracking-tighter text-slate-800 uppercase cursor-pointer">Media Archive</h1>
                 </div>
 
                 <div class="flex bg-slate-200/50 p-1 rounded-xl border border-slate-200">
@@ -40,20 +40,20 @@
             </div>
         </header>
 
-        <main class="max-w-[1400px] mx-auto py-10 px-6">
+        <main class="max-w-[1920px] mx-auto py-10 px-6">
             
-            <div class="mb-12 flex flex-col gap-6">
-                <div>
+            <div class="mb-12 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div class="flex-shrink-0">
                     <h2 class="text-4xl font-black text-slate-900 uppercase tracking-tighter">
                         {{ object === 'Gadget' ? 'Secret Gadgets' : 'Characters & Things' }}
                     </h2>
-                    <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-2 flex items-center gap-2">
+                    <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-1 flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-                        {{ filteredData.length }} Entries Found
+                        Showing {{ filteredData.length }} Individual Entries
                     </p>
                 </div>
                 
-                <div class="relative w-full max-w-2xl">
+                <div class="relative w-full max-w-3xl">
                     <div class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5"></path></svg>
                     </div>
@@ -70,9 +70,9 @@
                 <div v-for="i in 8" class="h-64 bg-white/50 rounded-[2rem] border border-slate-200 animate-pulse"></div>
             </div>
 
-            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <div v-for="item in filteredData" :key="item.UniqueKey" 
-                    class="bg-white rounded-[2rem] border border-slate-200 p-8 card-hover shadow-sm hover:shadow-xl flex flex-col group">
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                <div v-for="(item, idx) in filteredData" :key="idx" 
+                    class="bg-white rounded-[2rem] border border-slate-200 p-8 card-hover shadow-sm hover:shadow-xl flex flex-col group h-full">
                     
                     <div class="flex justify-between items-start mb-6">
                         <span class="text-[10px] font-black text-slate-300 font-mono">#{{ item.displayId }}</span>
@@ -88,12 +88,12 @@
 
                     <div class="grid grid-cols-2 gap-3 mb-6">
                         <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                            <p class="text-[8px] font-black text-slate-400 uppercase mb-1">文化傳信</p>
-                            <p class="text-[11px] font-black text-slate-700 truncate">{{ item['CultureCom Trans'] || '---' }}</p>
+                            <p class="text-[8px] font-black text-slate-400 uppercase mb-1 text-center">文化傳信</p>
+                            <p class="text-[11px] font-black text-slate-700 truncate text-center">{{ item['CultureCom Trans'] || '---' }}</p>
                         </div>
                         <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                            <p class="text-[8px] font-black text-slate-400 uppercase mb-1">正文社</p>
-                            <p class="text-[11px] font-black text-slate-700 truncate">{{ item['HKChingWin Trans'] || '---' }}</p>
+                            <p class="text-[8px] font-black text-slate-400 uppercase mb-1 text-center">正文社</p>
+                            <p class="text-[11px] font-black text-slate-700 truncate text-center">{{ item['HKChingWin Trans'] || '---' }}</p>
                         </div>
                     </div>
 
@@ -109,8 +109,10 @@
                     </div>
 
                     <div v-if="object === 'Character'" class="mt-auto pt-4 border-t border-slate-50">
-                        <span class="text-[9px] font-black text-red-500 uppercase tracking-widest block mb-2">{{ item['Object Type'] || 'General' }}</span>
-                        <p class="text-xs text-slate-500 line-clamp-3 italic leading-relaxed">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[9px] font-black text-red-500 uppercase tracking-widest">{{ item['Object Type'] || 'General' }}</span>
+                        </div>
+                        <p class="text-xs text-slate-500 italic leading-relaxed">
                             {{ item['Description'] || 'No additional details.' }}
                         </p>
                     </div>
@@ -153,21 +155,25 @@
                         idKey = 'Object ID';
                     }
 
-                    const activeMaster = master.filter(item => item.Active?.toString().toLowerCase() === 'yes');
+                    // 1. Create a flattened list. 
+                    // Instead of finding 1 master for 1 media, we map the MEDIA sheet directly
+                    // and "lookup" the master info. This ensures duplicate IDs are NOT grouped.
+                    const entries = media.map(mItem => {
+                        const masterInfo = master.find(mst => mst[idKey] === mItem[idKey]) || {};
+                        
+                        // Only include if the master record is "Active"
+                        if (masterInfo.Active?.toString().toLowerCase() !== 'yes') return null;
 
-                    const joined = activeMaster.map((mItem, index) => {
-                        const mediaMatch = media.find(med => med[idKey] === mItem[idKey]) || {};
                         return {
+                            ...masterInfo,
                             ...mItem,
-                            ...mediaMatch,
-                            displayId: mItem[idKey],
-                            UniqueKey: `${this.object}-${index}`
+                            displayId: mItem[idKey]
                         };
-                    });
+                    }).filter(x => x !== null);
 
-                    if (!this.searchQuery.trim()) return joined;
+                    if (!this.searchQuery.trim()) return entries;
                     const q = this.searchQuery.toLowerCase();
-                    return joined.filter(i => 
+                    return entries.filter(i => 
                         (i['JP Title'] || '').toLowerCase().includes(q) ||
                         (i['HK Translation'] || '').toLowerCase().includes(q) ||
                         (i.displayId || '').toString().toLowerCase().includes(q)
@@ -197,7 +203,7 @@
                     }
                 },
                 getMovieTitle(movieId) {
-                    if (!movieId) return 'Unknown Movie';
+                    if (!movieId) return 'Movie Details';
                     const movie = this.db.movies.find(m => m['Media ID'] === movieId);
                     return movie ? movie['JP Title'] : 'Movie Details';
                 },

@@ -215,21 +215,10 @@
                 sortedMagazines() { return Object.keys(this.magazineStats).sort((a, b) => a.localeCompare(b, 'zh-Hant')); },
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
-                    const activeMags = this.activeMagazines;
-                    const hasActiveMags = activeMags.length > 0;
-                
                     return this.master.filter(r => {
-                        // 1. Check Magazine Filter first (faster than string search)
-                        if (hasActiveMags && !activeMags.includes(r.初出掲載誌?.trim())) {
-                            return false;
-                        }
-                        
-                        // 2. Search against the pre-calculated blob
-                        if (q !== '' && !r.searchBlob.includes(q)) {
-                            return false;
-                        }
-                
-                        return true;
+                        const sub = this.getSubtitleInfo(r.作品番);
+                        const combinedText = [r.掲載番, r.初出副題, sub.pubSub, sub.hkSub, r.初出掲載誌, r.初出掲載号, r.備考].join(' ').toLowerCase();
+                        return (q === '' || combinedText.includes(q)) && (this.activeMagazines.length === 0 || this.activeMagazines.includes(r.初出掲載誌?.trim()));
                     });
                 },
                 totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
@@ -253,24 +242,7 @@
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
                         ]);
-                        //this.master = m.filter(r => r.作品番); this.contents = c; this.publishHk = h;
-                        // PRE-PROCESS DATA HERE
-                        this.master = m.filter(r => r.作品番).map(r => {
-                            const sub = this.getSubtitleInfo(r.作品番);
-                            return {
-                                ...r,
-                                // Create a hidden "searchBlob" containing all searchable text
-                                searchBlob: [
-                                    r.掲載番, 
-                                    r.初出副題, 
-                                    sub.pubSub, 
-                                    sub.hkSub, 
-                                    r.初出掲載誌, 
-                                    r.初出掲載号, 
-                                    r.備考
-                                ].join(' ').toLowerCase()
-                            };
-                        });
+                        this.master = m.filter(r => r.作品番); this.contents = c; this.publishHk = h;
                         window.addEventListener('scroll', () => { this.showScrollButton = window.scrollY > 400; });
                         this.loading = false;
                     } catch (e) { console.error("Load Error:", e); }

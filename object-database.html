@@ -42,7 +42,7 @@
 
         <main class="max-w-[1400px] mx-auto py-10 px-6">
             
-            <div class="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-8">
+            <div class="mb-12 flex flex-col gap-6">
                 <div>
                     <h2 class="text-4xl font-black text-slate-900 uppercase tracking-tighter">
                         {{ object === 'Gadget' ? 'Secret Gadgets' : 'Characters & Things' }}
@@ -53,9 +53,16 @@
                     </p>
                 </div>
                 
-                <div class="relative w-full md:w-80">
-                    <input type="text" v-model="searchQuery" placeholder="Search entries..." 
-                        class="w-full bg-white border border-slate-200 rounded-2xl py-4 px-6 text-sm font-bold shadow-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                <div class="relative w-full max-w-2xl">
+                    <div class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5"></path></svg>
+                    </div>
+                    <input type="text" v-model="searchQuery" placeholder="Search by name, ID, or movie..." 
+                        class="w-full bg-white border border-slate-200 rounded-2xl py-4 pl-14 pr-12 text-sm font-bold shadow-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                    
+                    <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </button>
                 </div>
             </div>
 
@@ -126,7 +133,7 @@
                         gadgetMedia: [],
                         objectMaster: [],
                         objectMedia: [],
-                        movies: [] // New sheet
+                        movies: []
                     }
                 }
             },
@@ -162,7 +169,8 @@
                     const q = this.searchQuery.toLowerCase();
                     return joined.filter(i => 
                         (i['JP Title'] || '').toLowerCase().includes(q) ||
-                        (i['HK Translation'] || '').toLowerCase().includes(q)
+                        (i['HK Translation'] || '').toLowerCase().includes(q) ||
+                        (i.displayId || '').toString().toLowerCase().includes(q)
                     );
                 }
             },

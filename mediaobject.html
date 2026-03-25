@@ -19,16 +19,16 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
-        .data-card { background: white; border-radius: 24px; border: 2px solid #f1f5f9; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); min-height: 500px; display: flex; flex-direction: column; }
+        .data-card { background: white; border-radius: 24px; border: 2px solid #f1f5f9; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); min-height: 520px; display: flex; flex-direction: column; }
         .data-card:hover { border-color: #6366f1; transform: translateY(-4px); }
         
-        .scroll-area { max-height: 350px; overflow-y: auto; scrollbar-width: thin; padding-right: 4px; }
+        /* 2. TAB HOVER EFFECT */
+        .tab-btn { transition: all 0.2s ease-in-out; border-bottom: 3px solid transparent; cursor: pointer; }
+        .tab-btn:hover:not(.active) { background-color: #f1f5f9; color: #1e293b; border-radius: 8px 8px 0 0; transform: translateY(-1px); }
+        .tab-btn.active { border-color: #6366f1; color: #6366f1; font-weight: 900; }
         
+        .scroll-area { max-height: 320px; overflow-y: auto; scrollbar-width: thin; padding-right: 4px; }
         mark { background: #fef08a; color: #854d0e; padding: 0 2px; border-radius: 2px; font-weight: bold; }
-        
-        .tab-btn { transition: all 0.2s ease-in-out; border-bottom: 3px solid transparent; }
-        .tab-btn:hover:not(.active) { background-color: #f1f5f9; transform: translateY(-1px); color: #1e293b; border-radius: 8px 8px 0 0; }
-        .tab-btn.active { border-color: #6366f1; color: #6366f1; }
     </style>
 </head>
 <body class="bg-grid">
@@ -92,59 +92,59 @@
 
                     <div class="mt-auto pt-4 border-t border-slate-100">
                         <div class="flex border-b border-slate-200 mb-4 gap-4">
-                            <button @click="parent.activeTab = 'movie'" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', parent.activeTab === 'movie' ? 'active' : 'text-slate-400']">
+                            <button @click="setTab(parent['Object ID'], 'movie')" 
+                                    :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'movie' ? 'active' : 'text-slate-400']">
                                 Movie ({{ parent.movieAppearances.length }})
                             </button>
-                            <button @click="parent.activeTab = 'manga'" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', parent.activeTab === 'manga' ? 'active' : 'text-slate-400']">
+                            <button @click="setTab(parent['Object ID'], 'manga')" 
+                                    :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'manga' ? 'active' : 'text-slate-400']">
                                 Manga ({{ parent.mangaRecords.length }})
                             </button>
-                            <button @click="parent.activeTab = 'anime'" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', parent.activeTab === 'anime' ? 'active' : 'text-slate-400']">
+                            <button @click="setTab(parent['Object ID'], 'anime')" 
+                                    :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'anime' ? 'active' : 'text-slate-400']">
                                 Anime (0)
                             </button>
                         </div>
 
-                        <div v-if="parent.activeTab === 'movie'">
-                            <div v-if="parent.movieAppearances.length > 0" class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
-                                <div v-for="(child, idx) in parent.movieAppearances" :key="idx" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition-all">
-                                    <div class="flex flex-col gap-2">
-                                        <span class="text-[8px] font-black bg-slate-900 text-white px-2 py-0.5 rounded w-fit">MOVIE {{ child.movieYear }}</span>
-                                        <span class="text-sm font-black text-slate-800" v-html="'<span class=\'text-[9px] text-slate-400 uppercase font-bold mr-1\'>港譯/</span>' + highlight(child['HK Translation'])"></span>
-                                        <a :href="'movie.html?mediaid=' + encodeURIComponent(child['Movie ID'])" target="_blank" 
-                                           class="text-[11px] font-bold text-indigo-500 hover:text-indigo-700 flex items-center gap-1">
-                                           <span v-html="highlight(child.movieTitle)"></span>
-                                           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round"></path></svg>
+                        <div class="tab-content">
+                            <div v-if="getTab(parent['Object ID']) === 'movie'">
+                                <div v-if="parent.movieAppearances.length > 0" class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
+                                    <div v-for="(child, idx) in parent.movieAppearances" :key="idx" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition-all">
+                                        <div class="flex flex-col gap-2">
+                                            <span class="text-[8px] font-black bg-slate-900 text-white px-2 py-0.5 rounded w-fit uppercase">Movie {{ child.movieYear }}</span>
+                                            <span class="text-sm font-black text-slate-800" v-html="'<span class=\'text-[9px] text-slate-400 uppercase font-bold mr-1\'>港譯/</span>' + highlight(child['HK Translation'])"></span>
+                                            <a :href="'movie.html?mediaid=' + encodeURIComponent(child['Movie ID'])" target="_blank" 
+                                               class="text-[11px] font-bold text-indigo-500 hover:text-indigo-700 flex items-center gap-1">
+                                               <span v-html="highlight(child.movieTitle)"></span>
+                                               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round"></path></svg>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p v-else class="text-[10px] font-bold text-slate-300 italic py-4 text-center uppercase">No Movie Data</p>
+                            </div>
+
+                            <div v-if="getTab(parent['Object ID']) === 'manga'">
+                                <div v-if="parent.mangaInfo" class="mb-3 px-1 space-y-1">
+                                    <div class="text-[10px] font-bold text-slate-400 uppercase">文傳譯: <span class="text-slate-800 ml-1" v-html="highlight(parent.mangaInfo['CultureCom Trans'] || '-')"></span></div>
+                                    <div class="text-[10px] font-bold text-slate-400 uppercase">青文譯: <span class="text-slate-800 ml-1" v-html="highlight(parent.mangaInfo['HKChingWin Trans'] || '-')"></span></div>
+                                </div>
+                                <div v-if="parent.mangaRecords.length > 0" class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
+                                    <div v-for="(rec, idx) in parent.mangaRecords" :key="idx" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition-all">
+                                        <a :href="'manga-database.html?region=JP&isbn=' + encodeURIComponent(rec.isbn)" target="_blank" class="block group">
+                                            <div class="text-xs font-black text-slate-800 flex items-center justify-between">
+                                                <span v-html="highlight(rec.title + ' ' + rec.vol)"></span>
+                                                <svg class="w-3 h-3 text-slate-300 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round"></path></svg>
+                                            </div>
+                                            <div class="text-[9px] text-slate-400 mt-1 font-mono tracking-tighter">{{ rec.isbn }}</div>
                                         </a>
                                     </div>
                                 </div>
+                                <p v-else class="text-[10px] font-bold text-slate-300 italic py-4 text-center uppercase">No Manga Data</p>
                             </div>
-                            <p v-else class="text-[10px] font-bold text-slate-300 italic py-4 text-center uppercase">No Movie Data</p>
-                        </div>
 
-                        <div v-if="parent.activeTab === 'manga'">
-                            <div v-if="parent.mangaInfo" class="mb-3 px-1">
-                                <div class="text-[10px] font-bold text-slate-500">
-                                    文傳譯: <span class="text-slate-800" v-html="highlight(parent.mangaInfo['CultureCom Trans'])"></span>
-                                </div>
-                                <div class="text-[10px] font-bold text-slate-500">
-                                    青文譯: <span class="text-slate-800" v-html="highlight(parent.mangaInfo['HKChingWin Trans'])"></span>
-                                </div>
-                            </div>
-                            
-                            <div v-if="parent.mangaRecords.length > 0" class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
-                                <div v-for="(rec, idx) in parent.mangaRecords" :key="idx" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition-all">
-                                    <a :href="'manga-database.html?region=JP&isbn=' + encodeURIComponent(rec.isbn)" target="_blank" class="block">
-                                        <div class="text-xs font-black text-slate-800 flex items-center justify-between group">
-                                            <span v-html="highlight(rec.title + ' ' + rec.vol)"></span>
-                                            <svg class="w-3 h-3 text-slate-300 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round"></path></svg>
-                                        </div>
-                                        <div class="text-[9px] text-slate-400 mt-1 font-mono">{{ rec.isbn }}</div>
-                                    </a>
-                                </div>
-                            </div>
-                            <p v-else class="text-[10px] font-bold text-slate-300 italic py-4 text-center uppercase">No Manga Data</p>
+                            <div v-if="getTab(parent['Object ID']) === 'anime'" class="py-8 text-center text-slate-300 text-[10px] font-bold uppercase italic tracking-widest">Anime Data Coming Soon</div>
                         </div>
-
-                        <div v-if="parent.activeTab === 'anime'" class="py-8 text-center text-slate-300 text-[10px] font-bold uppercase italic">Anime Data Coming Soon</div>
                     </div>
                 </div>
             </div>
@@ -167,13 +167,13 @@
     </div>
 
     <script>
-        const { createApp } = Vue;
+        const { createApp, reactive } = Vue;
         createApp({
             data() {
                 return {
                     loading: true, searchQuery: '', selectedClass: 'All', selectedType: 'All', currentPage: 1, itemsPerPage: 12,
-                    parentData: [], movieChild: [], movieMeta: [],
-                    mangaChild: [], workInclude: [], pubCatalog: []
+                    parentData: [], movieChild: [], movieMeta: [], mangaChild: [], workInclude: [], pubCatalog: [],
+                    tabStates: reactive({}) // Crucial: ensure this is a reactive object
                 }
             },
             async mounted() {
@@ -187,8 +187,7 @@
                         fetch(base + "書籍收錄作品").then(r => r.json()),
                         fetch(base + "出版目録JP").then(r => r.json())
                     ]);
-                    // Initialize each parent with movie tab as default
-                    this.parentData = parents.map(p => ({ ...p, activeTab: 'movie' }));
+                    this.parentData = parents;
                     this.movieChild = mChild; this.movieMeta = mMeta;
                     this.mangaChild = manChild; this.workInclude = works; this.pubCatalog = pubs;
                     this.loading = false;
@@ -201,7 +200,11 @@
                     return String(text).replace(regex, '<mark>$1</mark>');
                 },
                 changePage(p) { this.currentPage = p; window.scrollTo({ top: 0, behavior: 'smooth' }); },
-                handleClassChange() { this.selectedType = 'All'; this.currentPage = 1; }
+                handleClassChange() { this.selectedType = 'All'; this.currentPage = 1; },
+                
+                // FIXED TAB LOGIC: Use direct property assignment for reactivity
+                getTab(id) { return this.tabStates[id] || 'movie'; },
+                setTab(id, tab) { this.tabStates[id] = tab; }
             },
             computed: {
                 classifications() {
@@ -221,7 +224,6 @@
                             const matchClass = this.selectedClass === 'All' || p['Object Classification'] === this.selectedClass;
                             const matchType = this.selectedType === 'All' || p['Object Type'] === this.selectedType;
                             
-                            // Check if matching in child data for filtering
                             const manInfo = this.mangaChild.find(c => String(c['Object ID']) === String(p['Object ID']));
                             const mAppears = this.movieChild.filter(c => String(c['Object ID']) === String(p['Object ID']));
 
@@ -237,7 +239,6 @@
                             return matchClass && matchType && matchSearch;
                         })
                         .map(p => {
-                            // Link Movies
                             const movieAppearances = this.movieChild
                                 .filter(c => String(c['Object ID']) === String(p['Object ID']))
                                 .map(c => {
@@ -250,27 +251,16 @@
                                     return { ...c, movieTitle: m ? m['JP Title'] : 'Unknown', movieYear: year };
                                 });
 
-                            // Link Manga
                             const manInfo = this.mangaChild.find(c => String(c['Object ID']) === String(p['Object ID']));
                             let mangaRecords = [];
                             if (manInfo) {
                                 const relatedWorks = this.workInclude.filter(w => String(w['作品番']) === String(manInfo['Work ID']));
                                 mangaRecords = relatedWorks.map(w => {
                                     const pub = this.pubCatalog.find(pc => String(pc['ISBN']) === String(w['ISBN']));
-                                    return {
-                                        isbn: w['ISBN'],
-                                        title: pub ? pub['標題'] : 'Unknown Title',
-                                        vol: pub ? pub['巻'] : ''
-                                    };
+                                    return { isbn: w['ISBN'], title: pub ? pub['標題'] : 'Unknown Title', vol: pub ? pub['巻'] : '' };
                                 });
                             }
-
-                            return { 
-                                ...p, 
-                                movieAppearances, 
-                                mangaInfo: manInfo, 
-                                mangaRecords 
-                            };
+                            return { ...p, movieAppearances, mangaInfo: manInfo, mangaRecords };
                         });
                 },
                 paginatedData() {
@@ -278,10 +268,6 @@
                     return this.displayData.slice(start, start + this.itemsPerPage);
                 },
                 totalPages() { return Math.ceil(this.displayData.length / this.itemsPerPage); }
-            },
-            watch: {
-                searchQuery() { this.currentPage = 1; },
-                selectedType() { this.currentPage = 1; }
             }
         }).mount('#app');
     </script>

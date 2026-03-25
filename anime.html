@@ -83,30 +83,30 @@
                         </div>
                     </div>
                     
-                    <div class="w-full lg:w-auto flex flex-col md:flex-row gap-6 bg-white/50 p-4 rounded-2xl border border-slate-100">
+                    <div class="w-full lg:w-auto flex flex-col xl:flex-row gap-6 bg-white/50 p-5 rounded-2xl border border-slate-200 backdrop-blur-sm">
                         <div class="flex flex-col gap-2">
-                            <label class="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 tracking-widest">
-                                <span class="text-base">🇯🇵</span> JP Broadcast
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
+                                <span class="text-base">🇯🇵</span> JP Broadcast Period
                             </label>
                             <div class="flex items-center gap-2">
-                                <input type="date" v-model="filters.jpStart" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold focus:border-indigo-500 outline-none">
-                                <span class="text-slate-300">→</span>
-                                <input type="date" v-model="filters.jpEnd" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold focus:border-indigo-500 outline-none">
+                                <input type="date" v-model="filters.jpStart" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                                <span class="text-slate-300 font-bold">→</span>
+                                <input type="date" v-model="filters.jpEnd" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
                             </div>
                         </div>
                     
                         <div class="flex flex-col gap-2">
-                            <label class="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 tracking-widest">
-                                <span class="text-base">🇭🇰</span> HK Broadcast
+                            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
+                                <span class="text-base">🇭🇰</span> HK Broadcast Period
                             </label>
                             <div class="flex items-center gap-2">
-                                <input type="date" v-model="filters.hkStart" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold focus:border-indigo-500 outline-none">
-                                <span class="text-slate-300">→</span>
-                                <input type="date" v-model="filters.hkEnd" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold focus:border-indigo-500 outline-none">
+                                <input type="date" v-model="filters.hkStart" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                                <span class="text-slate-300 font-bold">→</span>
+                                <input type="date" v-model="filters.hkEnd" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
                                 
                                 <button v-if="filters.jpStart || filters.jpEnd || filters.hkStart || filters.hkEnd" 
                                         @click="filters.jpStart=''; filters.jpEnd=''; filters.hkStart=''; filters.hkEnd='';" 
-                                        class="ml-2 p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors">
+                                        class="ml-2 p-2 bg-rose-50 text-rose-500 rounded-lg hover:bg-rose-500 hover:text-white transition-all shadow-sm">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
                                 </button>
                             </div>
@@ -199,74 +199,62 @@
                 return {
                     loading: true,
                     searchQuery: '',
-                    activeYears: [],
-                    currentPage: 1,
-                    itemsPerPage: 50,
-                    showScrollBtn: false,
-                    anime: [],
-                    contents: [],
-                    publishHk: [],
+                    // Consolidated Date Filters
                     filters: {
                         jpStart: '',
                         jpEnd: '',
                         hkStart: '',
                         hkEnd: ''
                     },
+                    currentPage: 1,
+                    itemsPerPage: 50,
+                    showScrollBtn: false,
+                    anime: [],
+                    contents: [],
+                    publishHk: []
                 }
             },
             watch: {
                 searchQuery() { this.currentPage = 1; },
-                activeYears() { this.currentPage = 1; }
+                filters: {
+                    handler() { this.currentPage = 1; },
+                    deep: true
+                }
             },
             computed: {
-                yearStats() {
-                    const stats = {};
-                    this.anime.forEach(r => {
-                        const dateStr = String(r['JP Show Date'] || '');
-                        // This looks for any 4-digit number (the year)
-                        const match = dateStr.match(/\d{4}/); 
-                        if (match) {
-                            const year = parseInt(match[0]);
-                            const decade = Math.floor(year / 10) * 10;
-                            stats[decade] = (stats[decade] || 0) + 1;
-                        }
-                    });
-                    // Sort decades (1970, 1980, 1990...)
-                    const sorted = {};
-                    Object.keys(stats).sort().forEach(k => sorted[k] = stats[k]);
-                    return sorted;
-                },
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
                     
-                    // Helper to convert UI strings to Date objects
-                    const parseUI = (val) => val ? new Date(val) : null;
+                    // Convert UI strings to comparable Date objects
+                    const parse = (val) => val ? new Date(val).getTime() : null;
                     const f = {
-                        js: parseUI(this.filters.jpStart), je: parseUI(this.filters.jpEnd),
-                        hs: parseUI(this.filters.hkStart), he: parseUI(this.filters.hkEnd)
+                        js: parse(this.filters.jpStart), je: parse(this.filters.jpEnd),
+                        hs: parse(this.filters.hkStart), he: parse(this.filters.hkEnd)
                     };
-                
+        
                     return this.anime.filter(r => {
-                        // 1. Global Search
-                        const combined = [r['Media ID'], r['JP Title'], r['HK Title'], r['Work ID'], r['Note']].join(' ').toLowerCase();
+                        // 1. Global Search Logic
+                        const combined = [r['Media ID'], r['JP Title'], r['HK Title'], r['Work ID'], r['Note'], r['JP Chapter ID'], r['JP Show ID']].join(' ').toLowerCase();
                         if (q && !combined.includes(q)) return false;
                         
-                        // 2. Japan Date Filter
+                        // 2. Japan Date Logic
                         if (f.js || f.je) {
-                            const d = r['JP Show Date'] ? new Date(r['JP Show Date']) : null;
-                            if (!d || isNaN(d.getTime())) return false;
+                            const dStr = r['JP Show Date'];
+                            const d = dStr ? new Date(dStr).getTime() : null;
+                            if (!d || isNaN(d)) return false; // Hide rows with invalid/empty dates if filter is active
                             if (f.js && d < f.js) return false;
                             if (f.je && d > f.je) return false;
                         }
-                
-                        // 3. HK Date Filter
+        
+                        // 3. HK Date Logic
                         if (f.hs || f.he) {
-                            const d = r['HK Show Date'] ? new Date(r['HK Show Date']) : null;
-                            if (!d || isNaN(d.getTime())) return false;
+                            const dStr = r['HK Show Date'];
+                            const d = dStr ? new Date(dStr).getTime() : null;
+                            if (!d || isNaN(d)) return false;
                             if (f.hs && d < f.hs) return false;
                             if (f.he && d > f.he) return false;
                         }
-                
+        
                         return true;
                     });
                 },
@@ -294,14 +282,6 @@
                         this.anime = a; 
                         this.contents = c; 
                         this.publishHk = h;
-                
-                        const params = new URLSearchParams(window.location.search);
-                        const mediaID = params.get('mediaid');
-                        if (mediaID) {
-                            const target = this.anime.find(r => String(r['Media ID']) === String(mediaID));
-                            if (target) { this.searchQuery = target['JP Title'] || ''; }
-                        }
-                
                         this.loading = false;
                         window.addEventListener('scroll', () => { this.showScrollBtn = window.scrollY > 400; });
                     } catch (e) { console.error(e); }
@@ -311,12 +291,6 @@
                     const q = this.searchQuery.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
                     const regex = new RegExp(`(${q})`, 'gi');
                     return String(text).replace(regex, '<mark class="bg-yellow-200 text-yellow-900 px-0.5 rounded">$1</mark>');
-                },
-                toggleYear(year) {
-                    const decade = parseInt(year);
-                    const idx = this.activeYears.indexOf(decade);
-                    if (idx > -1) this.activeYears.splice(idx, 1);
-                    else this.activeYears.push(decade);
                 },
                 getLabelColor(type) {
                     if (type === '45卷') return 'bg-emerald-600';

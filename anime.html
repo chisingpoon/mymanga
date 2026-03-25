@@ -233,6 +233,72 @@
             methods: {
                 async init() {
                     try {
+const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    loading: true,
+                    searchQuery: '',
+                    activeYears: [],
+                    currentPage: 1,
+                    itemsPerPage: 50,
+                    showScrollBtn: false,
+                    anime: [],
+                    contents: [],
+                    publishHk: []
+                }
+            },
+            watch: {
+                searchQuery() { this.currentPage = 1; },
+                activeYears() { this.currentPage = 1; }
+            },
+            computed: {
+                yearStats() {
+                    const stats = {};
+                    this.anime.forEach(r => {
+                        // FIX: Changed [2] to [0] because date is YYYY/MM/DD
+                        const yrStr = r['JP Show Date']?.split('/')[0];
+                        if (yrStr && yrStr.length === 4) {
+                            const decade = Math.floor(parseInt(yrStr) / 10) * 10;
+                            stats[decade] = (stats[decade] || 0) + 1;
+                        }
+                    });
+                    // Sort decades 1970, 1980, 1990...
+                    const sorted = {};
+                    Object.keys(stats).sort().forEach(k => sorted[k] = stats[k]);
+                    return sorted;
+                },
+                filteredData() {
+                    const q = this.searchQuery.toLowerCase().trim();
+                    return this.anime.filter(r => {
+                        const combined = [r['Media ID'], r['JP Title'], r['HK Title'], r['Work ID'], r['Note'], r['JP Chapter ID'], r['JP Show ID']].join(' ').toLowerCase();
+                        const matchesSearch = !q || combined.includes(q);
+                        
+                        let matchesYear = true;
+                        if (this.activeYears.length > 0) {
+                            // FIX: Changed [2] to [0] here as well
+                            const year = parseInt(r['JP Show Date']?.split('/')[0]);
+                            matchesYear = year && this.activeYears.includes(Math.floor(year/10)*10);
+                        }
+                        return matchesSearch && matchesYear;
+                    });
+                },
+                totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
+                paginatedData() {
+                    const start = (this.currentPage - 1) * this.itemsPerPage;
+                    return this.filteredData.slice(start, start + this.itemsPerPage);
+                },
+                paginationRange() {
+                    const current = this.currentPage, last = this.totalPages, range = [];
+                    for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i); }
+                    const res = []; let l;
+                    for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
+                    return res;
+                }
+            },
+            methods: {
+                async init() {
+                    try {
                         const [a, c, h] = await Promise.all([
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/電視動畫").then(r => r.json()),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
@@ -258,7 +324,6 @@
                 },
                 highlight(text) {
                     if (!text || !this.searchQuery) return text || '-';
-                    // Escapes special characters for regex
                     const q = this.searchQuery.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
                     const regex = new RegExp(`(${q})`, 'gi');
                     return String(text).replace(regex, '<mark class="bg-yellow-200 text-yellow-900 px-0.5 rounded">$1</mark>');

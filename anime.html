@@ -194,12 +194,12 @@
 
     <script>
         const { createApp } = Vue;
+        
         createApp({
             data() {
                 return {
                     loading: true,
                     searchQuery: '',
-                    // Consolidated Date Filters
                     filters: {
                         jpStart: '',
                         jpEnd: '',
@@ -215,7 +215,9 @@
                 }
             },
             watch: {
-                searchQuery() { this.currentPage = 1; },
+                searchQuery() { 
+                    this.currentPage = 1; 
+                },
                 filters: {
                     handler() { this.currentPage = 1; },
                     deep: true
@@ -225,14 +227,22 @@
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
                     
-                    const parse = (val) => val ? new Date(val).getTime() : null;
-                    const f = {
-                        js: parse(this.filters.jpStart), je: parse(this.filters.jpEnd),
-                        hs: parse(this.filters.hkStart), he: parse(this.filters.hkEnd)
+                    // Helper to get timestamps for comparison
+                    const getTimestamp = (val) => {
+                        if (!val) return null;
+                        const d = new Date(val);
+                        return isNaN(d.getTime()) ? null : d.getTime();
                     };
-                
+        
+                    const f = {
+                        js: getTimestamp(this.filters.jpStart),
+                        je: getTimestamp(this.filters.jpEnd),
+                        hs: getTimestamp(this.filters.hkStart),
+                        he: getTimestamp(this.filters.hkEnd)
+                    };
+        
                     return this.anime.filter(r => {
-                        // 1. Search Logic - Restored all IDs
+                        // 1. Search Logic
                         const combined = [
                             r['Media ID'], 
                             r['JP Title'], 
@@ -241,41 +251,52 @@
                             r['Note'], 
                             r['JP Chapter ID'], 
                             r['JP Show ID']
-                        ].join(' ').toLowerCase();
+                        ].map(v => String(v || '').toLowerCase()).join(' ');
                         
                         if (q && !combined.includes(q)) return false;
                         
-                        // 2. Japan Date Logic (M/D/YYYY safe)
+                        // 2. Japan Date Filter (Handles M/D/YYYY)
                         if (f.js || f.je) {
-                            const dStr = r['JP Show Date'];
-                            const d = dStr ? new Date(dStr).getTime() : null;
-                            if (!d || isNaN(d)) return false;
-                            if (f.js && d < f.js) return false;
-                            if (f.je && d > f.je) return false;
+                            const rowDate = getTimestamp(r['JP Show Date']);
+                            if (!rowDate) return false;
+                            if (f.js && rowDate < f.js) return false;
+                            if (f.je && rowDate > f.je) return false;
                         }
-                
-                        // 3. HK Date Logic (M/D/YYYY safe)
+        
+                        // 3. HK Date Filter (Handles M/D/YYYY)
                         if (f.hs || f.he) {
-                            const dStr = r['HK Show Date'];
-                            const d = dStr ? new Date(dStr).getTime() : null;
-                            if (!d || isNaN(d)) return false;
-                            if (f.hs && d < f.hs) return false;
-                            if (f.he && d > f.he) return false;
+                            const rowDate = getTimestamp(r['HK Show Date']);
+                            if (!rowDate) return false;
+                            if (f.hs && rowDate < f.hs) return false;
+                            if (f.he && rowDate > f.he) return false;
                         }
-                
+        
                         return true;
                     });
                 },
-                totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
+                totalPages() { 
+                    return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; 
+                },
                 paginatedData() {
                     const start = (this.currentPage - 1) * this.itemsPerPage;
                     return this.filteredData.slice(start, start + this.itemsPerPage);
                 },
                 paginationRange() {
-                    const current = this.currentPage, last = this.totalPages, range = [];
-                    for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i); }
-                    const res = []; let l;
-                    for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
+                    const current = this.currentPage;
+                    const last = this.totalPages;
+                    const range = [];
+                    for (let i = 1; i <= last; i++) {
+                        if (i === 1 || i === last || (i >= current - 2 && i <= current + 2)) {
+                            range.push(i);
+                        }
+                    }
+                    const res = [];
+                    let l;
+                    for (let i of range) {
+                        if (l && i - l !== 1) res.push('...');
+                        res.push(i);
+                        l = i;
+                    }
                     return res;
                 }
             },
@@ -287,24 +308,28 @@
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
                         ]);
+                        
                         this.anime = a; 
                         this.contents = c; 
                         this.publishHk = h;
+        
+                        // Handle URL Parameters
                         const params = new URLSearchParams(window.location.search);
                         const mediaID = params.get('mediaid');
-                        const queryParam = params.get('q'); // Added support for ?q=Title
-                
                         if (mediaID) {
                             const target = this.anime.find(r => String(r['Media ID']) === String(mediaID));
                             if (target) {
-                                // Prioritize JP Title for the search filter
-                                this.searchQuery = target['JP Title'] || target['HK Title'] || '';
+                                this.searchQuery = target['JP Title'] || '';
                             }
-                        } else if (queryParam) {
-                            this.searchQuery = decodeURIComponent(queryParam);
+                        }
+        
                         this.loading = false;
-                        window.addEventListener('scroll', () => { this.showScrollBtn = window.scrollY > 400; });
-                    } catch (e) { console.error(e); }
+                        window.addEventListener('scroll', () => { 
+                            this.showScrollBtn = window.scrollY > 400; 
+                        });
+                    } catch (e) { 
+                        console.error("Initialization error:", e); 
+                    }
                 },
                 highlight(text) {
                     if (!text || !this.searchQuery) return text || '-';
@@ -313,27 +338,47 @@
                     return String(text).replace(regex, '<mark class="bg-yellow-200 text-yellow-900 px-0.5 rounded">$1</mark>');
                 },
                 getLabelColor(type) {
-                    if (type === '45卷') return 'bg-emerald-600';
-                    if (type === 'プラス') return 'bg-amber-500';
-                    if (type === 'カラー作品集') return 'bg-rose-500';
-                    return 'bg-slate-600';
+                    const colors = {
+                        '45卷': 'bg-emerald-600',
+                        'プラス': 'bg-amber-500',
+                        'カラー作品集': 'bg-rose-500'
+                    };
+                    return colors[type] || 'bg-slate-600';
                 },
-                changePage(p) { this.currentPage = p; this.scrollToTop(); },
-                scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },
+                changePage(p) { 
+                    this.currentPage = p; 
+                    this.scrollToTop(); 
+                },
+                scrollToTop() { 
+                    window.scrollTo({ top: 0, behavior: 'smooth' }); 
+                },
                 getMapping(workId, types) {
-                    if(!workId || workId === "-") return null;
+                    if (!workId || workId === "-") return null;
                     const idStr = workId.toString().trim();
                     const match = this.contents.find(c => c.作品番?.toString().trim() === idStr && types.includes(c.類));
                     if (!match || !match.ISBN) return null;
+                    
                     const isbn = match.ISBN.trim();
-                    const matches = this.publishHk.filter(h => (h.ISBN_JP && h.ISBN_JP.trim() === isbn) || (h.ISBN && h.ISBN.trim() === isbn));
+                    const matches = this.publishHk.filter(h => 
+                        (h.ISBN_JP && h.ISBN_JP.trim() === isbn) || 
+                        (h.ISBN && h.ISBN.trim() === isbn)
+                    );
+                    
                     if (matches.length === 0) return null;
                     const latestHk = matches.sort((a, b) => new Date(b.IssueDate || 0) - new Date(a.IssueDate || 0))[0];
-                    return { vol: match.卷 || match.巻, chapter: match.收錄話 || '-', hkIsbn: latestHk.ISBN, type: match.類 };
+                    
+                    return { 
+                        vol: match.卷 || match.巻, 
+                        chapter: match.收錄話 || '-', 
+                        hkIsbn: latestHk.ISBN, 
+                        type: match.類 
+                    };
                 }
             },
-            mounted() { this.init(); }
-        }).mount('#app')
+            mounted() { 
+                this.init(); 
+            }
+        }).mount('#app');
     </script>
 </body>
 </html>

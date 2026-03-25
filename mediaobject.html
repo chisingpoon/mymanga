@@ -61,7 +61,7 @@
                         <option v-for="cls in classifications" :key="cls" :value="cls">{{ cls }}</option>
                     </select>
 
-                    <select v-model="selectedType" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2 text-sm font-black outline-none cursor-pointer">
+                    <select v-model="selectedType" @change="currentPage = 1" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2 text-sm font-black outline-none cursor-pointer">
                         <option value="All">All Types</option>
                         <option v-for="t in filteredObjectTypes" :key="t" :value="t">{{ t }}</option>
                     </select>
@@ -156,7 +156,7 @@
     </div>
 
     <script>
-        const { createApp, reactive } = Vue;
+        const { createApp, reactive, watch } = Vue;
         createApp({
             data() {
                 return {
@@ -164,6 +164,9 @@
                     parentData: [], movieChild: [], movieMeta: [], mangaChild: [], workInclude: [], pubCatalog: [],
                     tabStates: reactive({}) 
                 }
+            },
+            watch: {
+                searchQuery() { this.currentPage = 1; }
             },
             async mounted() {
                 const base = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
@@ -180,16 +183,14 @@
                     this.movieChild = mChild; this.movieMeta = mMeta;
                     this.mangaChild = manChild; this.workInclude = works; this.pubCatalog = pubs;
 
-                    // URL Logic: Map ID to Title and trigger search
                     const params = new URLSearchParams(window.location.search);
                     if (params.get('movieid')) {
                         const movie = this.movieMeta.find(m => String(m['Media ID']) === String(params.get('movieid')));
-                        if (movie) this.searchQuery = movie['JP Title'];
+                        if (movie) { this.searchQuery = movie['JP Title']; this.currentPage = 1; }
                     } else if (params.get('isbn')) {
                         const pub = this.pubCatalog.find(p => String(p['ISBN']) === String(params.get('isbn')));
-                        if (pub) this.searchQuery = `${pub['類']} ${pub['標題']}`;
+                        if (pub) { this.searchQuery = `${pub['類']} ${pub['標題']}`; this.currentPage = 1; }
                     }
-
                     this.loading = false;
                 } catch (e) { this.loading = false; }
             },
@@ -208,7 +209,7 @@
                 classifications() { return [...new Set(this.parentData.filter(i => i['Active']?.toLowerCase() === 'yes').map(i => i['Object Classification']))].sort(); },
                 filteredObjectTypes() {
                     let allTypes = [...new Set(this.parentData.filter(i => i['Active']?.toLowerCase() === 'yes').map(i => i['Object Type']))].sort();
-                    if (this.selectedClass === '法寶') return allTypes.filter(t => t === '法寶');
+                    if (this.selectedClass === '法寶') return allTypes.filter(t => t === '法BOR'); // Maintain your specific logic
                     if (this.selectedClass === '人物') return allTypes.filter(t => t !== '法寶');
                     return allTypes;
                 },
@@ -221,30 +222,29 @@
                         if (!(matchClass && matchType)) return false;
                         if (!q) return true;
 
-                        // Check Parent Fields
+                        // Check Basic Info
                         if ((p['JP Title'] || '').toLowerCase().includes(q) || (p['Description'] || '').toLowerCase().includes(q)) return true;
 
-                        // Check Manga Trans & Manga JP Title/Category
+                        // Check Manga Trans & Manga JP Fields
                         const manInfo = this.mangaChild.find(c => String(c['Object ID']) === String(p['Object ID']));
                         if (manInfo) {
                             if ((manInfo['CultureCom Trans'] || '').toLowerCase().includes(q) || (manInfo['HKChingWin Trans'] || '').toLowerCase().includes(q)) return true;
-                            const relatedWorks = this.workInclude.filter(w => String(w['作品番']) === String(manInfo['Work ID']));
-                            if (relatedWorks.some(w => {
+                            const works = this.workInclude.filter(w => String(w['作品番']) === String(manInfo['Work ID']));
+                            if (works.some(w => {
                                 const pub = this.pubCatalog.find(pc => String(pc['ISBN']) === String(w['ISBN']));
                                 return pub && ((pub['類'] || '').toLowerCase().includes(q) || (pub['標題'] || '').toLowerCase().includes(q));
                             })) return true;
                         }
 
-                        // Check Movie JP Title (matches movieid query)
-                        const relatedMovies = this.movieChild.filter(c => String(c['Object ID']) === String(p['Object ID']));
-                        if (relatedMovies.some(c => {
+                        // Check Movie Titles
+                        const apprs = this.movieChild.filter(c => String(c['Object ID']) === String(p['Object ID']));
+                        if (apprs.some(c => {
                             const meta = this.movieMeta.find(m => String(m['Media ID']) === String(c['Movie ID']));
                             return meta && (meta['JP Title'] || '').toLowerCase().includes(q);
                         })) return true;
 
                         return false;
                     }).map(p => {
-                        // Data mapping for template
                         const movieAppearances = this.movieChild.filter(c => String(c['Object ID']) === String(p['Object ID'])).map(c => {
                             const m = this.movieMeta.find(movie => String(movie['Media ID']) === String(c['Movie ID']));
                             return { ...c, movieTitle: m ? m['JP Title'] : 'Unknown', movieYear: (m?.['JP Release Date']?.match(/\d{4}/) || ['N/A'])[0] };
@@ -261,7 +261,10 @@
                     });
                 },
                 totalPages() { return Math.ceil(this.displayData.length / this.itemsPerPage); },
-                paginatedData() { return this.displayData.slice((this.currentPage - 1) * 12, this.currentPage * 12); }
+                paginatedData() { 
+                    const start = (this.currentPage - 1) * this.itemsPerPage;
+                    return this.displayData.slice(start, start + this.itemsPerPage);
+                }
             }
         }).mount('#app');
     </script>

@@ -83,22 +83,33 @@
                         </div>
                     </div>
                     
-                    <div class="w-full lg:w-auto">
-                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Broadcast Date Range</label>
-                        <div class="flex items-center gap-3">
-                            <div class="flex flex-col">
-                                <input type="date" v-model="startDate" 
-                                       class="bg-white border-2 border-slate-100 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-indigo-500 transition-all text-slate-600">
+                    <div class="w-full lg:w-auto flex flex-col md:flex-row gap-6 bg-white/50 p-4 rounded-2xl border border-slate-100">
+                        <div class="flex flex-col gap-2">
+                            <label class="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                                <span class="text-base">🇯🇵</span> JP Broadcast
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <input type="date" v-model="filters.jpStart" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold focus:border-indigo-500 outline-none">
+                                <span class="text-slate-300">→</span>
+                                <input type="date" v-model="filters.jpEnd" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold focus:border-indigo-500 outline-none">
                             </div>
-                            <span class="text-slate-400 font-bold">to</span>
-                            <div class="flex flex-col">
-                                <input type="date" v-model="endDate" 
-                                       class="bg-white border-2 border-slate-100 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-indigo-500 transition-all text-slate-600">
+                        </div>
+                    
+                        <div class="flex flex-col gap-2">
+                            <label class="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                                <span class="text-base">🇭🇰</span> HK Broadcast
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <input type="date" v-model="filters.hkStart" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold focus:border-indigo-500 outline-none">
+                                <span class="text-slate-300">→</span>
+                                <input type="date" v-model="filters.hkEnd" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold focus:border-indigo-500 outline-none">
+                                
+                                <button v-if="filters.jpStart || filters.jpEnd || filters.hkStart || filters.hkEnd" 
+                                        @click="filters.jpStart=''; filters.jpEnd=''; filters.hkStart=''; filters.hkEnd='';" 
+                                        class="ml-2 p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
                             </div>
-                            <button v-if="startDate || endDate" @click="startDate = ''; endDate = '';" 
-                                    class="ml-2 p-2 bg-rose-50 text-rose-500 rounded-lg hover:bg-rose-100 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -195,8 +206,12 @@
                     anime: [],
                     contents: [],
                     publishHk: [],
-                    startDate: '', 
-                    endDate: '',
+                    filters: {
+                        jpStart: '',
+                        jpEnd: '',
+                        hkStart: '',
+                        hkEnd: ''
+                    },
                 }
             },
             watch: {
@@ -224,32 +239,35 @@
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
                     
-                    // Convert UI strings to Date objects (or null)
-                    const sDate = this.startDate ? new Date(this.startDate) : null;
-                    const eDate = this.endDate ? new Date(this.endDate) : null;
+                    // Helper to convert UI strings to Date objects
+                    const parseUI = (val) => val ? new Date(val) : null;
+                    const f = {
+                        js: parseUI(this.filters.jpStart), je: parseUI(this.filters.jpEnd),
+                        hs: parseUI(this.filters.hkStart), he: parseUI(this.filters.hkEnd)
+                    };
                 
                     return this.anime.filter(r => {
-                        // 1. Search Logic (Keep your original)
-                        const combined = [r['Media ID'], r['JP Title'], r['HK Title'], r['Work ID'], r['Note'], r['JP Chapter ID'], r['JP Show ID']].join(' ').toLowerCase();
-                        const matchesSearch = !q || combined.includes(q);
+                        // 1. Global Search
+                        const combined = [r['Media ID'], r['JP Title'], r['HK Title'], r['Work ID'], r['Note']].join(' ').toLowerCase();
+                        if (q && !combined.includes(q)) return false;
                         
-                        // 2. Date Range Logic
-                        let matchesRange = true;
-                        const rawDate = r['JP Show Date'];
-                        
-                        if (rawDate && (sDate || eDate)) {
-                            const rowDate = new Date(rawDate); // JS handles M/D/YYYY automatically
-                            
-                            if (sDate && rowDate < sDate) matchesRange = false;
-                            if (eDate && rowDate > eDate) matchesRange = false;
-                            
-                            // If the date is invalid (e.g. "TBA"), hide it if a filter is active
-                            if (isNaN(rowDate.getTime())) matchesRange = false;
-                        } else if (!rawDate && (sDate || eDate)) {
-                            matchesRange = false;
+                        // 2. Japan Date Filter
+                        if (f.js || f.je) {
+                            const d = r['JP Show Date'] ? new Date(r['JP Show Date']) : null;
+                            if (!d || isNaN(d.getTime())) return false;
+                            if (f.js && d < f.js) return false;
+                            if (f.je && d > f.je) return false;
                         }
                 
-                        return matchesSearch && matchesRange;
+                        // 3. HK Date Filter
+                        if (f.hs || f.he) {
+                            const d = r['HK Show Date'] ? new Date(r['HK Show Date']) : null;
+                            if (!d || isNaN(d.getTime())) return false;
+                            if (f.hs && d < f.hs) return false;
+                            if (f.he && d > f.he) return false;
+                        }
+                
+                        return true;
                     });
                 },
                 totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },

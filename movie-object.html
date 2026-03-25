@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archive | Movies, Characters and Gadgets</title>
+    <title>Archive | Gadgets, Characters and Things</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -27,7 +27,7 @@
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Syncing Data...</p>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Syncing DB...</p>
         </div>
 
         <nav class="top-nav">
@@ -36,7 +36,7 @@
                     <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </a>
-                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Movies, Characters and Gadgets</h1>
+                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Gadgets, Characters and Things DB</h1>
                 </div>
             </div>
         </nav>
@@ -44,7 +44,7 @@
         <main class="max-w-[1400px] mx-auto px-6 pt-10">
             <div class="flex flex-wrap items-center gap-4 mb-8 bg-white/80 p-4 rounded-2xl backdrop-blur-md border border-slate-200 sticky top-24 z-30 shadow-sm">
                 <div class="flex-1 min-w-[250px] relative">
-                    <input type="text" v-model.trim="searchQuery" placeholder="Search Gadgets..." 
+                    <input type="text" v-model.trim="searchQuery" placeholder="Search Database..." 
                            class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-4 pr-12 py-2.5 text-sm font-bold outline-none focus:border-indigo-500 transition-all">
                     <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round"></path></svg>
@@ -52,7 +52,7 @@
                 </div>
             
                 <div class="flex items-center gap-2">
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Class</span>
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Classification</span>
                     <select v-model="selectedClass" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2 text-sm font-black outline-none cursor-pointer">
                         <option value="All">All Class</option>
                         <option v-for="cls in classifications" :key="cls" :value="cls">{{ cls }}</option>
@@ -68,7 +68,7 @@
                 </div>
 
                 <div class="bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-xl flex items-center gap-3 ml-auto">
-                    <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Results</span>
+                    <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Matched</span>
                     <span class="text-xl font-black text-indigo-900 leading-none">{{ displayData.length }}</span>
                 </div>
             </div>
@@ -87,12 +87,13 @@
                             <span class="text-[10px] text-slate-400 uppercase font-bold align-middle mr-1">原文/</span>{{ parent['JP Title'] }}
                         </h2>
                         
-                        <div v-if="parent['Description'] && parent['Description'] !== '-'" class="bg-slate-50 border-l-4 border-indigo-500 p-4 rounded-r-xl mb-4">
+                        <div v-if="parent['Description'] && parent['Description'].trim() !== '' && parent['Description'] !== '-'" 
+                             class="bg-slate-50 border-l-4 border-indigo-500 p-4 rounded-r-xl mb-4">
                             <p class="text-sm text-slate-600 leading-relaxed font-medium">{{ parent['Description'] }}</p>
                         </div>
                     </div>
 
-                    <div class="mt-auto pt-6 border-t border-slate-100">
+                    <div v-if="parent.children && parent.children.length > 0" class="mt-auto pt-6 border-t border-slate-100">
                         <div class="flex justify-between items-center mb-4">
                             <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Movie Appearances</h4>
                             <span class="bg-slate-200 text-slate-700 text-[10px] font-black px-2 py-0.5 rounded-full">
@@ -100,7 +101,7 @@
                             </span>
                         </div>
 
-                        <div v-if="parent.children.length > 0" class="movie-scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
+                        <div class="movie-scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
                             <div v-for="(child, idx) in parent.children" :key="idx" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition-all">
                                 <div class="flex flex-col gap-2">
                                     <div class="flex">
@@ -120,7 +121,6 @@
                                 </div>
                             </div>
                         </div>
-                        <p v-else class="text-[10px] font-bold text-slate-300 italic text-center py-4 uppercase">No movie links found</p>
                     </div>
                 </div>
             </div>
@@ -161,7 +161,9 @@
                         fetch(base + "電影人物法寶").then(r => r.json()),
                         fetch(base + "電影動畫").then(r => r.json())
                     ]);
-                    this.parentData = parents; this.childData = children; this.movieData = movies;
+                    this.parentData = Array.isArray(parents) ? parents : [];
+                    this.childData = Array.isArray(children) ? children : [];
+                    this.movieData = Array.isArray(movies) ? movies : [];
                     this.loading = false;
                 } catch (e) { console.error(e); this.loading = false; }
             },
@@ -189,22 +191,17 @@
                                 .filter(c => String(c['Object ID']) === String(p['Object ID']))
                                 .map(c => {
                                     const m = this.movieData.find(movie => String(movie['Media ID']) === String(c['Movie ID']));
-                                    
-                                    // 1. IMPROVED YEAR EXTRACTION LOGIC
                                     let year = 'N/A';
                                     if (m && m['JP Release Date']) {
                                         const found = m['JP Release Date'].match(/\d{4}/);
                                         if (found) year = found[0];
                                     }
-
-                                    return {
-                                        ...c,
-                                        movieTitle: m ? m['JP Title'] : 'Unknown',
-                                        movieYear: year
-                                    };
+                                    return { ...c, movieTitle: m ? m['JP Title'] : 'Unknown', movieYear: year };
                                 });
                             return { ...p, children: appearances };
-                        });
+                        })
+                        // 2. ONLY SHOW CARDS THAT HAVE MOVIE RECORDS
+                        .filter(p => p.children.length > 0);
                 },
                 paginatedData() {
                     const start = (this.currentPage - 1) * this.itemsPerPage;

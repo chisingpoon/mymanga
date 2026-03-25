@@ -180,29 +180,36 @@
                         fetch(base + "出版目録JP").then(r => r.json())
                     ]);
                     
-                    // Critical Fix: Store data first
                     this.parentData = parents;
                     this.movieChild = mChild; 
-                    this.movieMeta = mMeta;
+                    this.movieMeta = mMeta; // Table: 電影動畫
                     this.mangaChild = manChild; 
                     this.workInclude = works; 
                     this.pubCatalog = pubs;
 
-                    // Trigger Search ONLY after data is stored
+                    // URL PARAMETER LOGIC
                     const params = new URLSearchParams(window.location.search);
                     const movieID = params.get('movieid');
                     const isbn = params.get('isbn');
 
                     if (movieID) {
-                        const movie = this.movieMeta.find(m => String(m['Media ID']) === String(movieID));
-                        if (movie) { this.searchQuery = movie['JP Title']; }
+                        // Match movieid to Media ID in 電影動畫 table
+                        const movieRecord = this.movieMeta.find(m => String(m['Media ID']) === String(movieID));
+                        if (movieRecord && movieRecord['JP Title']) {
+                            this.searchQuery = movieRecord['JP Title'];
+                        }
                     } else if (isbn) {
                         const pub = this.pubCatalog.find(p => String(p['ISBN']) === String(isbn));
-                        if (pub) { this.searchQuery = `${pub['類']} ${pub['標題']}`; }
+                        if (pub) { 
+                            this.searchQuery = `${pub['類']} ${pub['標題']}`; 
+                        }
                     }
 
                     this.loading = false;
-                } catch (e) { this.loading = false; }
+                } catch (e) { 
+                    console.error("Archive Error:", e);
+                    this.loading = false; 
+                }
             },
             methods: {
                 highlight(text) {
@@ -232,10 +239,10 @@
                         if (!(matchClass && matchType)) return false;
                         if (!q) return true;
 
-                        // 1. Check Titles/Description
+                        // Check Titles/Description
                         if ((p['JP Title'] || '').toLowerCase().includes(q) || (p['Description'] || '').toLowerCase().includes(q)) return true;
 
-                        // 2. Check Manga/Publisher related titles
+                        // Check Manga related
                         const manInfo = this.mangaChild.find(c => String(c['Object ID']) === String(p['Object ID']));
                         if (manInfo) {
                             if ((manInfo['CultureCom Trans'] || '').toLowerCase().includes(q) || (manInfo['HKChingWin Trans'] || '').toLowerCase().includes(q)) return true;
@@ -246,7 +253,7 @@
                             })) return true;
                         }
 
-                        // 3. Check Movie JP Titles
+                        // Check Movie Titles (This is what matches the JP Title set by URL)
                         const apps = this.movieChild.filter(c => String(c['Object ID']) === String(p['Object ID']));
                         if (apps.some(c => {
                             const meta = this.movieMeta.find(m => String(m['Media ID']) === String(c['Movie ID']));

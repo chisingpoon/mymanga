@@ -105,14 +105,14 @@
                         <tbody>
                             <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-indigo-50/50 transition-colors group cursor-default">
                                 <td class="font-bold text-slate-700 whitespace-nowrap">{{ row.初出掲載誌 }}</td>
-                                <td class="text-blue-500 font-black text-[13px] whitespace-nowrap">{{ row.初出掲載号 }}</td>
-                                <td class="font-mono text-slate-400 text-[12px]">{{ row.掲載番 }}</td>
+                                <td class="text-blue-500 font-black text-[12px] whitespace-nowrap">{{ row.初出掲載号 }}</td>
+                                <td class="font-mono text-slate-400 text-[9px]">{{ row.掲載番 }}</td>
                                 <td class="font-black text-slate-900 min-w-[200px] group-hover:text-indigo-600 transition-colors">{{ row.初出副題 }}</td>
                                 <td class="text-slate-500 text-center">{{ row.初出掲載頁 }}</td>
-                                <td class="text-[11px] leading-tight py-1.5">
+                                <td class="text-[13px] leading-tight py-1.5">
                                     <div v-html="row.daizhenshuSubtitle" class="max-w-[150px] truncate-2-lines"></div>
                                 </td>
-                                <td class="text-[11px] py-1.5 min-w-[130px]">
+                                <td class="text-[13px] py-1.5 min-w-[130px]">
                                     <div v-if="row.vol45PlusData.length" class="flex flex-col gap-0.5">
                                         <a v-for="(link, idx) in row.vol45PlusData" :key="idx" :href="link.url" target="_blank"
                                            :class="{
@@ -129,7 +129,7 @@
                                     <span v-else class="text-slate-300 italic">---</span>
                                 </td>
                                 
-                                <td class="text-[11px] leading-tight min-w-[140px] py-1.5">
+                                <td class="text-[13px] leading-tight min-w-[140px] py-1.5">
                                     <div v-if="row.daizhenshuData.length" class="flex flex-col gap-0.5">
                                         <a v-for="(link, idx) in row.daizhenshuData" :key="idx" :href="link.url" target="_blank" 
                                            class="text-indigo-600 hover:text-indigo-800 font-bold underline decoration-indigo-100">
@@ -139,11 +139,17 @@
                                     <span v-else class="text-slate-300 italic">---</span>
                                 </td>
                                 
-                                <td class="text-[11px] py-2 min-w-[140px]">
+                                <td class="text-[10px] py-2 min-w-[140px]">
                                     <div v-if="row.othersData.length" class="flex flex-col gap-1">
                                         <a v-for="(link, idx) in row.othersData" :key="idx" :href="link.url" target="_blank" 
-                                           class="text-slate-500 hover:text-indigo-600 underline decoration-slate-200 font-medium leading-tight block">
-                                            {{ link.label }}
+                                           :class="{
+                                               'bg-blue-50 text-blue-700 border-blue-100': link.type === '文庫版',
+                                               'bg-cyan-50 text-cyan-700 border-cyan-100': link.type === 'ぴっかぴかコミックス',
+                                               'bg-slate-50 text-slate-600 border-slate-200': !['文庫版', 'ぴっかぴかコミックス'].includes(link.type)
+                                           }"
+                                           class="px-1.5 py-0.5 rounded border font-bold hover:bg-white transition-all flex items-center justify-between group">
+                                            <span>{{ link.label }}</span>
+                                            <span class="opacity-0 group-hover:opacity-100 text-[8px] flex-shrink-0 ml-1">↗</span>
                                         </a>
                                     </div>
                                     <span v-else class="text-slate-300 italic">---</span>
@@ -363,7 +369,8 @@
                                 else {
                                     othersLinks.push({ 
                                         label: `${c.類 || '其他'}${labelSuffix}`, 
-                                        url: targetUrl 
+                                        url: targetUrl,
+                                        type: c.類 // Pass the category type for styling
                                     });
                                 }
                             });

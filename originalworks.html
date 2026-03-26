@@ -450,8 +450,10 @@
                                 othersData: othersLinks,
                                 daizhenshuSubtitle: subtitleLines.length > 0 ? subtitleLines.join('<br>') : '---',
                                 searchBlob: [
-                                    r.掲載番, r.初出副題, (r.初出掲載號 || ''), r.備考,
-                                    ...vol45PlusLinks.map(l => l.label),
+                                    //r.掲載番, 
+                                    r.初出副題, (r.初出掲載號 || ''), r.備考,
+                                    subtitleLines.join(' '),
+                                    //...vol45PlusLinks.map(l => l.label),
                                     ...othersLinks.map(l => l.label)
                                 ].join(' ').toLowerCase()
                             };

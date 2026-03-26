@@ -109,32 +109,30 @@
                                 <td class="font-mono text-slate-400 text-[12px]">{{ row.掲載番 }}</td>
                                 <td class="font-black text-slate-900 min-w-[200px] group-hover:text-indigo-600 transition-colors">{{ row.初出副題 }}</td>
                                 <td class="text-slate-500 text-center">{{ row.初出掲載頁 }}</td>
-                                <td class="font-black text-slate-900 min-w-[200px] leading-tight text-[14px]">
-                                    <div v-html="row.daizhenshuSubtitle"></div>
+                                <td class="text-[9px] leading-tight py-1.5">
+                                    <div v-html="row.daizhenshuSubtitle" class="max-w-[150px] truncate-2-lines"></div>
                                 </td>
-                                <td class="text-[10px] py-2 min-w-[140px]">
-                                    <div v-if="row.vol45PlusData.length" class="flex flex-col gap-1">
+                                <td class="text-[9px] py-1.5 min-w-[130px]">
+                                    <div v-if="row.vol45PlusData.length" class="flex flex-col gap-0.5">
                                         <a v-for="(link, idx) in row.vol45PlusData" :key="idx" :href="link.url" target="_blank"
                                            :class="{
-                                               'bg-rose-50 text-rose-600 border-rose-100': link.type === '45卷',
-                                               'bg-emerald-50 text-emerald-600 border-emerald-100': link.type === 'プラス',
-                                               'bg-amber-50 text-amber-600 border-amber-100': link.type === 'カラー作品集'
+                                               'bg-rose-50 text-rose-700 border-rose-100': link.type === '45卷',
+                                               'bg-emerald-50 text-emerald-700 border-emerald-100': link.type === 'プラス',
+                                               'bg-amber-50 text-amber-700 border-amber-100': link.type === 'カラー作品集'
                                            }"
-                                           class="px-2 py-1 rounded border font-black hover:bg-white transition-all flex items-center justify-between group/link">
+                                           class="px-1.5 py-0.5 rounded border font-bold hover:bg-white transition-all flex items-center justify-between group">
                                             <span>{{ link.label }}</span>
-                                            <svg class="w-2.5 h-2.5 opacity-0 group-hover/link:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                            <span class="opacity-0 group-hover:opacity-100 text-[8px]">↗</span>
                                         </a>
                                     </div>
                                     <span v-else class="text-slate-300 italic">---</span>
                                 </td>
                                 
-                                <td class="text-[10px] leading-tight min-w-[160px] py-2">
-                                    <div v-if="row.daizhenshuData.length" class="flex flex-col gap-1.5">
-                                        <a v-for="(link, idx) in row.daizhenshuData" :key="idx" :href="link.url" target="_blank" class="group flex items-start gap-1 text-indigo-600 hover:text-indigo-900 transition-colors">
-                                            <span :class="link.url && link.url.includes('region=HK') ? 'bg-blue-50 text-blue-500' : 'bg-amber-50 text-amber-600'" class="px-1 py-0.5 rounded font-black text-[8px] mt-0.5 flex-shrink-0">
-                                                {{ (link.url && link.url.includes('region=HK')) ? 'HK' : 'JP' }}
-                                            </span>
-                                            <span class="font-bold underline decoration-indigo-200 underline-offset-2">{{ link.label }}</span>
+                                <td class="text-[9px] leading-tight min-w-[140px] py-1.5">
+                                    <div v-if="row.daizhenshuData.length" class="flex flex-col gap-0.5">
+                                        <a v-for="(link, idx) in row.daizhenshuData" :key="idx" :href="link.url" target="_blank" 
+                                           class="text-indigo-600 hover:text-indigo-800 font-bold underline decoration-indigo-100">
+                                            {{ link.label }}
                                         </a>
                                     </div>
                                     <span v-else class="text-slate-300 italic">---</span>
@@ -294,13 +292,13 @@
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
                         ]);
-        
+                
                         const parseDate = (dateStr) => {
                             if (!dateStr || !dateStr.includes('/')) return 0;
                             const [m, d, y] = dateStr.split('/');
                             return new Date(y, m - 1, d).getTime();
                         };
-        
+                
                         const latestHkMap = {};
                         const sortedPList = pList.sort((a, b) => parseDate(b.IssueDate) - parseDate(a.IssueDate));
                         sortedPList.forEach(p => {
@@ -309,11 +307,7 @@
                                 latestHkMap[jpKey] = p['ISBN']?.toString().trim();
                             }
                         });
-        
-                        // Get URL params once
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const workidFromUrl = urlParams.get('workid');
-        
+                
                         this.master = mList.filter(r => r.作品番).map(r => {
                             const workId = r.作品番.toString().trim();
                             const bookMatches = cList.filter(c => c.作品番?.toString().trim() === workId);
@@ -327,21 +321,23 @@
                                 const jpIsbn = c.ISBN?.toString().trim();
                                 const hkIsbn = latestHkMap[jpIsbn];
                                 
+                                // --- SUBTITLE LOGIC: Strictly from bookMatches only ---
                                 if (c.出版副題) {
-                                    const jpLine = `<span class="bg-slate-100 text-slate-500 px-1 rounded text-[9px] font-black mr-1 uppercase">JP</span>${c.出版副題}`;
+                                    const jpLine = `<span class="bg-slate-100 text-slate-500 px-1 rounded text-[8px] font-black mr-1 uppercase">JP</span>${c.出版副題}`;
                                     if (!subtitleLines.includes(jpLine)) subtitleLines.push(jpLine);
                                 }
                                 if (c.副題港譯) {
-                                    const hkLine = `<span class="bg-blue-50 text-blue-500 px-1 rounded text-[9px] font-black mr-1 uppercase">HK</span>${c.副題港譯}`;
+                                    const hkLine = `<span class="bg-blue-50 text-blue-500 px-1 rounded text-[8px] font-black mr-1 uppercase">HK</span>${c.副題港譯}`;
                                     if (!subtitleLines.includes(hkLine)) subtitleLines.push(hkLine);
                                 }
-        
+                
                                 const targetUrl = hkIsbn 
                                     ? `manga-database.html?isbn=${hkIsbn}&region=HK` 
                                     : (jpIsbn ? `manga-database.html?isbn=${jpIsbn}&region=JP` : null);
-        
-                                const fullLabel = `Vol.${c.巻 || '?'} Ch.${c.收錄話 || '?'}`;
-        
+                
+                                // Compact Label: Vol.X Ch.Y
+                                const fullLabel = `V.${c.巻 || '?'} C.${c.收錄話 || '?'}`;
+                
                                 if (c.類 === '大長編大全集' || c.類 === '大全集') {
                                     daizhenshuLinks.push({ label: `[${c.類}] ${fullLabel}`, url: targetUrl });
                                 } 
@@ -352,37 +348,34 @@
                                     othersLinks.push({ label: `${c.書名 || 'Other'} ${fullLabel}`, url: targetUrl });
                                 }
                             });
-        
-                            const finalSubtitle = subtitleLines.length > 0 ? subtitleLines.join('<br>') : '---';
-                            
+                
                             return {
                                 ...r,
                                 daizhenshuData: daizhenshuLinks,
                                 vol45PlusData: vol45PlusLinks,
                                 othersData: othersLinks,
-                                daizhenshuSubtitle: finalSubtitle,
+                                daizhenshuSubtitle: subtitleLines.length > 0 ? subtitleLines.join('<br>') : '---',
                                 searchBlob: [
                                     r.掲載番, r.初出副題, (r.初出掲載號 || r.初出掲載号 || ''), r.備考,
                                     ...vol45PlusLinks.map(l => l.label),
-                                    ...othersLinks.map(l => l.label),
-                                    finalSubtitle.replace(/<[^>]*>?/gm, '') 
+                                    subtitleLines.join(' ').replace(/<[^>]*>?/gm, '') 
                                 ].join(' ').toLowerCase()
                             };
                         });
-        
-                        // URL Parameter Handling - AFTER master is populated
-                        if (workidFromUrl) {
-                            this.workIdFilter = workidFromUrl.toString();
-                            const target = this.master.find(r => r.作品番?.toString() === workidFromUrl.toString());
-                            if (target) {
-                                this.searchQuery = target.初出副題 || ''; 
-                            }
+                
+                        // URL Handling
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const workid = urlParams.get('workid');
+                        if (workid) {
+                            this.workIdFilter = workid.toString();
+                            const target = this.master.find(r => r.作品番?.toString() === workid.toString());
+                            if (target) this.searchQuery = target.初出副題 || ''; 
                         }
-        
+                
                         window.addEventListener('scroll', () => { this.showScrollButton = window.scrollY > 400; });
                         this.loading = false;
                     } catch (e) { 
-                        console.error("Critical Mapping Error:", e); 
+                        console.error("Mapping Error:", e); 
                         this.loading = false; 
                     }
                 },

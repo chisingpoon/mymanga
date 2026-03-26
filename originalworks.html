@@ -373,7 +373,7 @@
                             const vol45PlusLinks = [];
                             const othersLinks = [];
                             const subtitleLines = [];
-                            const searchSubtitles = [];
+                            const rawSubtitlesForSearch = [];
                             
                             bookMatches.forEach(c => {
                                 const jpIsbn = c.ISBN?.toString().trim();
@@ -381,14 +381,15 @@
                                 
                                 // --- Subtitle Logic: Strictly from bookMatches ---
                                 if (c.出版副題) {
+                                    const jpText = c.出版副題.trim();
                                     const jpLine = `<span class="bg-slate-100 text-slate-500 px-1 rounded text-[8px] font-black mr-1 uppercase">JP</span>${c.出版副題}`;
                                     if (!subtitleLines.includes(jpLine)) subtitleLines.push(jpLine);
-                                    searchSubtitles.push(jpText);
+                                    rawSubtitlesForSearch.push(jpText);
                                 }
                                 if (c.副題港譯) {
                                     const hkLine = `<span class="bg-blue-50 text-blue-500 px-1 rounded text-[8px] font-black mr-1 uppercase">HK</span>${c.副題港譯}`;
                                     if (!subtitleLines.includes(hkLine)) subtitleLines.push(hkLine);
-                                    searchSubtitles.push(hkText);
+                                    rawSubtitlesForSearch.push(hkText);
                                 }
                         
                                 const targetUrl = hkIsbn 
@@ -431,6 +432,17 @@
                                     });
                                 }
                             });
+
+                            const searchParts = [
+                                r.掲載番 || '',
+                                r.初出副題 || '',
+                                r.初出掲載號 || '',
+                                r.備考 || '',
+                                ...rawSubtitlesForSearch,
+                                ...vol45PlusLinks.map(l => l.label),
+                                ...othersLinks.map(l => l.label),
+                                ...daizhenshuLinks.map(l => l.label)
+                            ];
                         
                             return {
                                 ...r,
@@ -438,13 +450,7 @@
                                 vol45PlusData: vol45PlusLinks,
                                 othersData: othersLinks,
                                 daizhenshuSubtitle: subtitleLines.length > 0 ? subtitleLines.join('<br>') : '---',
-                                searchBlob: [
-                                    r.掲載番, r.初出副題, (r.初出掲載號 || ''), (r.備考 || ''),
-                                    ...vol45PlusLinks.map(l => l.label),
-                                    ...othersLinks.map(l => l.label),
-                                    ...daizhenshuLinks.map(l => l.label),
-                                    ...searchSubtitles
-                                ].join(' ').toLowerCase()
+                                searchBlob: searchParts.join(' ').toLowerCase()
                             };
                         });
                 

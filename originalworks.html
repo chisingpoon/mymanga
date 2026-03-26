@@ -342,65 +342,57 @@
                 }
             },
             methods: {
-                async init() {
+               async init() {
                     try {
                         const [mList, cList, pList] = await Promise.all([
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json()),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
                         ]);
-                
+
                         const parseDate = (dateStr) => {
                             if (!dateStr || !dateStr.includes('/')) return 0;
                             const [m, d, y] = dateStr.split('/');
                             return new Date(y, m - 1, d).getTime();
                         };
-                
+
                         const latestHkMap = {};
                         const sortedPList = pList.sort((a, b) => parseDate(b.IssueDate) - parseDate(a.IssueDate));
+
                         sortedPList.forEach(p => {
                             const jpKey = p['ISBN_JP']?.toString().trim();
                             if (jpKey && !latestHkMap[jpKey]) {
                                 latestHkMap[jpKey] = p['ISBN']?.toString().trim();
                             }
                         });
-                
                         this.master = mList.filter(r => r.作品番).map(r => {
                             const workId = r.作品番.toString().trim();
                             const bookMatches = cList.filter(c => c.作品番?.toString().trim() === workId);
-                            
                             const daizhenshuLinks = [];
                             const vol45PlusLinks = [];
                             const othersLinks = [];
                             const subtitleLines = [];
-                            const rawSubtitlesForSearch = [];
-                            
+
                             bookMatches.forEach(c => {
                                 const jpIsbn = c.ISBN?.toString().trim();
                                 const hkIsbn = latestHkMap[jpIsbn];
-                                
                                 // --- Subtitle Logic: Strictly from bookMatches ---
                                 if (c.出版副題) {
-                                    const jpText = c.出版副題.trim();
                                     const jpLine = `<span class="bg-slate-100 text-slate-500 px-1 rounded text-[8px] font-black mr-1 uppercase">JP</span>${c.出版副題}`;
                                     if (!subtitleLines.includes(jpLine)) subtitleLines.push(jpLine);
-                                    rawSubtitlesForSearch.push(jpText);
                                 }
                                 if (c.副題港譯) {
                                     const hkLine = `<span class="bg-blue-50 text-blue-500 px-1 rounded text-[8px] font-black mr-1 uppercase">HK</span>${c.副題港譯}`;
                                     if (!subtitleLines.includes(hkLine)) subtitleLines.push(hkLine);
-                                    rawSubtitlesForSearch.push(hkText);
                                 }
                         
                                 const targetUrl = hkIsbn 
                                     ? `manga-database.html?isbn=${hkIsbn}&region=HK` 
                                     : (jpIsbn ? `manga-database.html?isbn=${jpIsbn}&region=JP` : null);
-                        
                                 // --- Helper: Clean Padding (Skip if blank) ---
                                 let labelSuffix = "";
                                 const volVal = c.巻?.toString().trim();
                                 const chVal = c.收錄話?.toString().trim();
-
                                 let volLabel = c.類 || '---';
                                 if (volLabel === '45卷') {
                                     volLabel = '本卷';
@@ -432,17 +424,6 @@
                                     });
                                 }
                             });
-
-                            const searchParts = [
-                                r.掲載番 || '',
-                                r.初出副題 || '',
-                                r.初出掲載號 || '',
-                                r.備考 || '',
-                                ...rawSubtitlesForSearch,
-                                ...vol45PlusLinks.map(l => l.label),
-                                ...othersLinks.map(l => l.label),
-                                ...daizhenshuLinks.map(l => l.label)
-                            ];
                         
                             return {
                                 ...r,
@@ -450,7 +431,11 @@
                                 vol45PlusData: vol45PlusLinks,
                                 othersData: othersLinks,
                                 daizhenshuSubtitle: subtitleLines.length > 0 ? subtitleLines.join('<br>') : '---',
-                                searchBlob: searchParts.join(' ').toLowerCase()
+                                searchBlob: [
+                                    r.掲載番, r.初出副題, (r.初出掲載號 || ''), r.備考,
+                                    ...vol45PlusLinks.map(l => l.label),
+                                    ...othersLinks.map(l => l.label)
+                                ].join(' ').toLowerCase()
                             };
                         });
                 

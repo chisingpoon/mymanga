@@ -41,6 +41,14 @@
             overflow-wrap: break-word !important;
             white-space: normal !important;
         }
+
+        td.max-w-\[300px\] {
+            width: auto;
+        }
+        
+        .備考-empty {
+            min-width: 50px;
+        }
     </style>
 </head>
 <body class="bg-grid">
@@ -115,7 +123,7 @@
                                 <th class="px-3 py-3 w-px whitespace-nowrap text-left">45卷/P+/カラー</th>
                                 <th class="px-3 py-3 w-px whitespace-nowrap text-left">大全集</th>
                                 <th class="px-3 py-3 w-px whitespace-nowrap text-left">其他版本</th>
-                                <th class="px-3 py-3 text-left min-w-[250px]">備考</th>
+                                <th class="px-3 py-3 text-left text-[10px] max-w-[300px]">備考</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
@@ -176,8 +184,11 @@
                                     <span v-else class="text-slate-300 italic text-[9px]">---</span>
                                 </td>
                 
-                                <td class="px-3 py-2 text-slate-400 italic text-[11px] leading-tight">
-                                    {{ row.備考 }}
+                                <td class="px-3 py-2 text-slate-400 italic text-[11px] leading-tight max-w-[300px] break-words">
+                                    <div v-if="row.備考 && row.備考.trim() !== ''" class="line-clamp-2 hover:line-clamp-none transition-all duration-300">
+                                        {{ row.備考 }}
+                                    </div>
+                                    <span v-else class="text-slate-200 block text-center">—</span>
                                 </td>
                 
                             </tr>

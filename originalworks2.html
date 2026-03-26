@@ -121,25 +121,23 @@
                                 
                                 <td class="text-slate-400 text-xs italic text-center">{{ row.vol45PlusColor }}</td>
                 
-                                <td class="text-slate-400 text-xs italic">
-                                    <td class="text-[10px] leading-tight min-w-[160px] py-2">
-                                        <div v-if="row.daizhenshuData && row.daizhenshuData.length > 0" class="flex flex-col gap-1.5">
-                                            <a v-for="(link, idx) in row.daizhenshuData" 
-                                               :key="idx" 
-                                               :href="link.url" 
-                                               target="_blank" 
-                                               class="group flex items-start gap-1 text-indigo-600 hover:text-indigo-900 transition-colors">
-                                               <span :class="link.url.includes('region=HK') ? 'bg-blue-50 text-blue-500' : 'bg-amber-50 text-amber-600'" 
-                                                     class="px-1 py-0.5 rounded font-black text-[8px] mt-0.5 flex-shrink-0">
-                                                     {{ link.url.includes('region=HK') ? 'HK' : 'JP' }}
-                                               </span>
-                                               <span class="font-bold underline decoration-indigo-100 group-hover:decoration-indigo-400">
-                                                   {{ link.label }}
-                                               </span>
-                                            </a>
-                                        </div>
-                                        <span v-else class="text-slate-300 italic">---</span>
-                                    </td>
+                                <td class="text-[10px] leading-tight min-w-[160px] py-2">
+                                    <div v-if="row.daizhenshuData && row.daizhenshuData.length > 0" class="flex flex-col gap-1.5">
+                                        <a v-for="(link, idx) in row.daizhenshuData" 
+                                           :key="idx" 
+                                           :href="link.url" 
+                                           target="_blank" 
+                                           class="group flex items-start gap-1 text-indigo-600 hover:text-indigo-900 transition-colors">
+                                           <span :class="link.url.includes('region=HK') ? 'bg-blue-50 text-blue-500' : 'bg-amber-50 text-amber-600'" 
+                                                 class="px-1 py-0.5 rounded font-black text-[8px] mt-0.5 flex-shrink-0">
+                                                 {{ link.url.includes('region=HK') ? 'HK' : 'JP' }}
+                                           </span>
+                                           <span class="font-bold underline decoration-indigo-100 group-hover:decoration-indigo-400">
+                                               {{ link.label }}
+                                           </span>
+                                        </a>
+                                    </div>
+                                    <span v-else class="text-slate-300 italic">---</span>
                                 </td>
                 
                                 <td class="text-slate-400 text-xs italic">---</td>

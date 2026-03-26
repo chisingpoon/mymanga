@@ -109,10 +109,10 @@
                                 <td class="font-mono text-slate-400 text-[12px]">{{ row.掲載番 }}</td>
                                 <td class="font-black text-slate-900 min-w-[200px] group-hover:text-indigo-600 transition-colors">{{ row.初出副題 }}</td>
                                 <td class="text-slate-500 text-center">{{ row.初出掲載頁 }}</td>
-                                <td class="text-[10px] leading-tight py-1.5">
+                                <td class="text-[11px] leading-tight py-1.5">
                                     <div v-html="row.daizhenshuSubtitle" class="max-w-[150px] truncate-2-lines"></div>
                                 </td>
-                                <td class="text-[10px] py-1.5 min-w-[130px]">
+                                <td class="text-[11px] py-1.5 min-w-[130px]">
                                     <div v-if="row.vol45PlusData.length" class="flex flex-col gap-0.5">
                                         <a v-for="(link, idx) in row.vol45PlusData" :key="idx" :href="link.url" target="_blank"
                                            :class="{
@@ -129,7 +129,7 @@
                                     <span v-else class="text-slate-300 italic">---</span>
                                 </td>
                                 
-                                <td class="text-[10px] leading-tight min-w-[140px] py-1.5">
+                                <td class="text-[11px] leading-tight min-w-[140px] py-1.5">
                                     <div v-if="row.daizhenshuData.length" class="flex flex-col gap-0.5">
                                         <a v-for="(link, idx) in row.daizhenshuData" :key="idx" :href="link.url" target="_blank" 
                                            class="text-indigo-600 hover:text-indigo-800 font-bold underline decoration-indigo-100">
@@ -139,7 +139,7 @@
                                     <span v-else class="text-slate-300 italic">---</span>
                                 </td>
                                 
-                                <td class="text-[10px] py-2 min-w-[140px]">
+                                <td class="text-[11px] py-2 min-w-[140px]">
                                     <div v-if="row.othersData.length" class="flex flex-col gap-1">
                                         <a v-for="(link, idx) in row.othersData" :key="idx" :href="link.url" target="_blank" 
                                            class="text-slate-500 hover:text-indigo-600 underline decoration-slate-200 font-medium leading-tight block">
@@ -151,7 +151,7 @@
                                 <td class="text-slate-400 italic text-[12px] leading-tight min-w-[200px]">{{ row.備考 }}</td>
                             </tr>
                             <tr v-if="filteredData.length === 0">
-                                <td colspan="10" class="py-32 text-center bg-white">
+                                <td colspan="11" class="py-32 text-center bg-white">
                                     <div class="flex flex-col items-center justify-center space-y-4">
                                         <div class="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-300">
                                             <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">

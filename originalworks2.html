@@ -119,7 +119,25 @@
                 
                                 <td class="text-slate-400 text-xs italic">---</td>
                 
-                                <td class="text-slate-400 text-xs italic">---</td>
+                                <td class="text-slate-400 text-xs italic">
+                                    <td class="text-[10px] leading-tight min-w-[160px] py-2">
+                                        <div v-if="row.daizhenshuData && row.daizhenshuData.length > 0" class="flex flex-col gap-1.5">
+                                            <a v-for="(link, idx) in row.daizhenshuData" 
+                                               :key="idx" 
+                                               :href="link.url" 
+                                               class="group flex items-start gap-1 text-indigo-600 hover:text-indigo-900 transition-colors">
+                                               <span :class="link.url.includes('region=HK') ? 'bg-blue-50 text-blue-500' : 'bg-amber-50 text-amber-600'" 
+                                                     class="px-1 py-0.5 rounded font-black text-[8px] mt-0.5">
+                                                     {{ link.url.includes('region=HK') ? 'HK' : 'JP' }}
+                                               </span>
+                                               <span class="font-bold underline decoration-indigo-100 group-hover:decoration-indigo-400">
+                                                   {{ link.label }}
+                                               </span>
+                                            </a>
+                                        </div>
+                                        <span v-else class="text-slate-300 italic">---</span>
+                                    </td>
+                                </td>
                 
                                 <td class="text-slate-400 text-xs italic">---</td>
                 
@@ -222,40 +240,85 @@
             methods: {
                 async init() {
                     try {
-                        const response = await fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表");
-                        const mList = await response.json();
-        
-                        this.master = mList.filter(r => r.作品番).map(r => ({
-                            ...r,
-                            // Check both 号 and 號 to prevent "undefined" crashing the search
-                            searchBlob: [
-                                r.掲載番, 
-                                r.初出副題, 
-                                r.初出掲載誌, 
-                                (r.初出掲載号 || r.初出掲載號 || ''), 
-                                r.備考
-                            ].join(' ').toLowerCase()
-                        }));
-        
+                        // 同時獲取三個數據源
+                        const [mList, cList, pList] = await Promise.all([
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json()),
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
+                        ]);
+                
+                        // 預處理：將出版目錄轉為 Map 提高查詢效率 (ISBN JP -> ISBN)
+                        const isbnMap = {};
+                        pList.forEach(p => {
+                            const jpKey = p['ISBN JP']?.toString().trim();
+                            if (jpKey) {
+                                if (!isbnMap[jpKey]) isbnMap[jpKey] = [];
+                                // Store the HK ISBN
+                                isbnMap[jpKey].push(p['ISBN']?.toString().trim());
+                            }
+                        });
+                
+                        this.master = mList.filter(r => r.作品番).map(r => {
+                            const workId = r.作品番.toString();
+                        
+                            // 2. Find all matches in "書籍收錄作品" (Contents)
+                            const rawMatches = cList.filter(c => 
+                                c.作品番?.toString() === workId && 
+                                (c.類 === '大長編大全集' || c.類 === '大全集')
+                            );
+                        
+                            // 3. Flatten the matches (handling multiple HK ISBNs for one JP ISBN)
+                            const daizhenshuLinks = [];
+                            rawMatches.forEach(c => {
+                                const jpIsbn = c.ISBN?.toString().trim();
+                                const hkIsbns = isbnMap[jpIsbn];
+                        
+                                const label = `[${c.類}] Vol.${c.巻} Ch.${c.收錄話}`;
+                        
+                                if (hkIsbns && hkIsbns.length > 0) {
+                                    // Case A: Multiple matching HK ISBNs found
+                                    hkIsbns.forEach(hkIsbn => {
+                                        daizhenshuLinks.push({
+                                            label: label,
+                                            url: `manga-database.html?isbn=${hkIsbn}&region=HK`
+                                        });
+                                    });
+                                } else {
+                                    // Case B: No matching HK ISBN found -> Use original JP ISBN
+                                    daizhenshuLinks.push({
+                                        label: label,
+                                        url: `manga-database.html?isbn=${jpIsbn}&region=JP`
+                                    });
+                                }
+                            });
+                        
+                            return {
+                                ...r,
+                                daizhenshuData: daizhenshuLinks,
+                                daizhenshuSubtitle: '---', 
+                                volumeColor: '---',
+                                others: '---',
+                                searchBlob: [
+                                    r.掲載番, r.初出副題, r.初出掲載誌, 
+                                    (r.初出掲載号 || r.初出掲載號 || ''), r.備考
+                                ].join(' ').toLowerCase()
+                            };
+                        });
+                
+                        // URL 參數處理 (保持不變)
                         const urlParams = new URLSearchParams(window.location.search);
                         const workid = urlParams.get('workid');
-                        
                         if (workid) {
                             this.workIdFilter = workid;
                             const target = this.master.find(r => r.作品番?.toString() === workid.toString());
-                            if (target) {
-                                this.searchQuery = target.初出副題 || '';
-                            }
+                            if (target) this.searchQuery = target.初出副題 || '';
                         }
-        
-                        window.addEventListener('scroll', () => { 
-                            this.showScrollButton = window.scrollY > 400; 
-                        });
-        
+                
+                        window.addEventListener('scroll', () => { this.showScrollButton = window.scrollY > 400; });
+                        this.loading = false;
                     } catch (e) { 
-                        console.error("Critical Load Error:", e); 
-                    } finally {
-                        this.loading = false; // Ensure loader closes even on error
+                        console.error("Data Map Error:", e);
+                        this.loading = false;
                     }
                 },
                 resetSearch() {

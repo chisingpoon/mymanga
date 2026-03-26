@@ -201,21 +201,15 @@
                     return Object.keys(this.magazineStats).sort((a, b) => a.localeCompare(b, 'zh-Hant')); 
                 },
                 filteredData() {
-                    const q = this.searchQuery.toLowerCase().trim();
-                    const wid = this.workIdFilter.trim();
-                    const activeMags = this.activeMagazines;
-        
-                    return this.master.filter(r => {
-                        // 1. Hidden WorkID Filter
-                        if (wid !== '' && r.作品番?.toString() !== wid) return false;
-        
-                        // 2. Magazine Filter
-                        if (activeMags.length > 0 && !activeMags.includes(r.初出掲載誌?.trim())) return false;
-        
-                        // 3. Text Search
-                        if (q !== '' && !r.searchBlob.includes(q)) return false;
-        
-                        return true;
+                    return this.master.filter(row => {
+                        // 1. If an ID Lock exists, only show that specific ID
+                        if (this.workIdFilter && row.作品番?.toString() !== this.workIdFilter) {
+                            return false;
+                        }
+                        
+                        // 2. Then apply the text search against the searchBlob
+                        const query = this.searchQuery.toLowerCase().trim();
+                        return row.searchBlob.includes(query);
                     });
                 },
                 totalPages() { 
@@ -241,89 +235,110 @@
             methods: {
                 async init() {
                     try {
+                        // 1. Fetch all three necessary sheets
                         const [mList, cList, pList] = await Promise.all([
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json()),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
                         ]);
                 
-                        // 1. 日付パース用のヘルパー (MM/DD/YYYY 形式に対応)
+                        // 2. Helper to parse MM/DD/YYYY
                         const parseDate = (dateStr) => {
                             if (!dateStr || !dateStr.includes('/')) return 0;
                             const [m, d, y] = dateStr.split('/');
                             return new Date(y, m - 1, d).getTime();
                         };
                 
-                        // 2. 出版目録HKの処理: IssueDateの降順でソートし、ISBN_JPごとに最新の香港版ISBNを1つだけ保持
+                        // 3. Process PublishHK: Sort by Date DESC and map the LATEST ISBN per ISBN_JP
                         const latestHkMap = {};
                         const sortedPList = pList.sort((a, b) => parseDate(b.IssueDate) - parseDate(a.IssueDate));
-                
                         sortedPList.forEach(p => {
-                            const jpKey = p['ISBN_JP']?.toString().trim(); // ここを ISBN_JP に修正
+                            const jpKey = p['ISBN_JP']?.toString().trim();
                             if (jpKey && !latestHkMap[jpKey]) {
                                 latestHkMap[jpKey] = p['ISBN']?.toString().trim();
                             }
                         });
                 
                         this.master = mList.filter(r => r.作品番).map(r => {
+                            const urlParams = new URLSearchParams(window.location.search);
+                            const workid = urlParams.get('workid');
+                            
+                            if (workid) {
+                                // 1. Set the hidden filter (This is the "ID Lock")
+                                this.workIdFilter = workid.toString(); 
+                            
+                                // 2. Find the record to pre-fill the visible search box
+                                const target = this.master.find(r => r.作品番?.toString() === workid.toString());
+                                if (target) {
+                                    // We fill the search box with the title so the user knows what they are looking at
+                                    this.searchQuery = target.初出副題 || ''; 
+                                }
+                            }
                             const workId = r.作品番.toString().trim();
                 
-                            // 3. 書籍收錄作品から該当する「大全集」系レコードを抽出
+                            // 4. Find matches in "書籍收錄作品"
                             const rawMatches = cList.filter(c => 
                                 c.作品番?.toString().trim() === workId && 
                                 (c.類 === '大長編大全集' || c.類 === '大全集')
                             );
                 
                             const daizhenshuLinks = [];
-                            const subtitles = [];
+                            const subtitleLines = [];
                 
                             rawMatches.forEach(c => {
                                 const jpIsbn = c.ISBN?.toString().trim();
-                                const hkIsbn = latestHkMap[jpIsbn]; // 最新の香港版ISBNを取得
+                                const hkIsbn = latestHkMap[jpIsbn]; // "Top 1" logic
                                 
-                                // 大全集副題の構築 (国旗アイコン付き)
-                                if (c.出版副題 || c.副題港譯) {
-                                    const jpPart = c.出版副題 ? `🇯🇵 ${c.出版副題}` : '';
-                                    const hkPart = c.副題港譯 ? `🇭🇰 ${c.副題港譯}` : '';
-                                    const combined = [jpPart, hkPart].filter(p => p).join(' / ');
-                                    if (!subtitles.includes(combined)) subtitles.push(combined);
+                                // Subtitle Logic: Tag style, separate lines
+                                if (c.出版副題) {
+                                    const jpLine = `<span class="bg-slate-100 text-slate-500 px-1 rounded text-[9px] font-black mr-1 uppercase">JP</span>${c.出版副題}`;
+                                    if (!subtitleLines.includes(jpLine)) subtitleLines.push(jpLine);
+                                }
+                                if (c.副題港譯) {
+                                    const hkLine = `<span class="bg-blue-50 text-blue-500 px-1 rounded text-[9px] font-black mr-1 uppercase">HK</span>${c.副題港譯}`;
+                                    if (!subtitleLines.includes(hkLine)) subtitleLines.push(hkLine);
                                 }
                 
                                 const label = `[${c.類}] Vol.${c.巻} Ch.${c.收錄話}`;
                 
-                                // 4. リンク生成ロジック (香港版優先、なければ日本版)
+                                // 5. Link Logic: HK priority, fallback to JP, Target blank
                                 if (hkIsbn) {
-                                    daizhenshuLinks.push({ 
-                                        label, 
-                                        url: `manga-database.html?isbn=${hkIsbn}&region=HK` 
-                                    });
+                                    daizhenshuLinks.push({ label, url: `manga-database.html?isbn=${hkIsbn}&region=HK` });
                                 } else if (jpIsbn) {
-                                    daizhenshuLinks.push({ 
-                                        label, 
-                                        url: `manga-database.html?isbn=${jpIsbn}&region=JP` 
-                                    });
+                                    daizhenshuLinks.push({ label, url: `manga-database.html?isbn=${jpIsbn}&region=JP` });
                                 }
                             });
+                
+                            const finalSubtitle = subtitleLines.length > 0 ? subtitleLines.join('<br>') : '---';
                 
                             return {
                                 ...r,
                                 daizhenshuData: daizhenshuLinks,
-                                daizhenshuSubtitle: subtitles.length > 0 ? subtitles.join('<br>') : '---',
-                                vol45PlusColor: '---', // 次のステップ用
+                                daizhenshuSubtitle: finalSubtitle,
+                                vol45PlusColor: '---',
                                 others: '---',
-                                // 検索対象から「初出掲載誌」を除外
                                 searchBlob: [
-                                    r.掲載番, 
-                                    r.初出副題, 
-                                    (r.初出掲載號 || r.初出掲載号 || ''), 
-                                    r.備考
+                                    r.掲載番, r.初出副題, (r.初出掲載號 || r.初出掲載号 || ''), r.備考,
+                                    finalSubtitle.replace(/<[^>]*>?/gm, '') 
                                 ].join(' ').toLowerCase()
                             };
                         });
                 
+                        // 6. RESTORED URL PARAMETER LOGIC
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const workid = urlParams.get('workid');
+                        if (workid) {
+                            this.workIdFilter = workid;
+                            const target = this.master.find(r => r.作品番?.toString() === workid.toString());
+                            if (target) {
+                                this.searchQuery = target.初出副題 || ''; 
+                            }
+                        }
+                
+                        window.addEventListener('scroll', () => { this.showScrollButton = window.scrollY > 400; });
                         this.loading = false;
                     } catch (e) { 
-                        console.error("Mapping Error:", e); 
+                        console.error("Critical Mapping Error:", e); 
                         this.loading = false; 
                     }
                 },
@@ -331,6 +346,19 @@
                     this.searchQuery = '';
                     this.workIdFilter = '';
                     this.currentPage = 1;
+                },
+                clearSearch() {
+                    // 1. Reset the data states
+                    this.searchQuery = '';
+                    this.workIdFilter = null;
+            
+                    // 2. Remove the ?workid= from the browser address bar without reloading
+                    const url = new URL(window.location);
+                    url.searchParams.delete('workid');
+                    window.history.replaceState({}, '', url);
+                    
+                    // 3. Optional: Scroll back to top
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 },
                 toggleMagazine(m) {
                     const i = this.activeMagazines.indexOf(m);

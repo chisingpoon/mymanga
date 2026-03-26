@@ -88,18 +88,18 @@
         
                 <div class="overflow-x-auto">
                     <table class="min-w-full">
-                        <thead>
+                        <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold">
                             <tr>
-                                <th>初出掲載誌</th>
-                                <th>初出掲載号</th>
-                                <th>掲載番</th>
-                                <th>初出副題</th>
-                                <th>初出掲載頁</th>
-                                <th>大全集副題</th>
-                                <th>45卷/P+/カラー</th>
-                                <th>大全集</th>
-                                <th>Others</th>
-                                <th>備考</th>
+                                <th class="px-3 py-3 w-px whitespace-nowrap">初出掲載誌</th>
+                                <th class="px-3 py-3 w-px whitespace-nowrap">初出掲載号</th>
+                                <th class="px-3 py-3 w-px whitespace-nowrap">掲載番</th>
+                                <th class="px-3 py-3 w-px whitespace-nowrap text-left">初出副題</th>
+                                <th class="px-3 py-3 w-px whitespace-nowrap text-left">初出掲載頁</th>
+                                <th class="px-3 py-3 w-px whitespace-nowrap text-left">大全集副題</th>
+                                <th class="px-3 py-3 w-px whitespace-nowrap text-left">45卷/P+/カラー</th>
+                                <th class="px-3 py-3 w-px whitespace-nowrap text-left">大全集</th>
+                                <th class="px-3 py-3 w-px whitespace-nowrap text-left">其他版本</th>
+                                <th class="px-3 py-3 text-left min-w-[200px]">備考</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -107,12 +107,12 @@
                                 <td class="font-bold text-slate-700 whitespace-nowrap">{{ row.初出掲載誌 }}</td>
                                 <td class="text-blue-500 font-black text-[12px] whitespace-nowrap">{{ row.初出掲載号 }}</td>
                                 <td class="font-mono text-slate-400 text-[9px]">{{ row.掲載番 }}</td>
-                                <td class="font-black text-slate-900 min-w-[200px] group-hover:text-indigo-600 transition-colors">{{ row.初出副題 }}</td>
+                                <td class="font-black text-slate-900 min-w-[200px] group-hover:text-indigo-600 transition-colors whitespace-nowrap">{{ row.初出副題 }}</td>
                                 <td class="text-slate-500 text-center">{{ row.初出掲載頁 }}</td>
-                                <td class="text-[13px] leading-tight py-1.5">
+                                <td class="text-[13px] leading-tight py-1.5 whitespace-nowrap">
                                     <div v-html="row.daizhenshuSubtitle" class="max-w-[150px] truncate-2-lines"></div>
                                 </td>
-                                <td class="text-[13px] py-1.5 min-w-[130px]">
+                                <td class="text-[13px] py-1.5 min-w-[130px] whitespace-nowrap">
                                     <div v-if="row.vol45PlusData.length" class="flex flex-col gap-0.5">
                                         <a v-for="(link, idx) in row.vol45PlusData" :key="idx" :href="link.url" target="_blank"
                                            :class="{
@@ -129,7 +129,7 @@
                                     <span v-else class="text-slate-300 italic">---</span>
                                 </td>
                                 
-                                <td class="text-[13px] leading-tight min-w-[140px] py-1.5">
+                                <td class="text-[13px] leading-tight min-w-[140px] py-1.5 whitespace-nowrap">
                                     <div v-if="row.daizhenshuData.length" class="flex flex-col gap-0.5">
                                         <a v-for="(link, idx) in row.daizhenshuData" :key="idx" :href="link.url" target="_blank" 
                                            class="text-indigo-600 hover:text-indigo-800 font-bold underline decoration-indigo-100">
@@ -139,7 +139,7 @@
                                     <span v-else class="text-slate-300 italic">---</span>
                                 </td>
                                 
-                                <td class="text-[10px] py-2 min-w-[140px]">
+                                <td class="text-[10px] py-2 min-w-[140px] whitespace-nowrap">
                                     <div v-if="row.othersData.length" class="flex flex-col gap-1">
                                         <a v-for="(link, idx) in row.othersData" :key="idx" :href="link.url" target="_blank" 
                                            :class="{

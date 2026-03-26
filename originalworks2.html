@@ -112,7 +112,7 @@
                                 <td class="text-[9px] leading-tight py-1.5">
                                     <div v-html="row.daizhenshuSubtitle" class="max-w-[150px] truncate-2-lines"></div>
                                 </td>
-                                <td class="text-[9px] py-1.5 min-w-[130px]">
+                                <td class="text-[10px] py-1.5 min-w-[130px]">
                                     <div v-if="row.vol45PlusData.length" class="flex flex-col gap-0.5">
                                         <a v-for="(link, idx) in row.vol45PlusData" :key="idx" :href="link.url" target="_blank"
                                            :class="{
@@ -128,7 +128,7 @@
                                     <span v-else class="text-slate-300 italic">---</span>
                                 </td>
                                 
-                                <td class="text-[9px] leading-tight min-w-[140px] py-1.5">
+                                <td class="text-[10px] leading-tight min-w-[140px] py-1.5">
                                     <div v-if="row.daizhenshuData.length" class="flex flex-col gap-0.5">
                                         <a v-for="(link, idx) in row.daizhenshuData" :key="idx" :href="link.url" target="_blank" 
                                            class="text-indigo-600 hover:text-indigo-800 font-bold underline decoration-indigo-100">

@@ -112,24 +112,37 @@
                                 <td class="font-black text-slate-900 min-w-[200px] leading-tight text-[14px]">
                                     <div v-html="row.daizhenshuSubtitle"></div>
                                 </td>
-                                <td class="text-slate-400 text-xs italic text-center">{{ row.vol45PlusColor }}</td>
-                                <td class="text-[10px] leading-tight min-w-[160px] py-2">
-                                     <div v-if="row.daizhenshuData && row.daizhenshuData.length > 0" class="flex flex-col gap-1.5">
-                                        <a v-for="(link, idx) in row.daizhenshuData" :key="idx" :href="link.url" target="_blank" class="group flex items-start gap-1 text-indigo-600 hover:text-indigo-900 transition-colors">
-                                           <span :class="link.url.includes('region=HK') ? 'bg-blue-50 text-blue-500' : 'bg-amber-50 text-amber-600'" class="px-1 py-0.5 rounded font-black text-[8px] mt-0.5 flex-shrink-0">
-                                                 {{ link.url.includes('region=HK') ? 'HK' : 'JP' }}
-                                           </span>
-                                           <span class="font-bold underline">{{ link.label }}</span>
+                                <td class="text-[10px] py-2 min-w-[120px]">
+                                    <div v-if="row.vol45PlusData && row.vol45PlusData.length > 0" class="flex flex-col gap-1">
+                                        <a v-for="(link, idx) in row.vol45PlusData" :key="idx" :href="link.url" target="_blank"
+                                           :class="{
+                                               'bg-rose-50 text-rose-600 border-rose-100': link.type === '45卷',
+                                               'bg-emerald-50 text-emerald-600 border-emerald-100': link.type === 'プラス',
+                                               'bg-amber-50 text-amber-600 border-amber-100': link.type === 'カラー作品集'
+                                           }"
+                                           class="px-2 py-1 rounded border font-black hover:bg-white transition-all flex items-center justify-between">
+                                            {{ link.label }}
                                         </a>
                                     </div>
                                     <span v-else class="text-slate-300 italic">---</span>
                                 </td>
                                 <td class="text-[10px] leading-tight min-w-[160px] py-2">
-                                    <div v-if="row.othersData && row.othersData.length > 0" class="flex flex-wrap gap-1">
-                                        <span v-for="(item, idx) in row.othersData" :key="idx" 
-                                              class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold border border-slate-200">
-                                            {{ item.label }}
-                                        </span>
+                                    <div v-if="row.daizhenshuData && row.daizhenshuData.length > 0" class="flex flex-col gap-1.5">
+                                        <a v-for="(link, idx) in row.daizhenshuData" :key="idx" :href="link.url" target="_blank" class="group flex items-start gap-1 text-indigo-600 hover:text-indigo-900 transition-colors">
+                                            <span :class="link.url && link.url.includes('region=HK') ? 'bg-blue-50 text-blue-500' : 'bg-amber-50 text-amber-600'" class="px-1 py-0.5 rounded font-black text-[8px] mt-0.5 flex-shrink-0">
+                                                {{ (link.url && link.url.includes('region=HK')) ? 'HK' : 'JP' }}
+                                            </span>
+                                            <span class="font-bold underline">{{ link.label }}</span>
+                                        </a>
+                                    </div>
+                                    <span v-else class="text-slate-300 italic">---</span>
+                                </td>
+                                <td class="text-[10px] leading-tight min-w-[140px] py-2">
+                                    <div v-if="row.othersData && row.othersData.length > 0" class="flex flex-col gap-1">
+                                        <a v-for="(link, idx) in row.othersData" :key="idx" :href="link.url" target="_blank" 
+                                           class="text-slate-500 hover:text-indigo-600 underline decoration-slate-200 font-medium">
+                                            {{ link.label }}
+                                        </a>
                                     </div>
                                     <span v-else class="text-slate-300 italic">---</span>
                                 </td>
@@ -328,19 +341,18 @@
                             const workId = r.作品番.toString().trim();
                 
                             // 4. Find matches in "書籍收錄作品"
-                            const rawMatches = cList.filter(c => 
-                                c.作品番?.toString().trim() === workId && 
-                                (c.類 === '大長編大全集' || c.類 === '大全集')
-                            );
-                
+                            const bookMatches = cList.filter(c => c.作品番?.toString().trim() === workId);
+                            
                             const daizhenshuLinks = [];
+                            const vol45PlusLinks = [];
+                            const othersLinks = [];
                             const subtitleLines = [];
-                
-                            rawMatches.forEach(c => {
+                            
+                            bookMatches.forEach(c => {
                                 const jpIsbn = c.ISBN?.toString().trim();
-                                const hkIsbn = latestHkMap[jpIsbn]; // "Top 1" logic
+                                const hkIsbn = latestHkMap[jpIsbn];
                                 
-                                // Subtitle Logic: Tag style, separate lines
+                                // Subtitle Logic (Existing)
                                 if (c.出版副題) {
                                     const jpLine = `<span class="bg-slate-100 text-slate-500 px-1 rounded text-[9px] font-black mr-1 uppercase">JP</span>${c.出版副題}`;
                                     if (!subtitleLines.includes(jpLine)) subtitleLines.push(jpLine);
@@ -349,27 +361,46 @@
                                     const hkLine = `<span class="bg-blue-50 text-blue-500 px-1 rounded text-[9px] font-black mr-1 uppercase">HK</span>${c.副題港譯}`;
                                     if (!subtitleLines.includes(hkLine)) subtitleLines.push(hkLine);
                                 }
-                
-                                const label = `[${c.類}] Vol.${c.巻} Ch.${c.收錄話}`;
-                
-                                // 5. Link Logic: HK priority, fallback to JP, Target blank
-                                if (hkIsbn) {
-                                    daizhenshuLinks.push({ label, url: `manga-database.html?isbn=${hkIsbn}&region=HK` });
-                                } else if (jpIsbn) {
-                                    daizhenshuLinks.push({ label, url: `manga-database.html?isbn=${jpIsbn}&region=JP` });
+                            
+                                // Determine Link URL (HK priority, fallback to JP)
+                                const targetUrl = hkIsbn 
+                                    ? `manga-database.html?isbn=${hkIsbn}&region=HK` 
+                                    : (jpIsbn ? `manga-database.html?isbn=${jpIsbn}&region=JP` : null);
+                            
+                                // SORTING LOGIC: Follows your existing pattern but splits by "類"
+                                if (c.類 === '大長編大全集' || c.類 === '大全集') {
+                                    daizhenshuLinks.push({ 
+                                        label: `[${c.類}] Vol.${c.巻} Ch.${c.收錄話}`, 
+                                        url: targetUrl 
+                                    });
+                                } 
+                                else if (["45卷", "プラス", "カラー作品集"].includes(c.類)) {
+                                    vol45PlusLinks.push({ 
+                                        label: `${c.類}${c.巻 ? ' ' + c.巻 : ''}`, 
+                                        url: targetUrl,
+                                        type: c.類 
+                                    });
+                                } 
+                                else {
+                                    othersLinks.push({ 
+                                        label: c.書名 || 'Other', 
+                                        url: targetUrl 
+                                    });
                                 }
                             });
-                
+                            
                             const finalSubtitle = subtitleLines.length > 0 ? subtitleLines.join('<br>') : '---';
-                
+                            
                             return {
                                 ...r,
                                 daizhenshuData: daizhenshuLinks,
+                                vol45PlusData: vol45PlusLinks,
+                                othersData: othersLinks,
                                 daizhenshuSubtitle: finalSubtitle,
-                                vol45PlusColor: '---',
-                                others: '---',
                                 searchBlob: [
                                     r.掲載番, r.初出副題, (r.初出掲載號 || r.初出掲載号 || ''), r.備考,
+                                    ...vol45PlusLinks.map(l => l.label),
+                                    ...othersLinks.map(l => l.label),
                                     finalSubtitle.replace(/<[^>]*>?/gm, '') 
                                 ].join(' ').toLowerCase()
                             };

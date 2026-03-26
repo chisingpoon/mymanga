@@ -115,11 +115,11 @@
                                 
                                 <td class="text-slate-500 text-center">{{ row.初出掲載頁 }}</td>
                 
-                                <td class="text-[11px] leading-tight text-slate-600 font-medium">
+                                <td class="font-black text-slate-900 min-w-[200px] leading-tight text-[14px]">
                                     <div v-html="row.daizhenshuSubtitle"></div>
                                 </td>
-                
-                                <td class="text-slate-400 text-xs italic">{{ row.vol45PlusColor }}</td>
+                                
+                                <td class="text-slate-400 text-xs italic text-center">{{ row.vol45PlusColor }}</td>
                 
                                 <td class="text-slate-400 text-xs italic">
                                     <td class="text-[10px] leading-tight min-w-[160px] py-2">
@@ -130,7 +130,7 @@
                                                target="_blank" 
                                                class="group flex items-start gap-1 text-indigo-600 hover:text-indigo-900 transition-colors">
                                                <span :class="link.url.includes('region=HK') ? 'bg-blue-50 text-blue-500' : 'bg-amber-50 text-amber-600'" 
-                                                     class="px-1 py-0.5 rounded font-black text-[8px] mt-0.5">
+                                                     class="px-1 py-0.5 rounded font-black text-[8px] mt-0.5 flex-shrink-0">
                                                      {{ link.url.includes('region=HK') ? 'HK' : 'JP' }}
                                                </span>
                                                <span class="font-bold underline decoration-indigo-100 group-hover:decoration-indigo-400">
@@ -243,66 +243,77 @@
             methods: {
                 async init() {
                     try {
-                        // 同時獲取三個數據源
                         const [mList, cList, pList] = await Promise.all([
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json()),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
                         ]);
                 
-                        // 預處理：將出版目錄轉為 Map 提高查詢效率 (ISBN JP -> ISBN)
-                        const isbnMap = {};
-                        pList.forEach(p => {
-                            const jpKey = p['ISBN JP']?.toString().trim();
-                            if (jpKey) {
-                                if (!isbnMap[jpKey]) isbnMap[jpKey] = [];
-                                // Store the HK ISBN
-                                isbnMap[jpKey].push(p['ISBN']?.toString().trim());
+                        // 1. 日付パース用のヘルパー (MM/DD/YYYY 形式に対応)
+                        const parseDate = (dateStr) => {
+                            if (!dateStr || !dateStr.includes('/')) return 0;
+                            const [m, d, y] = dateStr.split('/');
+                            return new Date(y, m - 1, d).getTime();
+                        };
+                
+                        // 2. 出版目録HKの処理: IssueDateの降順でソートし、ISBN_JPごとに最新の香港版ISBNを1つだけ保持
+                        const latestHkMap = {};
+                        const sortedPList = pList.sort((a, b) => parseDate(b.IssueDate) - parseDate(a.IssueDate));
+                
+                        sortedPList.forEach(p => {
+                            const jpKey = p['ISBN_JP']?.toString().trim(); // ここを ISBN_JP に修正
+                            if (jpKey && !latestHkMap[jpKey]) {
+                                latestHkMap[jpKey] = p['ISBN']?.toString().trim();
                             }
                         });
                 
                         this.master = mList.filter(r => r.作品番).map(r => {
-                            const workId = r.作品番.toString();
-                        
-                            // 1. Data Logic for "大全集" (daizhenshuData)
+                            const workId = r.作品番.toString().trim();
+                
+                            // 3. 書籍收錄作品から該当する「大全集」系レコードを抽出
                             const rawMatches = cList.filter(c => 
-                                c.作品番?.toString() === workId && 
+                                c.作品番?.toString().trim() === workId && 
                                 (c.類 === '大長編大全集' || c.類 === '大全集')
                             );
-                        
+                
                             const daizhenshuLinks = [];
                             const subtitles = [];
-                        
+                
                             rawMatches.forEach(c => {
                                 const jpIsbn = c.ISBN?.toString().trim();
-                                const hkIsbns = isbnMap[jpIsbn];
-                                const label = `[${c.類}] Vol.${c.巻} Ch.${c.收錄話}`;
-                        
-                                // Subtitle Construction: JP Subtitle + HK Translation with Flags
+                                const hkIsbn = latestHkMap[jpIsbn]; // 最新の香港版ISBNを取得
+                                
+                                // 大全集副題の構築 (国旗アイコン付き)
                                 if (c.出版副題 || c.副題港譯) {
-                                    const sub = `${c.出版副題 ? '🇯🇵 ' + c.出版副題 : ''}${c.出版副題 && c.副題港譯 ? ' / ' : ''}${c.副題港譯 ? '🇭🇰 ' + c.副題港譯 : ''}`;
-                                    if (!subtitles.includes(sub)) subtitles.push(sub);
+                                    const jpPart = c.出版副題 ? `🇯🇵 ${c.出版副題}` : '';
+                                    const hkPart = c.副題港譯 ? `🇭🇰 ${c.副題港譯}` : '';
+                                    const combined = [jpPart, hkPart].filter(p => p).join(' / ');
+                                    if (!subtitles.includes(combined)) subtitles.push(combined);
                                 }
-                        
-                                // Priority Logic: Check HK first
-                                if (hkIsbns && hkIsbns.length > 0) {
-                                    hkIsbns.forEach(hkIsbn => {
-                                        daizhenshuLinks.push({ label, url: `manga-database.html?isbn=${hkIsbn}&region=HK` });
+                
+                                const label = `[${c.類}] Vol.${c.巻} Ch.${c.收錄話}`;
+                
+                                // 4. リンク生成ロジック (香港版優先、なければ日本版)
+                                if (hkIsbn) {
+                                    daizhenshuLinks.push({ 
+                                        label, 
+                                        url: `manga-database.html?isbn=${hkIsbn}&region=HK` 
                                     });
-                                } else {
-                                    // Fallback to JP if no HK mapping exists
-                                    daizhenshuLinks.push({ label, url: `manga-database.html?isbn=${jpIsbn}&region=JP` });
+                                } else if (jpIsbn) {
+                                    daizhenshuLinks.push({ 
+                                        label, 
+                                        url: `manga-database.html?isbn=${jpIsbn}&region=JP` 
+                                    });
                                 }
                             });
-                        
+                
                             return {
                                 ...r,
                                 daizhenshuData: daizhenshuLinks,
                                 daizhenshuSubtitle: subtitles.length > 0 ? subtitles.join('<br>') : '---',
-                                vol45PlusColor: '---',
+                                vol45PlusColor: '---', // 次のステップ用
                                 others: '---',
-                                
-                                // Removed r.初出掲載誌 from the search array
+                                // 検索対象から「初出掲載誌」を除外
                                 searchBlob: [
                                     r.掲載番, 
                                     r.初出副題, 
@@ -312,20 +323,10 @@
                             };
                         });
                 
-                        // URL 參數處理 (保持不變)
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const workid = urlParams.get('workid');
-                        if (workid) {
-                            this.workIdFilter = workid;
-                            const target = this.master.find(r => r.作品番?.toString() === workid.toString());
-                            if (target) this.searchQuery = target.初出副題 || '';
-                        }
-                
-                        window.addEventListener('scroll', () => { this.showScrollButton = window.scrollY > 400; });
                         this.loading = false;
                     } catch (e) { 
-                        console.error("Data Map Error:", e);
-                        this.loading = false;
+                        console.error("Mapping Error:", e); 
+                        this.loading = false; 
                     }
                 },
                 resetSearch() {

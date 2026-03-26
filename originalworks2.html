@@ -373,33 +373,20 @@
                                 const volVal = c.巻?.toString().trim();
                                 const chVal = c.收錄話?.toString().trim();
                                 
-                                if (volVal) labelSuffix += ` ${volVal}`;
-                                if (chVal) labelSuffix += ` Ch.${chVal}`;
-                                
-                                let volLabel = c.類 || '---';
-                                if (volLabel === '45卷') {
-                                    volLabel = '本卷';
-                                }  
-                                let daizhenLabel = '---';
-                                if (c.大全集) {
-                                    const prefix = c.類 === '大長編' ? '大長編 ' : '';
-                                    const vol = c.卷 || '?';
-                                    const ch = c.話 || '?';
-                                    daizhenLabel = `[${prefix}Vol.${vol} Ch.${ch}]`;
-                                }
-                                                    
+                                if (volVal) labelSuffix += ` V.${volVal}`;
+                                if (chVal) labelSuffix += ` C.${chVal}`;
+                        
                                 // 1. 大全集 Column
                                 if (c.類 === '大長編大全集' || c.類 === '大全集') {
                                     daizhenshuLinks.push({ 
-                                        //label: `[${c.類}]${labelSuffix}`, 
-                                        label: daizhenLabel,
+                                        label: `[${c.類}]${labelSuffix}`, 
                                         url: targetUrl 
                                     });
                                 } 
                                 // 2. 45卷/P+/カラー/大長編 Column
                                 else if (["45卷", "プラス", "カラー作品集", "大長編"].includes(c.類)) {
                                     vol45PlusLinks.push({ 
-                                        label: `${volLabel}${labelSuffix}`, 
+                                        label: `${c.類}${labelSuffix}`, 
                                         url: targetUrl, 
                                         type: c.類 
                                     });
@@ -408,8 +395,7 @@
                                 else {
                                     othersLinks.push({ 
                                         label: `${c.類 || '其他'}${labelSuffix}`, 
-                                        url: targetUrl,
-                                        type: c.類 // Pass the category type for styling
+                                        url: targetUrl 
                                     });
                                 }
                             });

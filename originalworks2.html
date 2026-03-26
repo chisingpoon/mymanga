@@ -104,85 +104,84 @@
                 </div>
         
                 <div class="overflow-x-auto">
-                    <table class="min-w-full">
+                    <table class="min-w-full table-auto">
                         <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold">
                             <tr>
-                                <th class="px-3 py-3 w-px whitespace-nowrap">掲載番</th>
                                 <th class="px-3 py-3 w-px whitespace-nowrap text-left">初出掲載誌 / 号</th>
+                                <th class="px-3 py-3 w-px whitespace-nowrap text-center">掲載番</th>
                                 <th class="px-3 py-3 w-px whitespace-nowrap text-left">初出副題</th>
-                                <th class="px-3 py-3 w-px whitespace-nowrap text-left text-center">頁</th>
-                                <th class="px-3 py-3 w-px text-left no-wrap-column">大全集副題</th>
+                                <th class="px-3 py-3 w-px whitespace-nowrap text-center">頁</th>
+                                <th class="px-3 py-3 w-px whitespace-nowrap text-left">大全集副題</th>
                                 <th class="px-3 py-3 w-px whitespace-nowrap text-left">45卷/P+/カラー</th>
                                 <th class="px-3 py-3 w-px whitespace-nowrap text-left">大全集</th>
                                 <th class="px-3 py-3 w-px whitespace-nowrap text-left">其他版本</th>
-                                <th class="px-3 py-3 text-left min-w-[300px]">備考</th>
+                                <th class="px-3 py-3 text-left min-w-[250px]">備考</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-indigo-50/50 transition-colors group cursor-default">
+                        <tbody class="divide-y divide-slate-100">
+                            <tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-indigo-50/50 transition-colors">
                                 
-                                <td class="px-3 py-2 font-mono text-slate-400 text-[9px] w-px whitespace-nowrap">{{ row.掲載番 }}</td>
-                            
-                                <td class="px-3 py-2 w-px whitespace-nowrap">
-                                    <div class="font-bold text-slate-700 text-[13px] leading-tight">{{ row.初出掲載誌 }}</div>
-                                    <div class="text-blue-500 font-black text-[11px] leading-tight mt-0.5">{{ row.初出掲載号 }}</div>
+                                <td class="px-3 py-2 whitespace-nowrap">
+                                    <div class="font-bold text-slate-700 text-[12px] leading-tight">{{ row.初出掲載誌 }}</div>
+                                    <div class="text-blue-500 font-black text-[10px] leading-tight mt-0.5">{{ row.初出掲載号 }}</div>
                                 </td>
-                            
-                                <td class="px-3 py-2 font-black text-slate-900 min-w-[150px] group-hover:text-indigo-600 transition-colors whitespace-nowrap">
+                
+                                <td class="px-3 py-2 text-center font-mono text-slate-400 text-[9px] whitespace-nowrap">
+                                    {{ row.掲載番 }}
+                                </td>
+                
+                                <td class="px-3 py-2 font-black text-slate-900 text-[13px] whitespace-nowrap">
                                     {{ row.初出副題 }}
                                 </td>
-                            
-                                <td class="px-3 py-2 text-slate-500 text-center w-px whitespace-nowrap text-[11px]">{{ row.初出掲載頁 }}</td>
-                            
-                                <td class="px-3 py-2 no-wrap-column align-top">
+                
+                                <td class="px-3 py-2 text-slate-500 text-center text-[11px] whitespace-nowrap">
+                                    {{ row.初出掲載頁 }}
+                                </td>
+                
+                                <td class="px-3 py-2 whitespace-nowrap">
                                     <div v-if="row.daizhenshuSubtitle && row.daizhenshuSubtitle !== '---'" 
-                                         class="text-[12px] text-slate-600 font-medium leading-tight">
-                                        <div v-html="row.daizhenshuSubtitle"></div>
+                                         class="text-[11px] text-slate-600 font-medium leading-tight" 
+                                         v-html="row.daizhenshuSubtitle">
                                     </div>
                                     <span v-else class="text-slate-300 italic text-[9px]">---</span>
                                 </td>
-                            
-                                <td class="px-3 py-2 text-[11px] w-px whitespace-nowrap">
+                
+                                <td class="px-3 py-2 whitespace-nowrap">
                                     <div v-if="row.vol45PlusData.length" class="flex flex-col gap-0.5">
-                                        <a v-for="(link, idx) in row.vol45PlusData" :key="idx" :href="link.url" target="_blank"
-                                           :class="{
-                                               'bg-rose-50 text-rose-700 border-rose-100': link.type === '45卷',
-                                               'bg-emerald-50 text-emerald-700 border-emerald-100': link.type === 'プラス',
-                                               'bg-amber-50 text-amber-700 border-amber-100': link.type === 'カラー作品集',
-                                               'bg-violet-50 text-violet-700 border-violet-100': link.type === '大長編'
-                                           }"
-                                           class="px-1.5 py-0.5 rounded border font-bold hover:bg-white transition-all flex items-center justify-between group">
-                                           <span>{{ link.label }}</span>
-                                           <span class="opacity-0 group-hover:opacity-100 text-[8px] ml-1">↗</span>
+                                        <a v-for="link in row.vol45PlusData" :href="link.url" target="_blank"
+                                           class="px-1.5 py-0.5 rounded border font-bold text-[8px] bg-slate-50 hover:bg-white transition-all">
+                                            {{ link.label }}
                                         </a>
                                     </div>
-                                    <span v-else class="text-slate-300 italic">---</span>
+                                    <span v-else class="text-slate-300 italic text-[9px]">---</span>
                                 </td>
-                            
-                                <td class="px-3 py-2 text-[11px] w-px whitespace-nowrap">
+                
+                                <td class="px-3 py-2 whitespace-nowrap">
                                     <div v-if="row.daizhenshuData.length" class="flex flex-col gap-0.5">
-                                        <a v-for="(link, idx) in row.daizhenshuData" :key="idx" :href="link.url" target="_blank" 
-                                           class="text-indigo-600 hover:text-indigo-800 font-bold underline decoration-indigo-100 block">
+                                        <a v-for="link in row.daizhenshuData" :href="link.url" target="_blank" 
+                                           class="text-indigo-600 font-bold text-[9px] underline block">
                                             {{ link.label }}
                                         </a>
                                     </div>
-                                    <span v-else class="text-slate-300 italic">---</span>
+                                    <span v-else class="text-slate-300 italic text-[9px]">---</span>
                                 </td>
-                            
-                                <td class="px-3 py-2 text-[11px] w-px whitespace-nowrap">
-                                    <div v-if="row.othersData.length" class="flex flex-col gap-1">
-                                        <a v-for="(link, idx) in row.othersData" :key="idx" :href="link.url" target="_blank" 
-                                           class="bg-slate-50 text-slate-600 border-slate-200 px-1.5 py-0.5 rounded border font-bold hover:bg-white transition-all block text-center">
+                
+                                <td class="px-3 py-2 whitespace-nowrap">
+                                    <div v-if="row.othersData.length" class="flex flex-col gap-0.5">
+                                        <a v-for="link in row.othersData" :href="link.url" target="_blank" 
+                                           class="bg-slate-50 text-slate-600 border border-slate-200 px-1.5 py-0.5 rounded font-bold text-[8px] block text-center">
                                             {{ link.label }}
                                         </a>
                                     </div>
-                                    <span v-else class="text-slate-300 italic">---</span>
+                                    <span v-else class="text-slate-300 italic text-[9px]">---</span>
                                 </td>
-                            
-                                <td class="px-3 py-2 text-slate-400 italic text-[12px] leading-tight min-w-[300px]">
+                
+                                <td class="px-3 py-2 text-slate-400 italic text-[11px] leading-tight">
                                     {{ row.備考 }}
                                 </td>
-                            </tr>                        </tbody>
+                
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
                 <div v-if="filteredData.length > 0" class="bg-slate-50 p-8 flex flex-col items-center gap-6 border-t border-slate-100">
@@ -241,7 +240,7 @@
                     workIdFilter: '', 
                     activeMagazines: [],
                     currentPage: 1, 
-                    itemsPerPage: 50, 
+                    itemsPerPage: 20, 
                     showScrollButton: false,
                     master: [],
                     selectedMagazine: 'All'

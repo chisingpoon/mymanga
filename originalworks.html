@@ -76,6 +76,24 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             transform: translateY(-1px);
         }
+        /* Better focus states for accessibility */
+        input:focus {
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+        
+        /* Subtle progress bar at the top of the card during data refresh */
+        .refresh-bar {
+            height: 2px;
+            background: linear-gradient(to right, #6366f1, #a855f7);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        /* Mobile-friendly adjustments */
+        @media (max-width: 768px) {
+            .main-card { border-radius: 0; border-inline: none; }
+            .top-nav { h1 { font-size: 1.25rem; } }
+        }
     </style>
 </head>
 <body class="bg-grid">

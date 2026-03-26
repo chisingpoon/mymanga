@@ -142,13 +142,13 @@
                                     {{ row.初出副題 }}
                                 </td>
                 
-                                <td class="px-3 py-2 text-slate-500 text-center text-[11px] whitespace-nowrap">
+                                <td class="px-3 py-2 text-slate-500 text-center text-[9px] whitespace-nowrap">
                                     {{ row.初出掲載頁 }}
                                 </td>
                 
                                 <td class="px-3 py-2 whitespace-nowrap">
                                     <div v-if="row.daizhenshuSubtitle && row.daizhenshuSubtitle !== '---'" 
-                                         class="text-[11px] text-slate-600 font-medium leading-tight" 
+                                         class="text-[12px] text-slate-600 font-medium leading-tight" 
                                          v-html="row.daizhenshuSubtitle">
                                     </div>
                                     <span v-else class="text-slate-300 italic text-[9px]">---</span>
@@ -157,7 +157,7 @@
                                 <td class="px-3 py-2 whitespace-nowrap">
                                     <div v-if="row.vol45PlusData.length" class="flex flex-col gap-0.5">
                                         <a v-for="link in row.vol45PlusData" :href="link.url" target="_blank"
-                                           class="px-1.5 py-0.5 rounded border font-bold text-[8px] bg-slate-50 hover:bg-white transition-all">
+                                           class="px-1.5 py-0.5 rounded border font-bold text-[10px] bg-slate-50 hover:bg-white transition-all">
                                             {{ link.label }}
                                         </a>
                                     </div>
@@ -167,7 +167,7 @@
                                 <td class="px-3 py-2 whitespace-nowrap">
                                     <div v-if="row.daizhenshuData.length" class="flex flex-col gap-0.5">
                                         <a v-for="link in row.daizhenshuData" :href="link.url" target="_blank" 
-                                           class="text-indigo-600 font-bold text-[9px] underline block">
+                                           class="text-indigo-600 font-bold text-[10px] underline block">
                                             {{ link.label }}
                                         </a>
                                     </div>
@@ -177,7 +177,7 @@
                                 <td class="px-3 py-2 whitespace-nowrap">
                                     <div v-if="row.othersData.length" class="flex flex-col gap-0.5">
                                         <a v-for="link in row.othersData" :href="link.url" target="_blank" 
-                                           class="bg-slate-50 text-slate-600 border border-slate-200 px-1.5 py-0.5 rounded font-bold text-[8px] block text-center">
+                                           class="bg-slate-50 text-slate-600 border border-slate-200 px-1.5 py-0.5 rounded font-bold text-[10px] block text-center">
                                             {{ link.label }}
                                         </a>
                                     </div>
@@ -373,20 +373,33 @@
                                 const volVal = c.巻?.toString().trim();
                                 const chVal = c.收錄話?.toString().trim();
                                 
-                                if (volVal) labelSuffix += ` V.${volVal}`;
-                                if (chVal) labelSuffix += ` C.${chVal}`;
-                        
+                                if (volVal) labelSuffix += ` ${volVal}`;
+                                if (chVal) labelSuffix += ` Ch.${chVal}`;
+                                
+                                let volLabel = c.類 || '---';
+                                if (volLabel === '45卷') {
+                                    volLabel = '本卷';
+                                }  
+                                let daizhenLabel = '---';
+                                if (c.大全集) {
+                                    const prefix = c.類 === '大長編' ? '大長編 ' : '';
+                                    const vol = c.卷 || '?';
+                                    const ch = c.話 || '?';
+                                    daizhenLabel = `[${prefix}Vol.${vol} Ch.${ch}]`;
+                                }
+                                                    
                                 // 1. 大全集 Column
                                 if (c.類 === '大長編大全集' || c.類 === '大全集') {
                                     daizhenshuLinks.push({ 
-                                        label: `[${c.類}]${labelSuffix}`, 
+                                        //label: `[${c.類}]${labelSuffix}`, 
+                                        label: daizhenLabel,
                                         url: targetUrl 
                                     });
                                 } 
                                 // 2. 45卷/P+/カラー/大長編 Column
                                 else if (["45卷", "プラス", "カラー作品集", "大長編"].includes(c.類)) {
                                     vol45PlusLinks.push({ 
-                                        label: `${c.類}${labelSuffix}`, 
+                                        label: `${volLabel}${labelSuffix}`, 
                                         url: targetUrl, 
                                         type: c.類 
                                     });

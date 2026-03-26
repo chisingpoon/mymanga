@@ -109,8 +109,12 @@
                                 <td class="font-mono text-slate-400 text-[9px]">{{ row.掲載番 }}</td>
                                 <td class="font-black text-slate-900 min-w-[200px] group-hover:text-indigo-600 transition-colors whitespace-nowrap">{{ row.初出副題 }}</td>
                                 <td class="text-slate-500 text-center">{{ row.初出掲載頁 }}</td>
-                                <td class="text-[13px] leading-tight py-1.5 whitespace-nowrap">
-                                    <div v-html="row.daizhenshuSubtitle" class="max-w-[150px] truncate-2-lines"></div>
+                                <td class="px-2 py-2 w-[18%] align-top">
+                                    <div v-if="row.daizhenshuSubtitle && row.daizhenshuSubtitle !== '---'" 
+                                         class="text-[12px] text-slate-600 font-medium leading-tight break-all">
+                                        <div v-html="row.daizhenshuSubtitle"></div>
+                                    </div>
+                                    <span v-else class="text-slate-300 italic text-[9px]">---</span>
                                 </td>
                                 <td class="text-[13px] py-1.5 min-w-[130px] whitespace-nowrap">
                                     <div v-if="row.vol45PlusData.length" class="flex flex-col gap-0.5">

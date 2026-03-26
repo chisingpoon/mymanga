@@ -374,13 +374,6 @@
                                 if (volLabel === '45卷') {
                                     volLabel = '本卷';
                                 }
-                                let daizhenLabel = '---';
-                                if (c.大全集) {
-                                    const prefix = c.類 === '大長編' ? '大長編 ' : 'Vol.';
-                                    const vol = c.卷 || '?';
-                                    const ch = c.話 || '?';
-                                    daizhenLabel = `[${prefix}${vol} Ch.${ch}]`;
-                                }
                                 
                                 if (volVal) labelSuffix += ` ${volVal}`;
                                 if (chVal) labelSuffix += ` Ch.${chVal}`;
@@ -388,8 +381,7 @@
                                 // 1. 大全集 Column
                                 if (c.類 === '大長編大全集' || c.類 === '大全集') {
                                     daizhenshuLinks.push({ 
-                                        //label: `[${c.類}]${labelSuffix}`, 
-                                        label: `${daizhenLabel}`,
+                                        label: `[${c.類}]${labelSuffix}`, 
                                         url: targetUrl 
                                     });
                                 } 

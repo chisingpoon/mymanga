@@ -438,7 +438,9 @@
                                 searchBlob: [
                                     r.掲載番, r.初出副題, (r.初出掲載號 || ''), r.備考,
                                     ...vol45PlusLinks.map(l => l.label),
-                                    ...othersLinks.map(l => l.label)
+                                    ...othersLinks.map(l => l.label),
+                                    ...daizhenshuLinks.map(l => l.label),
+                                    ...subtitleLines.map(1 => l.label)
                                 ].join(' ').toLowerCase()
                             };
                         });

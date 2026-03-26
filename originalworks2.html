@@ -151,23 +151,46 @@
                         </tbody>
                     </table>
                 </div>
-                <div v-if="filteredData.length > 0" class="bg-slate-50 p-8 flex justify-center border-t border-slate-100">
-                    <div class="flex gap-2">
-                        <button v-if="currentPage > 3" @click="changePage(1)" 
-                                class="w-10 h-10 flex items-center justify-center rounded-lg font-black text-xs bg-white text-slate-500 border border-slate-200 hover:border-indigo-500 transition-all">
-                            1
+                <div v-if="filteredData.length > 0" class="bg-slate-50 p-8 flex flex-col items-center gap-6 border-t border-slate-100">
+                    
+                    <div class="flex items-center gap-2">
+                        <button 
+                            @click="currentPage > 1 ? changePage(currentPage - 1) : null" 
+                            :disabled="currentPage === 1"
+                            :class="currentPage === 1 ? 'opacity-20 cursor-not-allowed' : 'hover:bg-indigo-600 hover:text-white'"
+                            class="h-10 px-4 flex items-center gap-2 rounded-lg font-black text-[10px] uppercase tracking-widest bg-white text-slate-500 border border-slate-200 transition-all shadow-sm"
+                        >
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                            Prev
                         </button>
-                        
-                        <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" 
-                            :class="p === currentPage ? 'bg-slate-900 text-white shadow-lg scale-105' : 'bg-white text-slate-500 border border-slate-200 hover:border-indigo-500'" 
-                            class="w-10 h-10 flex items-center justify-center rounded-lg font-black text-xs transition-all">
-                            {{ p }}
+                
+                        <div class="flex gap-2 mx-2">
+                            <button v-for="p in paginationRange" 
+                                :key="p" 
+                                @click="p !== '...' ? changePage(p) : null" 
+                                :class="[
+                                    p === currentPage ? 'bg-slate-900 text-white shadow-lg scale-110' : 'bg-white text-slate-500 border border-slate-200 hover:border-indigo-500',
+                                    p === '...' ? 'cursor-default border-transparent bg-transparent' : ''
+                                ]" 
+                                class="w-10 h-10 flex items-center justify-center rounded-lg font-black text-xs transition-all"
+                            >
+                                {{ p }}
+                            </button>
+                        </div>
+                
+                        <button 
+                            @click="currentPage < totalPages ? changePage(currentPage + 1) : null" 
+                            :disabled="currentPage === totalPages"
+                            :class="currentPage === totalPages ? 'opacity-20 cursor-not-allowed' : 'hover:bg-indigo-600 hover:text-white'"
+                            class="h-10 px-4 flex items-center gap-2 rounded-lg font-black text-[10px] uppercase tracking-widest bg-white text-slate-500 border border-slate-200 transition-all shadow-sm"
+                        >
+                            Next
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                         </button>
-
-                        <button v-if="currentPage < totalPages - 2" @click="changePage(totalPages)" 
-                                class="w-10 h-10 flex items-center justify-center rounded-lg font-black text-xs bg-white text-slate-500 border border-slate-200 hover:border-indigo-500 transition-all">
-                            {{ totalPages }}
-                        </button>
+                    </div>
+                
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                        Showing Page {{ currentPage }} of {{ totalPages }}
                     </div>
                 </div>
             </div>
@@ -240,16 +263,17 @@
                 },
                 paginationRange() {
                     const current = this.currentPage, last = this.totalPages, range = [];
-                    for (let i = 1; i <= last; i++) { 
-                        if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i); 
+                    // Always include first, last, and the pages around current
+                    for (let i = 1; i <= last; i++) {
+                        if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i);
                     }
                     const res = []; let l;
-                    for (let i of range) { 
-                        if (l && i - l !== 1) res.push('...'); 
-                        res.push(i); l = i; 
+                    for (let i of range) {
+                        if (l && i - l !== 1) res.push('...');
+                        res.push(i); l = i;
                     }
                     return res;
-                } // Added comma was missing here in some versions
+                }
             },
             methods: {
                 async init() {

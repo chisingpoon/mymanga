@@ -79,6 +79,11 @@
                             </svg>
                         </button>
                     </div>
+                    <select v-model="selectedMagazine" class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 focus:ring-2 focus:ring-indigo-500">
+                        <option v-for="mag in uniqueMagazines" :key="mag" :value="mag">
+                            {{ mag }}
+                        </option>
+                    </select>
                     <div class="flex flex-col items-end">
                         <div class="text-[11px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Showing {{ filteredData.length }} Entries</div>
                         <div v-if="workIdFilter" class="bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded text-[9px] font-black mt-1 uppercase">ID Lock: {{ workIdFilter }}</div>
@@ -184,6 +189,7 @@
                     itemsPerPage: 50, 
                     showScrollButton: false,
                     master: [],
+                    selectedMagazine: 'All'
                 }
             },
             computed: {
@@ -202,15 +208,28 @@
                 },
                 filteredData() {
                     return this.master.filter(row => {
-                        // 1. If an ID Lock exists, only show that specific ID
+                        // 1. ID Lock (from URL ?workid=)
                         if (this.workIdFilter && row.作品番?.toString() !== this.workIdFilter) {
                             return false;
                         }
-                        
-                        // 2. Then apply the text search against the searchBlob
+            
+                        // 2. Magazine Filter (Restored)
+                        if (this.selectedMagazine !== 'All' && row.初出掲載誌 !== this.selectedMagazine) {
+                            return false;
+                        }
+            
+                        // 3. Text Search (Matches Search Box against searchBlob)
                         const query = this.searchQuery.toLowerCase().trim();
-                        return row.searchBlob.includes(query);
+                        if (query && !row.searchBlob.includes(query)) {
+                            return false;
+                        }
+            
+                        return true;
                     });
+                },
+                uniqueMagazines() {
+                    const mags = this.master.map(r => r.初出掲載誌).filter(m => m);
+                    return ['All', ...new Set(mags)];
                 },
                 totalPages() { 
                     return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; 
@@ -348,16 +367,15 @@
                     this.currentPage = 1;
                 },
                 clearSearch() {
-                    // 1. Reset the data states
                     this.searchQuery = '';
                     this.workIdFilter = null;
-            
-                    // 2. Remove the ?workid= from the browser address bar without reloading
+                    this.selectedMagazine = 'All'; // Reset the magazine filter
+                    
+                    // Clean URL
                     const url = new URL(window.location);
                     url.searchParams.delete('workid');
                     window.history.replaceState({}, '', url);
                     
-                    // 3. Optional: Scroll back to top
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 },
                 toggleMagazine(m) {
@@ -365,6 +383,17 @@
                     if (i > -1) this.activeMagazines.splice(i, 1);
                     else this.activeMagazines.push(m);
                     this.currentPage = 1;
+                },
+                filterByMagazine(magName) {
+                    this.selectedMagazine = magName;
+                    // Optional: If a user clicks a magazine button, we should probably 
+                    // clear the workIdFilter so they can actually see the magazine results
+                    this.workIdFilter = null; 
+                    
+                    // Clean URL if they were looking at a specific work ID
+                    const url = new URL(window.location);
+                    url.searchParams.delete('workid');
+                    window.history.replaceState({}, '', url);
                 },
                 selectAllMagazines() { 
                     this.activeMagazines = [...this.sortedMagazines]; 

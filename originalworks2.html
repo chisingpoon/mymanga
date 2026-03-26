@@ -115,7 +115,9 @@
                                 
                                 <td class="text-slate-500 text-center">{{ row.初出掲載頁 }}</td>
                 
-                                <td class="text-slate-400 text-xs italic">{{ row.daizhenshuSubtitle }}</td>
+                                <td class="text-[11px] leading-tight text-slate-600 font-medium">
+                                    <div v-html="row.daizhenshuSubtitle"></div>
+                                </td>
                 
                                 <td class="text-slate-400 text-xs italic">{{ row.vol45PlusColor }}</td>
                 
@@ -125,6 +127,7 @@
                                             <a v-for="(link, idx) in row.daizhenshuData" 
                                                :key="idx" 
                                                :href="link.url" 
+                                               target="_blank" 
                                                class="group flex items-start gap-1 text-indigo-600 hover:text-indigo-900 transition-colors">
                                                <span :class="link.url.includes('region=HK') ? 'bg-blue-50 text-blue-500' : 'bg-amber-50 text-amber-600'" 
                                                      class="px-1 py-0.5 rounded font-black text-[8px] mt-0.5">
@@ -268,32 +271,42 @@
                             );
                         
                             const daizhenshuLinks = [];
+                            const subtitles = [];
+                        
                             rawMatches.forEach(c => {
                                 const jpIsbn = c.ISBN?.toString().trim();
                                 const hkIsbns = isbnMap[jpIsbn];
                                 const label = `[${c.類}] Vol.${c.巻} Ch.${c.收錄話}`;
                         
+                                // Subtitle Construction: JP Subtitle + HK Translation with Flags
+                                if (c.出版副題 || c.副題港譯) {
+                                    const sub = `${c.出版副題 ? '🇯🇵 ' + c.出版副題 : ''}${c.出版副題 && c.副題港譯 ? ' / ' : ''}${c.副題港譯 ? '🇭🇰 ' + c.副題港譯 : ''}`;
+                                    if (!subtitles.includes(sub)) subtitles.push(sub);
+                                }
+                        
+                                // Priority Logic: Check HK first
                                 if (hkIsbns && hkIsbns.length > 0) {
                                     hkIsbns.forEach(hkIsbn => {
                                         daizhenshuLinks.push({ label, url: `manga-database.html?isbn=${hkIsbn}&region=HK` });
                                     });
                                 } else {
+                                    // Fallback to JP if no HK mapping exists
                                     daizhenshuLinks.push({ label, url: `manga-database.html?isbn=${jpIsbn}&region=JP` });
                                 }
                             });
                         
                             return {
                                 ...r,
-                                daizhenshuData: daizhenshuLinks,    // Mapped to "大全集" column
-                                daizhenshuSubtitle: '---',         // Placeholder for "大全集副題"
-                                vol45PlusColor: '---',             // RENAMED from volumeColor
-                                others: '---',                     // Placeholder for "Others"
+                                daizhenshuData: daizhenshuLinks,
+                                daizhenshuSubtitle: subtitles.length > 0 ? subtitles.join('<br>') : '---',
+                                vol45PlusColor: '---',
+                                others: '---',
                                 
+                                // Removed r.初出掲載誌 from the search array
                                 searchBlob: [
                                     r.掲載番, 
                                     r.初出副題, 
-                                    r.初出掲載誌, 
-                                    (r.初出掲載号 || r.初出掲載號 || ''), 
+                                    (r.初出掲載號 || r.初出掲載号 || ''), 
                                     r.備考
                                 ].join(' ').toLowerCase()
                             };

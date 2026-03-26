@@ -69,9 +69,20 @@
             <div class="main-card">
                 <div class="p-6 border-b border-slate-100 flex items-center justify-between gap-4">
                     <div class="relative w-full max-w-xl">
-                        <input type="text" v-model="searchQuery" placeholder="Search sub-titles, magazines, or notes..." class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-base font-bold outline-none focus:border-indigo-500">
+                        <input type="text" v-model="searchQuery" placeholder="Search sub-titles, magazines, or notes..." 
+                               class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-base font-bold outline-none focus:border-indigo-500 transition-all">
+                        
+                        <button v-if="searchQuery || workIdFilter" @click="resetAllSearch" 
+                                class="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-indigo-600 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                        </button>
                     </div>
-                    <div class="text-[11px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Showing {{ filteredData.length }} Entries</div>
+                    <div class="flex flex-col items-end">
+                        <div class="text-[11px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Showing {{ filteredData.length }} Entries</div>
+                        <div v-if="workIdFilter" class="text-[9px] font-bold text-indigo-500 uppercase mt-1">Filtering by ID: {{ workIdFilter }}</div>
+                    </div>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -128,8 +139,13 @@
         createApp({
             data() {
                 return {
-                    loading: true, searchQuery: '', activeMagazines: [],
-                    currentPage: 1, itemsPerPage: 50, showScrollButton: false,
+                    loading: true, 
+                    searchQuery: '', 
+                    workIdFilter: '', // The "hidden" search box for WorkID
+                    activeMagazines: [],
+                    currentPage: 1, 
+                    itemsPerPage: 50, 
+                    showScrollButton: false,
                     master: [],
                 }
             },
@@ -142,11 +158,26 @@
                 sortedMagazines() { return Object.keys(this.magazineStats).sort((a, b) => a.localeCompare(b, 'zh-Hant')); },
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
+                    const wid = this.workIdFilter.trim();
                     const activeMags = this.activeMagazines;
+            
                     return this.master.filter(r => {
-                        const matchesMag = activeMags.length === 0 || activeMags.includes(r.初出掲載誌?.trim());
-                        const matchesSearch = q === '' || r.searchBlob.includes(q);
-                        return matchesMag && matchesSearch;
+                        // 1. Hidden WorkID Filter (Exact match)
+                        if (wid !== '' && r.作品番?.toString() !== wid) {
+                            return false;
+                        }
+            
+                        // 2. Magazine Filter
+                        if (activeMags.length > 0 && !activeMags.includes(r.初出掲載誌?.trim())) {
+                            return false;
+                        }
+            
+                        // 3. Text Search Blob
+                        if (q !== '' && !r.searchBlob.includes(q)) {
+                            return false;
+                        }
+            
+                        return true;
                     });
                 },
                 totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
@@ -165,33 +196,30 @@
             methods: {
                 async init() {
                     try {
-                        const [mList, cList] = await Promise.all([
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json()),
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json())
+                        const [mList] = await Promise.all([
+                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json())
                         ]);
-
-                        // Pre-process search blobs for performance
-                        this.master = mList.filter(r => r.作品番).map(r => {
-                            return {
-                                ...r,
-                                searchBlob: [r.掲載番, r.初出副題, r.初出掲載誌, r.初出掲載号, r.備考, r.全集副題].join(' ').toLowerCase()
-                            };
-                        });
-
-                        // URL Parameter Logic
+            
+                        this.master = mList.filter(r => r.作品番).map(r => ({
+                            ...r,
+                            searchBlob: [r.掲載番, r.初出副題, r.初出掲載誌, r.初出掲載号, r.備考, r.全集副題].join(' ').toLowerCase()
+                        }));
+            
+                        // Handle URL Parameter
                         const urlParams = new URLSearchParams(window.location.search);
                         const workid = urlParams.get('workid');
-                        
                         if (workid) {
-                            const target = this.master.find(r => r.作品番?.toString() === workid.toString());
-                            if (target && target.全集副題) {
-                                this.searchQuery = target.全集副題;
-                            }
+                            this.workIdFilter = workid; // Put in hidden filter instead of search box
                         }
-
+            
                         window.addEventListener('scroll', () => { this.showScrollButton = window.scrollY > 400; });
                         this.loading = false;
                     } catch (e) { console.error("Load Error:", e); }
+                },
+                resetAllSearch() {
+                    this.searchQuery = '';
+                    this.workIdFilter = '';
+                    this.currentPage = 1;
                 },
                 toggleMagazine(m) {
                     const i = this.activeMagazines.indexOf(m);

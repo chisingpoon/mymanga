@@ -115,9 +115,9 @@
                                 
                                 <td class="text-slate-500 text-center">{{ row.初出掲載頁 }}</td>
                 
-                                <td class="text-slate-400 text-xs italic">---</td>
+                                <td class="text-slate-400 text-xs italic">{{ row.daizhenshuSubtitle }}</td>
                 
-                                <td class="text-slate-400 text-xs italic">---</td>
+                                <td class="text-slate-400 text-xs italic">{{ row.vol45PlusColor }}</td>
                 
                                 <td class="text-slate-400 text-xs italic">
                                     <td class="text-[10px] leading-tight min-w-[160px] py-2">
@@ -261,46 +261,40 @@
                         this.master = mList.filter(r => r.作品番).map(r => {
                             const workId = r.作品番.toString();
                         
-                            // 2. Find all matches in "書籍收錄作品" (Contents)
+                            // 1. Data Logic for "大全集" (daizhenshuData)
                             const rawMatches = cList.filter(c => 
                                 c.作品番?.toString() === workId && 
                                 (c.類 === '大長編大全集' || c.類 === '大全集')
                             );
                         
-                            // 3. Flatten the matches (handling multiple HK ISBNs for one JP ISBN)
                             const daizhenshuLinks = [];
                             rawMatches.forEach(c => {
                                 const jpIsbn = c.ISBN?.toString().trim();
                                 const hkIsbns = isbnMap[jpIsbn];
-                        
                                 const label = `[${c.類}] Vol.${c.巻} Ch.${c.收錄話}`;
                         
                                 if (hkIsbns && hkIsbns.length > 0) {
-                                    // Case A: Multiple matching HK ISBNs found
                                     hkIsbns.forEach(hkIsbn => {
-                                        daizhenshuLinks.push({
-                                            label: label,
-                                            url: `manga-database.html?isbn=${hkIsbn}&region=HK`
-                                        });
+                                        daizhenshuLinks.push({ label, url: `manga-database.html?isbn=${hkIsbn}&region=HK` });
                                     });
                                 } else {
-                                    // Case B: No matching HK ISBN found -> Use original JP ISBN
-                                    daizhenshuLinks.push({
-                                        label: label,
-                                        url: `manga-database.html?isbn=${jpIsbn}&region=JP`
-                                    });
+                                    daizhenshuLinks.push({ label, url: `manga-database.html?isbn=${jpIsbn}&region=JP` });
                                 }
                             });
                         
                             return {
                                 ...r,
-                                daizhenshuData: daizhenshuLinks,
-                                daizhenshuSubtitle: '---', 
-                                volumeColor: '---',
-                                others: '---',
+                                daizhenshuData: daizhenshuLinks,    // Mapped to "大全集" column
+                                daizhenshuSubtitle: '---',         // Placeholder for "大全集副題"
+                                vol45PlusColor: '---',             // RENAMED from volumeColor
+                                others: '---',                     // Placeholder for "Others"
+                                
                                 searchBlob: [
-                                    r.掲載番, r.初出副題, r.初出掲載誌, 
-                                    (r.初出掲載号 || r.初出掲載號 || ''), r.備考
+                                    r.掲載番, 
+                                    r.初出副題, 
+                                    r.初出掲載誌, 
+                                    (r.初出掲載号 || r.初出掲載號 || ''), 
+                                    r.備考
                                 ].join(' ').toLowerCase()
                             };
                         });

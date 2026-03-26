@@ -253,30 +253,18 @@
                 },
                 filteredData() {
                     return this.master.filter(row => {
-                        // 1. Primary Filter: ID Lock (URL ?workid=)
-                        // If an ID is locked, we only show that record, ignoring other filters
                         if (this.workIdFilter && row.作品番?.toString() !== this.workIdFilter) {
                             return false;
                         }
-                
-                        // 2. Secondary Filter: Multi-select Magazines
-                        // Only applies if user has actually clicked some magazine buttons
                         if (this.activeMagazines.length > 0 && !this.activeMagazines.includes(row.初出掲載誌)) {
                             return false;
                         }
-                
-                        // 3. Tertiary Filter: Text Search
                         const query = this.searchQuery.toLowerCase().trim();
                         if (query && !row.searchBlob.includes(query)) {
                             return false;
                         }
-                
                         return true;
                     });
-                },
-                uniqueMagazines() {
-                    const mags = this.master.map(r => r.初出掲載誌).filter(m => m);
-                    return ['All', ...new Set(mags)];
                 },
                 totalPages() { 
                     return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; 
@@ -287,7 +275,6 @@
                 },
                 paginationRange() {
                     const current = this.currentPage, last = this.totalPages, range = [];
-                    // Always include first, last, and the pages around current
                     for (let i = 1; i <= last; i++) {
                         if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i);
                     }
@@ -302,21 +289,18 @@
             methods: {
                 async init() {
                     try {
-                        // 1. Fetch all three necessary sheets
                         const [mList, cList, pList] = await Promise.all([
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json()),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
                         ]);
-                
-                        // 2. Helper to parse MM/DD/YYYY
+        
                         const parseDate = (dateStr) => {
                             if (!dateStr || !dateStr.includes('/')) return 0;
                             const [m, d, y] = dateStr.split('/');
                             return new Date(y, m - 1, d).getTime();
                         };
-                
-                        // 3. Process PublishHK: Sort by Date DESC and map the LATEST ISBN per ISBN_JP
+        
                         const latestHkMap = {};
                         const sortedPList = pList.sort((a, b) => parseDate(b.IssueDate) - parseDate(a.IssueDate));
                         sortedPList.forEach(p => {
@@ -325,25 +309,12 @@
                                 latestHkMap[jpKey] = p['ISBN']?.toString().trim();
                             }
                         });
-                
+        
+                        // Get URL params once
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const workidFromUrl = urlParams.get('workid');
+        
                         this.master = mList.filter(r => r.作品番).map(r => {
-                            const urlParams = new URLSearchParams(window.location.search);
-                            const workid = urlParams.get('workid');
-                            
-                            if (workid) {
-                                // 1. Set the hidden filter (This is the "ID Lock")
-                                this.workIdFilter = workid.toString(); 
-                            
-                                // 2. Find the record to pre-fill the visible search box
-                                const target = this.master.find(r => r.作品番?.toString() === workid.toString());
-                                if (target) {
-                                    // We fill the search box with the title so the user knows what they are looking at
-                                    this.searchQuery = target.初出副題 || ''; 
-                                }
-                            }
-                            const workId = r.作品番.toString().trim();
-                
-                            // 4. Find matches in "書籍收錄作品"
                             const workId = r.作品番.toString().trim();
                             const bookMatches = cList.filter(c => c.作品番?.toString().trim() === workId);
                             
@@ -356,7 +327,6 @@
                                 const jpIsbn = c.ISBN?.toString().trim();
                                 const hkIsbn = latestHkMap[jpIsbn];
                                 
-                                // Subtitle Logic: Only use subtitles found in "書籍收錄作品"
                                 if (c.出版副題) {
                                     const jpLine = `<span class="bg-slate-100 text-slate-500 px-1 rounded text-[9px] font-black mr-1 uppercase">JP</span>${c.出版副題}`;
                                     if (!subtitleLines.includes(jpLine)) subtitleLines.push(jpLine);
@@ -365,35 +335,24 @@
                                     const hkLine = `<span class="bg-blue-50 text-blue-500 px-1 rounded text-[9px] font-black mr-1 uppercase">HK</span>${c.副題港譯}`;
                                     if (!subtitleLines.includes(hkLine)) subtitleLines.push(hkLine);
                                 }
-                            
+        
                                 const targetUrl = hkIsbn 
                                     ? `manga-database.html?isbn=${hkIsbn}&region=HK` 
                                     : (jpIsbn ? `manga-database.html?isbn=${jpIsbn}&region=JP` : null);
-                            
-                                // Label with Chapter padding (Vol.X Ch.Y)
+        
                                 const fullLabel = `Vol.${c.巻 || '?'} Ch.${c.收錄話 || '?'}`;
-                            
+        
                                 if (c.類 === '大長編大全集' || c.類 === '大全集') {
-                                    daizhenshuLinks.push({ 
-                                        label: `[${c.類}] ${fullLabel}`, 
-                                        url: targetUrl 
-                                    });
+                                    daizhenshuLinks.push({ label: `[${c.類}] ${fullLabel}`, url: targetUrl });
                                 } 
                                 else if (["45卷", "プラス", "カラー作品集"].includes(c.類)) {
-                                    vol45PlusLinks.push({ 
-                                        label: `${c.類} ${fullLabel}`, 
-                                        url: targetUrl,
-                                        type: c.類 
-                                    });
+                                    vol45PlusLinks.push({ label: `${c.類} ${fullLabel}`, url: targetUrl, type: c.類 });
                                 } 
                                 else {
-                                    othersLinks.push({ 
-                                        label: `${c.書名 || 'Other'} ${fullLabel}`, 
-                                        url: targetUrl 
-                                    });
+                                    othersLinks.push({ label: `${c.書名 || 'Other'} ${fullLabel}`, url: targetUrl });
                                 }
                             });
-                            
+        
                             const finalSubtitle = subtitleLines.length > 0 ? subtitleLines.join('<br>') : '---';
                             
                             return {
@@ -401,7 +360,7 @@
                                 daizhenshuData: daizhenshuLinks,
                                 vol45PlusData: vol45PlusLinks,
                                 othersData: othersLinks,
-                                daizhenshuSubtitle: finalSubtitle, // Now strictly from bookMatches
+                                daizhenshuSubtitle: finalSubtitle,
                                 searchBlob: [
                                     r.掲載番, r.初出副題, (r.初出掲載號 || r.初出掲載号 || ''), r.備考,
                                     ...vol45PlusLinks.map(l => l.label),
@@ -410,18 +369,16 @@
                                 ].join(' ').toLowerCase()
                             };
                         });
-                
-                        // 6. RESTORED URL PARAMETER LOGIC
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const workid = urlParams.get('workid');
-                        if (workid) {
-                            this.workIdFilter = workid;
-                            const target = this.master.find(r => r.作品番?.toString() === workid.toString());
+        
+                        // URL Parameter Handling - AFTER master is populated
+                        if (workidFromUrl) {
+                            this.workIdFilter = workidFromUrl.toString();
+                            const target = this.master.find(r => r.作品番?.toString() === workidFromUrl.toString());
                             if (target) {
                                 this.searchQuery = target.初出副題 || ''; 
                             }
                         }
-                
+        
                         window.addEventListener('scroll', () => { this.showScrollButton = window.scrollY > 400; });
                         this.loading = false;
                     } catch (e) { 
@@ -429,23 +386,14 @@
                         this.loading = false; 
                     }
                 },
-                resetSearch() {
-                    this.searchQuery = '';
-                    this.workIdFilter = '';
-                    this.currentPage = 1;
-                },
                 clearSearch() {
-                    // Reset Data
                     this.searchQuery = '';
                     this.workIdFilter = '';
-                    this.activeMagazines = []; // Clears the multi-select buttons
+                    this.activeMagazines = [];
                     this.currentPage = 1;
-                    
-                    // Reset URL
                     const url = new URL(window.location);
                     url.searchParams.delete('workid');
                     window.history.replaceState({}, '', url);
-                    
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 },
                 toggleMagazine(m) {
@@ -454,16 +402,10 @@
                     else this.activeMagazines.push(m);
                     this.currentPage = 1;
                 },
-                filterByMagazine(magName) {
-                    this.selectedMagazine = magName;
-                    // Optional: If a user clicks a magazine button, we should probably 
-                    // clear the workIdFilter so they can actually see the magazine results
-                    this.workIdFilter = null; 
-                    
-                    // Clean URL if they were looking at a specific work ID
-                    const url = new URL(window.location);
-                    url.searchParams.delete('workid');
-                    window.history.replaceState({}, '', url);
+                resetSearch() {
+                    this.searchQuery = '';
+                    this.workIdFilter = '';
+                    this.currentPage = 1;
                 },
                 selectAllMagazines() { 
                     this.activeMagazines = [...this.sortedMagazines]; 
@@ -472,6 +414,14 @@
                 clearMagazines() { 
                     this.activeMagazines = []; 
                     this.currentPage = 1; 
+                },
+                filterByMagazine(magName) {
+                    this.activeMagazines = [magName];
+                    this.workIdFilter = ''; 
+                    const url = new URL(window.location);
+                    url.searchParams.delete('workid');
+                    window.history.replaceState({}, '', url);
+                    this.currentPage = 1;
                 },
                 changePage(p) { 
                     this.currentPage = p;

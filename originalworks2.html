@@ -124,7 +124,15 @@
                                     </div>
                                     <span v-else class="text-slate-300 italic">---</span>
                                 </td>
-                                <td class="text-slate-400 text-xs italic">---</td>
+                                <td class="text-[10px] leading-tight min-w-[160px] py-2">
+                                    <div v-if="row.othersData && row.othersData.length > 0" class="flex flex-wrap gap-1">
+                                        <span v-for="(item, idx) in row.othersData" :key="idx" 
+                                              class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold border border-slate-200">
+                                            {{ item.label }}
+                                        </span>
+                                    </div>
+                                    <span v-else class="text-slate-300 italic">---</span>
+                                </td>
                                 <td class="text-slate-400 italic text-[12px] leading-tight min-w-[200px]">{{ row.備考 }}</td>
                             </tr>
                             <tr v-if="filteredData.length === 0">

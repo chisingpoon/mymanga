@@ -49,6 +49,31 @@
         .備考-empty {
             min-width: 50px;
         }
+
+        /* Alternating row colors for easy horizontal tracking */
+        tbody tr:nth-child(even) {
+            background-color: #f8fafc; /* Slate-50 */
+        }
+        
+        /* Row hover highlight to keep track of the current line */
+        tbody tr:hover {
+            background-color: #f1f5f9 !important; /* Slate-100 */
+        }
+        
+        /* Specific Link Hover Effects for the data columns */
+        .data-link {
+            transition: all 0.2s ease;
+            display: block;
+            border: 1px solid transparent;
+        }
+        
+        .data-link:hover {
+            background-color: #ffffff;
+            border-color: #6366f1; /* Indigo-500 */
+            color: #4338ca; /* Indigo-700 */
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
     </style>
 </head>
 <body class="bg-grid">
@@ -157,7 +182,7 @@
                                 <td class="px-3 py-2 whitespace-nowrap">
                                     <div v-if="row.vol45PlusData.length" class="flex flex-col gap-0.5">
                                         <a v-for="link in row.vol45PlusData" :href="link.url" target="_blank"
-                                           class="bg-slate-50 text-slate-600 border border-slate-200 px-1.5 py-0.5 rounded font-bold text-[10px] block">
+                                           class="bg-slate-50 text-slate-600 data-link border border-slate-200 px-1.5 py-0.5 rounded font-bold text-[10px] block">
                                             {{ link.label }}
                                         </a>
                                     </div>
@@ -167,7 +192,7 @@
                                 <td class="px-3 py-2 whitespace-nowrap">
                                     <div v-if="row.daizhenshuData.length" class="flex flex-col gap-0.5">
                                         <a v-for="link in row.daizhenshuData" :href="link.url" target="_blank" 
-                                           class="bg-slate-50 text-slate-600 border border-slate-200 px-1.5 py-0.5 rounded font-bold text-[10px] block">
+                                           class="bg-slate-50 text-slate-600 data-link border border-slate-200 px-1.5 py-0.5 rounded font-bold text-[10px] block">
                                             {{ link.label }}
                                         </a>
                                     </div>
@@ -177,7 +202,7 @@
                                 <td class="px-3 py-2 whitespace-nowrap">
                                     <div v-if="row.othersData.length" class="flex flex-col gap-0.5">
                                         <a v-for="link in row.othersData" :href="link.url" target="_blank" 
-                                           class="bg-slate-50 text-slate-600 border border-slate-200 px-1.5 py-0.5 rounded font-bold text-[10px] block">
+                                           class="bg-slate-50 text-slate-600 data-link border border-slate-200 px-1.5 py-0.5 rounded font-bold text-[10px] block">
                                             {{ link.label }}
                                         </a>
                                     </div>

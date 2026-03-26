@@ -118,20 +118,21 @@
                                            :class="{
                                                'bg-rose-50 text-rose-700 border-rose-100': link.type === '45卷',
                                                'bg-emerald-50 text-emerald-700 border-emerald-100': link.type === 'プラス',
-                                               'bg-amber-50 text-amber-700 border-amber-100': link.type === 'カラー作品集'
+                                               'bg-amber-50 text-amber-700 border-amber-100': link.type === 'カラー作品集',
+                                               'bg-violet-50 text-violet-700 border-violet-100': link.type === '大長編'
                                            }"
                                            class="px-1.5 py-0.5 rounded border font-bold hover:bg-white transition-all flex items-center justify-between group">
                                             <span>{{ link.label }}</span>
                                             <span class="opacity-0 group-hover:opacity-100 text-[8px]">↗</span>
                                         </a>
-                                    </div>
+                                    </div>    
                                     <span v-else class="text-slate-300 italic">---</span>
                                 </td>
                                 
                                 <td class="text-[10px] leading-tight min-w-[140px] py-1.5">
-                                    <div v-if="row.daizhenshuData.length" class="flex flex-col gap-0.5">
-                                        <a v-for="(link, idx) in row.daizhenshuData" :key="idx" :href="link.url" target="_blank" 
-                                           class="text-indigo-600 hover:text-indigo-800 font-bold underline decoration-indigo-100">
+                                    <div v-if="row.othersData.length" class="flex flex-col gap-1">
+                                        <a v-for="(link, idx) in row.othersData" :key="idx" :href="link.url" target="_blank" 
+                                           class="text-slate-500 hover:text-indigo-600 underline decoration-slate-200 font-medium leading-tight">
                                             {{ link.label }}
                                         </a>
                                     </div>
@@ -141,7 +142,7 @@
                                 <td class="text-[10px] py-2 min-w-[140px]">
                                     <div v-if="row.othersData.length" class="flex flex-col gap-1">
                                         <a v-for="(link, idx) in row.othersData" :key="idx" :href="link.url" target="_blank" 
-                                           class="text-slate-500 hover:text-indigo-600 underline decoration-slate-200 font-medium leading-tight">
+                                           class="text-slate-500 hover:text-indigo-600 underline decoration-slate-200 font-medium leading-tight block">
                                             {{ link.label }}
                                         </a>
                                     </div>
@@ -321,7 +322,7 @@
                                 const jpIsbn = c.ISBN?.toString().trim();
                                 const hkIsbn = latestHkMap[jpIsbn];
                                 
-                                // --- SUBTITLE LOGIC: Strictly from bookMatches only ---
+                                // --- Subtitle Logic: Strictly from bookMatches ---
                                 if (c.出版副題) {
                                     const jpLine = `<span class="bg-slate-100 text-slate-500 px-1 rounded text-[8px] font-black mr-1 uppercase">JP</span>${c.出版副題}`;
                                     if (!subtitleLines.includes(jpLine)) subtitleLines.push(jpLine);
@@ -330,25 +331,43 @@
                                     const hkLine = `<span class="bg-blue-50 text-blue-500 px-1 rounded text-[8px] font-black mr-1 uppercase">HK</span>${c.副題港譯}`;
                                     if (!subtitleLines.includes(hkLine)) subtitleLines.push(hkLine);
                                 }
-                
+                        
                                 const targetUrl = hkIsbn 
                                     ? `manga-database.html?isbn=${hkIsbn}&region=HK` 
                                     : (jpIsbn ? `manga-database.html?isbn=${jpIsbn}&region=JP` : null);
-                
-                                // Compact Label: Vol.X Ch.Y
-                                const fullLabel = `V.${c.巻 || '?'} C.${c.收錄話 || '?'}`;
-                
+                        
+                                // --- Helper: Clean Padding (Skip if blank) ---
+                                let labelSuffix = "";
+                                const volVal = c.巻?.toString().trim();
+                                const chVal = c.收錄話?.toString().trim();
+                                
+                                if (volVal) labelSuffix += ` V.${volVal}`;
+                                if (chVal) labelSuffix += ` C.${chVal}`;
+                        
+                                // 1. 大全集 Column
                                 if (c.類 === '大長編大全集' || c.類 === '大全集') {
-                                    daizhenshuLinks.push({ label: `[${c.類}] ${fullLabel}`, url: targetUrl });
+                                    daizhenshuLinks.push({ 
+                                        label: `[${c.類}]${labelSuffix}`, 
+                                        url: targetUrl 
+                                    });
                                 } 
-                                else if (["45卷", "プラス", "カラー作品集"].includes(c.類)) {
-                                    vol45PlusLinks.push({ label: `${c.類} ${fullLabel}`, url: targetUrl, type: c.類 });
+                                // 2. 45卷/P+/カラー/大長編 Column
+                                else if (["45卷", "プラス", "カラー作品集", "大長編"].includes(c.類)) {
+                                    vol45PlusLinks.push({ 
+                                        label: `${c.類}${labelSuffix}`, 
+                                        url: targetUrl, 
+                                        type: c.類 
+                                    });
                                 } 
+                                // 3. Others Column (Uses c.類)
                                 else {
-                                    othersLinks.push({ label: `${c.書名 || 'Other'} ${fullLabel}`, url: targetUrl });
+                                    othersLinks.push({ 
+                                        label: `${c.類 || '其他'}${labelSuffix}`, 
+                                        url: targetUrl 
+                                    });
                                 }
                             });
-                
+                        
                             return {
                                 ...r,
                                 daizhenshuData: daizhenshuLinks,
@@ -356,9 +375,9 @@
                                 othersData: othersLinks,
                                 daizhenshuSubtitle: subtitleLines.length > 0 ? subtitleLines.join('<br>') : '---',
                                 searchBlob: [
-                                    r.掲載番, r.初出副題, (r.初出掲載號 || r.初出掲載号 || ''), r.備考,
+                                    r.掲載番, r.初出副題, (r.初出掲載號 || ''), r.備考,
                                     ...vol45PlusLinks.map(l => l.label),
-                                    subtitleLines.join(' ').replace(/<[^>]*>?/gm, '') 
+                                    ...othersLinks.map(l => l.label)
                                 ].join(' ').toLowerCase()
                             };
                         });

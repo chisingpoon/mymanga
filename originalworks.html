@@ -379,7 +379,13 @@
                     return stats;
                 },
                 sortedMagazines() { 
-                    return Object.keys(this.magazineStats).sort((a, b) => a.localeCompare(b, 'zh-Hant')); 
+                    //return Object.keys(this.magazineStats).sort((a, b) => a.localeCompare(b, 'zh-Hant')); 
+                    // Create a Chinese Traditional Stroke-order Collator
+                    const collator = new Intl.Collator('zh-Hant-u-co-stroke');
+                    
+                    return Object.keys(this.magazineStats).sort((a, b) => {
+                        return collator.compare(a, b);
+                    });
                 },
                 filteredData() {
                     return this.master.filter(row => {

@@ -185,4 +185,121 @@ createApp({
             currentPage: 1,
             pageSize: 6,
             activePost: null,
-            sheetUrl: '
+            sheetUrl: 'https://opensheet.elk.sh/1PkFmYV1rVoJqFmysUyHQBOC1jS-MWRodr9OyOFOloKs/BlogList'
+        }
+    },
+    computed: {
+        categories() {
+            const activeOnly = this.posts.filter(p => String(p.Active).toLowerCase() === 'yes');
+            return [...new Set(activeOnly.map(p => p.Category))].filter(Boolean);
+        },
+        isFiltered() {
+            return this.selectedCategory !== 'All' || this.searchQuery !== '' || this.startDate !== '' || this.endDate !== '';
+        },
+        filteredPosts() {
+            let filtered = this.posts.filter(p => String(p.Active).toLowerCase() === 'yes');
+            
+            if (this.selectedCategory !== 'All') {
+                filtered = filtered.filter(p => p.Category === this.selectedCategory);
+            }
+            
+            if (this.searchQuery) {
+                const q = this.searchQuery.toLowerCase();
+                filtered = filtered.filter(p => 
+                    (p.Title || "").toLowerCase().includes(q) || 
+                    (p.Summary || "").toLowerCase().includes(q)
+                );
+            }
+
+            if (this.startDate || this.endDate) {
+                filtered = filtered.filter(p => {
+                    if (!p.PostDate) return false;
+                    const postDate = this.parseSheetDate(p.PostDate);
+                    const start = this.startDate ? new Date(this.startDate) : null;
+                    const end = this.endDate ? new Date(this.endDate) : null;
+                    if (start) start.setHours(0,0,0,0);
+                    if (end) end.setHours(23,59,59,999);
+                    if (start && postDate < start) return false;
+                    if (end && postDate > end) return false;
+                    return true;
+                });
+            }
+
+            // DATE SORTING LOGIC
+            filtered.sort((a, b) => {
+                const dateA = this.parseSheetDate(a.PostDate || "1/1/1900");
+                const dateB = this.parseSheetDate(b.PostDate || "1/1/1900");
+                return this.sortBy === 'newest' ? dateB - dateA : dateA - dateB;
+            });
+
+            return filtered;
+        },
+        paginatedPosts() {
+            const start = (this.currentPage - 1) * this.pageSize;
+            return this.filteredPosts.slice(start, start + this.pageSize);
+        },
+        totalPages() {
+            return Math.ceil(this.filteredPosts.length / this.pageSize);
+        }
+    },
+    methods: {
+        async fetchData() {
+            try {
+                const response = await fetch(this.sheetUrl);
+                const rawData = await response.json();
+                this.posts = rawData.map(post => {
+                    const normalized = {};
+                    Object.keys(post).forEach(key => normalized[key.trim()] = post[key]);
+                    if (!normalized.PostDate && normalized.Date) normalized.PostDate = normalized.Date;
+                    return normalized;
+                });
+                this.loading = false;
+            } catch (error) { this.loading = false; }
+        },
+        parseSheetDate(dateStr) {
+            const parts = dateStr.trim().split('/');
+            if (parts.length === 3) {
+                const [m, d, y] = parts.map(Number);
+                return new Date(y, m - 1, d);
+            }
+            return new Date(dateStr);
+        },
+        formatDate(dateStr) {
+            if (!dateStr) return '';
+            const dateObj = this.parseSheetDate(dateStr);
+            return dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        },
+        highlight(text) {
+            if (!this.searchQuery || !text) return text;
+            const reg = new RegExp(`(${this.searchQuery.trim()})`, 'gi');
+            return String(text).replace(reg, '<mark>$1</mark>');
+        },
+        renderMarkdown(text) {
+            const html = marked.parse(text || '');
+            return this.highlight(html);
+        },
+        resetAll() {
+            this.selectedCategory = 'All';
+            this.searchQuery = '';
+            this.startDate = '';
+            this.endDate = '';
+            this.sortBy = 'newest';
+            this.currentPage = 1;
+        },
+        openPost(post) {
+            this.activePost = post;
+            document.body.style.overflow = 'hidden';
+        },
+        setPage(num) {
+            this.currentPage = num;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    },
+    watch: {
+        activePost(val) { if (!val) document.body.style.overflow = 'auto'; }
+    },
+    mounted() { this.fetchData(); }
+}).mount('#app');
+</script>
+</body>
+</html>

@@ -103,7 +103,7 @@
             </div>
             <div v-if="displayData.length > 0" class="grid gap-8 mb-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                 <div v-for="parent in paginatedData" :key="parent['Object ID']" class="data-card p-8 shadow-sm">
-                    <div class="mb-2">
+                    <div>
                         <div class="flex justify-between items-start mb-4">
                             <span class="px-4 py-1.5 bg-slate-100 text-slate-700 text-xs font-black rounded-xl uppercase tracking-wider">{{ parent['Object Classification'] }}</span>
                             <span class="text-xs font-black text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-xl uppercase tracking-wider">{{ parent['Object Type'] }}</span>

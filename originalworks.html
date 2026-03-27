@@ -94,6 +94,16 @@
             .main-card { border-radius: 0; border-inline: none; }
             .top-nav { h1 { font-size: 1.25rem; } }
         }
+
+        @keyframes pulse-yellow {
+            0% { transform: scale(1.1); box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7); }
+            70% { transform: scale(1.15); box-shadow: 0 0 0 10px rgba(250, 204, 21, 0); }
+            100% { transform: scale(1.1); box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); }
+        }
+        
+        .animate-pulse {
+            animation: pulse-yellow 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+        }
     </style>
 </head>
 <body class="bg-grid">
@@ -232,8 +242,12 @@
                 
                                 <td class="px-3 py-2 text-center relative group w-10">
                                     <div v-if="row.備考 && row.備考.trim() !== ''" class="flex justify-center">
-                                        <div class="cursor-help text-slate-300 hover:text-indigo-500 transition-colors bg-slate-100 rounded-full w-5 h-5 flex items-center justify-center">
-                                            <span class="text-[10px] font-serif italic">i</span>
+                                        <div :class="['cursor-help transition-all duration-300 rounded-full w-6 h-6 flex items-center justify-center border-2',
+                                                hasMatchInRemarks(row.備考) 
+                                                ? 'bg-yellow-400 border-yellow-500 text-black shadow-[0_0_10px_rgba(250,204,21,0.8)] animate-pulse scale-110' 
+                                                : 'bg-slate-100 border-transparent text-slate-300 hover:text-indigo-500'
+                                             ]">
+                                            <span class="text-[10px] font-serif italic">{{ hasMatchInRemarks(row.備考) ? '!' : 'i' }}</span>
                                         </div>
                                 
                                         <div class="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute z-50 bottom-full mb-2 right-0 w-64 p-3 bg-slate-900 text-white text-[11px] rounded-lg shadow-xl pointer-events-none text-left">
@@ -536,6 +550,10 @@
                     
                     // 4. Wrap matches in a styled span (using a bright yellow for visibility in the dark popup)
                     return text.toString().replace(re, '<span class="bg-yellow-400 text-black px-0.5 rounded font-bold">$1</span>');
+                },
+                hasMatchInRemarks(remarks) {
+                    if (!this.searchQuery || !remarks) return false;
+                    return remarks.toLowerCase().includes(this.searchQuery.toLowerCase().trim());
                 },
             },
             mounted() { 

@@ -12,8 +12,8 @@
     <style>
         [v-cloak] { display: none; }
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        mark { background-color: #fde68a; color: #92400e; border-radius: 2px; padding: 0 2px; font-weight: 700; }
-        .content-area p { margin-bottom: 1rem; line-height: 1.7; color: #475569; }
+        mark { background-color: #fef08a; color: #854d0e; border-radius: 2px; padding: 0 2px; }
+        .prose p { margin-bottom: 1rem; line-height: 1.7; color: #475569; }
     </style>
 </head>
 <body class="text-slate-900">
@@ -27,47 +27,47 @@
                 </a>
                 <span class="font-black text-xl tracking-tighter text-slate-800 uppercase">Journal</span>
             </div>
-            <a href="index.html" class="text-sm font-semibold text-slate-500 hover:text-indigo-600 transition-colors">← Back to Archive</a>
+            <a href="index.html" class="text-sm font-bold text-slate-500 hover:text-indigo-600 transition-colors uppercase tracking-tight">Back to Archive</a>
         </div>
     </nav>
 
-    <header class="bg-slate-900 py-16 px-6">
+    <header class="bg-slate-900 py-20 px-6">
         <div class="max-w-4xl mx-auto text-center">
-            <span class="text-indigo-400 font-bold tracking-widest text-xs uppercase mb-3 block">Insights & Updates</span>
-            <h1 class="text-4xl md:text-5xl font-black text-white mb-6">The Collective Blog</h1>
-            <p class="text-slate-400 text-lg max-w-2xl mx-auto">Discover stories, updates, and deep dives from our latest archive additions.</p>
+            <span class="text-indigo-400 font-bold tracking-[0.2em] text-[10px] uppercase mb-4 block">Archive Insights</span>
+            <h1 class="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight uppercase">The Collective Blog</h1>
+            <p class="text-slate-400 text-lg max-w-2xl mx-auto font-medium">Deep dives, updates, and stories behind our latest archive collections.</p>
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-6 -mt-8">
-        <div class="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4 mb-8 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+    <main class="max-w-6xl mx-auto px-6 -mt-10">
+        <div class="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4 mb-10 bg-white p-5 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200">
             <div class="flex flex-wrap gap-2 order-2 lg:order-1">
                 <button @click="selectedCategory = 'All'; currentPage = 1" 
                     :class="selectedCategory === 'All' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'"
-                    class="px-4 py-2 rounded-xl text-[11px] font-black transition-all uppercase">All</button>
+                    class="px-5 py-2 rounded-xl text-[11px] font-black transition-all uppercase tracking-wider">All</button>
                 <button v-for="cat in categories" @click="selectedCategory = cat; currentPage = 1"
                     :class="selectedCategory === cat ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'"
-                    class="px-4 py-2 rounded-xl text-[11px] font-black transition-all uppercase">{{ cat }}</button>
+                    class="px-5 py-2 rounded-xl text-[11px] font-black transition-all uppercase tracking-wider">{{ cat }}</button>
             </div>
 
             <div class="flex items-center gap-3 order-1 lg:order-2 flex-grow lg:flex-grow-0">
-                <div class="relative flex-grow lg:w-72">
-                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5" stroke-linecap="round"></path></svg>
+                <div class="relative flex-grow lg:w-80">
+                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3" stroke-linecap="round"></path></svg>
                     </span>
-                    <input v-model="searchQuery" @input="currentPage = 1" type="text" placeholder="Search entries..." 
-                        class="block w-full pl-10 pr-10 py-2.5 bg-slate-100 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 transition-all outline-none">
+                    <input v-model="searchQuery" @input="currentPage = 1" type="text" placeholder="Search the journal..." 
+                        class="block w-full pl-11 pr-10 py-3 bg-slate-100 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 transition-all outline-none">
                     
-                    <button v-if="searchQuery" @click="searchQuery = ''; currentPage = 1" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-indigo-600 transition-colors">
+                    <button v-if="searchQuery" @click="searchQuery = ''; currentPage = 1" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-indigo-600 transition-colors">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
                     </button>
                 </div>
 
-                <div class="flex bg-slate-100 p-1 rounded-xl shrink-0">
-                    <button @click="currentLayout = 'grid'" :class="currentLayout === 'grid' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'" class="p-2 rounded-lg transition-all">
+                <div class="flex bg-slate-100 p-1 rounded-2xl shrink-0">
+                    <button @click="currentLayout = 'grid'" :class="currentLayout === 'grid' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'" class="p-2.5 rounded-xl transition-all">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                     </button>
-                    <button @click="currentLayout = 'table'" :class="currentLayout === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'" class="p-2 rounded-lg transition-all">
+                    <button @click="currentLayout = 'table'" :class="currentLayout === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'" class="p-2.5 rounded-xl transition-all">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
                     </button>
                 </div>
@@ -77,70 +77,70 @@
         <div v-if="loading" class="text-center py-20"><div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto"></div></div>
 
         <div v-if="!loading && currentLayout === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <article v-for="post in paginatedPosts" @click="openPost(post)" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300">
-                <div class="p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded uppercase tracking-tighter">{{ post.Category }}</span>
-                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{{ formatDate(post.Date) }}</span>
+            <article v-for="post in paginatedPosts" @click="openPost(post)" class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden cursor-pointer hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
+                <div class="p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg uppercase tracking-widest">{{ post.Category }}</span>
+                        <span class="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">{{ formatDate(post.Date) }}</span>
                     </div>
-                    <h2 class="text-xl font-black text-slate-800 mb-3 leading-tight" v-html="highlight(post.Title)"></h2>
-                    <p class="text-slate-500 text-sm line-clamp-3 mb-4" v-html="highlight(post.Summary)"></p>
-                    <div class="text-[11px] font-bold text-slate-400 italic">By {{ post.Author }}</div>
+                    <h2 class="text-xl font-black text-slate-800 mb-4 leading-tight" v-html="highlight(post.Title)"></h2>
+                    <p class="text-slate-500 text-sm line-clamp-3 mb-6 font-medium leading-relaxed" v-html="highlight(post.Summary)"></p>
+                    <div class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">By {{ post.Author }}</div>
                 </div>
             </article>
         </div>
 
-        <div v-if="!loading && currentLayout === 'table'" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div v-if="!loading && currentLayout === 'table'" class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-slate-50 border-b border-slate-200">
-                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</th>
-                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Title</th>
-                        <th class="px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Action</th>
+                    <tr class="bg-slate-50/50 border-b border-slate-200">
+                        <th class="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Date</th>
+                        <th class="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Title</th>
+                        <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="post in paginatedPosts" @click="openPost(post)" class="border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer group">
-                        <td class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">{{ formatDate(post.Date) }}</td>
-                        <td class="px-6 py-4 text-sm font-black text-slate-800 group-hover:text-indigo-600" v-html="highlight(post.Title)"></td>
-                        <td class="px-6 py-4 text-right">
-                            <button class="text-indigo-600 font-black text-[10px] tracking-widest">VIEW</button>
+                        <td class="px-8 py-5 text-xs font-black text-slate-400 uppercase tracking-tighter">{{ formatDate(post.Date) }}</td>
+                        <td class="px-8 py-5 text-sm font-black text-slate-800 group-hover:text-indigo-600 transition-colors" v-html="highlight(post.Title)"></td>
+                        <td class="px-8 py-5 text-right">
+                            <button class="text-indigo-600 font-black text-[10px] tracking-widest uppercase">View Entry</button>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <div v-if="totalPages > 1" class="flex justify-center items-center gap-2 py-12">
-            <button @click="setPage(currentPage - 1)" :disabled="currentPage === 1" class="p-2 rounded-lg bg-white border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round"></path></svg>
+        <div v-if="totalPages > 1" class="flex justify-center items-center gap-3 py-16">
+            <button @click="setPage(currentPage - 1)" :disabled="currentPage === 1" class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center disabled:opacity-20 hover:bg-slate-50 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2.5" stroke-linecap="round"></path></svg>
             </button>
             <button v-for="n in totalPages" @click="setPage(n)" 
-                :class="n === currentPage ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'"
-                class="w-10 h-10 rounded-lg border font-black text-xs transition-all">{{ n }}</button>
-            <button @click="setPage(currentPage + 1)" :disabled="currentPage === totalPages" class="p-2 rounded-lg bg-white border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round"></path></svg>
+                :class="n === currentPage ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-100' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'"
+                class="w-10 h-10 rounded-xl border font-black text-xs transition-all">{{ n }}</button>
+            <button @click="setPage(currentPage + 1)" :disabled="currentPage === totalPages" class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center disabled:opacity-20 hover:bg-slate-50 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2.5" stroke-linecap="round"></path></svg>
             </button>
         </div>
     </main>
 
     <div v-if="activePost" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-sm" @click="activePost = null"></div>
-        <div class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl relative z-10">
-            <div class="sticky top-0 bg-white/95 backdrop-blur-md px-8 py-6 border-b border-slate-100 flex justify-between items-center">
+        <div class="absolute inset-0 bg-slate-900/95 backdrop-blur-md" @click="activePost = null"></div>
+        <div class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[2rem] shadow-2xl relative z-10">
+            <div class="sticky top-0 bg-white/95 backdrop-blur-md px-10 py-8 border-b border-slate-100 flex justify-between items-center">
                 <div>
-                    <span class="text-indigo-600 font-black text-[10px] tracking-widest uppercase">{{ activePost.Category }}</span>
-                    <h2 class="text-2xl font-black text-slate-900 mt-1" v-html="highlight(activePost.Title)"></h2>
+                    <span class="text-indigo-600 font-black text-[10px] tracking-[0.2em] uppercase">{{ activePost.Category }}</span>
+                    <h2 class="text-3xl font-black text-slate-900 mt-2 tracking-tight" v-html="highlight(activePost.Title)"></h2>
                 </div>
-                <button @click="activePost = null" class="bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition-colors">
-                    <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round"></path></svg>
+                <button @click="activePost = null" class="bg-slate-100 hover:bg-slate-200 p-3 rounded-2xl transition-all">
+                    <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round"></path></svg>
                 </button>
             </div>
-            <div class="p-8 md:p-12">
-                <div class="text-[10px] font-black text-slate-400 mb-8 border-b border-slate-100 pb-4 uppercase tracking-widest">
-                    By {{ activePost.Author }} — Published {{ formatDate(activePost.Date) }}
+            <div class="p-10 md:p-16">
+                <div class="text-[10px] font-black text-slate-400 mb-10 border-b border-slate-100 pb-6 uppercase tracking-[0.2em]">
+                    Written By {{ activePost.Author }} — {{ formatDate(activePost.Date) }}
                 </div>
-                <div class="prose max-w-none content-area" v-html="renderMarkdown(activePost.Content)"></div>
+                <div class="prose max-w-none" v-html="renderMarkdown(activePost.Content)"></div>
             </div>
         </div>
     </div>
@@ -198,20 +198,31 @@ createApp({
                 this.loading = false;
             } catch (error) { this.loading = false; }
         },
+        // IMPROVED DATE PARSER FOR M/D/YYYY
         formatDate(dateStr) {
             if (!dateStr) return '';
             try {
-                const parts = dateStr.split('/');
+                // Ensure no hidden spaces, split by slash
+                const parts = dateStr.trim().split('/');
                 if (parts.length === 3) {
-                    const d = new Date(parts[2], parts[0] - 1, parts[1]);
-                    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                    // Map parts to numbers: [Month, Day, Year]
+                    const [m, d, y] = parts.map(Number);
+                    // JS Date uses 0-indexed months (Jan = 0)
+                    const dateObj = new Date(y, m - 1, d);
+                    
+                    return dateObj.toLocaleDateString('en-GB', { 
+                        day: '2-digit', 
+                        month: 'short', 
+                        year: 'numeric' 
+                    });
                 }
                 return dateStr;
             } catch (e) { return dateStr; }
         },
         highlight(text) {
             if (!this.searchQuery || !text) return text;
-            const reg = new RegExp(`(${this.searchQuery})`, 'gi');
+            const query = this.searchQuery.trim();
+            const reg = new RegExp(`(${query})`, 'gi');
             return String(text).replace(reg, '<mark>$1</mark>');
         },
         renderMarkdown(text) {

@@ -14,7 +14,7 @@
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         mark { background-color: #fef08a; color: #854d0e; border-radius: 2px; padding: 0 2px; }
         .prose p { margin-bottom: 1rem; line-height: 1.7; color: #475569; }
-        input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
+        select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1.5em; }
     </style>
 </head>
 <body class="text-slate-900">
@@ -43,26 +43,34 @@
     <main class="max-w-6xl mx-auto px-6 -mt-8">
         <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4 mb-8">
             <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-                <div class="flex flex-wrap gap-2">
+                <div class="flex flex-wrap gap-2 items-center">
                     <button @click="selectedCategory = 'All'; currentPage = 1" 
                         :class="selectedCategory === 'All' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'"
                         class="px-4 py-2 rounded-xl text-[11px] font-black transition-all uppercase tracking-wider">All</button>
                     <button v-for="cat in categories" @click="selectedCategory = cat; currentPage = 1"
                         :class="selectedCategory === cat ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'"
                         class="px-4 py-2 rounded-xl text-[11px] font-black transition-all uppercase tracking-wider">{{ cat }}</button>
+                    
+                    <button v-if="isFiltered" @click="resetAll" class="ml-2 text-[10px] font-black text-rose-500 hover:text-rose-700 uppercase tracking-widest flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        Reset All
+                    </button>
                 </div>
 
                 <div class="flex items-center gap-3 w-full lg:w-auto">
-                    <div class="relative flex-grow lg:w-72">
+                    <div class="relative flex-grow lg:w-64">
                         <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5" stroke-linecap="round"></path></svg>
                         </span>
-                        <input v-model="searchQuery" @input="currentPage = 1" type="text" placeholder="Search entries..." 
+                        <input v-model="searchQuery" @input="currentPage = 1" type="text" placeholder="Search..." 
                             class="block w-full pl-10 pr-10 py-2.5 bg-slate-100 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
-                        <button v-if="searchQuery" @click="searchQuery = ''; currentPage = 1" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-indigo-600 transition-colors">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
-                        </button>
                     </div>
+                    
+                    <select v-model="sortBy" class="bg-slate-100 border-none rounded-xl px-4 pr-10 py-2.5 text-xs font-black text-slate-600 uppercase tracking-wider focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer">
+                        <option value="newest">Newest</option>
+                        <option value="oldest">Oldest</option>
+                    </select>
+
                     <div class="flex bg-slate-100 p-1 rounded-xl shrink-0">
                         <button @click="currentLayout = 'grid'" :class="currentLayout === 'grid' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'" class="p-2 rounded-lg transition-all">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
@@ -80,7 +88,6 @@
                     <input type="date" v-model="startDate" @change="currentPage = 1" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500">
                     <span class="text-slate-300 text-xs font-bold">to</span>
                     <input type="date" v-model="endDate" @change="currentPage = 1" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500">
-                    <button v-if="startDate || endDate" @click="clearDates" class="text-[10px] font-black text-indigo-600 uppercase ml-2 hover:underline">Clear Dates</button>
                 </div>
             </div>
         </div>
@@ -115,7 +122,7 @@
                         <td class="px-6 py-4 text-xs font-bold text-slate-400 uppercase whitespace-nowrap">{{ formatDate(post.PostDate) }}</td>
                         <td class="px-6 py-4 text-sm font-black text-slate-800 group-hover:text-indigo-600" v-html="highlight(post.Title)"></td>
                         <td class="px-6 py-4 text-right">
-                            <button class="text-indigo-600 font-black text-[10px] tracking-widest">VIEW</button>
+                            <button class="text-indigo-600 font-black text-[10px] tracking-widest uppercase">View</button>
                         </td>
                     </tr>
                 </tbody>
@@ -123,7 +130,7 @@
         </div>
 
         <div v-if="!loading && filteredPosts.length === 0" class="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-300">
-            <p class="text-slate-400 font-bold uppercase text-xs tracking-widest">No matching entries found</p>
+            <p class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">No matching entries found</p>
         </div>
 
         <div v-if="totalPages > 1" class="flex justify-center items-center gap-2 py-12">
@@ -173,117 +180,9 @@ createApp({
             searchQuery: '',
             startDate: '',
             endDate: '',
+            sortBy: 'newest', // Default sorting
             currentLayout: 'grid',
             currentPage: 1,
             pageSize: 6,
             activePost: null,
-            sheetUrl: 'https://opensheet.elk.sh/1PkFmYV1rVoJqFmysUyHQBOC1jS-MWRodr9OyOFOloKs/BlogList'
-        }
-    },
-    computed: {
-        categories() {
-            const activeOnly = this.posts.filter(p => String(p.Active).toLowerCase() === 'yes');
-            return [...new Set(activeOnly.map(p => p.Category))].filter(Boolean);
-        },
-        filteredPosts() {
-            let filtered = this.posts.filter(p => String(p.Active).toLowerCase() === 'yes');
-            
-            // Category Filter
-            if (this.selectedCategory !== 'All') {
-                filtered = filtered.filter(p => p.Category === this.selectedCategory);
-            }
-            
-            // Search Filter
-            if (this.searchQuery) {
-                const q = this.searchQuery.toLowerCase();
-                filtered = filtered.filter(p => 
-                    (p.Title || "").toLowerCase().includes(q) || 
-                    (p.Summary || "").toLowerCase().includes(q)
-                );
-            }
-
-            // Date Range Filter
-            if (this.startDate || this.endDate) {
-                filtered = filtered.filter(p => {
-                    if (!p.PostDate) return false;
-                    const postDate = this.parseSheetDate(p.PostDate);
-                    const start = this.startDate ? new Date(this.startDate) : null;
-                    const end = this.endDate ? new Date(this.endDate) : null;
-                    
-                    if (start) start.setHours(0,0,0,0);
-                    if (end) end.setHours(23,59,59,999);
-                    
-                    if (start && postDate < start) return false;
-                    if (end && postDate > end) return false;
-                    return true;
-                });
-            }
-
-            return filtered;
-        },
-        paginatedPosts() {
-            const start = (this.currentPage - 1) * this.pageSize;
-            return this.filteredPosts.slice(start, start + this.pageSize);
-        },
-        totalPages() {
-            return Math.ceil(this.filteredPosts.length / this.pageSize);
-        }
-    },
-    methods: {
-        async fetchData() {
-            try {
-                const response = await fetch(this.sheetUrl);
-                const rawData = await response.json();
-                this.posts = rawData.map(post => {
-                    const normalized = {};
-                    Object.keys(post).forEach(key => normalized[key.trim()] = post[key]);
-                    if (!normalized.PostDate && normalized.Date) normalized.PostDate = normalized.Date;
-                    return normalized;
-                });
-                this.loading = false;
-            } catch (error) { this.loading = false; }
-        },
-        parseSheetDate(dateStr) {
-            const parts = dateStr.trim().split('/');
-            if (parts.length === 3) {
-                const [m, d, y] = parts.map(Number);
-                return new Date(y, m - 1, d);
-            }
-            return new Date(dateStr);
-        },
-        formatDate(dateStr) {
-            if (!dateStr) return '';
-            const dateObj = this.parseSheetDate(dateStr);
-            return dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-        },
-        highlight(text) {
-            if (!this.searchQuery || !text) return text;
-            const reg = new RegExp(`(${this.searchQuery.trim()})`, 'gi');
-            return String(text).replace(reg, '<mark>$1</mark>');
-        },
-        renderMarkdown(text) {
-            const html = marked.parse(text || '');
-            return this.highlight(html);
-        },
-        clearDates() {
-            this.startDate = '';
-            this.endDate = '';
-            this.currentPage = 1;
-        },
-        openPost(post) {
-            this.activePost = post;
-            document.body.style.overflow = 'hidden';
-        },
-        setPage(num) {
-            this.currentPage = num;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    },
-    watch: {
-        activePost(val) { if (!val) document.body.style.overflow = 'auto'; }
-    },
-    mounted() { this.fetchData(); }
-}).mount('#app');
-</script>
-</body>
-</html>
+            sheetUrl: '

@@ -122,6 +122,23 @@
             border-top-color: transparent !important;
             border-bottom-color: #0f172a !important; /* slate-900 */
         }
+        /Allow popups to exit the card boundaries */
+        .main-card {
+            overflow: visible !important; 
+        }
+        
+        /Ensure the table container doesn't clip the bottom */
+        .overflow-x-auto {
+            overflow-x: auto !important;
+            overflow-y: visible !important;
+            padding-bottom: 60px; /* Adds extra space so the last row's popup has room */
+            margin-bottom: -60px; /* Offset the padding so the layout stays tight */
+        }
+        
+        /High Z-index for the active popup to stay above everything */
+        .z-popup {
+            z-index: 9999 !important;
+        }
     </style>
 </head>
 <body class="bg-grid">
@@ -275,9 +292,8 @@
                                         </div>
                                 
                                         <div :class="[
-                                                'absolute z-50 right-0 w-72 p-4 bg-slate-900 text-white text-[12px] rounded-xl shadow-2xl text-left border border-slate-700 transition-all duration-200',
-                                                /* Flip downward for the first 3 rows, otherwise upward */
-                                                index < 3 ? 'top-full mt-3' : 'bottom-full mb-3',
+                                                'absolute z-popup right-0 w-72 p-4 bg-slate-900 text-white text-[12px] rounded-xl shadow-2xl text-left border border-slate-700 transition-all duration-200',
+                                                (index < 3 || filteredData.length === 1) ? 'top-full mt-3' : 'bottom-full mb-3',
                                                 (activePopupId === row.作品番) ? 'opacity-100 visible translate-y-0 pointer-events-auto' : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
                                              ]">
                                             
@@ -293,7 +309,8 @@
                                 
                                             <div class="leading-relaxed font-medium select-text" v-html="highlight(row.備考)"></div>
                                             
-                                            <div :class="['absolute right-5 border-8 border-transparent', index < 3 ? 'bottom-auto top-[-16px] border-b-slate-900' : 'top-full border-t-slate-900']"></div>
+                                            <!--<div :class="['absolute right-5 border-8 border-transparent', index < 3 ? 'bottom-auto top-[-16px] border-b-slate-900' : 'top-full border-t-slate-900']"></div>-->
+                                            <div :class="['absolute right-5 border-8 border-transparent', (index < 3 || filteredData.length === 1) ? 'bottom-auto top-[-16px] border-b-slate-900' : 'top-full border-t-slate-900']"></div>
                                         </div>
                                     </div>
                                     <span v-else class="text-slate-200 text-[10px]">—</span>

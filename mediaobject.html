@@ -114,7 +114,7 @@
                         </div>
                     </div>
 
-                    <div class="mt-auto pt-1 border-t border-slate-100">
+                    <div class="pt-2 border-t border-slate-100">
                         <div class="flex border-b border-slate-200 mb-4 gap-4">
                             <button @click="setTab(parent['Object ID'], 'movie')" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'movie' ? 'active' : 'text-slate-400']">Movie ({{ parent.movieAppearances.length }})</button>
                             <button @click="setTab(parent['Object ID'], 'manga')" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'manga' ? 'active' : 'text-slate-400']">Manga ({{ parent.mangaRecords.length }})</button>

@@ -131,11 +131,16 @@
         },
         computed: {
             categories() {
-                const cats = this.posts.map(p => p.Category);
+                // Only pull categories from Active posts
+                const activeOnly = this.posts.filter(p => String(p.Active).toLowerCase() === 'yes');
+                const cats = activeOnly.map(p => p.Category);
                 return [...new Set(cats)];
             },
             filteredPosts() {
-                let filtered = this.posts.filter(p => p.Active === 'TRUE' || p.Active === true);
+                // Filter by Active status "Yes" (case-insensitive)
+                let filtered = this.posts.filter(p => String(p.Active).toLowerCase() === 'yes');
+                
+                // Then filter by Category
                 if (this.selectedCategory !== 'All') {
                     filtered = filtered.filter(p => p.Category === this.selectedCategory);
                 }

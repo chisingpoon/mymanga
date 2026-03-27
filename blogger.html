@@ -7,19 +7,20 @@
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #15202b; /* X Dark Mode color */
+            background-color: #15202b; /* X Dark Mode background */
             color: white;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 40px;
+            margin: 0;
         }
         .container {
             max-width: 500px;
             width: 100%;
-            background: #ffffff;
+            /* Removed the white background so the dark widget blends in */
             border-radius: 15px;
-            overflow: hidden;
+            min-height: 600px; /* Gives space for the widget to load */
         }
         h1 { margin-bottom: 20px; }
     </style>
@@ -29,9 +30,12 @@
     <h1>Latest from X</h1>
 
     <div class="container">
-        <a class="twitter-timeline" href="https://twitter.com/doraemonChannel?ref_src=twsrc%5Etfw">Tweets by doraemonChannel</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-            Loading Twists...
+        <a class="twitter-timeline" 
+           data-theme="dark" 
+           href="https://twitter.com/doraemonChannel?ref_src=twsrc%5Etfw">
+           Loading Twists from @doraemonChannel...
         </a> 
+        
         <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
     </div>
 

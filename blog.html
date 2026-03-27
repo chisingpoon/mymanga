@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog | Archive Project</title>
+    <title>Journal | Archive Blog</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     
     <style>
+        [v-cloak] { display: none; }
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .blog-card:hover { transform: translateY(-4px); transition: all 0.3s ease; }
-        /* Markdown Styling (Tailwind Typography equivalent) */
-        .content-area h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem; }
-        .content-area p { margin-bottom: 1rem; line-height: 1.7; color: #475569; }
-        .content-area strong { color: #1e293b; }
+        .prose h1 { font-weight: 900; font-size: 1.875rem; margin-bottom: 1.25rem; color: #1e293b; }
+        .prose p { margin-bottom: 1.25rem; line-height: 1.75; color: #475569; }
+        .prose strong { color: #0f172a; font-weight: 700; }
+        mark { border-radius: 0.125rem; }
     </style>
 </head>
 <body class="text-slate-900">
@@ -33,37 +33,37 @@
         </div>
     </nav>
 
-    <header class="bg-slate-900 py-16 px-6">
+    <header class="bg-slate-900 py-16 px-6 mb-12">
         <div class="max-w-4xl mx-auto text-center">
-            <span class="text-indigo-400 font-bold tracking-widest text-xs uppercase mb-3 block">Insights & Updates</span>
-            <h1 class="text-4xl md:text-5xl font-black text-white mb-6">The Collective Blog</h1>
-            <p class="text-slate-400 text-lg max-w-2xl mx-auto">Discover stories, updates, and deep dives from our latest archive additions.</p>
+            <h1 class="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight uppercase">Latest Insights</h1>
+            <p class="text-slate-400 text-lg font-medium">Updates and stories from our collection.</p>
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-6 -mt-8">
+    <main class="max-w-6xl mx-auto px-6">
         <div class="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4 mb-8 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
             <div class="flex flex-wrap gap-2 order-2 lg:order-1">
                 <button @click="selectedCategory = 'All'; currentPage = 1" 
                     :class="selectedCategory === 'All' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'"
-                    class="px-4 py-2 rounded-xl text-xs font-black transition-all uppercase">All</button>
+                    class="px-4 py-2 rounded-xl text-[11px] font-black transition-all uppercase tracking-wider">All</button>
                 <button v-for="cat in categories" @click="selectedCategory = cat; currentPage = 1"
                     :class="selectedCategory === cat ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'"
-                    class="px-4 py-2 rounded-xl text-xs font-black transition-all uppercase">{{ cat }}</button>
+                    class="px-4 py-2 rounded-xl text-[11px] font-black transition-all uppercase tracking-wider">{{ cat }}</button>
             </div>
-        
+
             <div class="flex items-center gap-3 order-1 lg:order-2 flex-grow lg:flex-grow-0">
                 <div class="relative flex-grow lg:w-72">
                     <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5" stroke-linecap="round"></path></svg>
                     </span>
-                    <input v-model="searchQuery" @input="currentPage = 1" type="text" placeholder="Search posts..." 
+                    <input v-model="searchQuery" @input="currentPage = 1" type="text" placeholder="Search entries..." 
                         class="block w-full pl-10 pr-10 py-2.5 bg-slate-100 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 transition-all outline-none">
-                    <button v-if="searchQuery" @click="searchQuery = ''; currentPage = 1" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+                    
+                    <button v-if="searchQuery" @click="searchQuery = ''; currentPage = 1" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-indigo-600 transition-colors">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
                     </button>
                 </div>
-        
+
                 <div class="flex bg-slate-100 p-1 rounded-xl shrink-0">
                     <button @click="currentLayout = 'grid'" :class="currentLayout === 'grid' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'" class="p-2 rounded-lg transition-all">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
@@ -74,204 +74,178 @@
                 </div>
             </div>
         </div>
-    
-        <div v-if="currentLayout === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <article v-for="post in paginatedPosts" @click="openPost(post)" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col cursor-pointer hover:shadow-xl transition-all duration-300">
+
+        <div v-if="loading" class="text-center py-20"><div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto"></div></div>
+
+        <div v-if="!loading && currentLayout === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <article v-for="post in paginatedPosts" @click="openPost(post)" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-4">
                         <span class="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded uppercase tracking-tighter">{{ post.Category }}</span>
                         <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{{ formatDate(post.Date) }}</span>
                     </div>
-                    <h2 class="text-xl font-black text-slate-800 mb-3 leading-tight">{{ post.Title }}</h2>
-                    <p class="text-slate-500 text-sm line-clamp-3 mb-4">{{ post.Summary }}</p>
+                    <h2 class="text-xl font-black text-slate-800 mb-3 leading-tight" v-html="highlight(post.Title)"></h2>
+                    <p class="text-slate-500 text-sm line-clamp-3 mb-4" v-html="highlight(post.Summary)"></p>
                     <div class="text-[11px] font-bold text-slate-400 italic">By {{ post.Author }}</div>
                 </div>
             </article>
         </div>
-    
-        <div v-if="currentLayout === 'table'" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+
+        <div v-if="!loading && currentLayout === 'table'" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-50 border-b border-slate-200">
-                        <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase">Date</th>
-                        <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase">Title</th>
-                        <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase">Category</th>
-                        <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase text-right">Action</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Title</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Category</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="post in paginatedPosts" @click="openPost(post)" class="border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer group">
-                        <td class="px-6 py-4 text-sm font-medium text-slate-400">{{ formatDate(post.Date) }}</td>
-                        <td class="px-6 py-4 text-sm font-black text-slate-800 group-hover:text-indigo-600">{{ post.Title }}</td>
+                        <td class="px-6 py-4 text-xs font-bold text-slate-400 uppercase whitespace-nowrap">{{ formatDate(post.Date) }}</td>
+                        <td class="px-6 py-4 text-sm font-black text-slate-800 group-hover:text-indigo-600" v-html="highlight(post.Title)"></td>
                         <td class="px-6 py-4">
-                            <span class="text-[9px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded uppercase">{{ post.Category }}</span>
+                            <span class="text-[9px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded uppercase tracking-tighter">{{ post.Category }}</span>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <button class="text-indigo-600 font-black text-xs">VIEW</button>
+                            <button class="text-indigo-600 font-black text-[10px] tracking-widest">VIEW</button>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
-    
+
         <div v-if="totalPages > 1" class="flex justify-center items-center gap-2 py-12">
-            <button @click="setPage(currentPage - 1)" :disabled="currentPage === 1" class="p-2 rounded-lg bg-white border border-slate-200 disabled:opacity-30">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <button @click="setPage(currentPage - 1)" :disabled="currentPage === 1" class="p-2 rounded-lg bg-white border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round"></path></svg>
             </button>
             <button v-for="n in totalPages" @click="setPage(n)" 
-                :class="n === currentPage ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200'"
-                class="w-10 h-10 rounded-lg border font-bold text-sm transition-all">
+                :class="n === currentPage ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'"
+                class="w-10 h-10 rounded-lg border font-black text-xs transition-all">
                 {{ n }}
             </button>
-            <button @click="setPage(currentPage + 1)" :disabled="currentPage === totalPages" class="p-2 rounded-lg bg-white border border-slate-200 disabled:opacity-30">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <button @click="setPage(currentPage + 1)" :disabled="currentPage === totalPages" class="p-2 rounded-lg bg-white border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round"></path></svg>
             </button>
         </div>
     </main>
 
-    <div v-if="activePost" class="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10">
-        <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" @click="activePost = null"></div>
-        
-        <div class="bg-white w-full max-w-4xl max-h-full overflow-y-auto rounded-3xl shadow-2xl relative z-10">
-            <div class="sticky top-0 bg-white/90 backdrop-blur-md px-8 py-6 border-b border-slate-100 flex justify-between items-center">
+    <div v-if="activePost" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-sm" @click="activePost = null"></div>
+        <div class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl relative z-10">
+            <div class="sticky top-0 bg-white/95 backdrop-blur-md px-8 py-6 border-b border-slate-100 flex justify-between items-center">
                 <div>
                     <span class="text-indigo-600 font-black text-[10px] tracking-widest uppercase">{{ activePost.Category }}</span>
-                    <h2 class="text-2xl font-black text-slate-900 mt-1">{{ activePost.Title }}</h2>
+                    <h2 class="text-2xl font-black text-slate-900 mt-1" v-html="highlight(activePost.Title)"></h2>
                 </div>
                 <button @click="activePost = null" class="bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition-colors">
-                    <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round"></path></svg>
+                    <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round"></path></svg>
                 </button>
             </div>
-            
             <div class="p-8 md:p-12">
-                <div class="flex items-center gap-4 text-sm text-slate-400 mb-8 pb-8 border-b border-slate-100">
-                    <div class="flex flex-col">
-                        <span class="text-slate-900 font-bold">{{ activePost.Author }}</span>
-                        <span>Published on {{ formatDate(activePost.Date) }}</span>
-                    </div>
+                <div class="text-xs font-bold text-slate-400 mb-8 pb-4 border-b border-slate-100 uppercase tracking-widest">
+                    By {{ activePost.Author }} — Published {{ formatDate(activePost.Date) }}
                 </div>
-                
-                <div class="content-area prose max-w-none" v-html="renderMarkdown(activePost.Content)"></div>
+                <div class="prose max-w-none content-area" v-html="renderMarkdown(activePost.Content)"></div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    const { createApp } = Vue;
+const { createApp } = Vue;
 
-    createApp({
-        data() {
-            return {
-                posts: [],
-                loading: true,
-                selectedCategory: 'All',
-                activePost: null,
-                currentLayout: 'grid', // 'grid' or 'table'
-                currentPage: 1,
-                pageSize: 6,
-                searchQuery: '',
-                sheetUrl: 'https://opensheet.elk.sh/1PkFmYV1rVoJqFmysUyHQBOC1jS-MWRodr9OyOFOloKs/BlogList'
-            }
-        },
-        computed: {
-            categories() {
-                // Only pull categories from Active posts
-                const activeOnly = this.posts.filter(p => String(p.Active).toLowerCase() === 'yes');
-                const cats = activeOnly.map(p => p.Category);
-                return [...new Set(cats)];
-            },
-            filteredPosts() {
-                // 1. Filter by Active status
-                let filtered = this.posts.filter(p => String(p.Active).toLowerCase() === 'yes');
-                
-                // 2. Filter by Category
-                if (this.selectedCategory !== 'All') {
-                    filtered = filtered.filter(p => p.Category === this.selectedCategory);
-                }
-        
-                // 3. NEW: Filter by Search Query (Title, Summary, or Author)
-                if (this.searchQuery) {
-                    const query = this.searchQuery.toLowerCase();
-                    filtered = filtered.filter(p => 
-                        p.Title.toLowerCase().includes(query) || 
-                        p.Summary.toLowerCase().includes(query) ||
-                        p.Author.toLowerCase().includes(query)
-                    );
-                }
-                
-                return filtered;
-            },
-            
-            // 2. Then, paginate the filtered results
-            paginatedPosts() {
-                const start = (this.currentPage - 1) * this.pageSize;
-                const end = start + this.pageSize;
-                return this.filteredPosts.slice(start, end);
-            },
-            
-            totalPages() {
-                return Math.ceil(this.filteredPosts.length / this.pageSize);
-            }
-        },
-        methods: {
-            async fetchData() {
-                try {
-                    const response = await fetch(this.sheetUrl);
-                    const data = await response.json();
-                    // Store raw data
-                    this.posts = data;
-                    this.loading = false;
-                } catch (error) {
-                    console.error("Error:", error);
-                }
-            },
-            formatDate(dateStr) {
-                if (!dateStr) return 'No Date';
-                try {
-                    // Handles both "2024/05/20" and "2024-05-20"
-                    const d = new Date(dateStr.replace(/\//g, '-'));
-                    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-                } catch (e) {
-                    return dateStr;
-                }
-            },
-            renderMarkdown(text) {
-                return marked.parse(text || '');
-            },
-            openPost(post) {
-                this.activePost = post;
-                document.body.style.overflow = 'hidden'; // Prevent scroll
-            },
-            setPage(num) {
-                this.currentPage = num;
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            },
-            highlight(text) {
-                if (!this.searchQuery) return text;
-                const re = new RegExp(`(${this.searchQuery})`, 'gi');
-                return text.replace(re, '<mark class="bg-amber-200 text-slate-900 rounded-sm px-0.5">$1</mark>');
-            },
-            renderMarkdown(text) {
-                // Highlight the text AFTER markdown is parsed
-                const html = marked.parse(text || '');
-                return this.highlight(html);
-            },
-            openPost(post) {
-                this.activePost = post;
-                document.body.style.overflow = 'hidden';
-            }
-        },
-        watch: {
-            activePost(val) {
-                if (!val) document.body.style.overflow = 'auto';
-            }
-        },
-        mounted() {
-            this.fetchData();
+createApp({
+    data() {
+        return {
+            posts: [],
+            loading: true,
+            selectedCategory: 'All',
+            searchQuery: '',
+            currentLayout: 'grid',
+            currentPage: 1,
+            pageSize: 6,
+            activePost: null,
+            sheetUrl: 'https://opensheet.elk.sh/1PkFmYV1rVoJqFmysUyHQBOC1jS-MWRodr9OyOFOloKs/BlogList'
         }
-    }).mount('#app');
+    },
+    computed: {
+        categories() {
+            const activeOnly = this.posts.filter(p => String(p.Active).toLowerCase() === 'yes');
+            return [...new Set(activeOnly.map(p => p.Category))].filter(Boolean);
+        },
+        filteredPosts() {
+            let filtered = this.posts.filter(p => String(p.Active).toLowerCase() === 'yes');
+            if (this.selectedCategory !== 'All') {
+                filtered = filtered.filter(p => p.Category === this.selectedCategory);
+            }
+            if (this.searchQuery) {
+                const q = this.searchQuery.toLowerCase();
+                filtered = filtered.filter(p => 
+                    (p.Title || "").toLowerCase().includes(q) || 
+                    (p.Summary || "").toLowerCase().includes(q) ||
+                    (p.Author || "").toLowerCase().includes(q) ||
+                    (p.Content || "").toLowerCase().includes(q)
+                );
+            }
+            return filtered;
+        },
+        paginatedPosts() {
+            const start = (this.currentPage - 1) * this.pageSize;
+            return this.filteredPosts.slice(start, start + this.pageSize);
+        },
+        totalPages() {
+            return Math.ceil(this.filteredPosts.length / this.pageSize);
+        }
+    },
+    methods: {
+        async fetchData() {
+            try {
+                const response = await fetch(this.sheetUrl);
+                this.posts = await response.json();
+                this.loading = false;
+            } catch (error) {
+                console.error("Data error:", error);
+                this.loading = false;
+            }
+        },
+        formatDate(dateStr) {
+            if (!dateStr) return '';
+            try {
+                // Splits 3/20/2026 into month, day, year
+                const parts = dateStr.split('/');
+                if (parts.length === 3) {
+                    const d = new Date(parts[2], parts[0] - 1, parts[1]);
+                    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                }
+                return dateStr;
+            } catch (e) { return dateStr; }
+        },
+        highlight(text) {
+            if (!this.searchQuery || !text) return text;
+            const query = this.searchQuery.trim();
+            const reg = new RegExp(`(${query})`, 'gi');
+            return String(text).replace(reg, '<mark class="bg-amber-200 text-amber-900 rounded-sm px-0.5">$1</mark>');
+        },
+        renderMarkdown(text) {
+            const html = marked.parse(text || '');
+            return this.highlight(html);
+        },
+        openPost(post) {
+            this.activePost = post;
+            document.body.style.overflow = 'hidden';
+        },
+        setPage(num) {
+            this.currentPage = num;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    },
+    watch: {
+        activePost(val) { if (!val) document.body.style.overflow = 'auto'; }
+    },
+    mounted() { this.fetchData(); }
+}).mount('#app');
 </script>
-
 </body>
 </html>

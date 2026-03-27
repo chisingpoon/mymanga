@@ -51,24 +51,23 @@
                         :class="selectedCategory === cat ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'"
                         class="px-4 py-2 rounded-xl text-[11px] font-black transition-all uppercase tracking-wider">{{ cat }}</button>
                     
-                    <button v-if="isFiltered" @click="resetAll" class="ml-2 text-[10px] font-black text-rose-500 hover:text-rose-700 uppercase tracking-widest flex items-center gap-1">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                        Reset All
-                    </button>
+                    <div class="ml-2 flex items-center gap-3">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">{{ filteredPosts.length }} Results</span>
+                        <button v-if="isFiltered" @click="resetAll" class="text-[10px] font-black text-rose-500 hover:text-rose-700 uppercase tracking-widest flex items-center gap-1">
+                            Reset All
+                        </button>
+                    </div>
                 </div>
 
                 <div class="flex items-center gap-3 w-full lg:w-auto">
                     <div class="relative flex-grow lg:w-64">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5" stroke-linecap="round"></path></svg>
-                        </span>
                         <input v-model="searchQuery" @input="currentPage = 1" type="text" placeholder="Search..." 
-                            class="block w-full pl-10 pr-10 py-2.5 bg-slate-100 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
+                            class="block w-full pl-4 pr-10 py-2.5 bg-slate-100 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
                     </div>
                     
                     <select v-model="sortBy" class="bg-slate-100 border-none rounded-xl px-4 pr-10 py-2.5 text-xs font-black text-slate-600 uppercase tracking-wider focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer">
-                        <option value="newest">Newest</option>
-                        <option value="oldest">Oldest</option>
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
                     </select>
 
                     <div class="flex bg-slate-100 p-1 rounded-xl shrink-0">
@@ -83,7 +82,7 @@
             </div>
 
             <div class="pt-4 border-t border-slate-100 flex flex-wrap items-center gap-4">
-                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Filter by Date:</span>
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Filter Date Range:</span>
                 <div class="flex items-center gap-2">
                     <input type="date" v-model="startDate" @change="currentPage = 1" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500">
                     <span class="text-slate-300 text-xs font-bold">to</span>
@@ -130,17 +129,18 @@
         </div>
 
         <div v-if="!loading && filteredPosts.length === 0" class="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-300">
-            <p class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">No matching entries found</p>
+            <p class="text-slate-400 font-bold uppercase text-[10px] tracking-widest mb-2">No entries in this date range</p>
+            <button @click="resetAll" class="text-indigo-600 font-black text-xs uppercase hover:underline tracking-widest">View all posts</button>
         </div>
 
         <div v-if="totalPages > 1" class="flex justify-center items-center gap-2 py-12">
-            <button @click="setPage(currentPage - 1)" :disabled="currentPage === 1" class="p-2 rounded-lg bg-white border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors">
+            <button @click="setPage(currentPage - 1)" :disabled="currentPage === 1" class="p-2 rounded-lg bg-white border border-slate-200 disabled:opacity-30">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round"></path></svg>
             </button>
             <button v-for="n in totalPages" @click="setPage(n)" 
                 :class="n === currentPage ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-100' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'"
                 class="w-10 h-10 rounded-lg border font-black text-xs transition-all">{{ n }}</button>
-            <button @click="setPage(currentPage + 1)" :disabled="currentPage === totalPages" class="p-2 rounded-lg bg-white border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors">
+            <button @click="setPage(currentPage + 1)" :disabled="currentPage === totalPages" class="p-2 rounded-lg bg-white border border-slate-200 disabled:opacity-30">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round"></path></svg>
             </button>
         </div>
@@ -178,9 +178,9 @@ createApp({
             loading: true,
             selectedCategory: 'All',
             searchQuery: '',
-            startDate: '',
-            endDate: '',
-            sortBy: 'newest', // Default sorting
+            startDate: '', // Set in mounted
+            endDate: '',   // Set in mounted
+            sortBy: 'newest',
             currentLayout: 'grid',
             currentPage: 1,
             pageSize: 6,
@@ -194,7 +194,15 @@ createApp({
             return [...new Set(activeOnly.map(p => p.Category))].filter(Boolean);
         },
         isFiltered() {
-            return this.selectedCategory !== 'All' || this.searchQuery !== '' || this.startDate !== '' || this.endDate !== '';
+            // Check if user has changed anything from the default "Last 30 days" or Category/Search
+            return this.selectedCategory !== 'All' || this.searchQuery !== '' || this.isCustomDateRange;
+        },
+        isCustomDateRange() {
+            // Only show "Reset" if the user has manually changed the dates from the initial 30-day window
+            const now = new Date();
+            const lastMonth = new Date();
+            lastMonth.setDate(now.getDate() - 30);
+            return this.startDate !== lastMonth.toISOString().split('T')[0] || this.endDate !== now.toISOString().split('T')[0];
         },
         filteredPosts() {
             let filtered = this.posts.filter(p => String(p.Active).toLowerCase() === 'yes');
@@ -225,7 +233,6 @@ createApp({
                 });
             }
 
-            // DATE SORTING LOGIC
             filtered.sort((a, b) => {
                 const dateA = this.parseSheetDate(a.PostDate || "1/1/1900");
                 const dateB = this.parseSheetDate(b.PostDate || "1/1/1900");
@@ -281,10 +288,17 @@ createApp({
         resetAll() {
             this.selectedCategory = 'All';
             this.searchQuery = '';
-            this.startDate = '';
-            this.endDate = '';
             this.sortBy = 'newest';
             this.currentPage = 1;
+            this.setDefaultDates();
+        },
+        setDefaultDates() {
+            const today = new Date();
+            const lastMonth = new Date();
+            lastMonth.setDate(today.getDate() - 30);
+            
+            this.startDate = lastMonth.toISOString().split('T')[0];
+            this.endDate = today.toISOString().split('T')[0];
         },
         openPost(post) {
             this.activePost = post;
@@ -298,7 +312,10 @@ createApp({
     watch: {
         activePost(val) { if (!val) document.body.style.overflow = 'auto'; }
     },
-    mounted() { this.fetchData(); }
+    mounted() {
+        this.setDefaultDates();
+        this.fetchData();
+    }
 }).mount('#app');
 </script>
 </body>

@@ -71,18 +71,26 @@
                     </button>
                 </div>
                 
+                <div class="flex gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                    <button @click="viewMode = 'card'" :class="viewMode === 'card' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'" class="px-3 py-2 rounded-lg transition-all flex items-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke-width="2.5"></path></svg>
+                    </button>
+                    <button @click="viewMode = 'table'" :class="viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'" class="px-3 py-2 rounded-lg transition-all flex items-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16" stroke-width="2.5" stroke-linecap="round"></path></svg>
+                    </button>
+                </div>
+            
                 <div class="flex gap-4">
                     <select v-model="selectedClass" @change="handleClassChange" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2 text-sm font-black outline-none cursor-pointer">
                         <option value="All">All Class</option>
                         <option v-for="cls in classifications" :key="cls" :value="cls">{{ cls }}</option>
                     </select>
-
                     <select v-model="selectedType" @change="currentPage = 1" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2 text-sm font-black outline-none cursor-pointer">
                         <option value="All">All Types</option>
                         <option v-for="t in filteredObjectTypes" :key="t" :value="t">{{ t }}</option>
                     </select>
                 </div>
-
+            
                 <div class="bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-xl flex items-center gap-3 ml-auto">
                     <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Matched</span>
                     <span class="text-xl font-black text-indigo-900">{{ displayData.length }}</span>
@@ -226,6 +234,79 @@
                     </div>
                 </div>
             </div>
+            
+            <div v-else class="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden mb-12">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse table-fixed min-w-[1200px]">
+                            <thead>
+                                <tr class="bg-slate-900 text-white">
+                                    <th class="p-4 text-[10px] font-black uppercase tracking-widest w-40">Identity</th>
+                                    <th class="p-4 text-[10px] font-black uppercase tracking-widest w-64">Item & Description</th>
+                                    <th class="p-4 text-[10px] font-black uppercase tracking-widest">Movie Appearances</th>
+                                    <th class="p-4 text-[10px] font-black uppercase tracking-widest">Manga Records</th>
+                                    <th class="p-4 text-[10px] font-black uppercase tracking-widest">Anime Appearances</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200">
+                                <tr v-for="parent in paginatedData" :key="parent['Object ID']" class="hover:bg-slate-50 transition-colors">
+                                    <td class="p-4 align-top">
+                                        <div class="flex flex-col gap-1.5">
+                                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">ID: {{ parent['Object ID'] }}</span>
+                                            <span class="px-2 py-1 bg-slate-100 text-slate-700 text-[8px] font-black rounded uppercase text-center border border-slate-200">{{ parent['Object Classification'] }}</span>
+                                            <span class="px-2 py-1 bg-indigo-50 text-indigo-600 text-[8px] font-black rounded uppercase text-center border border-indigo-100">{{ parent['Object Type'] }}</span>
+                                        </div>
+                                    </td>
+            
+                                    <td class="p-4 align-top">
+                                        <h3 class="font-black text-slate-900 text-sm mb-1" v-html="highlight(parent['JP Title'])"></h3>
+                                        <div v-if="parent['Confirmed Translation'] && parent['Confirmed Translation'] !== '-'" class="mb-2">
+                                            <span class="text-[8px] font-bold text-slate-400 uppercase mr-1">港譯/</span>
+                                            <span class="text-[11px] font-black text-indigo-600" v-html="highlight(parent['Confirmed Translation'])"></span>
+                                        </div>
+                                        <p class="text-[10px] text-slate-500 leading-tight line-clamp-3 italic" v-html="highlight(parent['Description'])"></p>
+                                    </td>
+            
+                                    <td class="p-4 align-top bg-slate-50/30">
+                                        <div class="flex flex-wrap gap-2">
+                                            <div v-for="m in parent.movieAppearances" class="bg-white border border-slate-200 rounded-lg p-2 shadow-sm w-full max-w-[200px]">
+                                                <div class="text-[7px] font-black bg-slate-800 text-white px-1.5 py-0.5 rounded w-fit mb-1">MOV {{ m.movieYear }}</div>
+                                                <div class="text-[10px] font-black text-slate-800 truncate" v-html="highlight(m['HK Translation'])"></div>
+                                                <div class="text-[9px] font-bold text-indigo-500 truncate italic" v-html="highlight(m.movieTitle)"></div>
+                                            </div>
+                                            <span v-if="parent.movieAppearances.length === 0" class="text-[10px] text-slate-300 font-bold uppercase italic">No Data</span>
+                                        </div>
+                                    </td>
+            
+                                    <td class="p-4 align-top">
+                                        <div v-if="parent.mangaInfo" class="mb-3 p-2 bg-indigo-50/50 rounded-lg border border-indigo-100">
+                                            <div class="text-[8px] font-black text-indigo-400 uppercase tracking-tighter">Translations</div>
+                                            <div class="text-[10px] font-black text-slate-800">文: {{ parent.mangaInfo['CultureCom Trans'] }}</div>
+                                            <div class="text-[10px] font-black text-slate-800">青: {{ parent.mangaInfo['HKChingWin Trans'] }}</div>
+                                        </div>
+                                        <div class="flex flex-wrap gap-1">
+                                            <span v-for="r in parent.mangaRecords" class="text-[9px] font-bold bg-white border border-slate-200 px-2 py-1 rounded-md text-slate-600 shadow-sm whitespace-nowrap">
+                                                [{{ r.type }}] {{ r.vol }}
+                                            </span>
+                                            <span v-if="parent.mangaRecords.length === 0" class="text-[10px] text-slate-300 font-bold uppercase italic">No Data</span>
+                                        </div>
+                                    </td>
+            
+                                    <td class="p-4 align-top bg-slate-50/30">
+                                        <div class="flex flex-wrap gap-2">
+                                            <div v-for="a in parent.animeAppearances" class="bg-white border border-slate-200 rounded-lg p-2 shadow-sm w-full max-w-[200px]">
+                                                <div class="text-[7px] font-black bg-indigo-600 text-white px-1.5 py-0.5 rounded w-fit mb-1">{{ a.animeDate }}</div>
+                                                <div class="text-[10px] font-black text-slate-800 truncate" v-html="highlight(a['HK Translation'] || '-')"></div>
+                                                <div class="text-[9px] font-bold text-indigo-500 truncate italic" v-html="highlight(a.animeTitle)"></div>
+                                            </div>
+                                            <span v-if="parent.animeAppearances.length === 0" class="text-[10px] text-slate-300 font-bold uppercase italic">No Data</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
             <div v-if="totalPages > 1" class="flex flex-col items-center gap-4 py-12 border-t border-slate-200">
                 <div class="flex items-center gap-2">
@@ -251,6 +332,7 @@
                     loading: true, searchQuery: '', selectedClass: 'All', selectedType: 'All', currentPage: 1, itemsPerPage: 12,
                     parentData: [], movieChild: [], movieMeta: [], mangaChild: [], workInclude: [], pubCatalog: [],
                     animeChild: [], animeMeta: [],
+                    viewMode: 'card',
                     tabStates: reactive({}), showBackToTop: false
                 }
             },

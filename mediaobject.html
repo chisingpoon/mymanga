@@ -204,8 +204,8 @@
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-50/50 border-b border-slate-100">
-                                <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest w-[12%]">Classification</th>
-                                <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest w-[25%]">Archive Item</th>
+                                <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest w-[12%]">Class & Type</th>
+                                <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest w-[25%]">Title</th>
                                 <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Movie Ref.</th>
                                 <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Manga Ref.</th>
                                 <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Anime Ref.</th>
@@ -215,10 +215,14 @@
                             <tr v-for="parent in paginatedData" :key="parent['Object ID']" class="hover:bg-slate-50/50 transition-colors">
                                 
                                 <td class="px-6 py-6 align-top">
-                                    <span class="text-[11px] font-black text-slate-900 block uppercase mb-1">{{ parent['Object Classification'] }}</span>
-                                    <span class="text-[10px] font-bold text-indigo-500 uppercase">{{ parent['Object Type'] }}</span>
+                                    <span class="px-3 py-1 bg-slate-100 border-2 border-slate-200 text-slate-700 text-[10px] font-black rounded-xl uppercase tracking-wider block mb-2 text-center">
+                                        {{ parent['Object Classification'] }}
+                                    </span>
+                                    <span class="px-3 py-1 bg-indigo-50 border-2 border-indigo-100 text-indigo-600 text-[10px] font-black rounded-xl uppercase tracking-wider block text-center">
+                                        {{ parent['Object Type'] }}
+                                    </span>
                                 </td>
-        
+                
                                 <td class="px-6 py-6 align-top">
                                     <h3 class="text-lg font-black text-slate-900 leading-tight mb-2" v-html="highlight(parent['JP Title'])"></h3>
                                     <div v-if="parent['Confirmed Translation'] !== '-'" class="flex items-baseline gap-1 mb-3">
@@ -227,11 +231,11 @@
                                     </div>
                                     <p class="text-sm text-slate-600 font-medium line-clamp-3" v-html="highlight(parent['Description'])"></p>
                                 </td>
-        
+                
                                 <td class="px-6 py-6 align-top bg-slate-50/30">
                                     <div class="space-y-3">
-                                        <div v-for="m in parent.movieAppearances" class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-                                            <span class="text-[9px] font-black bg-slate-900 text-white px-2 py-0.5 rounded w-fit uppercase block mb-1">Movie {{ m.movieYear }}</span>
+                                        <div v-for="m in parent.movieAppearances" class="bg-white p-3 rounded-xl border-2 border-slate-100 shadow-sm">
+                                            <span class="text-[9px] font-black bg-slate-900 text-white border-2 border-slate-900 px-2 py-0.5 rounded w-fit uppercase block mb-1">Movie {{ m.movieYear }}</span>
                                             <span class="text-xs font-black text-slate-800 block mb-1" v-html="'<span class=\'text-[9px] text-slate-400 uppercase font-bold mr-1\'>港譯/</span>' + highlight(m['HK Translation'])"></span>
                                             <a :href="'movie.html?mediaid=' + encodeURIComponent(m['Movie ID'])" target="_blank" class="text-[11px] font-bold text-indigo-500 hover:text-indigo-700 flex items-center justify-between group">
                                                 <span v-html="highlight(m.movieTitle)"></span>
@@ -240,9 +244,9 @@
                                         </div>
                                     </div>
                                 </td>
-        
+                
                                 <td class="px-6 py-6 align-top">
-                                    <div v-if="parent.mangaInfo" class="mb-4 space-y-2 border-b border-slate-100 pb-3">
+                                    <div v-if="parent.mangaInfo" class="mb-4 space-y-2 border-b-2 border-slate-100 pb-3">
                                         <div class="flex items-center gap-2">
                                             <span class="text-[9px] font-black text-slate-400 uppercase tracking-tighter shrink-0">文傳譯/</span>
                                             <span class="text-sm text-slate-900 font-black truncate" v-html="highlight(parent.mangaInfo['CultureCom Trans'] || '-')"></span>
@@ -254,7 +258,7 @@
                                         <a v-if="parent.mangaInfo['Work ID'] && parent.mangaInfo['Work ID'] !== '-'" :href="'originalworks.html?workid=' + parent.mangaInfo['Work ID']" target="_blank" class="text-[9px] font-bold text-indigo-500 flex items-center gap-1 uppercase tracking-wider"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round"></path></svg>日本原作篇章</a>
                                     </div>
                                     <div class="space-y-2">
-                                        <div v-for="r in parent.mangaRecords" class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                                        <div v-for="r in parent.mangaRecords" class="bg-white p-3 rounded-xl border-2 border-slate-100 shadow-sm">
                                             <a :href="'manga-database.html?region=JP&isbn=' + encodeURIComponent(r.isbn)" target="_blank" class="text-[11px] font-bold text-indigo-500 hover:text-indigo-700 flex items-center justify-between group">
                                                 <span v-html="highlight(`[${r.type}] ${r.vol}`)"></span>
                                                 <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round"></path></svg>
@@ -262,11 +266,11 @@
                                         </div>
                                     </div>
                                 </td>
-        
+                
                                 <td class="px-6 py-6 align-top bg-slate-50/30">
                                     <div class="space-y-3">
-                                        <div v-for="a in parent.animeAppearances" class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-                                            <span class="text-[8px] font-black bg-indigo-600 text-white px-2 py-0.5 rounded w-fit uppercase block mb-1">{{ a.animeDate }}</span>
+                                        <div v-for="a in parent.animeAppearances" class="bg-white p-3 rounded-xl border-2 border-slate-100 shadow-sm">
+                                            <span class="text-[8px] font-black bg-indigo-600 border-2 border-indigo-600 text-white px-2 py-0.5 rounded w-fit uppercase block mb-1">{{ a.animeDate }}</span>
                                             <span class="text-xs font-black text-slate-800 block mb-1" v-html="'<span class=\'text-[9px] text-slate-400 uppercase font-bold mr-1\'>港譯/</span>' + highlight(a['HK Translation'] || '-')"></span>
                                             <a :href="'anime.html?mediaid=' + encodeURIComponent(a['Anime ID'])" target="_blank" class="text-[11px] font-bold text-indigo-500 hover:text-indigo-700 flex items-center justify-between group">
                                                 <span v-html="highlight(a.animeTitle)"></span>
@@ -275,7 +279,7 @@
                                         </div>
                                     </div>
                                 </td>
-        
+                
                             </tr>
                         </tbody>
                     </table>

@@ -130,10 +130,10 @@
                         <div class="tab-content">
                             <div v-if="getTab(parent['Object ID']) === 'movie'">
                                 <div v-if="parent.movieAppearances.length > 0">
-                                    <div class="flex items-center gap-2 mb-3 px-1">
+                                    <!--<div class="flex items-center gap-2 mb-3 px-1">
                                         <span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest shrink-0">Movie Ref.</span>
                                         <div class="h-px flex-1 bg-slate-200"></div>
-                                    </div>
+                                    </div>-->
                                 
                                     <div class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
                                         <div v-for="(child, idx) in parent.movieAppearances" :key="idx" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition-all">
@@ -199,10 +199,10 @@
 
                             <div v-if="getTab(parent['Object ID']) === 'anime'">
                                 <div v-if="parent.animeAppearances.length > 0">
-                                    <div class="flex items-center gap-2 mb-3 px-1">
+                                    <!--<div class="flex items-center gap-2 mb-3 px-1">
                                         <span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest shrink-0">Anime Ref.</span>
                                         <div class="h-px flex-1 bg-slate-200"></div>
-                                    </div>
+                                    </div>-->
                             
                                     <div class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
                                         <div v-for="(ani, idx) in parent.animeAppearances" :key="idx" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition-all">

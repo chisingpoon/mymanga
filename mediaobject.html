@@ -37,6 +37,16 @@
         }
         .back-to-top.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
         .back-to-top:hover { background: #6366f1; transform: translateY(-3px); }
+        th { 
+            font-size: 12px; font-weight: 800; padding: 16px 12px; 
+            text-align: left; color: #64748b; background: #f8fafc; 
+            border-bottom: 2px solid #e2e8f0; white-space: nowrap; 
+            position: sticky; top: 0; z-index: 10; 
+            text-transform: uppercase; letter-spacing: 0.025em;
+        }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        td { padding: 18px 12px; border-bottom: 1px solid #f1f5f9; font-size: 15px; vertical-align: middle; }
+
     </style>
 </head>
 <body class="bg-grid">
@@ -201,14 +211,14 @@
                 </div>
         
                 <div v-else class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden mb-12">
-                    <table class="w-full text-left border-collapse">
+                    <table>
                         <thead>
-                            <tr class="bg-slate-50/50 border-b border-slate-100">
-                                <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest w-[12%]">Class & Type</th>
-                                <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest w-[25%]">Title</th>
-                                <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Movie Ref.</th>
-                                <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Manga Ref.</th>
-                                <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Anime Ref.</th>
+                            <tr>
+                                <th>Class & Type</th>
+                                <th>Title</th>
+                                <th>Movie Ref.</th>
+                                <th>Manga Ref.</th>
+                                <th>Anime Ref.</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">

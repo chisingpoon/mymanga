@@ -109,7 +109,8 @@
         
             <div v-if="displayData.length > 0">
                 
-                <div v-if="viewMode === 'card'" class="grid gap-8 mb-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                <!--<div v-if="viewMode === 'card'" class="grid gap-8 mb-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">-->
+                <div v-if="viewMode === 'card'" class="grid gap-8 mb-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6">
                     <div v-for="parent in paginatedData" :key="parent['Object ID']" class="data-card p-8 shadow-sm">
                         <div>
                             <div class="flex justify-between items-start mb-4">

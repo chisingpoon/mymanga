@@ -175,9 +175,9 @@
                             </div>
                             <div class="md:w-3/5 p-8 flex flex-col justify-center">
                                 <span class="bg-blue-600 text-[10px] font-black text-white px-3 py-1 rounded-full uppercase w-fit">HK Edition Details</span>
-                                <h3 class="text-3xl font-black text-slate-900 mt-4 uppercase leading-tight">{{ hkDetail.Title }}</h3>
-                                <h2 v-if="hkDetail.Volume" class="text-blue-600 font-black mt-2 text-lg">Vol. {{ hkDetail.Volume }}</h2>
-                                <h2 v-if="hkDetail.Subtitle" class="text-slate-400 font-bold mt-1 text-sm">{{ hkDetail.Subtitle }}</h2>
+                                <h2 class="text-3xl font-black text-slate-900 mt-4 uppercase leading-tight">{{ hkDetail.Title }}</h2>
+                                <h2 v-if="hkDetail.Volume" class="text-blue-600 font-black mt-4 text-lg">Vol. {{ hkDetail.Volume }}</h2>
+                                <h2 v-if="hkDetail.Subtitle" class="text-slate-400 font-bold mt-4 text-sm">{{ hkDetail.Subtitle }}</h2>
                                 <div v-if="hkDetail" class="mt-4 flex flex-wrap gap-2">
                                     <template v-for="movie in getMovies(hkDetail.ISBN_JP)" :key="movie['Media ID']">
                                         <a :href="'movie.html?mediaid=' + movie['Media ID']" 
@@ -204,10 +204,10 @@
                                 <img :src="jpDetail.Image" class="w-full h-auto object-contain shadow-2xl rounded-xl">
                             </div>
                             <div class="md:w-3/5 p-8 flex flex-col justify-center">
-                                <span class="bg-red-600 text-[10px] font-black text-white px-3 py-1 rounded-full uppercase w-fit">JP Spec Details</span>
+                                <span class="bg-red-600 text-[10px] font-black text-white px-3 py-1 rounded-full uppercase w-fit">Original JP Edition Details</span>
                                 <h2 class="text-3xl font-black text-slate-900 mt-4 uppercase leading-tight">{{ jpDetail.標題 }}</h2>
-                                <p v-if="jpDetail.巻" class="text-red-600 font-black mt-2 text-lg">VOL. {{ jpDetail.巻 }}</p>
-                                <p v-if="jpDetail.副標題" class="text-slate-400 font-bold mt-1 italic text-sm">{{ jpDetail.副標題 }}</p>
+                                <h2 v-if="jpDetail.巻" class="text-red-600 font-black mt-4 text-lg">VOL. {{ jpDetail.巻 }}</h2>
+                                <h2 v-if="jpDetail.副標題" class="text-slate-400 font-bold mt-4 text-sm">{{ jpDetail.副標題 }}</h2>
                                 <div v-if="jpDetail" class="mt-4 flex flex-wrap gap-2">
                                     <template v-for="movie in getMovies(jpDetail.ISBN)" :key="movie['Media ID']">
                                         <a :href="'movie.html?mediaid=' + movie['Media ID']" 

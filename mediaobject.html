@@ -200,9 +200,9 @@
                 <div v-else class="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden mb-12">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse table-fixed min-w-[1300px]">
-                            <thead>
+                            <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold">
                                 <tr class="bg-slate-900 text-white">
-                                    <th class="px-3 py-3 w-px whitespace-nowrap uppercase tracking-widest text-left w-44">Classification</th>
+                                    <th  class="px-3 py-3 w-px whitespace-nowrap text-left">Classification</th>
                                     <th class="px-3 py-3 w-px whitespace-nowrap uppercase tracking-widest text-left w-80">Item Details</th>
                                     <th class="p-5 text-xs font-black uppercase tracking-widest">Movies</th>
                                     <th class="p-5 text-xs font-black uppercase tracking-widest">Manga</th>
@@ -214,7 +214,7 @@
                                     
                                     <td class="p-5 align-top">
                                         <span class="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-black rounded-lg uppercase block mb-2 text-center border border-slate-200">{{ parent['Object Classification'] }}</span>
-                                        <span class="text-[11px] font-black text-indigo-600 block text-center uppercase tracking-wider">{{ parent['Object Type'] }}</span>
+                                        <span class="text-[11px] font-black font-bold text-indigo-600 block text-center uppercase tracking-wider">{{ parent['Object Type'] }}</span>
                                     </td>
                 
                                     <td class="p-5 align-top">

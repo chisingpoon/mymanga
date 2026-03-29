@@ -100,8 +100,8 @@
                         <span class="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded uppercase tracking-tighter">{{ post.Category }}</span>
                         <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{{ formatDate(post.PostDate) }}</span>
                     </div>
-                    <h2 class="text-xl font-black text-slate-800 mb-3 leading-tight" v-html="highlight(post.Title)"></h2>
-                    <p class="text-slate-500 text-sm line-clamp-3 mb-4" v-html="highlight(post.Summary)"></p>
+                    <h2 v-if="post.Title" class="text-xl font-black text-slate-800 mb-3 leading-tight" v-html="highlight(post.Title)"></h2>
+                    <p v-if="post.Summary" class="text-slate-500 text-xs font-medium line-clamp-3 mb-6 leading-relaxed" v-html="highlight(post.Summary)"></p>
                     <div class="text-[11px] font-bold text-slate-400 italic">By {{ post.Author }}</div>
                 </div>
             </article>

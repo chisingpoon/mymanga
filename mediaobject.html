@@ -61,7 +61,7 @@
             </div>
         </nav>
 
-        <main class="max-w-[1920px] mx-auto px-6 pt-10">
+        <main class="max-w-full mx-auto px-6 pt-10">
             <div class="flex flex-wrap items-center gap-4 mb-8 bg-white/80 p-4 rounded-2xl backdrop-blur-md border border-slate-200 sticky top-24 z-30 shadow-sm">
                 <div class="flex-1 min-w-[250px] relative">
                     <input type="text" ref="searchInput" v-model.trim="searchQuery" placeholder="Search across all fields..." 
@@ -202,14 +202,21 @@
         
                 <div v-else class="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden mb-12">
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse table-fixed min-w-[1300px]">
+                        <table class="w-full text-left border-collapse table-fixed min-w-[1600px]">
                             <thead>
-                                <tr class="bg-slate-50/50 border-b border-slate-100">
+                                <tr class="bg-slate-900 border-b border-slate-100">
+                                    <!--
                                     <th class="px-6 py-5 text-[12px] font-black text-slate-400 uppercase tracking-widest">Class/Type</th>
                                     <th class="px-6 py-5 text-[12px] font-black text-slate-400 uppercase tracking-widest">Title</th>
                                     <th class="px-6 py-5 text-[12px] font-black text-slate-400 uppercase tracking-widest">Movies Ref.</th>
                                     <th class="px-6 py-5 text-[12px] font-black text-slate-400 uppercase tracking-widest">Manga Ref.</th>
                                     <th class="px-6 py-5 text-[12px] font-black text-slate-400 uppercase tracking-widest">Anime Ref.</th>
+                                    -->
+                                    <th class="p-5 text-xs font-black uppercase tracking-widest w-48">Class/Type</th>
+                                    <th class="p-5 text-xs font-black uppercase tracking-widest w-96">Title</th>
+                                    <th class="p-5 text-xs font-black uppercase tracking-widest w-[25%]">Movies Ref.</th>
+                                    <th class="p-5 text-xs font-black uppercase tracking-widest w-[25%]">Manga Ref.</th>
+                                    <th class="p-5 text-xs font-black uppercase tracking-widest w-[25%]">Anime Ref.</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-200">

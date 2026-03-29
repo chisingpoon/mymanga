@@ -129,19 +129,29 @@
 
                         <div class="tab-content">
                             <div v-if="getTab(parent['Object ID']) === 'movie'">
-                                <div v-if="parent.movieAppearances.length > 0" class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
-                                    <div v-for="(child, idx) in parent.movieAppearances" :key="idx" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition-all">
-                                        <div class="flex flex-col gap-2">
-                                            <span class="text-[8px] font-black bg-slate-900 text-white px-2 py-0.5 rounded w-fit uppercase">Movie {{ child.movieYear }}</span>
-                                            <span class="text-sm font-black text-slate-800" v-html="'<span class=\'text-[9px] text-slate-400 uppercase font-bold mr-1\'>港譯/</span>' + highlight(child['HK Translation'])"></span>
-                                            <a :href="'movie.html?mediaid=' + encodeURIComponent(child['Movie ID'])" target="_blank" class="text-[11px] font-bold text-indigo-500 hover:text-indigo-700 flex items-center justify-between group">
-                                                <span v-html="highlight(child.movieTitle)"></span>
-                                                <svg class="w-3.5 h-3.5 shrink-0 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round"></path></svg>
-                                            </a>
+                                <div v-if="parent.movieAppearances.length > 0">
+                                        <div class="flex items-center gap-2 mb-3 px-1">
+                                            <span class="text-[10px] font-black text-indigo-500 uppercase tracking-widest shrink-0">Movie Ref.</span>
+                                            <div class="h-px flex-1 bg-slate-200"></div>
+                                        </div>
+                                
+                                        <div class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
+                                            <div v-for="(child, idx) in parent.movieAppearances" :key="idx" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition-all">
+                                                <div class="flex flex-col gap-2">
+                                                    <span class="text-[8px] font-black bg-slate-900 text-white px-2 py-0.5 rounded w-fit uppercase">Movie {{ child.movieYear }}</span>
+                                                    <span class="text-sm font-black text-slate-800" v-html="'<span class=\'text-[9px] text-slate-400 uppercase font-bold mr-1\'>港譯/</span>' + highlight(child['HK Translation'])"></span>
+                                                    <a :href="'movie.html?mediaid=' + encodeURIComponent(child['Movie ID'])" target="_blank" class="text-[11px] font-bold text-indigo-500 hover:text-indigo-700 flex items-center justify-between group">
+                                                        <span v-html="highlight(child.movieTitle)"></span>
+                                                        <svg class="w-3.5 h-3.5 shrink-0 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round"></path></svg>
+                                                    </a>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <p v-else class="text-[10px] font-bold text-slate-300 italic py-4 text-center uppercase">No Movie Data</p>
+                                
+                                    <div v-else class="scroll-area bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
+                                        <p class="text-[13px] font-bold text-slate-300 italic py-4 text-center uppercase tracking-widest">No Movie Data</p>
+                                    </div>
                             </div>
 
                             <div v-if="getTab(parent['Object ID']) === 'manga'">
@@ -183,7 +193,7 @@
                                 </div>
                                 
                                 <div v-else class="scroll-area bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
-                                    <p class="text-[10px] font-bold text-slate-300 italic py-4 text-center uppercase tracking-widest">No Manga Data</p>
+                                    <p class="text-[13px] font-bold text-slate-300 italic py-4 text-center uppercase tracking-widest">No Manga Data</p>
                                 </div>
                             </div>
 

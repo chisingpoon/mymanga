@@ -180,7 +180,7 @@
                                         <div class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
                                             <div v-for="(rec, idx) in parent.mangaRecords" :key="idx" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition-all">
                                                 <a :href="'manga-database.html?region=JP&isbn=' + encodeURIComponent(rec.isbn)" target="_blank" class="text-[11px] font-bold text-indigo-500 hover:text-indigo-700 flex items-center justify-between group">
-                                                    <span v-html="highlight(`[${rec.type}] ${rec.title} ${rec.vol}`)"></span>
+                                                    <span v-html="highlight(`[${rec.type}] ${rec.title} ${rec.vol} Ch.${rec.ch}`)"></span>
                                                     <svg class="w-3.5 h-3.5 shrink-0 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round"></path></svg>
                                                 </a>
                                             </div>

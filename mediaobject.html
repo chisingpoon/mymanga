@@ -270,7 +270,7 @@
                                     <div class="space-y-2">
                                         <div v-for="r in parent.mangaRecords" class="bg-white p-3 rounded-xl border-2 border-slate-100 shadow-sm">
                                             <a :href="'manga-database.html?region=JP&isbn=' + encodeURIComponent(r.isbn)" target="_blank" class="text-[11px] font-bold text-indigo-500 hover:text-indigo-700 flex items-center justify-between group">
-                                                <span v-html="highlight(`[${r.type}] ${r.vol}`)"></span>
+                                                <span v-html="highlight(`[${r.type}] ${r.vol} Ch.${r.ch}`)"></span>
                                                 <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round"></path></svg>
                                             </a>
                                         </div>
@@ -455,7 +455,7 @@
                         if (manInfo) {
                             mangaRecords = this.workInclude.filter(w => String(w['作品番']) === String(manInfo['Work ID'])).map(w => {
                                 const pub = this.pubCatalog.find(pc => String(pc['ISBN']) === String(w['ISBN']));
-                                return { isbn: w['ISBN'], type: pub?.['類'] || 'N/A', title: pub?.['標題'] || 'Unknown', vol: pub?.['巻'] || '' };
+                                return { isbn: w['ISBN'], type: pub?.['類'] || 'N/A', title: pub?.['標題'] || 'Unknown', vol: pub?.['巻'] || '', ch: w['收錄話'] };
                             });
                         }
                         return { ...p, movieAppearances, animeAppearances, mangaInfo: manInfo, mangaRecords };

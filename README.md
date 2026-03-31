@@ -40,3 +40,6 @@ The project is powered by a Google Sheets backend. The following sheets are sync
 
 ---
 *Note: This project is for archival and research purposes.*
+
+## Google Analytics
+https://analytics.google.com/analytics/web/#/a389435709p530757715/reports/intelligenthome

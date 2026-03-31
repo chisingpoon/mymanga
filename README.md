@@ -43,3 +43,6 @@ The project is powered by a Google Sheets backend. The following sheets are sync
 
 ## Google Analytics
 https://analytics.google.com/analytics/web/#/a389435709p530757715/reports/intelligenthome
+
+## Cloudflare Redirect to Private GitHub Repository
+https://dash.cloudflare.com/

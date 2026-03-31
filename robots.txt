@@ -1,2 +1,6 @@
+# Allow all search engines to index the site
 User-agent: *
 Allow: /
+
+# Direct search engines to your sitemap
+Sitemap: hhttps://doradexhk.pages.dev/sitemap.xml

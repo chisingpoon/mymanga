@@ -248,7 +248,7 @@
                                     {{ row.初出掲載頁 }}
                                 </td>
                 
-                                <td class="px-3 py-2 whitespace-nowrap">
+                                <td class="px-3 py-2 whitespace-nowrap bg-indigo-50/20">
                                     <div v-if="row.daizhenshuSubtitle && row.daizhenshuSubtitle !== '---'" 
                                          class="text-[12px] text-slate-600 font-medium leading-tight" 
                                          v-html="highlight(row.daizhenshuSubtitle)">
@@ -286,7 +286,7 @@
                                     <span v-else class="text-slate-300 italic text-[9px] px-2">---</span>
                                 </td>
                 
-                                <td class="px-3 py-2 text-center relative w-10">
+                                <td class="px-3 py-2 text-center relative w-10 bg-indigo-50/20">
                                     <div v-if="row.備考 && row.備考.trim() !== ''" class="flex justify-center">
                                         
                                         <div @click.stop="togglePopup(row.作品番, $event)"

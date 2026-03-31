@@ -33,7 +33,21 @@
     <loc>https://doradexhk.pages.dev/mediaobject</loc>
     <lastmod>2026-03-31</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://doradexhk.pages.dev/mediaobject?filterclass=法寶</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://doradexhk.pages.dev/mediaobject?filterclass=人物</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
   </url>
   
 </urlset>

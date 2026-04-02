@@ -84,6 +84,10 @@
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </div>
                         </div>
+                        <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                            <button @click="viewMode = 'card'" :class="viewMode === 'card' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">Card</button>
+                            <button @click="viewMode = 'table'" :class="viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">Table</button>
+                        </div>
                     </div>
             
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -119,81 +123,138 @@
             </div>
 
             <div class="main-card">
-                <div class="overflow-x-auto">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Media ID</th>
-                                <th>Titles (JP / HK)</th>
-                                <th>IDs (CH / SH)</th>
-                                <th>Show Date (JP / HK)</th>
-                                <th>45卷/P+/カラー</th>
-                                <th>大全集</th>
-                                <th>Note</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="row in paginatedData" :key="row['Media ID']">
-                                <td class="font-mono text-slate-400 text-[13px] font-bold" v-html="highlight(row['Media ID'])"></td>
-                                <td class="font-black text-slate-900">
-                                    <div class="text-[16px]" v-html="highlight(row['JP Title'])"></div>
-                                    <div class="text-indigo-600 text-[13px] tracking-tight" v-html="highlight(row['HK Title'])"></div>
-                                </td>
-                                <td>
-                                    <div class="flex flex-col gap-1">
-                                        <div class="flex items-center gap-2 text-[9px] text-slate-400 font-black">CH <span class="id-badge" v-html="highlight(row['JP Chapter ID'] || '-')"></span></div>
-                                        <div class="flex items-center gap-2 text-[9px] text-slate-400 font-black">SH <span class="id-badge" v-html="highlight(row['JP Show ID'] || '-')"></span></div>
-                                    </div>
-                                </td>
-                                <td class="text-[12px] whitespace-nowrap">
-                                    <div class="flex items-center gap-2 font-bold"><span class="w-4 text-slate-300">🇯🇵</span> {{ row['JP Show Date'] || '-' }}</div>
-                                    <div class="flex items-center gap-2 mt-1 font-bold text-slate-500"><span class="w-4 text-slate-300">🇭🇰</span> {{ row['HK Show Date'] || '-' }}</div>
-                                </td>
-                        
-                                <td>
-                                    <a v-if="m = getMapping(row['Work ID'], ['45卷', 'カラー作品集', 'プラス'])" 
-                                       :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
-                                       target="_blank" 
-                                       class="vol-link"
-                                       :class="getLabelColor(m.type)">
-                                        <span>{{m.type}}</span>
-                                        <span class="main-label">Vol. {{m.vol}} Ch.{{m.chapter}}</span>
-                                    </a>
-                                </td>
-                        
-                                <td>
-                                    <a v-if="m = getMapping(row['Work ID'], ['大全集', '大長編大全集'])" 
-                                       :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
-                                       target="_blank" 
-                                       class="vol-link bg-indigo-500">
-                                        <span>{{m.type}}</span>
-                                        <span class="main-label">Vol. {{m.vol}} Ch.{{m.chapter}}</span>
-                                    </a>
-                                </td>
-                        
-                                <td class="text-slate-400 italic text-[13px] max-w-[200px] leading-snug" v-html="highlight(row.Note)"></td>
-                            </tr>
-                            <tr v-if="filteredData.length === 0">
-                                <td colspan="7" class="py-20 text-center">
-                                    <div class="flex flex-col items-center justify-center">
-                                        <div class="w-16 h-16 bg-slate-100 text-slate-300 rounded-full flex items-center justify-center mb-4">
-                                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                        </div>
-                                        <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">No Records Found</h3>
-                                        <p class="text-slate-400 text-sm font-medium mt-1">Try adjusting your search terms or date ranges.</p>
-                                        <button @click="searchQuery = ''; filters.jpStart=''; filters.jpEnd=''; filters.hkStart=''; filters.hkEnd='';" 
-                                                class="mt-6 px-6 py-2 bg-indigo-50 text-indigo-600 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-indigo-600 hover:text-white transition-all">
-                                            Reset All Filters
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div v-if="viewMode === 'card'" class="overflow-x-auto">
+                    <div v-if="paginatedData.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div v-for="row in paginatedData" :key="row['Media ID']" class="bg-slate-50/50 border border-slate-200 rounded-2xl p-5 hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-500/5 transition-all group">
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="id-badge" v-html="highlight(row['Media ID'])"></span>
+                                <div class="flex flex-col items-end gap-1 text-[9px] font-black text-slate-400 uppercase">
+                                    <span v-if="row['JP Show ID']">SH: <span class="text-slate-900" v-html="highlight(row['JP Show ID'])"></span></span>
+                                    <span v-if="row['JP Chapter ID']">CH: <span class="text-slate-900" v-html="highlight(row['JP Chapter ID'])"></span></span>
+                                </div>
+                            </div>
+                            
+                            <h3 class="font-black text-slate-900 text-lg leading-tight mb-1" v-html="highlight(row['JP Title'])"></h3>
+                            <p class="text-indigo-600 font-bold text-sm mb-4" v-html="highlight(row['HK Title'])"></p>
+            
+                            <div class="space-y-2 mb-4 bg-white p-3 rounded-xl border border-slate-100">
+                                <div class="flex items-center gap-2 text-[11px] font-bold text-slate-600">
+                                    <span class="w-4">🇯🇵</span> {{ row['JP Show Date'] || '-' }}
+                                </div>
+                                <div class="flex items-center gap-2 text-[11px] font-bold text-slate-400">
+                                    <span class="w-4">🇭🇰</span> {{ row['HK Show Date'] || '-' }}
+                                </div>
+                            </div>
+            
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <a v-if="m = getMapping(row['Work ID'], ['45卷', 'カラー作品集', 'プラス'])" :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" target="_blank" class="vol-link !min-w-0 flex-1" :class="getLabelColor(m.type)">
+                                    <span class="text-[8px]">{{m.type}}</span>
+                                    <span class="main-label">V.{{m.vol}} C.{{m.chapter}}</span>
+                                </a>
+                                <a v-if="m = getMapping(row['Work ID'], ['大全集', '大長編大全集'])" :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" target="_blank" class="vol-link !min-w-0 flex-1 bg-indigo-500">
+                                    <span class="text-[8px]">{{m.type}}</span>
+                                    <span class="main-label">V.{{m.vol}} C.{{m.chapter}}</span>
+                                </a>
+                            </div>
+            
+                            <p v-if="row.Note" class="text-[11px] text-slate-400 italic leading-snug border-t border-slate-100 pt-3" v-html="highlight(row.Note)"></p>
+                        </div>
+                    </div>
+            
+                    <div v-if="filteredData.length === 0" class="py-20 text-center">
+                        <div class="flex flex-col items-center justify-center">
+                             <div class="w-16 h-16 bg-slate-100 text-slate-300 rounded-full flex items-center justify-center mb-4">
+                                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                  </svg>
+                             </div>
+                             <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">No Records Found</h3>
+                             <p class="text-slate-400 text-sm font-medium mt-1">Try adjusting your search terms or date ranges.</p>
+                                 <button @click="searchQuery = ''; filters.jpStart=''; filters.jpEnd=''; filters.hkStart=''; filters.hkEnd='';" 
+                                     class="mt-6 px-6 py-2 bg-indigo-50 text-indigo-600 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-indigo-600 hover:text-white transition-all">
+                                     Reset All Filters
+                                 </button>
+                         </div>
+                    </div>
+                
                 </div>
-
+                <!-- TABLE VIEW -->    
+                <div v-else class="p-6">
+                    <div class="overflow-x-auto">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Media ID</th>
+                                    <th>Titles (JP / HK)</th>
+                                    <th>IDs (CH / SH)</th>
+                                    <th>Show Date (JP / HK)</th>
+                                    <th>45卷/P+/カラー</th>
+                                    <th>大全集</th>
+                                    <th>Note</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="row in paginatedData" :key="row['Media ID']">
+                                    <td class="font-mono text-slate-400 text-[13px] font-bold" v-html="highlight(row['Media ID'])"></td>
+                                    <td class="font-black text-slate-900">
+                                        <div class="text-[16px]" v-html="highlight(row['JP Title'])"></div>
+                                        <div class="text-indigo-600 text-[13px] tracking-tight" v-html="highlight(row['HK Title'])"></div>
+                                    </td>
+                                    <td>
+                                        <div class="flex flex-col gap-1">
+                                            <div class="flex items-center gap-2 text-[9px] text-slate-400 font-black">CH <span class="id-badge" v-html="highlight(row['JP Chapter ID'] || '-')"></span></div>
+                                            <div class="flex items-center gap-2 text-[9px] text-slate-400 font-black">SH <span class="id-badge" v-html="highlight(row['JP Show ID'] || '-')"></span></div>
+                                        </div>
+                                    </td>
+                                    <td class="text-[12px] whitespace-nowrap">
+                                        <div class="flex items-center gap-2 font-bold"><span class="w-4 text-slate-300">🇯🇵</span> {{ row['JP Show Date'] || '-' }}</div>
+                                        <div class="flex items-center gap-2 mt-1 font-bold text-slate-500"><span class="w-4 text-slate-300">🇭🇰</span> {{ row['HK Show Date'] || '-' }}</div>
+                                    </td>
+                            
+                                    <td>
+                                        <a v-if="m = getMapping(row['Work ID'], ['45卷', 'カラー作品集', 'プラス'])" 
+                                           :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
+                                           target="_blank" 
+                                           class="vol-link"
+                                           :class="getLabelColor(m.type)">
+                                            <span>{{m.type}}</span>
+                                            <span class="main-label">Vol. {{m.vol}} Ch.{{m.chapter}}</span>
+                                        </a>
+                                    </td>
+                            
+                                    <td>
+                                        <a v-if="m = getMapping(row['Work ID'], ['大全集', '大長編大全集'])" 
+                                           :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
+                                           target="_blank" 
+                                           class="vol-link bg-indigo-500">
+                                            <span>{{m.type}}</span>
+                                            <span class="main-label">Vol. {{m.vol}} Ch.{{m.chapter}}</span>
+                                        </a>
+                                    </td>
+                            
+                                    <td class="text-slate-400 italic text-[13px] max-w-[200px] leading-snug" v-html="highlight(row.Note)"></td>
+                                </tr>
+                                <tr v-if="filteredData.length === 0">
+                                    <td colspan="7" class="py-20 text-center">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <div class="w-16 h-16 bg-slate-100 text-slate-300 rounded-full flex items-center justify-center mb-4">
+                                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                            </div>
+                                            <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">No Records Found</h3>
+                                            <p class="text-slate-400 text-sm font-medium mt-1">Try adjusting your search terms or date ranges.</p>
+                                            <button @click="searchQuery = ''; filters.jpStart=''; filters.jpEnd=''; filters.hkStart=''; filters.hkEnd='';" 
+                                                    class="mt-6 px-6 py-2 bg-indigo-50 text-indigo-600 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-indigo-600 hover:text-white transition-all">
+                                                Reset All Filters
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                 <div class="bg-slate-50 p-6 flex flex-col md:flex-row items-center justify-between border-t border-slate-200 gap-4">
                     <div class="text-[11px] font-black uppercase text-slate-400 tracking-widest">
                         Page {{ currentPage }} of {{ totalPages }} ({{ filteredData.length }} results)
@@ -218,6 +279,7 @@
         createApp({
             data() {
                 return {
+                    viewMode: 'card',
                     loading: true,
                     searchQuery: '',
                     filters: {

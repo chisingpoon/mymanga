@@ -77,31 +77,47 @@
                 
                 <div class="flex-1 min-w-[280px] relative">
                     <input type="text" v-model.trim="searchQuery" placeholder="Search titles, IDs, or notes..." 
-                           class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl pl-5 pr-12 py-3 text-sm font-bold outline-none focus:border-indigo-500 transition-all shadow-inner">
-                    <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-500 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                           class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl pl-5 pr-12 py-3 text-sm font-bold outline-none focus:border-indigo-500 transition-all">
+                    <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500">
+                        <span class="text-xl">×</span>
                     </button>
                 </div>
             
-                <div class="flex items-center gap-2 bg-slate-50 border-2 border-slate-100 rounded-2xl px-3 py-2 min-w-[240px]">
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter mr-1">🇯🇵 JP</span>
-                    <input type="date" v-model="filters.jpStart" class="bg-transparent text-[11px] font-bold outline-none text-slate-600 w-full">
-                    <span class="text-slate-300">→</span>
-                    <input type="date" v-model="filters.jpEnd" class="bg-transparent text-[11px] font-bold outline-none text-slate-600 w-full">
+                <div class="flex flex-col gap-1 bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 py-2 min-w-[220px]">
+                    <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">🇯🇵 Japan Broadcast</span>
+                    <div class="flex items-center gap-2">
+                        <div class="flex flex-col">
+                            <label class="text-[9px] uppercase text-slate-400 font-bold">Start</label>
+                            <input type="date" v-model="filters.jpStart" class="bg-transparent text-xs font-bold outline-none text-slate-700">
+                        </div>
+                        <span class="text-slate-300 mt-3">→</span>
+                        <div class="flex flex-col">
+                            <label class="text-[9px] uppercase text-slate-400 font-bold">End</label>
+                            <input type="date" v-model="filters.jpEnd" class="bg-transparent text-xs font-bold outline-none text-slate-700">
+                        </div>
+                    </div>
                 </div>
             
-                <div class="flex items-center gap-2 bg-slate-50 border-2 border-slate-100 rounded-2xl px-3 py-2 min-w-[240px]">
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter mr-1">🇭🇰 HK</span>
-                    <input type="date" v-model="filters.hkStart" class="bg-transparent text-[11px] font-bold outline-none text-slate-600 w-full">
-                    <span class="text-slate-300">→</span>
-                    <input type="date" v-model="filters.hkEnd" class="bg-transparent text-[11px] font-bold outline-none text-slate-600 w-full">
-                    
-                    <button v-if="filters.jpStart || filters.jpEnd || filters.hkStart || filters.hkEnd" 
-                            @click="filters.jpStart=''; filters.jpEnd=''; filters.hkStart=''; filters.hkEnd='';" 
-                            class="ml-1 text-rose-500 hover:scale-110 transition-transform">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"/></svg>
-                    </button>
+                <div class="flex flex-col gap-1 bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 py-2 min-w-[220px]">
+                    <span class="text-[10px] font-black text-rose-600 uppercase tracking-widest">🇭🇰 Hong Kong Broadcast</span>
+                    <div class="flex items-center gap-2">
+                        <div class="flex flex-col">
+                            <label class="text-[9px] uppercase text-slate-400 font-bold">Start</label>
+                            <input type="date" v-model="filters.hkStart" class="bg-transparent text-xs font-bold outline-none text-slate-700">
+                        </div>
+                        <span class="text-slate-300 mt-3">→</span>
+                        <div class="flex flex-col">
+                            <label class="text-[9px] uppercase text-slate-400 font-bold">End</label>
+                            <input type="date" v-model="filters.hkEnd" class="bg-transparent text-xs font-bold outline-none text-slate-700">
+                        </div>
+                    </div>
                 </div>
+            
+                <button v-if="filters.jpStart || filters.jpEnd || filters.hkStart || filters.hkEnd" 
+                        @click="filters.jpStart=''; filters.jpEnd=''; filters.hkStart=''; filters.hkEnd='';" 
+                        class="bg-rose-50 border border-rose-100 text-rose-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-tighter hover:bg-rose-100 transition-colors">
+                    Reset Dates
+                </button>
             
                 <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
                     <button @click="viewMode = 'card'" :class="['px-3 py-1.5 rounded-lg transition-all', viewMode === 'card' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400']">
@@ -110,11 +126,6 @@
                     <button @click="viewMode = 'table'" :class="['px-3 py-1.5 rounded-lg transition-all', viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400']">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
                     </button>
-                </div>
-            
-                <div class="hidden lg:flex bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-2xl items-center gap-3 ml-auto">
-                    <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Matched</span>
-                    <span class="text-xl font-black text-indigo-900">{{ filteredData.length }}</span>
                 </div>
             </div>
 
@@ -323,50 +334,43 @@
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
                     
-                    // Helper to get timestamps for comparison
                     const getTimestamp = (val) => {
                         if (!val) return null;
                         const d = new Date(val);
                         return isNaN(d.getTime()) ? null : d.getTime();
                     };
-        
+                
                     const f = {
                         js: getTimestamp(this.filters.jpStart),
                         je: getTimestamp(this.filters.jpEnd),
                         hs: getTimestamp(this.filters.hkStart),
                         he: getTimestamp(this.filters.hkEnd)
                     };
-        
+                
                     return this.anime.filter(r => {
                         // 1. Search Logic
                         const combined = [
-                            r['Media ID'], 
-                            r['JP Title'], 
-                            r['HK Title'], 
-                            r['Work ID'], 
-                            r['Note'], 
-                            r['JP Chapter ID'], 
-                            r['JP Show ID']
+                            r['Media ID'], r['JP Title'], r['HK Title'], r['Work ID'], r['Note'], r['JP Chapter ID'], r['JP Show ID']
                         ].map(v => String(v || '').toLowerCase()).join(' ');
                         
                         if (q && !combined.includes(q)) return false;
                         
-                        // 2. Japan Date Filter (Handles M/D/YYYY)
+                        // 2. Japan Date Filter - ONLY runs if f.js or f.je have values
                         if (f.js || f.je) {
                             const rowDate = getTimestamp(r['JP Show Date']);
-                            if (!rowDate) return false;
+                            if (!rowDate) return false; // Hide if filtering by date but row has no date
                             if (f.js && rowDate < f.js) return false;
                             if (f.je && rowDate > f.je) return false;
                         }
-        
-                        // 3. HK Date Filter (Handles M/D/YYYY)
+                
+                        // 3. HK Date Filter - ONLY runs if f.hs or f.he have values
                         if (f.hs || f.he) {
                             const rowDate = getTimestamp(r['HK Show Date']);
-                            if (!rowDate) return false;
+                            if (!rowDate) return false; // Hide if filtering by date but row has no date
                             if (f.hs && rowDate < f.hs) return false;
                             if (f.he && rowDate > f.he) return false;
                         }
-        
+                
                         return true;
                     });
                 },

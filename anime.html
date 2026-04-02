@@ -73,52 +73,48 @@
         </nav>
 
         <main class="max-w-[1920px] mx-auto px-6 pt-10">
-            <div class="mb-8 bg-white/80 backdrop-blur-md p-6 rounded-3xl border border-slate-200 shadow-sm">
-                <div class="flex flex-col gap-6">
-                    <div class="w-full">
-                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest">Global Search</label>
-                        <div class="search-container">
-                            <input type="text" v-model="searchQuery" placeholder="Search titles, IDs, or notes..." 
-                                   class="w-full bg-white border-2 border-slate-100 rounded-2xl px-6 py-3.5 text-base font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
-                            <div v-if="searchQuery" @click="searchQuery = ''" class="clear-search-btn">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
-                            </div>
-                        </div>
-                        <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
-                            <button @click="viewMode = 'card'" :class="viewMode === 'card' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">Card</button>
-                            <button @click="viewMode = 'table'" :class="viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">Table</button>
-                        </div>
-                    </div>
+            <div class="flex flex-wrap items-center gap-4 mb-8 bg-white/80 p-4 rounded-3xl backdrop-blur-md border border-slate-200 sticky top-24 z-30 shadow-sm">
+                
+                <div class="flex-1 min-w-[280px] relative">
+                    <input type="text" v-model.trim="searchQuery" placeholder="Search titles, IDs, or notes..." 
+                           class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl pl-5 pr-12 py-3 text-sm font-bold outline-none focus:border-indigo-500 transition-all shadow-inner">
+                    <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-500 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </button>
+                </div>
             
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="flex flex-col gap-2">
-                            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest flex items-center gap-2">
-                                <span class="text-sm">🇯🇵</span> Japan Broadcast Range
-                            </label>
-                            <div class="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-100">
-                                <input type="date" v-model="filters.jpStart" class="bg-transparent text-xs font-bold outline-none text-slate-600 w-full">
-                                <span class="text-slate-300">→</span>
-                                <input type="date" v-model="filters.jpEnd" class="bg-transparent text-xs font-bold outline-none text-slate-600 w-full">
-                            </div>
-                        </div>
+                <div class="flex items-center gap-2 bg-slate-50 border-2 border-slate-100 rounded-2xl px-3 py-2 min-w-[240px]">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter mr-1">🇯🇵 JP</span>
+                    <input type="date" v-model="filters.jpStart" class="bg-transparent text-[11px] font-bold outline-none text-slate-600 w-full">
+                    <span class="text-slate-300">→</span>
+                    <input type="date" v-model="filters.jpEnd" class="bg-transparent text-[11px] font-bold outline-none text-slate-600 w-full">
+                </div>
             
-                        <div class="flex flex-col gap-2">
-                            <label class="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest flex items-center gap-2">
-                                <span class="text-sm">🇭🇰</span> Hong Kong Broadcast Range
-                            </label>
-                            <div class="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-100">
-                                <input type="date" v-model="filters.hkStart" class="bg-transparent text-xs font-bold outline-none text-slate-600 w-full">
-                                <span class="text-slate-300">→</span>
-                                <input type="date" v-model="filters.hkEnd" class="bg-transparent text-xs font-bold outline-none text-slate-600 w-full">
-                                
-                                <button v-if="filters.jpStart || filters.jpEnd || filters.hkStart || filters.hkEnd" 
-                                        @click="filters.jpStart=''; filters.jpEnd=''; filters.hkStart=''; filters.hkEnd='';" 
-                                        class="ml-2 text-rose-500 hover:scale-110 transition-transform">
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                <div class="flex items-center gap-2 bg-slate-50 border-2 border-slate-100 rounded-2xl px-3 py-2 min-w-[240px]">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter mr-1">🇭🇰 HK</span>
+                    <input type="date" v-model="filters.hkStart" class="bg-transparent text-[11px] font-bold outline-none text-slate-600 w-full">
+                    <span class="text-slate-300">→</span>
+                    <input type="date" v-model="filters.hkEnd" class="bg-transparent text-[11px] font-bold outline-none text-slate-600 w-full">
+                    
+                    <button v-if="filters.jpStart || filters.jpEnd || filters.hkStart || filters.hkEnd" 
+                            @click="filters.jpStart=''; filters.jpEnd=''; filters.hkStart=''; filters.hkEnd='';" 
+                            class="ml-1 text-rose-500 hover:scale-110 transition-transform">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"/></svg>
+                    </button>
+                </div>
+            
+                <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                    <button @click="viewMode = 'card'" :class="['px-3 py-1.5 rounded-lg transition-all', viewMode === 'card' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400']">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    </button>
+                    <button @click="viewMode = 'table'" :class="['px-3 py-1.5 rounded-lg transition-all', viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400']">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+            
+                <div class="hidden lg:flex bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-2xl items-center gap-3 ml-auto">
+                    <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Matched</span>
+                    <span class="text-xl font-black text-indigo-900">{{ filteredData.length }}</span>
                 </div>
             </div>
 

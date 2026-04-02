@@ -119,13 +119,20 @@
                     Reset Dates
                 </button>
             
-                <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
-                    <button @click="viewMode = 'card'" :class="['px-3 py-1.5 rounded-lg transition-all', viewMode === 'card' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400']">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                    </button>
-                    <button @click="viewMode = 'table'" :class="['px-3 py-1.5 rounded-lg transition-all', viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400']">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
-                    </button>
+                <div class="flex flex-wrap items-center gap-4 mb-8 bg-white/80 p-4 rounded-3xl backdrop-blur-md border border-slate-200 sticky top-24 z-30 shadow-sm">
+                    <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                        <button @click="viewMode = 'card'" :class="['px-3 py-1.5 rounded-lg transition-all', viewMode === 'card' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400']">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                        </button>
+                        <button @click="viewMode = 'table'" :class="['px-3 py-1.5 rounded-lg transition-all', viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400']">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
+                        </button>
+                    </div>
+                
+                    <div class="flex bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-2xl items-center gap-3 ml-auto">
+                        <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest whitespace-nowrap">Matched Records</span>
+                        <span class="text-xl font-black text-indigo-900">{{ filteredData.length }}</span>
+                    </div>
                 </div>
             </div>
 
@@ -222,29 +229,38 @@
                 
                     <div class="grid grid-cols-2 gap-2 mb-5 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
                         <div class="flex flex-col">
-                            <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Japan</span>
+                            <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">🇯🇵 JP Broadcast</span>
                             <span class="text-[11px] font-bold text-slate-700 truncate">{{ row['JP Show Date'] || '-' }}</span>
                         </div>
                         <div class="flex flex-col border-l border-slate-200 pl-3">
-                            <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Hong Kong</span>
+                            <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">🇯🇵 HK Broadcast</span>
                             <span class="text-[11px] font-bold text-slate-700 truncate">{{ row['HK Show Date'] || '-' }}</span>
                         </div>
                     </div>
-                
-                    <div class="flex flex-col gap-2 mb-4">
-                        <a v-if="m = getMapping(row['Work ID'], ['45卷', 'カラー作品集', 'プラス'])" 
-                            :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
-                            target="_blank" class="vol-link !w-full" :class="getLabelColor(m.type)">
-                            <span class="text-[8px]">{{m.type}}</span>
-                            <span class="main-label">Vol. {{m.vol}} Ch.{{m.chapter}}</span>
-                        </a>
-                        <a v-if="m = getMapping(row['Work ID'], ['大全集', '大長編大全集'])" 
-                            :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
-                            target="_blank" class="vol-link !w-full bg-indigo-500">
-                            <span class="text-[8px]">{{m.type}}</span>
-                            <span class="main-label">Vol. {{m.vol}} Ch.{{m.chapter}}</span>
-                        </a>
-                    </div>
+                    
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 mb-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                            <span class="text-[10px] font-black text-slate-500 uppercase tracking-wider">Manga Ref.</span>
+                        </div>
+                        
+                        <div class="flex flex-col gap-2 mb-4">
+                            <a v-if="m = getMapping(row['Work ID'], ['45卷', 'カラー作品集', 'プラス'])" 
+                                :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
+                                target="_blank" class="vol-link !w-full" :class="getLabelColor(m.type)">
+                                <span class="text-[8px]">{{m.type}}</span>
+                                <span class="main-label">Vol. {{m.vol}} Ch.{{m.chapter}}</span>
+                            </a>
+                            <a v-if="m = getMapping(row['Work ID'], ['大全集', '大長編大全集'])" 
+                                :href="'manga-database.html?isbn=' + m.hkIsbn + '&region=HK'" 
+                                target="_blank" class="vol-link !w-full bg-indigo-500">
+                                <span class="text-[8px]">{{m.type}}</span>
+                                <span class="main-label">Vol. {{m.vol}} Ch.{{m.chapter}}</span>
+                            </a>
+                        </div>
+                    </div>    
                 
                     <p v-if="row.Note" class="text-[11px] text-slate-400 italic leading-snug border-t border-slate-100 pt-3" v-html="highlight(row.Note)"></p>
                 </div>            
@@ -334,41 +350,64 @@
                 filteredData() {
                     const q = this.searchQuery.toLowerCase().trim();
                     
-                    const getTimestamp = (val) => {
-                        if (!val) return null;
-                        const d = new Date(val);
+                    // Helper to turn various formats (12/4/2021 or 2021-04-12) into a timestamp
+                    const parseDate = (dateVal) => {
+                        if (!dateVal) return null;
+                        
+                        // If it's already a YYYY-MM-DD string from the input
+                        if (typeof dateVal === 'string' && dateVal.includes('-')) {
+                            const d = new Date(dateVal);
+                            return d.getTime();
+                        }
+                
+                        // If it's a DD/MM/YYYY string from your DB
+                        if (typeof dateVal === 'string' && dateVal.includes('/')) {
+                            const parts = dateVal.split('/');
+                            // Assumes DD/MM/YYYY. If your DB is MM/DD/YYYY, swap parts[0] and parts[1]
+                            const day = parseInt(parts[0], 10);
+                            const month = parseInt(parts[1], 10) - 1;
+                            const year = parseInt(parts[2], 10);
+                            const d = new Date(year, month, day);
+                            return d.getTime();
+                        }
+                
+                        const d = new Date(dateVal);
                         return isNaN(d.getTime()) ? null : d.getTime();
                     };
                 
                     const f = {
-                        js: getTimestamp(this.filters.jpStart),
-                        je: getTimestamp(this.filters.jpEnd),
-                        hs: getTimestamp(this.filters.hkStart),
-                        he: getTimestamp(this.filters.hkEnd)
+                        js: parseDate(this.filters.jpStart),
+                        je: parseDate(this.filters.jpEnd),
+                        hs: parseDate(this.filters.hkStart),
+                        he: parseDate(this.filters.hkEnd)
                     };
                 
+                    // Buffer to handle the "End Date" inclusive (set to end of day 23:59:59)
+                    const dayEndBuffer = 86399999; 
+                
                     return this.anime.filter(r => {
-                        // 1. Search Logic
+                        // 1. Search Logic (remains unchanged)
                         const combined = [
-                            r['Media ID'], r['JP Title'], r['HK Title'], r['Work ID'], r['Note'], r['JP Chapter ID'], r['JP Show ID']
+                            r['Media ID'], r['JP Title'], r['HK Title'], r['Work ID'], r['Note']
                         ].map(v => String(v || '').toLowerCase()).join(' ');
                         
                         if (q && !combined.includes(q)) return false;
                         
-                        // 2. Japan Date Filter - ONLY runs if f.js or f.je have values
+                        // 2. Japan Date Filter
                         if (f.js || f.je) {
-                            const rowDate = getTimestamp(r['JP Show Date']);
-                            if (!rowDate) return false; // Hide if filtering by date but row has no date
+                            const rowDate = parseDate(r['JP Show Date']);
+                            if (!rowDate) return false; 
                             if (f.js && rowDate < f.js) return false;
-                            if (f.je && rowDate > f.je) return false;
+                            if (f.je && rowDate > (f.je + dayEndBuffer)) return false;
                         }
                 
-                        // 3. HK Date Filter - ONLY runs if f.hs or f.he have values
+                        // 3. Hong Kong Date Filter
                         if (f.hs || f.he) {
-                            const rowDate = getTimestamp(r['HK Show Date']);
-                            if (!rowDate) return false; // Hide if filtering by date but row has no date
+                            const rowDate = parseDate(r['HK Show Date']);
+                            if (!rowDate) return false;
                             if (f.hs && rowDate < f.hs) return false;
-                            if (f.he && rowDate > f.he) return false;
+                            // Add buffer to end date so 05/06/2021 includes the whole day of the 5th
+                            if (f.he && rowDate > (f.he + dayEndBuffer)) return false;
                         }
                 
                         return true;

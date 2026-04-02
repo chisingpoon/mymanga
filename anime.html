@@ -76,7 +76,7 @@
             <div class="flex flex-wrap items-center gap-4 mb-8 bg-white/80 p-4 rounded-3xl backdrop-blur-md border border-slate-200 sticky top-24 z-30 shadow-sm">
                 
                 <div class="flex-1 min-w-[280px] relative">
-                    <input type="text" v-model.trim="searchQuery" placeholder="Search titles, IDs, or notes..." 
+                    <input type="text" @input="debounceSearch" v-model.trim="searchQuery" placeholder="Search titles, IDs, or notes..." 
                            class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl pl-5 pr-12 py-3 text-sm font-bold outline-none focus:border-indigo-500 transition-all">
                     <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500">
                         <span class="text-xl">×</span>
@@ -119,20 +119,18 @@
                     Reset Dates
                 </button>
             
-                <div class="flex flex-wrap items-center gap-4 mb-8 bg-white/80 p-4 rounded-3xl backdrop-blur-md border border-slate-200 sticky top-24 z-30 shadow-sm">
-                    <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
-                        <button @click="viewMode = 'card'" :class="['px-3 py-1.5 rounded-lg transition-all', viewMode === 'card' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400']">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                        </button>
-                        <button @click="viewMode = 'table'" :class="['px-3 py-1.5 rounded-lg transition-all', viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400']">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
-                        </button>
-                    </div>
+                <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                    <button @click="viewMode = 'card'" :class="['px-3 py-1.5 rounded-lg transition-all', viewMode === 'card' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400']">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    </button>
+                    <button @click="viewMode = 'table'" :class="['px-3 py-1.5 rounded-lg transition-all', viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400']">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
                 
-                    <div class="flex bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-2xl items-center gap-3 ml-auto">
-                        <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest whitespace-nowrap">Matched Records</span>
-                        <span class="text-xl font-black text-indigo-900">{{ filteredData.length }}</span>
-                    </div>
+                <div class="flex bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-2xl items-center gap-3 ml-auto">
+                    <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest whitespace-nowrap">Matched Records</span>
+                    <span class="text-xl font-black text-indigo-900">{{ filteredData.length }}</span>
                 </div>
             </div>
 
@@ -319,12 +317,19 @@
         
         createApp({
             data() {
+                // Calculate "Today" and "12 Months Ago"
+                const today = new Date();
+                const lastYear = new Date();
+                lastYear.setFullYear(today.getFullYear() - 1);
+            
+                // Format to YYYY-MM-DD for the HTML input
+                const formatDate = (date) => date.toISOString().split('T')[0];
                 return {
                     viewMode: 'card',
                     loading: true,
                     searchQuery: '',
                     filters: {
-                        jpStart: '',
+                        jpStart: '', 
                         jpEnd: '',
                         hkStart: '',
                         hkEnd: ''
@@ -451,17 +456,33 @@
                         this.anime = a; 
                         this.contents = c; 
                         this.publishHk = h;
-        
-                        // Handle URL Parameters
+                
+                        // --- Handle URL Parameters & Defaults ---
                         const params = new URLSearchParams(window.location.search);
                         const mediaID = params.get('mediaid');
+                
                         if (mediaID) {
+                            // Logic A: URL has a specific parameter, find and show that record
                             const target = this.anime.find(r => String(r['Media ID']) === String(mediaID));
                             if (target) {
                                 this.searchQuery = target['JP Title'] || '';
+                                // Ensure dates are empty so they don't hide the specific record found
+                                this.filters.jpStart = '';
+                                this.filters.jpEnd = '';
                             }
+                        } else {
+                            // Logic B: No URL parameters, apply the 12-month JP default
+                            const today = new Date();
+                            const lastYear = new Date();
+                            lastYear.setFullYear(today.getFullYear() - 1);
+                
+                            const formatDate = (date) => date.toISOString().split('T')[0];
+                
+                            this.filters.jpStart = formatDate(lastYear);
+                            this.filters.jpEnd = formatDate(today);
                         }
-        
+                        // ----------------------------------------
+                
                         this.loading = false;
                         window.addEventListener('scroll', () => { 
                             this.showScrollBtn = window.scrollY > 400; 
@@ -490,6 +511,12 @@
                 },
                 scrollToTop() { 
                     window.scrollTo({ top: 0, behavior: 'smooth' }); 
+                },
+                debounceSearch(e) {
+                    clearTimeout(this.searchTimer);
+                    this.searchTimer = setTimeout(() => {
+                        this.searchQuery = e.target.value;
+                    }, 300); // 300ms delay
                 },
                 getMapping(workId, types) {
                     if (!workId || workId === "-") return null;

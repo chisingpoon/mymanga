@@ -118,27 +118,20 @@
         
         /* Mobile-friendly adjustments */
         @media (max-width: 768px) {
-        /* 1. Remove borders so the card spans the full edge of the phone screen */
             .main-card { 
                 border-radius: 0; 
                 border-inline: none;
-                /* 2. CRITICAL: Ensure the card itself doesn't grow wider than the screen */
                 max-width: 100vw;
-                overflow: hidden; 
+                /* CHANGE: Ensure overflow-x is allowed for the table to scroll */
+                overflow-x: auto !important; 
+                overflow-y: visible !important;
             }
         
-            .top-nav h1 { 
-                font-size: 1.25rem; 
-            }
-        
-            /* 3. Reduce padding on mobile so more of the table is visible at once */
-            .p-4.md\:p-6 {
-                padding: 1rem;
-            }
-        
-            /* 4. Optional: Make the horizontal scrollbar thicker for touch users */
-            .custom-scrollbar::-webkit-scrollbar {
-                height: 10px;
+            /* Ensure the table container itself allows scrolling */
+            .overflow-x-auto {
+                display: block !important; /* Forces visibility */
+                width: 100%;
+                -webkit-overflow-scrolling: touch;
             }
         }
 
@@ -246,15 +239,15 @@
         
         /* When popup is ABOVE (Default) */
         .popup-up .arrow-tip {
-            bottom: -15px;
-            border-top: 8px solid #0f172a; /* Slate-900 */
+            bottom: -8px; /* Adjusted from -15px to close the gap */
+            border-top: 8px solid #0f172a; 
             border-bottom: 0;
         }
         
         /* When popup is BELOW (First 2 rows) */
         .popup-down .arrow-tip {
-            top: -15px;
-            border-bottom: 8px solid #0f172a; /* Slate-900 */
+            top: -8px; /* Adjusted from -15px to close the gap */
+            border-bottom: 8px solid #0f172a; 
             border-top: 0;
         }
     </style>
@@ -839,6 +832,7 @@
                 toggleView(mode) {
                     this.activePopupId = null; // Close popups when switching
                     this.viewMode = mode;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 },
                 clearSearch() {
                     this.searchQuery = '';

@@ -19,7 +19,7 @@
         .loader-wrapper { position: fixed; inset: 0; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
         .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid #4f46e5; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 50; }
         .main-card { background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); margin-bottom: 3rem; border: 1px solid #e2e8f0;}
         //table { width: 100%; border-collapse: separate; border-spacing: 0; }
         th { font-size: 11px; font-weight: 800; padding: 16px 12px; text-align: left; color: #64748b; background: #f8fafc; border-bottom: 2px solid #e2e8f0; white-space: nowrap; position: sticky; top: 0; z-index: 10; text-transform: uppercase; }
@@ -60,6 +60,11 @@
         /* Row hover highlight to keep track of the current line */
         tbody tr:hover {
             background-color: #f1f5f9 !important; /* Slate-100 */
+        }
+
+        tbody tr {
+            position: relative;
+            z-index: auto;
         }
         
         /* Auto-fitting link style */
@@ -164,7 +169,8 @@
             border-bottom-color: #0f172a !important; /* slate-900 */
         }
         td.relative {
-            z-index: auto !important; /* Resetting this allows popups to float freely */
+            //z-index: auto !important; /* Resetting this allows popups to float freely */
+            position: relative;
         }
         
         /* Force the popup to the absolute front */

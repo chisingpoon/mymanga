@@ -238,6 +238,22 @@
             bottom: auto !important;
             transform: rotate(180deg);
         }
+        /* Base Arrow Style (Points Down) */
+        .arrow-tip {
+            position: absolute;
+            right: 20px;
+            bottom: -16px; /* Sits at the bottom of the popup */
+            border-width: 8px;
+            border-style: solid;
+            border-color: #0f172a transparent transparent transparent; /* Arrow color matches slate-900 */
+        }
+        
+        /* Flipped Arrow Style (Points Up) */
+        .popup-down .arrow-tip {
+            bottom: auto !important;
+            top: -16px !important; /* Move to the top of the popup */
+            border-color: transparent transparent #0f172a transparent !important; /* Point Up */
+        }
     </style>
 </head>
 <body class="bg-grid">
@@ -459,10 +475,12 @@
                                                     {{ hasMatchInRemarks(row.備考) ? '!' : 'i' }}
                                                 </span>
                                             </div>
-                                            <div :class="['absolute z-[9999] right-0 p-4 bg-slate-900 text-white rounded-xl shadow-2xl transition-all',
-                                                            index < 2 ? 'popup-down' : 'bottom-full mb-3', 
-                                                            activePopupId === row.作品番 ? 'opacity-100 visible' : 'opacity-0 invisible'
-                                                        ]">
+                                                <div :class="[
+                                                    'absolute z-[9999] right-0 p-4 bg-slate-900 text-white rounded-xl shadow-2xl transition-all duration-200 w-72',
+                                                    /* If index is 0 or 1, open down. Otherwise, open up. */
+                                                    index < 2 ? 'popup-down mt-2' : 'bottom-full mb-3',
+                                                    activePopupId === row.作品番 ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'
+                                                ]">
                                                 <div v-if="index < 3" class="arrow-upward absolute right-5 border-8 border-transparent"></div>
                                                 <div class="flex items-center justify-between mb-2 border-b border-slate-700 pb-2">
                                                     <span class="font-black text-indigo-400 uppercase text-[10px] tracking-widest">Remarks</span>

@@ -74,39 +74,50 @@
         </nav>
 
         <main class="max-w-full mx-auto px-6 pt-10">
-            <div class="flex flex-wrap items-center gap-4 mb-8 bg-white/80 p-4 rounded-2xl backdrop-blur-md border border-slate-200 sticky top-24 z-30 shadow-sm">
-                <div class="flex-1 min-w-[250px] relative">
-                    <input type="text" ref="searchInput" v-model.trim="searchQuery" placeholder="Search across all fields..." 
-                           class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-4 pr-12 py-2.5 text-sm font-bold outline-none focus:border-indigo-500 transition-all">
-                    <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-500 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                    </button>
-                </div>
+            <div class="flex flex-col gap-3 mb-6 bg-white/95 p-3 rounded-2xl border border-slate-200 sticky top-2 z-30 shadow-lg mx-2 md:mx-0 md:flex-row md:items-center md:gap-4 md:p-4 md:rounded-3xl md:top-24">
                 
-                <div class="flex gap-4">
-                    <select v-model="selectedClass" @change="handleClassChange" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2 text-sm font-black outline-none cursor-pointer">
-                        <option value="All">All Class</option>
-                        <option v-for="cls in classifications" :key="cls" :value="cls">{{ cls }}</option>
-                    </select>
-        
-                    <select v-model="selectedType" @change="currentPage = 1" class="bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2 text-sm font-black outline-none cursor-pointer">
-                        <option value="All">All Types</option>
-                        <option v-for="t in filteredObjectTypes" :key="t" :value="t">{{ t }}</option>
-                    </select>
-                </div>
-        
-                <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200 ml-2">
-                    <button @click="viewMode = 'card'" :class="['px-3 py-1.5 rounded-lg transition-all', viewMode === 'card' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400']">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                    </button>
-                    <button @click="viewMode = 'table'" :class="['px-3 py-1.5 rounded-lg transition-all', viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400']">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
+                <div class="relative w-full md:flex-1 md:min-w-[250px]">
+                    <input type="text" v-model.trim="searchQuery" placeholder="Search across all fields..." 
+                           class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-4 pr-10 py-2 text-sm font-bold outline-none focus:border-indigo-500 transition-all md:py-3 md:rounded-2xl">
+                    <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 transition-colors">
+                        <span class="text-lg">×</span>
                     </button>
                 </div>
-        
-                <div class="bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-xl flex items-center gap-3 ml-auto">
-                    <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Matched</span>
-                    <span class="text-xl font-black text-indigo-900">{{ displayData.length }}</span>
+            
+                <div class="grid grid-cols-2 gap-2 w-full md:flex md:w-auto md:gap-4">
+                    <div class="flex flex-col gap-0.5 bg-slate-50 border border-slate-100 rounded-xl px-2 py-1 md:px-3 md:min-w-[160px]">
+                        <label class="text-[9px] font-black text-indigo-600 uppercase tracking-tighter">Classification</label>
+                        <select v-model="selectedClass" @change="handleClassChange" 
+                                class="bg-transparent text-xs font-black outline-none cursor-pointer text-slate-700 py-1">
+                            <option value="All">All Class</option>
+                            <option v-for="cls in classifications" :key="cls" :value="cls">{{ cls }}</option>
+                        </select>
+                    </div>
+            
+                    <div class="flex flex-col gap-0.5 bg-slate-50 border border-slate-100 rounded-xl px-2 py-1 md:px-3 md:min-w-[160px]">
+                        <label class="text-[9px] font-black text-rose-600 uppercase tracking-tighter">Object Type</label>
+                        <select v-model="selectedType" @change="currentPage = 1" 
+                                class="bg-transparent text-xs font-black outline-none cursor-pointer text-slate-700 py-1">
+                            <option value="All">All Types</option>
+                            <option v-for="t in filteredObjectTypes" :key="t" :value="t">{{ t }}</option>
+                        </select>
+                    </div>
+                </div>
+            
+                <div class="flex items-center justify-between w-full pt-1 md:w-auto md:pt-0 md:gap-3">
+                    <div class="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                        <button @click="viewMode = 'card'" :class="['p-1.5 rounded-md transition-all', viewMode === 'card' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400']">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                        </button>
+                        <button @click="viewMode = 'table'" :class="['p-1.5 rounded-md transition-all', viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400']">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
+                        </button>
+                    </div>
+            
+                    <div class="flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100 ml-auto md:ml-0">
+                        <span class="text-[9px] font-black text-indigo-600 uppercase tracking-widest">Matched</span>
+                        <span class="text-sm font-black text-indigo-900">{{ displayData.length }}</span>
+                    </div>
                 </div>
             </div>
         

@@ -22,7 +22,6 @@
         .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 40; }
         .main-card { background: white; z-index: 1; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); margin-bottom: 3rem; border: 1px solid #e2e8f0;position: relative;overflow: visible !important;}
         
-        //table { width: 100%; border-collapse: separate; border-spacing: 0; }
         th { font-size: 11px; font-weight: 800; padding: 16px 12px; text-align: left; color: #64748b; background: #f8fafc; border-bottom: 2px solid #e2e8f0; white-space: nowrap; position: sticky; top: 0; z-index: 10; text-transform: uppercase; }
         td { padding: 14px 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; background: white; }
         .scroll-top-btn { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background: #1e293b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; pointer-events: none; z-index: 600; transition: 0.3s; }
@@ -197,7 +196,6 @@
             border-bottom-color: #0f172a !important; /* Matches slate-900 */
         }
         
-        /Ensure the table container doesn't clip the bottom */
         .overflow-x-auto {
             overflow-x: auto !important;
             overflow-y: visible !important;
@@ -375,7 +373,7 @@
                     </div>
                 </div>
 
-                <div v-if="viewMode === 'table'" class="w-full overflow-visible relative z-20">
+                <div v-if="viewMode === 'table'" class="w-full relative z-20" style="min-height: 200px;"> 
                     <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm custom-scrollbar">
                         <table class="w-full min-w-[1200px] text-left border-collapse bg-white table-auto">
                             <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold">
@@ -889,14 +887,19 @@
                     window.scrollTo({ top: 0, behavior: 'smooth' }); 
                 },
                 highlight(text) {
-                    if (!this.searchQuery || !text) return text;
-                    
-                    // Escape special characters in search query to prevent Regex errors
-                    const escapedQuery = this.searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    const regex = new RegExp(`(${escapedQuery})`, 'gi');
-                    
-                    // Using a span with a specific class for better mobile rendering
-                    return text.toString().replace(regex, '<mark class="bg-yellow-200 text-slate-900 rounded-sm px-0.5">$1</mark>');
+                    if (!text) return '';
+                    if (!this.searchQuery || this.searchQuery.trim() === '') return text;
+                
+                    try {
+                        // Escapes special regex characters so "A+" doesn't break the code
+                        const safeQuery = this.searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        const regex = new RegExp(`(${safeQuery})`, 'gi');
+                        
+                        // Use <mark> tag for native browser highlighting support
+                        return text.toString().replace(regex, '<mark>$1</mark>');
+                    } catch (e) {
+                        return text;
+                    }
                 },
                 hasMatchInRemarks(remarks) {
                     if (!this.searchQuery || !remarks) return false;

@@ -242,17 +242,25 @@
         .arrow-tip {
             position: absolute;
             right: 20px;
-            bottom: -16px; /* Sits at the bottom of the popup */
-            border-width: 8px;
-            border-style: solid;
-            border-color: #0f172a transparent transparent transparent; /* Arrow color matches slate-900 */
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            transition: all 0.2s ease;
         }
         
-        /* Flipped Arrow Style (Points Up) */
+        /* DEFAULT: Popup is ABOVE icon, arrow at BOTTOM pointing DOWN */
+        .popup-up .arrow-tip {
+            bottom: -15px; /* Pull it slightly under the popup edge */
+            border-top: 8px solid #0f172a; /* Slate-900 */
+            border-bottom: 0;
+        }
+        
+        /* FLIPPED: Popup is BELOW icon, arrow at TOP pointing UP */
         .popup-down .arrow-tip {
-            bottom: auto !important;
-            top: -16px !important; /* Move to the top of the popup */
-            border-color: transparent transparent #0f172a transparent !important; /* Point Up */
+            top: -15px; /* Pull it slightly above the popup edge */
+            border-bottom: 8px solid #0f172a; /* Slate-900 */
+            border-top: 0;
         }
     </style>
 </head>
@@ -477,8 +485,7 @@
                                             </div>
                                                 <div :class="[
                                                     'absolute z-[9999] right-0 p-4 bg-slate-900 text-white rounded-xl shadow-2xl transition-all duration-200 w-72',
-                                                    /* If index is 0 or 1, open down. Otherwise, open up. */
-                                                    index < 2 ? 'popup-down mt-2' : 'bottom-full mb-3',
+                                                    index < 2 ? 'popup-down mt-3' : 'popup-up bottom-full mb-3',
                                                     activePopupId === row.作品番 ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'
                                                 ]">
                                                 <div v-if="index < 3" class="arrow-upward absolute right-5 border-8 border-transparent"></div>

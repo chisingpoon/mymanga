@@ -117,18 +117,26 @@
         
         /* Mobile-friendly adjustments */
         @media (max-width: 768px) {
-            .main-card {
-                display: flex !important;
-                flex-direction: column !important;
-                min-height: 400px; 
+            .main-card { 
+                margin-left: -1rem; 
+                margin-right: -1rem;
+                width: calc(100% + 2rem);
+                border-radius: 0;
             }
         
-            /* This is the CRITICAL fix for the table showing up */
+            /* This forces the table container to be visible and scrollable */
             .overflow-x-auto {
                 display: block !important; 
-                width: 100% !important;
+                visibility: visible !important;
                 overflow-x: auto !important;
+                position: relative !important;
                 -webkit-overflow-scrolling: touch;
+                width: 100% !important;
+            }
+        
+            table {
+                display: table !important; /* Prevents CSS from turning it into a block */
+                min-width: 800px !important; /* Slightly smaller for mobile performance */
             }
         }
         mark {
@@ -831,9 +839,12 @@
                     }
                 },
                 toggleView(mode) {
-                    this.activePopupId = null; // Close popups when switching
+                    console.log("Switching to:", mode); // Add this to debug
                     this.viewMode = mode;
-                    //window.scrollTo({ top: 0, behavior: 'smooth' });
+                    // Optional: Force a layout recalculation for mobile Safari
+                    this.$nextTick(() => {
+                        window.dispatchEvent(new Event('resize'));
+                    });
                 },
                 clearSearch() {
                     this.searchQuery = '';
@@ -883,15 +894,13 @@
                 },
                 highlight(text) {
                     if (!text) return '';
-                    if (!this.searchQuery || this.searchQuery.trim() === '') return text;
-                
+                    if (!this.searchQuery) return text;
                     try {
-                        // Escapes special characters so "P+" doesn't break the Regex
-                        const safeQuery = this.searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                        const regex = new RegExp(`(${safeQuery})`, 'gi');
-                        
-                        // Use the <mark> tag which you already have styled in CSS
-                        return text.toString().replace(regex, '<mark>$1</mark>');
+                        const strText = String(text);
+                        // Escapes characters like + . * so they don't break the regex
+                        const escapedQuery = this.searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        const regex = new RegExp(`(${escapedQuery})`, 'gi');
+                        return strText.replace(regex, '<mark>$1</mark>');
                     } catch (e) {
                         return text;
                     }

@@ -354,18 +354,23 @@
                     <!-- View Toggles & Counter -->
                     <div class="flex items-center justify-between w-full md:w-auto gap-4 md:pl-4">
                         <!-- Toggle Switch -->
-                            <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
-                                <button @click.stop="viewMode = 'card'" 
-                                        :class="viewMode === 'card' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'"
-                                        class="px-4 py-2 rounded-lg transition-all flex items-center justify-center">
-                                    <svg class="w-5 h-5 pointer-events-none" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                                </button>
-                                <button @click.stop="viewMode = 'table'" 
-                                        :class="viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'"
-                                        class="px-4 py-2 rounded-lg transition-all flex items-center justify-center">
-                                    <svg class="w-5 h-5 pointer-events-none" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
-                                </button>
-                            </div>
+                        <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                            <button @click="viewMode = 'card'" 
+                                    :class="viewMode === 'card' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'"
+                                    class="p-2 rounded-lg transition-all flex items-center justify-center">
+                                <svg class="w-5 h-5 pointer-events-none" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                                </svg>
+                            </button>
+                            
+                            <button @click="viewMode = 'table'" 
+                                    :class="viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'"
+                                    class="p-2 rounded-lg transition-all flex items-center justify-center">
+                                <svg class="w-5 h-5 pointer-events-none" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
                 
                         <!-- Result Counter -->
                         <div class="flex flex-col items-end min-w-[70px]">
@@ -508,8 +513,7 @@
                         </table>
                     </div>
                 </div>
-                <div v-if="viewMode === 'card'" 
-                     class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 p-4 md:p-6 bg-slate-50/50">
+                <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 p-4 md:p-6 bg-slate-50/50">
                     
                     <div v-for="row in paginatedData" :key="row.作品番" 
                          class="group bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-all flex flex-col relative"

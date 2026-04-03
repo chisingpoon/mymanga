@@ -117,19 +117,16 @@
         
         /* Mobile-friendly adjustments */
         @media (max-width: 768px) {
-            .main-card { 
-                border-radius: 0; 
-                margin-left: -1.5rem; /* Match your page padding */
-                margin-right: -1.5rem;
-                width: calc(100% + 3rem);
-                max-width: none !important;
-                overflow: visible !important; 
+            .main-card {
+                display: flex !important;
+                flex-direction: column !important;
+                min-height: 400px; 
             }
         
             /* This is the CRITICAL fix for the table showing up */
             .overflow-x-auto {
                 display: block !important; 
-                width: 100vw !important;
+                width: 100% !important;
                 overflow-x: auto !important;
                 -webkit-overflow-scrolling: touch;
             }
@@ -170,7 +167,6 @@
             border-bottom-color: #0f172a !important; /* slate-900 */
         }
         td.relative {
-            //z-index: 100 !important; /* Resetting this allows popups to float freely */
             position: relative;
         }
         
@@ -201,7 +197,6 @@
             overflow-y: visible !important;
         }
         
-        /High Z-index for the active popup to stay above everything */
         .z-popup {
             z-index: 9999 !important;
         }
@@ -891,11 +886,11 @@
                     if (!this.searchQuery || this.searchQuery.trim() === '') return text;
                 
                     try {
-                        // Escapes special regex characters so "A+" doesn't break the code
+                        // Escapes special characters so "P+" doesn't break the Regex
                         const safeQuery = this.searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                         const regex = new RegExp(`(${safeQuery})`, 'gi');
                         
-                        // Use <mark> tag for native browser highlighting support
+                        // Use the <mark> tag which you already have styled in CSS
                         return text.toString().replace(regex, '<mark>$1</mark>');
                     } catch (e) {
                         return text;

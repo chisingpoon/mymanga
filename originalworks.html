@@ -176,6 +176,16 @@
         /* Force the popup to the absolute front */
         .z-popup-top {
             z-index: 9999 !important;
+            top: 100%;
+            bottom: auto;
+            right: 0;
+            margin-top: 12px;
+        }
+        .z-popup-top .absolute.top-full {
+            top: auto !important;
+            bottom: 100% !important;
+            border-top-color: transparent !important;
+            border-bottom-color: #0f172a !important; /* Matches slate-900 */
         }
         
         /Ensure the table container doesn't clip the bottom */

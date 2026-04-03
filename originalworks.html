@@ -232,13 +232,7 @@
             margin-top: 8px !important;
         }
         
-        /* Flip the arrow to point UP instead of DOWN */
-        .popup-down .arrow-tip {
-            top: -12px !important;
-            bottom: auto !important;
-            transform: rotate(180deg);
-        }
-        /* Base Arrow Style (Points Down) */
+        /* Base Arrow Style */
         .arrow-tip {
             position: absolute;
             right: 20px;
@@ -247,18 +241,19 @@
             border-left: 8px solid transparent;
             border-right: 8px solid transparent;
             transition: all 0.2s ease;
+            pointer-events: none;
         }
         
-        /* DEFAULT: Popup is ABOVE icon, arrow at BOTTOM pointing DOWN */
+        /* When popup is ABOVE (Default) */
         .popup-up .arrow-tip {
-            bottom: -15px; /* Pull it slightly under the popup edge */
+            bottom: -15px;
             border-top: 8px solid #0f172a; /* Slate-900 */
             border-bottom: 0;
         }
         
-        /* FLIPPED: Popup is BELOW icon, arrow at TOP pointing UP */
+        /* When popup is BELOW (First 2 rows) */
         .popup-down .arrow-tip {
-            top: -15px; /* Pull it slightly above the popup edge */
+            top: -15px;
             border-bottom: 8px solid #0f172a; /* Slate-900 */
             border-top: 0;
         }
@@ -488,15 +483,23 @@
                                                     index < 2 ? 'popup-down mt-3' : 'popup-up bottom-full mb-3',
                                                     activePopupId === row.作品番 ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'
                                                 ]">
-                                                <div v-if="index < 3" class="arrow-upward absolute right-5 border-8 border-transparent"></div>
-                                                <div class="flex items-center justify-between mb-2 border-b border-slate-700 pb-2">
-                                                    <span class="font-black text-indigo-400 uppercase text-[10px] tracking-widest">Remarks</span>
-                                                    <div class="flex items-center gap-2">
-                                                        <span v-if="hasMatchInRemarks(row.備考)" class="bg-amber-500 text-[8px] px-1.5 py-0.5 rounded text-white font-black">MATCH</span>
-                                                        <button v-if="activePopupId === row.作品番" @click.stop="activePopupId = null" class="text-slate-400 hover:text-white">
-                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round"></path></svg>
-                                                        </button>
+                                                    
+                                                    <!-- Header Section -->
+                                                    <div class="flex items-center justify-between mb-2 border-b border-slate-700 pb-2">
+                                                        <span class="font-black text-indigo-400 uppercase text-[10px] tracking-widest">Remarks</span>
+                                                        <div class="flex items-center gap-2">
+                                                            <span v-if="hasMatchInRemarks(row.備考)" class="bg-amber-500 text-[8px] px-1.5 py-0.5 rounded text-white font-black">MATCH</span>
+                                                            <button @click.stop="activePopupId = null" class="text-slate-400 hover:text-white">
+                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round"></path></svg>
+                                                            </button>
+                                                        </div>
                                                     </div>
+                                                    
+                                                    <!-- Content Section -->
+                                                    <div class="leading-relaxed font-medium select-text text-sm" v-html="highlight(row.備考)"></div>
+                                                
+                                                    <!-- SINGLE DYNAMIC ARROW -->
+                                                    <div class="arrow-tip"></div>
                                                 </div>
                                                 
                                                 <div class="leading-relaxed font-medium select-text" v-html="highlight(row.備考)"></div>

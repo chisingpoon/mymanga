@@ -120,18 +120,16 @@
         @media (max-width: 768px) {
             .main-card { 
                 border-radius: 0; 
-                border-inline: none;
-                max-width: 100vw;
-                /* CHANGE: Ensure overflow-x is allowed for the table to scroll */
-                overflow-x: auto !important; 
-                overflow-y: visible !important;
+                margin-inline: -1.5rem; /* Allows the card to touch screen edges on mobile */
+                max-width: none;
+                overflow: visible !important; /* Let the inner container handle scrolling */
             }
         
             /* Ensure the table container itself allows scrolling */
             .overflow-x-auto {
-                display: block !important; /* Forces visibility */
-                width: 100%;
-                -webkit-overflow-scrolling: touch;
+                display: block !important; /* Forces visibility when in table mode */
+                overflow-x: auto !important;
+                overflow-y: visible !important;
             }
         }
 
@@ -881,18 +879,14 @@
                     window.scrollTo({ top: 0, behavior: 'smooth' }); 
                 },
                 highlight(text) {
-                    // 1. If no search query or no text, return original text
                     if (!this.searchQuery || !text) return text;
                     
-                    // 2. Clean the query for regex safety
-                    const query = this.searchQuery.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    if (!query) return text;
-            
-                    // 3. Create a case-insensitive global regex
-                    const re = new RegExp(`(${query})`, "gi");
+                    // Escape special characters in search query to prevent Regex errors
+                    const escapedQuery = this.searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(`(${escapedQuery})`, 'gi');
                     
-                    // 4. Wrap matches in a styled span (using a bright yellow for visibility in the dark popup)
-                    return text.toString().replace(re, '<span class="bg-yellow-400 text-black px-0.5 rounded font-bold">$1</span>');
+                    // Using a span with a specific class for better mobile rendering
+                    return text.toString().replace(regex, '<mark class="bg-yellow-200 text-slate-900 rounded-sm px-0.5">$1</mark>');
                 },
                 hasMatchInRemarks(remarks) {
                     if (!this.searchQuery || !remarks) return false;

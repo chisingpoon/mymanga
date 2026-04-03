@@ -176,20 +176,54 @@
         </nav>
 
         <main class="max-w-[1920px] mx-auto px-6 pt-10">
-            <div class="mb-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h4 class="text-4xl font-black text-slate-900">Magazines Filters</h4>
-                    <div class="flex gap-2">
-                        <button @click="selectAllMagazines" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-full text-[11px] font-black uppercase transition-all shadow-sm">Select All</button>
-                        <button @click="clearMagazines" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2 rounded-full text-[11px] font-black uppercase transition-all shadow-sm">Clear Filters</button>
+            <div class="mb-8 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden transition-all">
+                <div @click="showFilters = !showFilters" 
+                     class="flex items-center justify-between p-5 md:p-6 cursor-pointer hover:bg-slate-50 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-indigo-600 p-2 rounded-xl shadow-indigo-100 shadow-lg">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-lg md:text-xl font-black text-slate-900 leading-none">Magazine Filters</h4>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-widest">
+                                {{ activeMagazines.length }} Selected / {{ sortedMagazines.length }} Total
+                            </p>
+                        </div>
+                    </div>
+            
+                    <div class="flex items-center gap-4">
+                        <div class="hidden sm:flex gap-2">
+                            <button @click.stop="selectAllMagazines" class="text-[10px] font-black uppercase text-indigo-600 hover:text-indigo-800 px-3 py-1 bg-indigo-50 rounded-lg transition-colors">All</button>
+                            <button @click.stop="clearMagazines" class="text-[10px] font-black uppercase text-slate-500 hover:text-rose-600 px-3 py-1 bg-slate-100 rounded-lg transition-colors">Clear</button>
+                        </div>
+                        <svg :class="{'rotate-180': showFilters}" class="w-5 h-5 text-slate-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
+                        </svg>
                     </div>
                 </div>
-                <div class="flex flex-wrap gap-3">
-                    <button v-for="mName in sortedMagazines" :key="mName" @click="toggleMagazine(mName)" 
-                        :class="activeMagazines.includes(mName) ? 'bg-indigo-600 text-white border-indigo-600 shadow-md scale-105' : 'bg-white text-slate-500 border-slate-200'" 
-                        class="px-4 py-2 rounded-xl text-[11px] font-black uppercase border-2 transition-all">
-                        {{ mName }} <span class="ml-1 opacity-50">{{ magazineStats[mName] }}</span>
-                    </button>
+            
+                <div v-show="showFilters" class="p-5 md:p-6 pt-0 border-t border-slate-50 bg-slate-50/30">
+                    <div class="flex sm:hidden gap-2 mb-4">
+                        <button @click="selectAllMagazines" class="flex-1 bg-indigo-600 text-white py-2 rounded-xl text-[10px] font-black uppercase shadow-sm">Select All</button>
+                        <button @click="clearMagazines" class="flex-1 bg-white text-slate-600 py-2 rounded-xl text-[10px] font-black uppercase border border-slate-200 shadow-sm">Clear</button>
+                    </div>
+            
+                    <div class="flex flex-wrap gap-2">
+                        <button v-for="mName in sortedMagazines" :key="mName" 
+                            @click="toggleMagazine(mName)" 
+                            :class="activeMagazines.includes(mName) 
+                                ? 'bg-indigo-600 text-white border-indigo-600 shadow-md ring-4 ring-indigo-50' 
+                                : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-300'" 
+                            class="group flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-black uppercase border-2 transition-all">
+                            <span>{{ mName }}</span>
+                            <span :class="activeMagazines.includes(mName) ? 'bg-indigo-500 text-indigo-100' : 'bg-slate-100 text-slate-400'"
+                                  class="px-1.5 py-0.5 rounded-md text-[9px]">
+                                {{ magazineStats[mName] }}
+                            </span>
+                        </button>
+                    </div>
                 </div>
             </div>
         

@@ -169,17 +169,23 @@
             border-bottom-color: #0f172a !important; /* slate-900 */
         }
         td.relative {
-            //z-index: auto !important; /* Resetting this allows popups to float freely */
+            z-index: auto !important; /* Resetting this allows popups to float freely */
             position: relative;
         }
         
         /* Force the popup to the absolute front */
         .z-popup-top {
             z-index: 9999 !important;
-            top: 100%;
-            bottom: auto;
+            position: absolute;
+            bottom: 100%; /* Position above the icon */
             right: 0;
-            margin-top: 12px;
+            margin-bottom: 12px;
+            width: 280px; /* Fixed width is fine */
+            height: auto; /* CRITICAL: Let content determine height */
+            max-height: 400px; /* Safety cap */
+            overflow-y: auto; /* Scroll if it hits max-height */
+            display: flex;
+            flex-direction: column;
         }
         .z-popup-top .absolute.top-full {
             top: auto !important;
@@ -194,11 +200,16 @@
             overflow-y: visible !important;
             -webkit-overflow-scrolling: touch;
             width: 100%;
+            padding-top: 10px;
         }
         
         /High Z-index for the active popup to stay above everything */
         .z-popup {
             z-index: 9999 !important;
+        }
+
+        .main-card .group {
+            overflow: visible !important;
         }
     </style>
 </head>

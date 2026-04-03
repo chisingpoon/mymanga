@@ -200,7 +200,6 @@
         .overflow-x-auto {
             overflow-x: auto !important;
             overflow-y: visible !important;
-            padding-top: 20px
         }
         
         /High Z-index for the active popup to stay above everything */
@@ -223,6 +222,21 @@
             bottom: auto !important;
             border-top-color: transparent !important;
             border-bottom-color: #0f172a !important;
+        }
+        .w-full.overflow-hidden {
+            overflow: visible !important;
+        }
+        .popup-down {
+            bottom: auto !important;
+            top: 100% !important;
+            margin-top: 8px !important;
+        }
+        
+        /* Flip the arrow to point UP instead of DOWN */
+        .popup-down .arrow-tip {
+            top: -12px !important;
+            bottom: auto !important;
+            transform: rotate(180deg);
         }
     </style>
 </head>
@@ -302,8 +316,7 @@
             </div>
         
             <div class="main-card">
-                <div class="p-4 md:p-6 border-b border-slate-100 flex flex-col md:flex-row items-center gap-4">
-                    
+                <div class="p-4 md:p-6 border-b border-slate-100 flex flex-col md:flex-row items-center gap-4 relative z-10">
                     <!-- Mobile-optimized Search Bar -->
                     <div class="relative w-full md:flex-grow">
                         <input type="text" 
@@ -342,7 +355,7 @@
                     </div>
                 </div>
 
-                <div v-if="viewMode === 'table'" class="w-full overflow-hidden">
+                <div v-if="viewMode === 'table'" class="w-full overflow-visible relative z-20">
                     <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm custom-scrollbar">
                         <table class="w-full min-w-[1200px] text-left border-collapse bg-white table-auto">
                             <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold">
@@ -446,10 +459,10 @@
                                                     {{ hasMatchInRemarks(row.備考) ? '!' : 'i' }}
                                                 </span>
                                             </div>
-                                    
-                                            <div :class="['absolute z-popup-top bottom-full mb-3 right-0 w-72 p-4 bg-slate-900 text-white text-[12px] rounded-xl shadow-2xl text-left border border-slate-700 transition-all duration-200',
-                                                            (activePopupId === row.作品番) ? 'opacity-100 visible translate-y-0 pointer-events-auto' : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
-                                                         ]">
+                                            <div :class="['absolute z-[9999] right-0 p-4 bg-slate-900 text-white rounded-xl shadow-2xl transition-all',
+                                                            index < 2 ? 'popup-down' : 'bottom-full mb-3', 
+                                                            activePopupId === row.作品番 ? 'opacity-100 visible' : 'opacity-0 invisible'
+                                                        ]">
                                                 <div v-if="index < 3" class="arrow-upward absolute right-5 border-8 border-transparent"></div>
                                                 <div class="flex items-center justify-between mb-2 border-b border-slate-700 pb-2">
                                                     <span class="font-black text-indigo-400 uppercase text-[10px] tracking-widest">Remarks</span>

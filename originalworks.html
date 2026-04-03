@@ -352,7 +352,9 @@
                      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 p-4 md:p-6 bg-slate-50/50">
                     
                     <div v-for="row in paginatedData" :key="row.作品番" 
-                         class="group bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-all flex flex-col relative overflow-hidden">
+                         class="group bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-all flex flex-col relative"
+                         :class="{ 'z-[100] ring-2 ring-indigo-500/20': activePopupId === row.作品番, 'z-0': activePopupId !== row.作品番 }"
+                         style="overflow: visible !important;">
                         
                         <!-- Header: Magazine Info -->
                         <div class="flex justify-between items-start mb-3">

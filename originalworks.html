@@ -122,21 +122,20 @@
                 margin-right: -1rem;
                 width: calc(100% + 2rem);
                 border-radius: 0;
+                display: block !important; /* Force display */
             }
         
-            /* This forces the table container to be visible and scrollable */
             .overflow-x-auto {
-                display: block !important; 
-                visibility: visible !important;
+                display: block !important;
                 overflow-x: auto !important;
-                position: relative !important;
                 -webkit-overflow-scrolling: touch;
                 width: 100% !important;
             }
         
+            /* Override the 1200px min-width slightly for mobile performance */
             table {
-                display: table !important; /* Prevents CSS from turning it into a block */
-                min-width: 800px !important; /* Slightly smaller for mobile performance */
+                min-width: 900px !important; 
+                display: table !important;
             }
         }
         mark {
@@ -355,18 +354,18 @@
                     <!-- View Toggles & Counter -->
                     <div class="flex items-center justify-between w-full md:w-auto gap-4 md:pl-4">
                         <!-- Toggle Switch -->
-                        <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
-                            <button @click="toggleView('card')" 
-                                    :class="viewMode === 'card' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'"
-                                    class="px-3 py-2 rounded-lg transition-all flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                            </button>
-                            <button @click="toggleView('table')" 
-                                    :class="viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'"
-                                    class="px-3 py-2 rounded-lg transition-all flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
-                            </button>
-                        </div>
+                            <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                                <button @click.stop="viewMode = 'card'" 
+                                        :class="viewMode === 'card' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'"
+                                        class="px-4 py-2 rounded-lg transition-all flex items-center justify-center">
+                                    <svg class="w-5 h-5 pointer-events-none" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                                </button>
+                                <button @click.stop="viewMode = 'table'" 
+                                        :class="viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'"
+                                        class="px-4 py-2 rounded-lg transition-all flex items-center justify-center">
+                                    <svg class="w-5 h-5 pointer-events-none" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
+                                </button>
+                            </div>
                 
                         <!-- Result Counter -->
                         <div class="flex flex-col items-end min-w-[70px]">
@@ -894,13 +893,14 @@
                 },
                 highlight(text) {
                     if (!text) return '';
-                    if (!this.searchQuery) return text;
+                    const cleanQuery = this.searchQuery ? this.searchQuery.trim() : '';
+                    if (!cleanQuery) return text;
+                    
                     try {
-                        const strText = String(text);
-                        // Escapes characters like + . * so they don't break the regex
-                        const escapedQuery = this.searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                        const regex = new RegExp(`(${escapedQuery})`, 'gi');
-                        return strText.replace(regex, '<mark>$1</mark>');
+                        // Escapes regex characters so searching "P+" doesn't crash the script
+                        const escaped = cleanQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        const regex = new RegExp(`(${escaped})`, 'gi');
+                        return String(text).replace(regex, '<mark>$1</mark>');
                     } catch (e) {
                         return text;
                     }

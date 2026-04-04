@@ -19,362 +19,228 @@
         .loader-wrapper { position: fixed; inset: 0; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
         .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid #4f46e5; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
         .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
-        .main-card { background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); margin-bottom: 3rem; border: 1px solid #e2e8f0; overflow: hidden; }
-        table { width: 100%; border-collapse: separate; border-spacing: 0; }
-        th { font-size: 11px; font-weight: 800; padding: 16px 12px; text-align: left; color: #64748b; background: #f8fafc; border-bottom: 2px solid #e2e8f0; white-space: nowrap; position: sticky; top: 0; z-index: 10; text-transform: uppercase; }
-        td { padding: 14px 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: middle; background: white; }
+        .main-card { background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0; overflow: hidden; }
+        
+        /* Table Styles */
+        th { font-size: 11px; font-weight: 800; padding: 16px 12px; text-align: left; color: #64748b; background: #f8fafc; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
+        td { padding: 14px 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; vertical-align: middle; transition: all 0.2s; }
+        tr:hover td { border-bottom-color: #6366f1; background-color: #f5f7ff; }
+
+        /* Floating Popup Fix */
+        .remarks-popup {
+            position: fixed;
+            z-index: 9999;
+            background: #0f172a;
+            color: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            width: 300px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            pointer-events: auto;
+        }
+
         .scroll-top-btn { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background: #1e293b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; pointer-events: none; z-index: 600; transition: 0.3s; }
         .scroll-top-btn.visible { opacity: 1; pointer-events: auto; }
-        /* Force the table to respect the widths you set */
-        table {
-            table-layout: auto !important;
-            width: 100%;
-            min-width: max-content;
-            margin-bottom: 0 !important;
-        }
-        .no-wrap-column {
-            white-space: nowrap !important;
-            word-break: keep-all !important;
-        }
-        
-        /* Ensure Japanese text wraps properly */
-        .break-all {
-            word-break: break-all !important;
-            overflow-wrap: break-word !important;
-            white-space: normal !important;
-        }
 
-        td.max-w-\[300px\] {
-            width: auto;
+        @keyframes pulse-match {
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); transform: scale(1); }
+            70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); transform: scale(1.1); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); transform: scale(1); }
         }
-        
-        .備考-empty {
-            min-width: 50px;
-        }
-
-        /* Alternating row colors for easy horizontal tracking */
-        tbody tr:nth-child(even) {
-            background-color: #f8fafc; /* Slate-50 */
-        }
-        
-        /* Row hover highlight to keep track of the current line */
-        tbody tr:hover {
-            background-color: #f1f5f9 !important; /* Slate-100 */
-        }
-        
-        /* Auto-fitting link style */
-        .data-link {
-            display: inline-block; /* Makes border wrap tightly around text */
-            width: fit-content;    /* Ensures it doesn't stretch to cell width */
-            transition: all 0.2s ease;
-            border: 1px solid transparent;
-        }
-        
-        /* Hover effect ONLY for these specific data links */
-        .data-link:hover {
-            background-color: #ffffff !important;
-            border-color: #6366f1 !important; /* Indigo-500 */
-            color: #4338ca !important;        /* Indigo-700 */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            transform: translateY(-1px);
-        }
-        /* Better focus states for accessibility */
-        input:focus {
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-        }
-        
-        /* Subtle progress bar at the top of the card during data refresh */
-        .refresh-bar {
-            height: 2px;
-            background: linear-gradient(to right, #6366f1, #a855f7);
-            width: 0%;
-            transition: width 0.3s;
-        }
-        
-        /* Mobile-friendly adjustments */
-        @media (max-width: 768px) {
-            .main-card { border-radius: 0; border-inline: none; }
-            .top-nav { h1 { font-size: 1.25rem; } }
-        }
-
-        @keyframes pulse-yellow {
-            0% { transform: scale(1.1); box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7); }
-            70% { transform: scale(1.15); box-shadow: 0 0 0 10px rgba(250, 204, 21, 0); }
-            100% { transform: scale(1.1); box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); }
-        }
-        
-        .animate-pulse {
-            animation: pulse-yellow 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
-        }
-        .match-pulse {
-            z-index: 1 !important; 
-        }
-        .main-card, .overflow-x-auto {
-            overflow: visible !important;
-        }
-        @keyframes ripple {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
-        }
-        
-        /* Ensure the ! is very bold */
-        .font-black { font-weight: 900; }
-        .arrow-downward {
-            bottom: auto !important;
-            top: -16px !important;
-            border-top-color: transparent !important;
-            border-bottom-color: #0f172a !important; /* slate-900 */
-        }
-        td.relative {
-            z-index: auto !important; /* Resetting this allows popups to float freely */
-        }
-        
-        /* Force the popup to the absolute front */
-        .z-popup-top {
-            z-index: 9999 !important;
-        }
-        .main-card {
-            overflow: visible !important; 
-        }
-        
-        /Ensure the table container doesn't clip the bottom */
-        .overflow-x-auto {
-            overflow-x: auto !important;
-            overflow-y: visible !important;
-            padding-bottom: 0 !important;
-            margin-bottom: 0 !important;
-        }
-        
-        /High Z-index for the active popup to stay above everything */
-        .z-popup {
-            z-index: 9999 !important;
-        }
+        .match-pulse { animation: pulse-match 2s infinite; }
     </style>
 </head>
 <body class="bg-grid">
     <div id="app" v-cloak>
         <div v-if="loading" class="loader-wrapper">
             <div class="spinner"></div>
-            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Retrieving Records...</p>
+            <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Syncing Master Archive...</p>
         </div>
 
         <div class="scroll-top-btn" :class="{ 'visible': showScrollButton }" @click="backToTop">
-            <svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" /></svg>
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         </div>
 
         <nav class="top-nav">
-            <div class="max-w-[1920px] mx-auto px-6 h-20 flex items-center justify-between">
-                <div class="flex items-center gap-6">
-                    <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl hover:bg-indigo-600 transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <div class="max-w-[1600px] mx-auto px-6 h-20 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <a href="index.html" class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg hover:bg-indigo-600 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </a>
-                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Archive Record Search</h1>
+                    <h1 class="font-black text-xl tracking-tight text-slate-800 uppercase">Archive Record Search</h1>
+                </div>
+                
+                <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                    <button @click="viewMode = 'table'" :class="viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all">Table</button>
+                    <button @click="viewMode = 'card'" :class="viewMode === 'card' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all">Cards</button>
                 </div>
             </div>
         </nav>
 
-        <main class="max-w-[1920px] mx-auto px-6 pt-10">
-            <div class="mb-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h4 class="text-4xl font-black text-slate-900">Magazines Filters</h4>
-                    <div class="flex gap-2">
-                        <button @click="selectAllMagazines" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-full text-[11px] font-black uppercase transition-all shadow-sm">Select All</button>
-                        <button @click="clearMagazines" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2 rounded-full text-[11px] font-black uppercase transition-all shadow-sm">Clear Filters</button>
-                    </div>
-                </div>
-                <div class="flex flex-wrap gap-3">
-                    <button v-for="mName in sortedMagazines" :key="mName" @click="toggleMagazine(mName)" 
-                        :class="activeMagazines.includes(mName) ? 'bg-indigo-600 text-white border-indigo-600 shadow-md scale-105' : 'bg-white text-slate-500 border-slate-200'" 
-                        class="px-4 py-2 rounded-xl text-[11px] font-black uppercase border-2 transition-all">
-                        {{ mName }} <span class="ml-1 opacity-50">{{ magazineStats[mName] }}</span>
+        <main class="max-w-[1600px] mx-auto px-6 py-8">
+            
+            <section class="mb-8 space-y-6">
+                <div class="relative max-w-2xl mx-auto">
+                    <input type="text" v-model="searchQuery" placeholder="Search across titles, remarks, or serial numbers..." 
+                           class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 text-lg font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
+                    <button v-if="searchQuery || workIdFilter" @click="clearSearch" class="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-rose-500 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </button>
                 </div>
-            </div>
-        
-            <div class="main-card">
-                <div class="p-6 border-b border-slate-100 flex items-center justify-between gap-4">
-                    <div class="relative w-full max-w-xl">
-                        <input type="text" v-model="searchQuery" placeholder="Search titles, notes, or subtitles..." 
-                               class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-base font-bold outline-none focus:border-indigo-500 transition-all">
-                        
-                        <!-- <button v-if="searchQuery || workIdFilter || activeMagazines.length > 0" @click="clearSearch" -->
-                        <button v-if="searchQuery || workIdFilter > 0" @click="clearSearch"
-                                class="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-indigo-600 transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                            </svg>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Filter by Publication</h4>
+                        <div class="flex gap-2">
+                            <button @click="selectAllMagazines" class="text-[10px] font-black text-indigo-600 hover:underline">SELECT ALL</button>
+                            <span class="text-slate-300">|</span>
+                            <button @click="clearMagazines" class="text-[10px] font-black text-slate-400 hover:underline">CLEAR</button>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button v-for="mName in sortedMagazines" :key="mName" @click="toggleMagazine(mName)" 
+                            :class="activeMagazines.includes(mName) ? 'bg-indigo-600 text-white border-indigo-600 scale-105' : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-slate-300'" 
+                            class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase border transition-all">
+                            {{ mName }} <span class="ml-1 opacity-60">{{ magazineStats[mName] }}</span>
                         </button>
                     </div>
-        
-                    <div class="flex flex-col items-end">
-                        <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap"> {{ filteredData.length }} Entries</div>
-                        <div v-if="workIdFilter" class="bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded text-[9px] font-black mt-1 uppercase">ID Lock: {{ workIdFilter }}</div>
-                    </div>
                 </div>
-        
+            </section>
+
+            <div class="flex items-center justify-between mb-4 px-2">
+                <div class="text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                    Found {{ filteredData.length }} records
+                </div>
+                <div v-if="workIdFilter" class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-[10px] font-black uppercase border border-amber-200">
+                    ID Locked: {{ workIdFilter }}
+                </div>
+            </div>
+
+            <div v-if="viewMode === 'table'" class="main-card shadow-xl">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full table-auto">
-                        <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold">
+                    <table class="min-w-full">
+                        <thead>
                             <tr>
-                                <th class="px-3 py-3 w-px whitespace-nowrap text-left">初出掲載誌 / 号</th>
-                                <th class="px-3 py-3 w-px whitespace-nowrap text-center">掲載番</th>
-                                <th class="px-3 py-3 w-px whitespace-nowrap text-left">初出副題</th>
-                                <th class="px-3 py-3 w-px whitespace-nowrap text-center">頁</th>
-                                <th class="px-3 py-3 w-px whitespace-nowrap text-left">大全集副題</th>
-                                <th class="px-3 py-3 w-px whitespace-nowrap text-left">45卷/P+/カラー</th>
-                                <th class="px-3 py-3 w-px whitespace-nowrap text-left">大全集</th>
-                                <th class="px-3 py-3 w-px whitespace-nowrap text-left">其他版本</th>
-                                <th class="px-3 py-3 w-10 text-center text-[10px] text-slate-400">備考</th>
+                                <th>Source / Issue</th>
+                                <th class="text-center">No.</th>
+                                <th>Original Title</th>
+                                <th class="text-center">Page</th>
+                                <th>Secondary Subtitles</th>
+                                <th>45 Vol / P+</th>
+                                <th>Complete Works</th>
+                                <th>Others</th>
+                                <th class="text-center">Note</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            <!--<tr v-for="row in paginatedData" :key="row.作品番" class="hover:bg-indigo-50/50 transition-colors">-->
-                            <tr v-for="(row, index) in paginatedData" :key="row.作品番" class="hover:bg-indigo-50/50 transition-colors">
-                                
-                                <td class="px-3 py-2 whitespace-nowrap bg-indigo-50/20">
-                                    <div class="font-bold text-slate-700 text-[12px] leading-tight">{{ row.初出掲載誌 }}</div>
-                                    <div class="text-blue-500 font-black text-[10px] leading-tight mt-0.5">{{ row.初出掲載号 }}</div>
+                            <tr v-for="(row, index) in paginatedData" :key="row.作品番">
+                                <td class="whitespace-nowrap">
+                                    <div class="font-bold text-slate-700 text-[12px]">{{ row.初出掲載誌 }}</div>
+                                    <div class="text-blue-500 font-black text-[10px] mt-0.5">{{ row.初出掲載号 }}</div>
                                 </td>
-                
-                                <td class="px-3 py-2 text-center font-mono text-slate-400 text-[9px] whitespace-nowrap bg-indigo-50/20">
-                                    {{ row.掲載番 }}
+                                <td class="text-center font-mono text-slate-400 text-[10px]">{{ row.掲載番 }}</td>
+                                <td class="font-black text-slate-900 text-[14px]" v-html="highlight(row.初出副題)"></td>
+                                <td class="text-slate-500 text-center text-[10px]">{{ row.初出掲載頁 }}</td>
+                                <td class="max-w-xs">
+                                    <div class="text-[11px] text-slate-600 leading-tight" v-html="highlight(row.daizhenshuSubtitle)"></div>
                                 </td>
-                
-                                <td class="px-3 py-2 font-black text-slate-900 text-[13px] whitespace-nowrap bg-indigo-50/20"
-                                    v-html="highlight(row.初出副題)">
-                                </td>
-                
-                                <td class="px-3 py-2 text-slate-500 text-center text-[9px] whitespace-nowrap bg-indigo-50/20">
-                                    {{ row.初出掲載頁 }}
-                                </td>
-                
-                                <td class="px-3 py-2 whitespace-nowrap bg-indigo-50/20">
-                                    <div v-if="row.daizhenshuSubtitle && row.daizhenshuSubtitle !== '---'" 
-                                         class="text-[12px] text-slate-600 font-medium leading-tight" 
-                                         v-html="highlight(row.daizhenshuSubtitle)">
-                                    </div>
-                                    <span v-else class="text-slate-300 italic text-[9px]">---</span>
-                                </td>
-                
-                                <td class="px-3 py-2 whitespace-nowrap bg-indigo-50/20">
-                                    <div v-if="row.vol45PlusData.length" class="flex flex-col items-start gap-1">
+                                <td>
+                                    <div class="flex flex-col gap-1">
                                         <a v-for="link in row.vol45PlusData" :href="link.url" target="_blank"
-                                           class="bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-colors px-2 py-0.5 rounded font-black text-[10px] block w-full shadow-sm">
+                                           class="bg-indigo-50 text-indigo-700 border border-indigo-100 hover:bg-indigo-600 hover:text-white px-2 py-0.5 rounded font-black text-[9px] block text-center">
                                             {{ link.label }}
                                         </a>
                                     </div>
-                                    <span v-else class="text-slate-300 italic text-[9px] px-2">---</span>
                                 </td>
-                
-                                <td class="px-3 py-2 whitespace-nowrap bg-indigo-50/20">
-                                    <div v-if="row.daizhenshuData.length" class="flex flex-col items-start gap-1">
+                                <td>
+                                    <div class="flex flex-col gap-1">
                                         <a v-for="link in row.daizhenshuData" :href="link.url" target="_blank" 
-                                            class="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-colors px-2 py-0.5 rounded font-black text-[10px] block w-full shadow-sm">
+                                           class="bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-600 hover:text-white px-2 py-0.5 rounded font-black text-[9px] block text-center">
                                             {{ link.label }}
                                         </a>
                                     </div>
-                                    <span v-else class="text-slate-300 italic text-[9px]">---</span>
                                 </td>
-                
-                                <td class="px-3 py-2 whitespace-nowrap bg-indigo-50/20">
-                                    <div v-if="row.othersData.length" class="flex flex-col items-start gap-1">
+                                <td>
+                                    <div class="flex flex-col gap-1">
                                         <a v-for="link in row.othersData" :href="link.url" target="_blank" 
-                                            class="bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-colors px-2 py-0.5 rounded font-black text-[10px] block w-full shadow-sm">
+                                           class="bg-rose-50 text-rose-700 border border-rose-100 hover:bg-rose-600 hover:text-white px-2 py-0.5 rounded font-black text-[9px] block text-center">
                                             {{ link.label }}
                                         </a>
                                     </div>
-                                    <span v-else class="text-slate-300 italic text-[9px] px-2">---</span>
                                 </td>
-                
-                                <td class="px-3 py-2 text-center relative w-10 bg-indigo-50/20">
-                                    <div v-if="row.備考 && row.備考.trim() !== ''" class="flex justify-center">
-                                        
-                                        <div @click.stop="togglePopup(row.作品番, $event)"
-                                             :class="[
-                                                'cursor-pointer transition-all duration-300 rounded-full w-7 h-7 flex items-center justify-center border-2 shadow-sm z-10',
-                                                hasMatchInRemarks(row.備考) 
-                                                    ? 'bg-amber-500 border-amber-600 text-white match-pulse scale-110' 
-                                                    : (activePopupId === row.作品番 ? 'bg-indigo-600 border-indigo-700 text-white' : 'bg-slate-200 border-slate-300 text-slate-600 hover:bg-indigo-500 hover:text-white')
-                                             ]">
-                                            <span :class="hasMatchInRemarks(row.備考) ? 'text-xs font-black' : 'text-[10px] font-serif italic'">
-                                                {{ hasMatchInRemarks(row.備考) ? '!' : 'i' }}
-                                            </span>
-                                        </div>
-                                
-                                        <div :class="['absolute z-popup-top bottom-full mb-3 right-0 w-72 p-4 bg-slate-900 text-white text-[12px] rounded-xl shadow-2xl text-left border border-slate-700 transition-all duration-200',
-                                                        (activePopupId === row.作品番) ? 'opacity-100 visible translate-y-0 pointer-events-auto' : 'opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto'
-                                                     ]">
-                                            
-                                            <div class="flex items-center justify-between mb-2 border-b border-slate-700 pb-2">
-                                                <span class="font-black text-indigo-400 uppercase text-[10px] tracking-widest">Remarks</span>
-                                                <div class="flex items-center gap-2">
-                                                    <span v-if="hasMatchInRemarks(row.備考)" class="bg-amber-500 text-[8px] px-1.5 py-0.5 rounded text-white font-black">MATCH</span>
-                                                    <button v-if="activePopupId === row.作品番" @click.stop="activePopupId = null" class="text-slate-400 hover:text-white">
-                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round"></path></svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                
-                                            <div class="leading-relaxed font-medium select-text" v-html="highlight(row.備考)"></div>
-                                            
-                                            <!--<div :class="['absolute right-5 border-8 border-transparent', index < 3 ? 'bottom-auto top-[-16px] border-b-slate-900' : 'top-full border-t-slate-900']"></div>-->
-                                            <div class="absolute top-full right-5 border-8 border-transparent border-t-slate-900"></div>
-                                            <!--<div :class="['absolute right-5 border-8 border-transparent', (index === 0 && filteredData.length > 3) ? 'bottom-auto top-[-16px] border-b-slate-900' : 'top-full border-t-slate-900']"></div>-->
-                                        </div>
+                                <td class="text-center relative">
+                                    <div v-if="row.備考 && row.備考.trim()" 
+                                         @click.stop="togglePopup(row.作品番, $event)"
+                                         :class="[
+                                            'mx-auto cursor-pointer w-7 h-7 flex items-center justify-center rounded-full border-2 transition-all',
+                                            hasMatchInRemarks(row.備考) ? 'bg-amber-500 border-amber-600 text-white match-pulse' : 'bg-slate-100 border-slate-200 text-slate-400 hover:bg-indigo-500 hover:text-white hover:border-indigo-600'
+                                         ]">
+                                        <span class="text-[10px] font-black">{{ hasMatchInRemarks(row.備考) ? '!' : 'i' }}</span>
                                     </div>
-                                    <span v-else class="text-slate-200 text-[10px]">—</span>
                                 </td>
-                
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <div v-if="filteredData.length > 0" class="bg-slate-50 p-8 flex flex-col items-center gap-6 border-t border-slate-100">
+            </div>
+
+            <div v-if="viewMode === 'card'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div v-for="row in paginatedData" :key="row.作品番" class="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-xl transition-all group">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="bg-slate-100 text-slate-500 px-2 py-1 rounded text-[9px] font-black uppercase">{{ row.初出掲載誌 }} · {{ row.初出掲載号 }}</span>
+                        <span class="text-slate-300 font-mono text-[10px]">#{{ row.掲載番 }}</span>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-900 mb-2 leading-tight" v-html="highlight(row.初出副題)"></h3>
+                    <div class="text-[11px] text-slate-500 mb-4 pb-4 border-b border-slate-50" v-html="highlight(row.daizhenshuSubtitle)"></div>
                     
-                    <div class="flex items-center gap-2">
-                        <button 
-                            @click="currentPage > 1 ? changePage(currentPage - 1) : null" 
-                            :disabled="currentPage === 1"
-                            :class="currentPage === 1 ? 'opacity-20 cursor-not-allowed' : 'hover:bg-indigo-600 hover:text-white'"
-                            class="h-10 px-4 flex items-center gap-2 rounded-lg font-black text-[10px] uppercase tracking-widest bg-white text-slate-500 border border-slate-200 transition-all shadow-sm"
-                        >
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                            Prev
-                        </button>
-                
-                        <div class="flex gap-2 mx-2">
-                            <button v-for="p in paginationRange" 
-                                :key="p" 
-                                @click="p !== '...' ? changePage(p) : null" 
-                                :class="[
-                                    p === currentPage ? 'bg-slate-900 text-white shadow-lg scale-110' : 'bg-white text-slate-500 border border-slate-200 hover:border-indigo-500',
-                                    p === '...' ? 'cursor-default border-transparent bg-transparent' : ''
-                                ]" 
-                                class="w-10 h-10 flex items-center justify-center rounded-lg font-black text-xs transition-all"
-                            >
-                                {{ p }}
-                            </button>
+                    <div class="space-y-3">
+                        <div v-if="row.vol45PlusData.length" class="flex flex-wrap gap-2">
+                            <a v-for="link in row.vol45PlusData" :href="link.url" target="_blank" class="bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-[9px] font-black border border-indigo-100">{{ link.label }}</a>
                         </div>
-                
-                        <button 
-                            @click="currentPage < totalPages ? changePage(currentPage + 1) : null" 
-                            :disabled="currentPage === totalPages"
-                            :class="currentPage === totalPages ? 'opacity-20 cursor-not-allowed' : 'hover:bg-indigo-600 hover:text-white'"
-                            class="h-10 px-4 flex items-center gap-2 rounded-lg font-black text-[10px] uppercase tracking-widest bg-white text-slate-500 border border-slate-200 transition-all shadow-sm"
-                        >
-                            Next
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                        </button>
+                        <div v-if="row.daizhenshuData.length" class="flex flex-wrap gap-2">
+                            <a v-for="link in row.daizhenshuData" :href="link.url" target="_blank" class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded text-[9px] font-black border border-emerald-100">{{ link.label }}</a>
+                        </div>
                     </div>
-                    <!--    
-                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                        Showing Page {{ currentPage }} of {{ totalPages }}
+
+                    <div v-if="row.備考 && row.備考.trim()" class="mt-4 pt-4 border-t border-dashed border-slate-100">
+                        <p class="text-[11px] text-slate-400 italic leading-relaxed" v-html="highlight(row.備考)"></p>
                     </div>
-                    -->
                 </div>
             </div>
+
+            <div v-if="filteredData.length > 0" class="mt-10 flex flex-col items-center gap-4">
+                <div class="flex items-center gap-1">
+                    <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" 
+                            class="h-10 px-4 rounded-xl font-black text-[10px] uppercase bg-white border border-slate-200 disabled:opacity-30 transition-all hover:bg-slate-50">Prev</button>
+                    
+                    <div class="flex gap-1">
+                        <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" 
+                                :class="p === currentPage ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-400'"
+                                class="w-10 h-10 flex items-center justify-center rounded-xl font-black text-xs border transition-all">
+                            {{ p }}
+                        </button>
+                    </div>
+
+                    <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" 
+                            class="h-10 px-4 rounded-xl font-black text-[10px] uppercase bg-white border border-slate-200 disabled:opacity-30 transition-all hover:bg-slate-50">Next</button>
+                </div>
+            </div>
+
+            <div v-if="activePopupId" 
+                 class="remarks-popup shadow-2xl" 
+                 :style="popupStyle"
+                 @click.stop>
+                <div class="flex justify-between items-center mb-3 border-b border-slate-700 pb-2">
+                    <span class="text-[9px] font-black text-indigo-400 tracking-widest uppercase">Editorial Notes</span>
+                    <button @click="activePopupId = null" class="text-slate-500 hover:text-white transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5"></path></svg>
+                    </button>
+                </div>
+                <div class="text-[13px] leading-relaxed font-medium" v-html="highlight(getCurrentRemarks())"></div>
+            </div>
+
         </main>
     </div>
 
@@ -384,6 +250,7 @@
             data() {
                 return {
                     loading: true, 
+                    viewMode: 'table',
                     searchQuery: '', 
                     workIdFilter: '', 
                     activeMagazines: [],
@@ -391,8 +258,8 @@
                     itemsPerPage: 20, 
                     showScrollButton: false,
                     master: [],
-                    selectedMagazine: 'All',
                     activePopupId: null,
+                    popupStyle: { top: '0px', left: '0px' }
                 }
             },
             computed: {
@@ -407,32 +274,19 @@
                     return stats;
                 },
                 sortedMagazines() { 
-                    //return Object.keys(this.magazineStats).sort((a, b) => a.localeCompare(b, 'zh-Hant')); 
-                    // Create a Chinese Traditional Stroke-order Collator
                     const collator = new Intl.Collator('zh-Hant-u-co-stroke');
-                    
-                    return Object.keys(this.magazineStats).sort((a, b) => {
-                        return collator.compare(a, b);
-                    });
+                    return Object.keys(this.magazineStats).sort((a, b) => collator.compare(a, b));
                 },
                 filteredData() {
                     return this.master.filter(row => {
-                        if (this.workIdFilter && row.作品番?.toString() !== this.workIdFilter) {
-                            return false;
-                        }
-                        if (this.activeMagazines.length > 0 && !this.activeMagazines.includes(row.初出掲載誌)) {
-                            return false;
-                        }
+                        if (this.workIdFilter && row.作品番?.toString() !== this.workIdFilter) return false;
+                        if (this.activeMagazines.length > 0 && !this.activeMagazines.includes(row.初出掲載誌)) return false;
                         const query = this.searchQuery.toLowerCase().trim();
-                        if (query && !row.searchBlob.includes(query)) {
-                            return false;
-                        }
+                        if (query && !row.searchBlob.includes(query)) return false;
                         return true;
                     });
                 },
-                totalPages() { 
-                    return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; 
-                },
+                totalPages() { return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; },
                 paginatedData() { 
                     const start = (this.currentPage - 1) * this.itemsPerPage;
                     return this.filteredData.slice(start, start + this.itemsPerPage); 
@@ -451,7 +305,7 @@
                 }
             },
             methods: {
-               async init() {
+                async init() {
                     try {
                         const [mList, cList, pList] = await Promise.all([
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json()),
@@ -459,193 +313,103 @@
                             fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
                         ]);
 
-                        const parseDate = (dateStr) => {
-                            if (!dateStr || !dateStr.includes('/')) return 0;
-                            const [m, d, y] = dateStr.split('/');
-                            return new Date(y, m - 1, d).getTime();
-                        };
-
                         const latestHkMap = {};
-                        const sortedPList = pList.sort((a, b) => parseDate(b.IssueDate) - parseDate(a.IssueDate));
-
-                        sortedPList.forEach(p => {
+                        pList.forEach(p => {
                             const jpKey = p['ISBN_JP']?.toString().trim();
-                            if (jpKey && !latestHkMap[jpKey]) {
-                                latestHkMap[jpKey] = p['ISBN']?.toString().trim();
-                            }
+                            if (jpKey) latestHkMap[jpKey] = p['ISBN']?.toString().trim();
                         });
+
                         this.master = mList.filter(r => r.作品番).map(r => {
                             const workId = r.作品番.toString().trim();
                             const bookMatches = cList.filter(c => c.作品番?.toString().trim() === workId);
-                            const daizhenshuLinks = [];
-                            const vol45PlusLinks = [];
-                            const othersLinks = [];
-                            const subtitleLines = [];
+                            const daizhenshuLinks = [], vol45PlusLinks = [], othersLinks = [], subtitleLines = [];
 
                             bookMatches.forEach(c => {
                                 const jpIsbn = c.ISBN?.toString().trim();
                                 const hkIsbn = latestHkMap[jpIsbn];
-                                // --- Subtitle Logic: Strictly from bookMatches ---
-                                if (c.出版副題) {
-                                    const jpLine = `<span class="bg-slate-100 text-slate-500 px-1 rounded text-[8px] font-black mr-1 uppercase">JP</span>${c.出版副題}`;
-                                    if (!subtitleLines.includes(jpLine)) subtitleLines.push(jpLine);
-                                }
-                                if (c.副題港譯) {
-                                    const hkLine = `<span class="bg-blue-50 text-blue-500 px-1 rounded text-[8px] font-black mr-1 uppercase">HK</span>${c.副題港譯}`;
-                                    if (!subtitleLines.includes(hkLine)) subtitleLines.push(hkLine);
-                                }
-                        
-                                const targetUrl = hkIsbn 
-                                    ? `manga-database.html?isbn=${hkIsbn}&region=HK` 
-                                    : (jpIsbn ? `manga-database.html?isbn=${jpIsbn}&region=JP` : null);
-                                // --- Helper: Clean Padding (Skip if blank) ---
-                                let labelSuffix = "";
-                                const volVal = c.巻?.toString().trim();
-                                const chVal = c.收錄話?.toString().trim();
-                                let volLabel = c.類 || '---';
-                                if (volLabel === '45卷') {
-                                    volLabel = '本卷';
-                                }
+                                if (c.出版副題) subtitleLines.push(`<span class="opacity-50 text-[9px] mr-1">JP</span>${c.出版副題}`);
+                                if (c.副題港譯) subtitleLines.push(`<span class="text-blue-400 text-[9px] mr-1">HK</span>${c.副題港譯}`);
+
+                                const targetUrl = hkIsbn ? `manga-database.html?isbn=${hkIsbn}&region=HK` : (jpIsbn ? `manga-database.html?isbn=${jpIsbn}&region=JP` : null);
+                                let labelSuffix = (c.巻 ? ` ${c.巻}` : '') + (c.收錄話 ? ` Ch.${c.收錄話}` : '');
                                 
-                                if (volVal) labelSuffix += ` ${volVal}`;
-                                if (chVal) labelSuffix += ` Ch.${chVal}`;
-                        
-                                // 1. 大全集 Column
-                                if (c.類 === '大長編大全集' || c.類 === '大全集') {
-                                    daizhenshuLinks.push({ 
-                                        label: `${c.類}${labelSuffix}`, 
-                                        url: targetUrl 
-                                    });
-                                } 
-                                // 2. 45卷/P+/カラー/大長編 Column
-                                else if (["45卷", "プラス", "カラー作品集", "大長編"].includes(c.類)) {
-                                    vol45PlusLinks.push({ 
-                                        label: `${volLabel}${labelSuffix}`, 
-                                        url: targetUrl, 
-                                        type: c.類 
-                                    });
-                                } 
-                                // 3. Others Column (Uses c.類)
-                                else {
-                                    othersLinks.push({ 
-                                        label: `${c.類 || '其他'}${labelSuffix}`, 
-                                        url: targetUrl 
-                                    });
-                                }
+                                const linkObj = { label: `${c.類 || '---'}${labelSuffix}`, url: targetUrl };
+                                if (['大長編大全集', '大全集'].includes(c.類)) daizhenshuLinks.push(linkObj);
+                                else if (["45卷", "プラス", "カラー作品集", "大長編"].includes(c.類)) vol45PlusLinks.push(linkObj);
+                                else othersLinks.push(linkObj);
                             });
-                        
+
                             return {
                                 ...r,
                                 daizhenshuData: daizhenshuLinks,
                                 vol45PlusData: vol45PlusLinks,
                                 othersData: othersLinks,
-                                daizhenshuSubtitle: subtitleLines.length > 0 ? subtitleLines.join('<br>') : '---',
-                                searchBlob: [
-                                    //r.掲載番, 
-                                    r.初出副題, (r.初出掲載號 || ''), r.備考,
-                                    subtitleLines.join(' '),
-                                    //...vol45PlusLinks.map(l => l.label),
-                                    ...othersLinks.map(l => l.label)
-                                ].join(' ').toLowerCase()
+                                daizhenshuSubtitle: subtitleLines.length ? subtitleLines.join('<br>') : '---',
+                                searchBlob: [r.初出副題, (r.初出掲載號 || ''), r.備考, subtitleLines.join(' ')].join(' ').toLowerCase()
                             };
                         });
-                
-                        // URL Handling
+
                         const urlParams = new URLSearchParams(window.location.search);
-                        const workid = urlParams.get('workid');
-                        if (workid) {
-                            this.workIdFilter = workid.toString();
-                            const target = this.master.find(r => r.作品番?.toString() === workid.toString());
-                            if (target) this.searchQuery = target.初出副題 || ''; 
+                        if (urlParams.get('workid')) {
+                            this.workIdFilter = urlParams.get('workid').toString();
+                            const target = this.master.find(r => r.作品番?.toString() === this.workIdFilter);
+                            if (target) this.searchQuery = target.初出副題 || '';
                         }
-                
+
                         window.addEventListener('scroll', () => { this.showScrollButton = window.scrollY > 400; });
                         this.loading = false;
-                    } catch (e) { 
-                        console.error("Mapping Error:", e); 
-                        this.loading = false; 
+                    } catch (e) { console.error(e); this.loading = false; }
+                },
+                togglePopup(id, event) {
+                    if (this.activePopupId === id) {
+                        this.activePopupId = null;
+                    } else {
+                        this.activePopupId = id;
+                        // Positioning logic to keep it near the cursor/button but safe from edges
+                        this.$nextTick(() => {
+                            const rect = event.target.getBoundingClientRect();
+                            this.popupStyle = {
+                                top: `${rect.top - 160}px`,
+                                left: `${rect.left - 280}px`
+                            };
+                        });
                     }
                 },
-                clearSearch() {
-                    this.searchQuery = '';
-                    this.workIdFilter = '';
-                    this.currentPage = 1;
-                    const url = new URL(window.location);
-                    url.searchParams.delete('workid');
-                    window.history.replaceState({}, '', url);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                getCurrentRemarks() {
+                    const found = this.master.find(r => r.作品番 === this.activePopupId);
+                    return found ? found.備考 : '';
+                },
+                highlight(text) {
+                    if (!this.searchQuery || !text) return text;
+                    const query = this.searchQuery.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const re = new RegExp(`(${query})`, "gi");
+                    return text.toString().replace(re, '<span class="bg-yellow-300 text-black px-0.5 rounded font-bold">$1</span>');
+                },
+                hasMatchInRemarks(remarks) {
+                    return remarks && this.searchQuery && remarks.toLowerCase().includes(this.searchQuery.toLowerCase().trim());
                 },
                 toggleMagazine(m) {
                     const i = this.activeMagazines.indexOf(m);
-                    if (i > -1) this.activeMagazines.splice(i, 1);
-                    else this.activeMagazines.push(m);
+                    if (i > -1) this.activeMagazines.splice(i, 1); else this.activeMagazines.push(m);
                     this.currentPage = 1;
                 },
-                resetSearch() {
-                    this.searchQuery = '';
-                    this.workIdFilter = '';
-                    this.currentPage = 1;
-                },
-                selectAllMagazines() { 
-                    this.activeMagazines = [...this.sortedMagazines]; 
-                    this.currentPage = 1; 
-                },
-                clearMagazines() { 
-                    this.activeMagazines = []; 
-                    this.currentPage = 1; 
-                },
-                filterByMagazine(magName) {
-                    this.activeMagazines = [magName];
-                    this.workIdFilter = ''; 
-                    const url = new URL(window.location);
-                    url.searchParams.delete('workid');
+                selectAllMagazines() { this.activeMagazines = [...this.sortedMagazines]; this.currentPage = 1; },
+                clearMagazines() { this.activeMagazines = []; this.currentPage = 1; },
+                clearSearch() { 
+                    this.searchQuery = ''; this.workIdFilter = ''; this.currentPage = 1;
+                    const url = new URL(window.location); url.searchParams.delete('workid');
                     window.history.replaceState({}, '', url);
-                    this.currentPage = 1;
                 },
                 changePage(p) { 
+                    if (p < 1 || p > this.totalPages) return;
                     this.currentPage = p;
-                    const tableElement = document.querySelector('.main-card');
-                    if (tableElement) {
-                        window.scrollTo({ top: tableElement.offsetTop - 100, behavior: 'smooth' });
-                    }
+                    window.scrollTo({ top: document.querySelector('.main-card')?.offsetTop - 120, behavior: 'smooth' });
                 },
-                backToTop() { 
-                    window.scrollTo({ top: 0, behavior: 'smooth' }); 
-                },
-                highlight(text) {
-                    // 1. If no search query or no text, return original text
-                    if (!this.searchQuery || !text) return text;
-                    
-                    // 2. Clean the query for regex safety
-                    const query = this.searchQuery.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    if (!query) return text;
-            
-                    // 3. Create a case-insensitive global regex
-                    const re = new RegExp(`(${query})`, "gi");
-                    
-                    // 4. Wrap matches in a styled span (using a bright yellow for visibility in the dark popup)
-                    return text.toString().replace(re, '<span class="bg-yellow-400 text-black px-0.5 rounded font-bold">$1</span>');
-                },
-                hasMatchInRemarks(remarks) {
-                    if (!this.searchQuery || !remarks) return false;
-                    return remarks.toLowerCase().includes(this.searchQuery.toLowerCase().trim());
-                },
-                togglePopup(id, event) {
-                    // Prevent the click from bubbling up if necessary
-                    event.stopPropagation();
-                    
-                    if (this.activePopupId === id) {
-                        this.activePopupId = null; // Close if clicking the same one
-                    } else {
-                        this.activePopupId = id; // Open the new one
-                    }
-                },
+                backToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
             },
             mounted() { 
                 this.init(); 
-                document.addEventListener('click', () => {
-                    this.activePopupId = null;
-                });
+                document.addEventListener('click', () => { this.activePopupId = null; });
             }
         }).mount('#app');
     </script>

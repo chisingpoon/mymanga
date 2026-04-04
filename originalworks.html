@@ -23,33 +23,42 @@
         .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
         .main-card { background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0; overflow: hidden; }
         
-        /* Table Styles */
         th { font-size: 11px; font-weight: 800; padding: 16px 12px; text-align: left; color: #64748b; background: #f8fafc; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
         td { padding: 14px 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; vertical-align: middle; transition: all 0.2s; }
         tr:hover td { border-bottom-color: #6366f1; background-color: #f5f7ff; }
 
-        /* Floating Popup Fix */
+        /* Enhanced Popup with Arrow */
         .remarks-popup {
-            position: fixed;
-            z-index: 9999;
-            background: #0f172a;
+            position: absolute;
+            z-index: 1000;
+            background: #1e293b;
             color: white;
-            padding: 1rem;
-            border-radius: 0.75rem;
-            width: 300px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            width: 280px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            font-size: 12px;
             pointer-events: auto;
+        }
+        .remarks-popup::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: 15px;
+            border-width: 8px 0 8px 8px;
+            border-style: solid;
+            border-color: transparent transparent transparent #1e293b;
         }
 
         .scroll-top-btn { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background: #1e293b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; pointer-events: none; z-index: 600; transition: 0.3s; }
         .scroll-top-btn.visible { opacity: 1; pointer-events: auto; }
-
-        @keyframes pulse-match {
-            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); transform: scale(1); }
-            70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); transform: scale(1.1); }
-            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); transform: scale(1); }
-        }
+        
         .match-pulse { animation: pulse-match 2s infinite; }
+        @keyframes pulse-match {
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
     </style>
 </head>
 <body class="bg-grid">
@@ -71,54 +80,51 @@
                     </a>
                     <h1 class="font-black text-xl tracking-tight text-slate-800 uppercase">Archive Record Search</h1>
                 </div>
-                
-                <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
-                    <button @click="viewMode = 'table'" :class="viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all">Table</button>
-                    <button @click="viewMode = 'card'" :class="viewMode === 'card' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all">Cards</button>
-                </div>
             </div>
         </nav>
 
         <main class="max-w-[1600px] mx-auto px-6 py-8">
             
-            <section class="mb-8 space-y-6">
-                <div class="relative max-w-2xl mx-auto">
-                    <input type="text" v-model="searchQuery" placeholder="Search across titles, remarks, or serial numbers..." 
-                           class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 text-lg font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
-                    <button v-if="searchQuery || workIdFilter" @click="clearSearch" class="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-rose-500 transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                    </button>
+            <section class="mb-8 space-y-4">
+                <div class="flex flex-col md:flex-row gap-4 items-center">
+                    <div class="relative flex-grow w-full">
+                        <input type="text" v-model="searchQuery" placeholder="Search titles, remarks..." 
+                               class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 text-lg font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
+                        <button v-if="searchQuery || workIdFilter" @click="clearSearch" class="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-rose-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        </button>
+                    </div>
+                    
+                    <!-- View Toggle moved here -->
+                    <div class="flex bg-slate-200 p-1 rounded-xl border border-slate-300 self-stretch md:self-center">
+                        <button @click="viewMode = 'table'" :class="viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-6 py-3 rounded-lg text-[10px] font-black uppercase transition-all">Table</button>
+                        <button @click="viewMode = 'card'" :class="viewMode === 'card' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="px-6 py-3 rounded-lg text-[10px] font-black uppercase transition-all">Cards</button>
+                    </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <div class="flex items-center justify-between mb-4">
-                        <h4 class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Filter by Publication</h4>
-                        <div class="flex gap-2">
-                            <button @click="selectAllMagazines" class="text-[10px] font-black text-indigo-600 hover:underline">SELECT ALL</button>
-                            <span class="text-slate-300">|</span>
-                            <button @click="clearMagazines" class="text-[10px] font-black text-slate-400 hover:underline">CLEAR</button>
+                <!-- Collapsible Magazine Filter -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <button @click="filterCollapsed = !filterCollapsed" class="w-full px-6 py-3 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                        <h4 class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Filter by Publication ({{ activeMagazines.length || 'All' }})</h4>
+                        <svg class="w-4 h-4 transition-transform" :class="{'rotate-180': !filterCollapsed}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </button>
+                    <div v-show="!filterCollapsed" class="p-6 pt-0 border-t border-slate-50">
+                        <div class="flex gap-4 mb-4 mt-4">
+                            <button @click="selectAllMagazines" class="text-[10px] font-black text-indigo-600 hover:underline uppercase">Select All</button>
+                            <button @click="clearMagazines" class="text-[10px] font-black text-slate-400 hover:underline uppercase">Clear</button>
                         </div>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <button v-for="mName in sortedMagazines" :key="mName" @click="toggleMagazine(mName)" 
-                            :class="activeMagazines.includes(mName) ? 'bg-indigo-600 text-white border-indigo-600 scale-105' : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-slate-300'" 
-                            class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase border transition-all">
-                            {{ mName }} <span class="ml-1 opacity-60">{{ magazineStats[mName] }}</span>
-                        </button>
+                        <div class="flex flex-wrap gap-2">
+                            <button v-for="mName in sortedMagazines" :key="mName" @click="toggleMagazine(mName)" 
+                                :class="activeMagazines.includes(mName) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-slate-300'" 
+                                class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase border transition-all">
+                                {{ mName }} <span class="ml-1 opacity-60">{{ magazineStats[mName] }}</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <div class="flex items-center justify-between mb-4 px-2">
-                <div class="text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                    Found {{ filteredData.length }} records
-                </div>
-                <div v-if="workIdFilter" class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-[10px] font-black uppercase border border-amber-200">
-                    ID Locked: {{ workIdFilter }}
-                </div>
-            </div>
-
-            <div v-if="viewMode === 'table'" class="main-card shadow-xl">
+            <div v-if="viewMode === 'table'" class="main-card shadow-xl relative">
                 <div class="overflow-x-auto">
                     <table class="min-w-full">
                         <thead>
@@ -144,7 +150,7 @@
                                 <td class="font-black text-slate-900 text-[14px]" v-html="highlight(row.初出副題)"></td>
                                 <td class="text-slate-500 text-center text-[10px]">{{ row.初出掲載頁 }}</td>
                                 <td class="max-w-xs">
-                                    <div class="text-[11px] text-slate-600 leading-tight" v-html="highlight(row.daizhenshuSubtitle)"></div>
+                                    <div class="text-[11px] text-slate-600 leading-tight" v-html="highlight(row.displaySecondarySubtitle)"></div>
                                 </td>
                                 <td>
                                     <div class="flex flex-col gap-1">
@@ -179,6 +185,14 @@
                                          ]">
                                         <span class="text-[10px] font-black">{{ hasMatchInRemarks(row.備考) ? '!' : 'i' }}</span>
                                     </div>
+                                    
+                                    <!-- Embedded Popup logic for proper alignment -->
+                                    <div v-if="activePopupId === row.作品番" 
+                                         class="remarks-popup" 
+                                         style="top: -10px; right: 45px;"
+                                         @click.stop>
+                                        <div class="text-left font-medium leading-relaxed" v-html="highlight(row.備考)"></div>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
@@ -186,35 +200,41 @@
                 </div>
             </div>
 
+            <!-- Card View -->
             <div v-if="viewMode === 'card'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div v-for="row in paginatedData" :key="row.作品番" class="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-xl transition-all group">
+                <div v-for="row in paginatedData" :key="row.作品番" class="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-xl transition-all">
                     <div class="flex justify-between items-start mb-4">
                         <span class="bg-slate-100 text-slate-500 px-2 py-1 rounded text-[9px] font-black uppercase">{{ row.初出掲載誌 }} · {{ row.初出掲載号 }}</span>
                         <span class="text-slate-300 font-mono text-[10px]">#{{ row.掲載番 }}</span>
                     </div>
                     <h3 class="text-lg font-black text-slate-900 mb-2 leading-tight" v-html="highlight(row.初出副題)"></h3>
-                    <div class="text-[11px] text-slate-500 mb-4 pb-4 border-b border-slate-50" v-html="highlight(row.daizhenshuSubtitle)"></div>
+                    <div class="text-[11px] text-slate-500 mb-4 pb-4 border-b border-slate-50" v-html="highlight(row.displaySecondarySubtitle)"></div>
                     
                     <div class="space-y-3">
                         <div v-if="row.vol45PlusData.length" class="flex flex-wrap gap-2">
+                            <span class="w-full text-[8px] font-black text-slate-300 uppercase">Standard Collections</span>
                             <a v-for="link in row.vol45PlusData" :href="link.url" target="_blank" class="bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-[9px] font-black border border-indigo-100">{{ link.label }}</a>
                         </div>
                         <div v-if="row.daizhenshuData.length" class="flex flex-wrap gap-2">
+                            <span class="w-full text-[8px] font-black text-slate-300 uppercase">Complete Works</span>
                             <a v-for="link in row.daizhenshuData" :href="link.url" target="_blank" class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded text-[9px] font-black border border-emerald-100">{{ link.label }}</a>
                         </div>
                     </div>
 
                     <div v-if="row.備考 && row.備考.trim()" class="mt-4 pt-4 border-t border-dashed border-slate-100">
-                        <p class="text-[11px] text-slate-400 italic leading-relaxed" v-html="highlight(row.備考)"></p>
+                        <div class="flex items-center gap-2 mb-1">
+                            <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+                            <span class="text-[9px] font-black text-slate-400 uppercase">Notes</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 leading-relaxed" v-html="highlight(row.備考)"></p>
                     </div>
                 </div>
             </div>
 
+            <!-- Pagination -->
             <div v-if="filteredData.length > 0" class="mt-10 flex flex-col items-center gap-4">
                 <div class="flex items-center gap-1">
-                    <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" 
-                            class="h-10 px-4 rounded-xl font-black text-[10px] uppercase bg-white border border-slate-200 disabled:opacity-30 transition-all hover:bg-slate-50">Prev</button>
-                    
+                    <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" class="h-10 px-4 rounded-xl font-black text-[10px] uppercase bg-white border border-slate-200 disabled:opacity-30 transition-all">Prev</button>
                     <div class="flex gap-1">
                         <button v-for="p in paginationRange" :key="p" @click="p !== '...' ? changePage(p) : null" 
                                 :class="p === currentPage ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-400'"
@@ -222,23 +242,8 @@
                             {{ p }}
                         </button>
                     </div>
-
-                    <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" 
-                            class="h-10 px-4 rounded-xl font-black text-[10px] uppercase bg-white border border-slate-200 disabled:opacity-30 transition-all hover:bg-slate-50">Next</button>
+                    <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" class="h-10 px-4 rounded-xl font-black text-[10px] uppercase bg-white border border-slate-200 disabled:opacity-30 transition-all">Next</button>
                 </div>
-            </div>
-
-            <div v-if="activePopupId" 
-                 class="remarks-popup shadow-2xl" 
-                 :style="popupStyle"
-                 @click.stop>
-                <div class="flex justify-between items-center mb-3 border-b border-slate-700 pb-2">
-                    <span class="text-[9px] font-black text-indigo-400 tracking-widest uppercase">Editorial Notes</span>
-                    <button @click="activePopupId = null" class="text-slate-500 hover:text-white transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5"></path></svg>
-                    </button>
-                </div>
-                <div class="text-[13px] leading-relaxed font-medium" v-html="highlight(getCurrentRemarks())"></div>
             </div>
 
         </main>
@@ -251,6 +256,7 @@
                 return {
                     loading: true, 
                     viewMode: 'table',
+                    filterCollapsed: true, // Default collapsed for mobile/clean look
                     searchQuery: '', 
                     workIdFilter: '', 
                     activeMagazines: [],
@@ -258,19 +264,13 @@
                     itemsPerPage: 20, 
                     showScrollButton: false,
                     master: [],
-                    activePopupId: null,
-                    popupStyle: { top: '0px', left: '0px' }
+                    activePopupId: null
                 }
             },
             computed: {
                 magazineStats() {
                     const stats = {};
-                    this.master.forEach(r => { 
-                        if (r.初出掲載誌) { 
-                            const n = r.初出掲載誌.trim(); 
-                            stats[n] = (stats[n] || 0) + 1; 
-                        } 
-                    });
+                    this.master.forEach(r => { if (r.初出掲載誌) { const n = r.初出掲載誌.trim(); stats[n] = (stats[n] || 0) + 1; } });
                     return stats;
                 },
                 sortedMagazines() { 
@@ -293,14 +293,9 @@
                 },
                 paginationRange() {
                     const current = this.currentPage, last = this.totalPages, range = [];
-                    for (let i = 1; i <= last; i++) {
-                        if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i);
-                    }
+                    for (let i = 1; i <= last; i++) { if (i == 1 || i == last || (i >= current - 2 && i <= current + 2)) range.push(i); }
                     const res = []; let l;
-                    for (let i of range) {
-                        if (l && i - l !== 1) res.push('...');
-                        res.push(i); l = i;
-                    }
+                    for (let i of range) { if (l && i - l !== 1) res.push('...'); res.push(i); l = i; }
                     return res;
                 }
             },
@@ -322,14 +317,12 @@
                         this.master = mList.filter(r => r.作品番).map(r => {
                             const workId = r.作品番.toString().trim();
                             const bookMatches = cList.filter(c => c.作品番?.toString().trim() === workId);
-                            const daizhenshuLinks = [], vol45PlusLinks = [], othersLinks = [], subtitleLines = [];
+                            const daizhenshuLinks = [], vol45PlusLinks = [], othersLinks = [];
 
+                            // Process Links
                             bookMatches.forEach(c => {
                                 const jpIsbn = c.ISBN?.toString().trim();
                                 const hkIsbn = latestHkMap[jpIsbn];
-                                if (c.出版副題) subtitleLines.push(`<span class="opacity-50 text-[9px] mr-1">JP</span>${c.出版副題}`);
-                                if (c.副題港譯) subtitleLines.push(`<span class="text-blue-400 text-[9px] mr-1">HK</span>${c.副題港譯}`);
-
                                 const targetUrl = hkIsbn ? `manga-database.html?isbn=${hkIsbn}&region=HK` : (jpIsbn ? `manga-database.html?isbn=${jpIsbn}&region=JP` : null);
                                 let labelSuffix = (c.巻 ? ` ${c.巻}` : '') + (c.收錄話 ? ` Ch.${c.收錄話}` : '');
                                 
@@ -339,13 +332,18 @@
                                 else othersLinks.push(linkObj);
                             });
 
+                            // Subtitle logic (Refined as requested)
+                            const subParts = [];
+                            if (r.全集副題) subParts.push(`<span class="opacity-50 text-[9px] mr-1">JP</span>${r.全集副題}`);
+                            if (r.全集副題香港譯名) subParts.push(`<span class="text-blue-400 text-[9px] mr-1">HK</span>${r.全集副題香港譯名}`);
+
                             return {
                                 ...r,
                                 daizhenshuData: daizhenshuLinks,
                                 vol45PlusData: vol45PlusLinks,
                                 othersData: othersLinks,
-                                daizhenshuSubtitle: subtitleLines.length ? subtitleLines.join('<br>') : '---',
-                                searchBlob: [r.初出副題, (r.初出掲載號 || ''), r.備考, subtitleLines.join(' ')].join(' ').toLowerCase()
+                                displaySecondarySubtitle: subParts.length ? subParts.join('<br>') : '---',
+                                searchBlob: [r.初出副題, (r.初出掲載號 || ''), r.備考, r.全集副題, r.全集副題香港譯名].join(' ').toLowerCase()
                             };
                         });
 
@@ -353,7 +351,10 @@
                         if (urlParams.get('workid')) {
                             this.workIdFilter = urlParams.get('workid').toString();
                             const target = this.master.find(r => r.作品番?.toString() === this.workIdFilter);
-                            if (target) this.searchQuery = target.初出副題 || '';
+                            if (target) {
+                                this.searchQuery = target.初出副題 || '';
+                                this.filterCollapsed = true; // Auto-collapse if ID search
+                            }
                         }
 
                         window.addEventListener('scroll', () => { this.showScrollButton = window.scrollY > 400; });
@@ -361,23 +362,7 @@
                     } catch (e) { console.error(e); this.loading = false; }
                 },
                 togglePopup(id, event) {
-                    if (this.activePopupId === id) {
-                        this.activePopupId = null;
-                    } else {
-                        this.activePopupId = id;
-                        // Positioning logic to keep it near the cursor/button but safe from edges
-                        this.$nextTick(() => {
-                            const rect = event.target.getBoundingClientRect();
-                            this.popupStyle = {
-                                top: `${rect.top - 160}px`,
-                                left: `${rect.left - 280}px`
-                            };
-                        });
-                    }
-                },
-                getCurrentRemarks() {
-                    const found = this.master.find(r => r.作品番 === this.activePopupId);
-                    return found ? found.備考 : '';
+                    this.activePopupId = (this.activePopupId === id) ? null : id;
                 },
                 highlight(text) {
                     if (!this.searchQuery || !text) return text;
@@ -401,7 +386,6 @@
                     window.history.replaceState({}, '', url);
                 },
                 changePage(p) { 
-                    if (p < 1 || p > this.totalPages) return;
                     this.currentPage = p;
                     window.scrollTo({ top: document.querySelector('.main-card')?.offsetTop - 120, behavior: 'smooth' });
                 },

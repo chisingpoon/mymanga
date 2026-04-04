@@ -249,7 +249,7 @@
                                         </span>
                                     </td>
                 
-                                    <td class="px-6 py-6 align-top group-hover:text-indigo-700 transition-all">
+                                    <td class="px-6 py-6 align-top border-b-1 group-hover:text-indigo-700 transition-all">
                                         <h3 class="text-lg font-black text-slate-900 leading-tight mb-2" v-html="highlight(parent['JP Title'])"></h3>
                                         <div v-if="parent['Confirmed Translation'] !== '-'" class="flex items-baseline gap-1 mb-3">
                                             <span class="text-[9px] font-bold text-slate-400 uppercase">採用港譯/</span>
@@ -259,7 +259,7 @@
                                         <p class="text-sm text-slate-600 font-medium max-w-[400px] leading-snug" v-html="highlight(parent['Description'])"></p>
                                     </td>
                 
-                                    <td class="px-6 py-6 align-top">
+                                    <td class="px-6 py-6 align-top border-b-1">
                                         <div class="space-y-3">
                                             <div v-for="m in parent.movieAppearances" class="bg-white p-3 rounded-xl border-2 border-slate-100 shadow-sm">
                                                 <span class="text-[9px] font-black bg-slate-900 text-white px-2 py-0.5 rounded w-fit uppercase block mb-1">Movie {{ m.movieYear }}</span>
@@ -272,7 +272,7 @@
                                         </div>
                                     </td>
                 
-                                    <td class="px-6 py-6 align-top">
+                                    <td class="px-6 py-6 align-top border-b-1">
                                         <div v-if="parent.mangaInfo" class="mb-4 space-y-2 border-b-2 border-slate-100 pb-3">
                                             <div class="flex items-center gap-2">
                                                 <span class="text-[9px] font-black text-slate-400 uppercase tracking-tighter shrink-0">文傳譯/</span>
@@ -294,7 +294,7 @@
                                         </div>
                                     </td>
                 
-                                    <td class="px-6 py-6 align-top">
+                                    <td class="px-6 py-6 align-top border-b-1">
                                         <div class="space-y-3">
                                             <div v-for="a in parent.animeAppearances" class="bg-white p-3 rounded-xl border-2 border-slate-100 shadow-sm">
                                                 <span class="text-[8px] font-black bg-indigo-600 text-white px-2 py-0.5 rounded w-fit uppercase block mb-1">{{ a.animeDate }}</span>

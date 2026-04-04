@@ -33,8 +33,10 @@
         .main-card { background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); margin-bottom: 3rem; overflow: hidden; border: 1px solid #e2e8f0; }
         
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
-        td { padding: 18px 12px; border-bottom: 1px solid #f1f5f9; font-size: 15px; vertical-align: middle; }
-
+        td { padding: 18px 12px; border-bottom: 1px solid #f1f5f9; font-size: 15px; vertical-align: middle; border-top: 1px solid transparent; transition: all 0.2s ease;}
+        tr:hover td { background-color: #f5f7ff; border-bottom-color: #6366f1 !important; border-top-color: #6366f1;}
+        tr:hover td:first-child { border-left: 4px solid #6366f1;}
+        
         .vol-link { display: flex; flex-direction: column; font-size: 9px; font-weight: 900; color: white !important; padding: 6px 8px; border-radius: 8px; line-height: 1.2; text-align: center; min-width: 105px; text-decoration: none !important; transition: all 0.15s; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
         .vol-link .main-label { font-size: 11px; margin-top: 2px; letter-spacing: -0.01em; white-space: nowrap; }
         .vol-link:hover { filter: brightness(110%); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.12); }
@@ -152,7 +154,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="row in paginatedData" :key="row['Media ID']">
+                            <tr v-for="row in paginatedData" :key="row['Media ID']" class="group">
                                 <td class="font-mono text-slate-400 text-[13px] font-bold" v-html="highlight(row['Media ID'])"></td>
                                 <td class="font-black text-slate-900">
                                     <div class="text-[16px]" v-html="highlight(row['JP Title'])"></div>

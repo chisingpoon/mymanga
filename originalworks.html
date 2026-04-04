@@ -63,12 +63,12 @@
         </div>
 
         <nav class="top-nav">
-            <div class="max-w-[1600px] mx-auto px-6 h-20 flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <a href="index.html" class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg hover:bg-indigo-600 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <div class="max-w-[1920px] mx-auto px-6 h-20 flex items-center justify-between">
+                <div class="flex items-center gap-6">
+                    <a href="index.html" class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl hover:bg-indigo-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                     </a>
-                    <h1 class="font-black text-xl tracking-tight text-slate-800 uppercase">Archive Record Search</h1>
+                    <h1 class="font-black text-2xl tracking-tighter text-slate-800 uppercase">Archive Record Search</h1>
                 </div>
             </div>
         </nav>
@@ -77,14 +77,15 @@
             
             <section class="mb-8 space-y-4">
                 <div class="flex gap-4 items-center">
+                    
                     <div class="relative flex-grow">
                         <input type="text" v-model="searchQuery" placeholder="Search titles, remarks..." 
-                               class="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 text-lg font-bold outline-none focus:border-indigo-500 shadow-sm transition-all">
+                               bg-slate-50 border-2 border-slate-100 rounded-xl pl-4 pr-10 py-2 text-sm font-bold outline-none focus:border-indigo-500 transition-all md:py-3 md:rounded-2xl">
                         <button v-if="searchQuery || workIdFilter" @click="clearSearch" class="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-rose-500">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                         </button>
                     </div>
-                    
+
                     <div class="flex bg-slate-200 p-1 rounded-xl shrink-0 border border-slate-300">
                         <button @click="viewMode = 'table'" :class="viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'" class="p-3 rounded-lg transition-all">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -123,14 +124,14 @@
                     <table class="min-w-full">
                         <thead>
                             <tr>
-                                <th>Source / Issue</th>
-                                <th class="text-center">No.</th>
+                                <th>First Pub Mag.</th>
+                                <th class="text-center">Work No.</th>
                                 <th>Original Title</th>
-                                <th class="text-center">Page</th>
-                                <th>Secondary Subtitles</th>
-                                <th>45 Vol / P+</th>
+                                <th class="text-center">Pages</th>
+                                <th>Complete Works Titles</th>
+                                <th>45Vol / P+ / Color</th>
                                 <th>Complete Works</th>
-                                <th>Others</th>
+                                <th>Others Collection</th>
                                 <th class="text-center">Note</th>
                             </tr>
                         </thead>

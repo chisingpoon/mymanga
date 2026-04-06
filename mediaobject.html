@@ -412,38 +412,61 @@
             methods: {
                 applyUrlParams() {
                     const params = new URLSearchParams(window.location.search);
-                    const movieID = params.get('movieid');
-                    const isbn = params.get('isbn');
-                    const animeID = params.get('animeid');
-                    const fClass = params.get('filterclass');
-        
-                    if (fClass) this.selectedClass = fClass;
-        
-                    if (movieID) {
-                        const movie = this.movieMeta.find(m => String(m['Media ID']) === String(movieID));
-                        if (movie) {
-                            this.searchQuery = movie['JP Title'];
-                            this.processedData.forEach(p => {
-                                if (p.movieAppearances.some(ma => String(ma['Movie ID']) === String(movieID))) this.tabStates[p['Object ID']] = 'movie';
-                            });
+                        const movieID = params.get('movieid');
+                        const isbn = params.get('isbn');
+                        const animeID = params.get('animeid');
+                        const fClass = params.get('filterclass');
+                    
+                        // 1. Handle Classification Filter (法寶/人物)
+                        if (fClass === '法寶' || fClass === '人物') {
+                            this.selectedClass = fClass;
+                            this.handleClassChange(); // Resets Type to 'All'
                         }
-                    } else if (isbn) {
-                        const pub = this.pubCatalog.find(p => String(p['ISBN']) === String(isbn));
-                        if (pub) {
-                            this.searchQuery = `[${pub['類']}] ${pub['標題']} ${pub['巻'] || ''}`.trim();
-                            this.processedData.forEach(p => {
-                                if (p.mangaRecords.some(r => String(r.isbn) === String(isbn))) this.tabStates[p['Object ID']] = 'manga';
-                            });
+                    
+                        // 2. Handle Movie ID -> Sets Search Text & Movie Tab
+                        if (movieID) {
+                            const movie = this.movieMeta.find(m => String(m['Media ID']) === String(movieID));
+                            if (movie) {
+                                this.searchQuery = movie['JP Title'];
+                                // Force the "Movie" tab open for all characters in this movie
+                                this.processedData.forEach(p => {
+                                    if (p.movieAppearances.some(ma => String(ma['Movie ID']) === String(movieID))) {
+                                        this.tabStates[p['Object ID']] = 'movie';
+                                    }
+                                });
+                            }
+                        } 
+                        
+                        // 3. Handle ISBN -> Sets Search Text & Manga Tab
+                        else if (isbn) {
+                            const pub = this.pubCatalog.find(p => String(p['ISBN']) === String(isbn));
+                            if (pub) {
+                                // Using the exact format you had: [類] 標題 巻
+                                this.searchQuery = `[${pub['類']}] ${pub['標題']} ${pub['巻'] || ''}`.trim();
+                                const workIds = this.workInclude
+                                    .filter(w => String(w['ISBN']) === String(isbn))
+                                    .map(w => String(w['作品番']));
+                                
+                                this.processedData.forEach(p => {
+                                    if (p.mangaInfo && workIds.includes(String(p.mangaInfo['Work ID']))) {
+                                        this.tabStates[p['Object ID']] = 'manga';
+                                    }
+                                });
+                            }
+                        } 
+                        
+                        // 4. Handle Anime ID -> Sets Search Text & Anime Tab
+                        else if (animeID) {
+                            const anime = this.animeMeta.find(a => String(a['Media ID']) === String(animeID));
+                            if (anime) {
+                                this.searchQuery = anime['JP Title'];
+                                this.processedData.forEach(p => {
+                                    if (p.animeAppearances.some(aa => String(aa['Anime ID']) === String(animeID))) {
+                                        this.tabStates[p['Object ID']] = 'anime';
+                                    }
+                                });
+                            }
                         }
-                    } else if (animeID) {
-                        const anime = this.animeMeta.find(a => String(a['Media ID']) === String(animeID));
-                        if (anime) {
-                            this.searchQuery = anime['JP Title'];
-                            this.processedData.forEach(p => {
-                                if (p.animeAppearances.some(aa => String(aa['Anime ID']) === String(animeID))) this.tabStates[p['Object ID']] = 'anime';
-                            });
-                        }
-                    }
                 },
                 handleScroll() { this.showBackToTop = window.scrollY > 300; },
                 scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },

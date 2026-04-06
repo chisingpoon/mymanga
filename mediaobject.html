@@ -352,6 +352,7 @@
             async mounted() {
                 window.addEventListener('scroll', this.handleScroll);
                 const base = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
+                
                 try {
                     const [parents, mChild, mMeta, manChild, works, pubs, aniChild, aniMeta] = await Promise.all([
                         fetch(base + "人物法寶").then(r => r.json()),
@@ -367,49 +368,41 @@
                     this.parentData = parents; this.movieChild = mChild; this.movieMeta = mMeta;
                     this.mangaChild = manChild; this.workInclude = works; this.pubCatalog = pubs;
                     this.animeChild = aniChild; this.animeMeta = aniMeta;
-        
-                    // PRE-PROCESS: Build the "Super Object"
+            
+                    // 1. Build the list
                     this.processedData = this.parentData
                         .filter(p => p['Active']?.toLowerCase() === 'yes')
                         .map(p => {
                             const objId = String(p['Object ID']);
-                            
-                            const movieAppearances = this.movieChild
-                                .filter(c => String(c['Object ID']) === objId)
-                                .map(c => {
-                                    const m = this.movieMeta.find(mm => String(mm['Media ID']) === String(c['Movie ID']));
-                                    return { ...c, movieTitle: m?.['JP Title'] || 'Unknown', movieYear: (m?.['JP Release Date']?.match(/\d{4}/) || ['N/A'])[0] };
-                                });
-        
-                            const animeAppearances = this.animeChild
-                                .filter(c => String(c['Object ID']) === objId)
-                                .map(c => {
-                                    const a = this.animeMeta.find(am => String(am['Media ID']) === String(c['Anime ID']));
-                                    return { ...c, animeTitle: a?.['JP Title'] || 'Unknown', animeDate: a?.['JP Show Date'] || 'N/A' };
-                                });
-        
+                            const movieAppearances = this.movieChild.filter(c => String(c['Object ID']) === objId).map(c => {
+                                const m = this.movieMeta.find(mm => String(mm['Media ID']) === String(c['Movie ID']));
+                                return { ...c, movieTitle: m?.['JP Title'] || 'Unknown' };
+                            });
+                            const animeAppearances = this.animeChild.filter(c => String(c['Object ID']) === objId).map(c => {
+                                const a = this.animeMeta.find(am => String(am['Media ID']) === String(c['Anime ID']));
+                                return { ...c, animeTitle: a?.['JP Title'] || 'Unknown' };
+                            });
                             const manInfo = this.mangaChild.find(c => String(c['Object ID']) === objId);
                             let mangaRecords = [];
                             if (manInfo) {
-                                mangaRecords = this.workInclude
-                                    .filter(w => String(w['作品番']) === String(manInfo['Work ID']))
-                                    .map(w => {
-                                        const pub = this.pubCatalog.find(pc => String(pc['ISBN']) === String(w['ISBN']));
-                                        return { isbn: w['ISBN'], type: pub?.['類'] || 'N/A', title: pub?.['標題'] || 'Unknown', vol: pub?.['巻'] || '', ch: w['收錄話'] };
-                                    });
+                                mangaRecords = this.workInclude.filter(w => String(w['作品番']) === String(manInfo['Work ID'])).map(w => {
+                                    const pub = this.pubCatalog.find(pc => String(pc['ISBN']) === String(w['ISBN']));
+                                    return { isbn: w['ISBN'], type: pub?.['類'] || '', title: pub?.['標題'] || '' };
+                                });
                             }
-        
-                            return { ...p, movieAppearances, animeAppearances, mangaInfo: manInfo, mangaRecords };
+                            return { ...p, movieAppearances, animeAppearances, mangaInfo, mangaRecords };
                         });
-        
-                    console.log("Data Ready: ", this.processedData.length, " items processed.");
-                    this.processedData = processed; // Ensure this is assigned
+            
                     this.loading = false;
-                    
+            
+                    // 2. RUN URL LOGIC AFTER DATA IS READY
                     await nextTick();
-                    console.log("Data is loaded. Starting URL Parameter check...");
                     this.applyUrlParams();
-                } catch (e) { console.error("Load Error:", e); this.loading = false; }
+            
+                } catch (e) {
+                    console.error("Mount Error:", e);
+                    this.loading = false;
+                }
             },
             methods: {
                 applyUrlParams() {
@@ -418,58 +411,42 @@
                     const isbn = params.get('isbn');
                     const animeID = params.get('animeid');
                     const fClass = params.get('filterclass');
-        
-                    console.log("URL Params found:", { movieID, isbn, animeID, fClass });
-        
-                    // 1. Filter by Class (人物/法寶)
+                
+                    // 1. Set Classification (人物 / 法寶)
                     if (fClass) {
                         this.selectedClass = fClass;
-                        this.handleClassChange(); 
                     }
-        
-                    // 2. Filter by Movie
+                
+                    // 2. Set Search Text based on ID
+                    let targetSearch = '';
+                
                     if (movieID) {
                         const movie = this.movieMeta.find(m => String(m['Media ID']) === String(movieID));
-                        if (movie) {
-                            console.log("Filtering for Movie:", movie['JP Title']);
-                            this.searchQuery = movie['JP Title'];
-                            this.processedData.forEach(p => {
-                                if (p.movieAppearances.some(ma => String(ma['Movie ID']) === String(movieID))) {
-                                    this.tabStates[p['Object ID']] = 'movie';
-                                }
-                            });
-                        }
-                    } 
-                    // 3. Filter by ISBN
-                    else if (isbn) {
+                        if (movie) targetSearch = movie['JP Title'];
+                    } else if (isbn) {
                         const pub = this.pubCatalog.find(p => String(p['ISBN']) === String(isbn));
-                        if (pub) {
-                            console.log("Filtering for ISBN:", pub['標題']);
-                            // We set the search query to the title to trigger the displayData filter
-                            this.searchQuery = pub['標題']; 
-                            this.processedData.forEach(p => {
-                                if (p.mangaRecords.some(r => String(r.isbn) === String(isbn))) {
-                                    this.tabStates[p['Object ID']] = 'manga';
-                                }
-                            });
-                        }
-                    } 
-                    // 4. Filter by Anime
-                    else if (animeID) {
+                        if (pub) targetSearch = pub['標題'];
+                    } else if (animeID) {
                         const anime = this.animeMeta.find(a => String(a['Media ID']) === String(animeID));
-                        if (anime) {
-                            console.log("Filtering for Anime:", anime['JP Title']);
-                            this.searchQuery = anime['JP Title'];
-                            this.processedData.forEach(p => {
-                                if (p.animeAppearances.some(aa => String(aa['Anime ID']) === String(animeID))) {
-                                    this.tabStates[p['Object ID']] = 'anime';
-                                }
-                            });
-                        }
+                        if (anime) targetSearch = anime['JP Title'];
                     }
-                    
-                    // Final Step: Reset to page 1 to show results
-                    this.currentPage = 1;
+                
+                    // 3. Trigger the actual Search
+                    if (targetSearch) {
+                        this.searchQuery = targetSearch;
+                        this.currentPage = 1;
+                        
+                        // 4. Also set the Tab States for the cards
+                        this.processedData.forEach(p => {
+                            if (movieID && p.movieAppearances.some(m => String(m['Movie ID']) === movieID)) {
+                                this.tabStates[p['Object ID']] = 'movie';
+                            } else if (isbn && p.mangaRecords.some(r => String(r.isbn) === isbn)) {
+                                this.tabStates[p['Object ID']] = 'manga';
+                            } else if (animeID && p.animeAppearances.some(a => String(a['Anime ID']) === animeID)) {
+                                this.tabStates[p['Object ID']] = 'anime';
+                            }
+                        });
+                    }
                 },
                 handleScroll() { this.showBackToTop = window.scrollY > 300; },
                 scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },

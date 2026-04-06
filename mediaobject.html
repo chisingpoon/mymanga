@@ -436,41 +436,67 @@
                     const animeID = params.get('animeid');
                     const fClass = params.get('filterclass');
                 
-                    // 1. Set Classification (人物 / 法寶)
+                    console.log("Applying URL Filters...");
+                
+                    // 1. Apply Class Filter (e.g., ?filterclass=法寶)
+                    // This happens regardless of whether there is a search ID
                     if (fClass) {
                         this.selectedClass = fClass;
+                        // If your HTML has a secondary dropdown for "Type", 
+                        // handleClassChange usually resets that to 'All'
+                        if (typeof this.handleClassChange === 'function') {
+                            this.handleClassChange();
+                        }
                     }
                 
-                    // 2. Set Search Text based on ID
+                    // 2. Determine Search Keyword & Open Tabs
+                    // We check all three ID types. If multiple exist, the last one found wins the search text.
                     let targetSearch = '';
                 
                     if (movieID) {
-                        const movie = this.movieMeta.find(m => String(m['Media ID']) === String(movieID));
-                        if (movie) targetSearch = movie['JP Title'];
-                    } else if (isbn) {
-                        const pub = this.pubCatalog.find(p => String(p['ISBN']) === String(isbn));
-                        if (pub) targetSearch = pub['標題'];
-                    } else if (animeID) {
-                        const anime = this.animeMeta.find(a => String(a['Media ID']) === String(animeID));
-                        if (anime) targetSearch = anime['JP Title'];
+                        const movie = this.movieMeta.find(m => String(m['Media ID']).trim() === String(movieID).trim());
+                        if (movie) {
+                            targetSearch = movie['JP Title'];
+                            // Auto-switch cards to 'movie' tab
+                            this.processedData.forEach(p => {
+                                if (p.movieAppearances.some(ma => String(ma['Movie ID']).trim() === String(movieID).trim())) {
+                                    this.tabStates[p['Object ID']] = 'movie';
+                                }
+                            });
+                        }
+                    } 
+                    
+                    if (isbn) {
+                        const pub = this.pubCatalog.find(p => String(p['ISBN']).trim() === String(isbn).trim());
+                        if (pub) {
+                            targetSearch = pub['標題'];
+                            this.processedData.forEach(p => {
+                                if (p.mangaRecords.some(r => String(r.isbn).trim() === String(isbn).trim())) {
+                                    this.tabStates[p['Object ID']] = 'manga';
+                                }
+                            });
+                        }
+                    } 
+                    
+                    if (animeID) {
+                        const anime = this.animeMeta.find(a => String(a['Media ID']).trim() === String(animeID).trim());
+                        if (anime) {
+                            targetSearch = anime['JP Title'];
+                            this.processedData.forEach(p => {
+                                if (p.animeAppearances.some(aa => String(aa['Anime ID']).trim() === String(animeID).trim())) {
+                                    this.tabStates[p['Object ID']] = 'anime';
+                                }
+                            });
+                        }
                     }
                 
-                    // 3. Trigger the actual Search
+                    // 3. Finalize the search state
                     if (targetSearch) {
                         this.searchQuery = targetSearch;
-                        this.currentPage = 1;
-                        
-                        // 4. Also set the Tab States for the cards
-                        this.processedData.forEach(p => {
-                            if (movieID && p.movieAppearances.some(m => String(m['Movie ID']) === movieID)) {
-                                this.tabStates[p['Object ID']] = 'movie';
-                            } else if (isbn && p.mangaRecords.some(r => String(r.isbn) === isbn)) {
-                                this.tabStates[p['Object ID']] = 'manga';
-                            } else if (animeID && p.animeAppearances.some(a => String(a['Anime ID']) === animeID)) {
-                                this.tabStates[p['Object ID']] = 'anime';
-                            }
-                        });
                     }
+                
+                    // 4. Reset pagination to show results from the beginning
+                    this.currentPage = 1;
                 },
                 handleScroll() { this.showBackToTop = window.scrollY > 300; },
                 scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },

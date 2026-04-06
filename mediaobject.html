@@ -341,10 +341,8 @@
                     selectedType: 'All', 
                     currentPage: 1, 
                     itemsPerPage: 12,
-                    // Raw Data from Sheets
                     parentData: [], movieChild: [], movieMeta: [], mangaChild: [], 
                     workInclude: [], pubCatalog: [], animeChild: [], animeMeta: [],
-                    // Optimized Master List
                     processedData: [], 
                     viewMode: 'card',
                     tabStates: reactive({}), 
@@ -370,30 +368,23 @@
                     this.mangaChild = manChild; this.workInclude = works; this.pubCatalog = pubs;
                     this.animeChild = aniChild; this.animeMeta = aniMeta;
         
-                    // --- START PERFORMANCE OPTIMIZATION ---
-                    // We "Join" all the data tables together once right here.
+                    // 1. Prepare the optimized list
                     this.processedData = this.parentData
                         .filter(p => p['Active']?.toLowerCase() === 'yes')
                         .map(p => {
                             const objId = String(p['Object ID']);
-        
-                            // 1. Link Movies
                             const movieAppearances = this.movieChild
                                 .filter(c => String(c['Object ID']) === objId)
                                 .map(c => {
                                     const m = this.movieMeta.find(mm => String(mm['Media ID']) === String(c['Movie ID']));
                                     return { ...c, movieTitle: m ? m['JP Title'] : 'Unknown', movieYear: (m?.['JP Release Date']?.match(/\d{4}/) || ['N/A'])[0] };
                                 });
-        
-                            // 2. Link Anime
                             const animeAppearances = this.animeChild
                                 .filter(c => String(c['Object ID']) === objId)
                                 .map(c => {
                                     const a = this.animeMeta.find(am => String(am['Media ID']) === String(c['Anime ID']));
                                     return { ...c, animeTitle: a ? a['JP Title'] : 'Unknown', animeDate: a?.['JP Show Date'] || 'N/A' };
                                 });
-        
-                            // 3. Link Manga
                             const manInfo = this.mangaChild.find(c => String(c['Object ID']) === objId);
                             let mangaRecords = [];
                             if (manInfo) {
@@ -404,15 +395,13 @@
                                         return { isbn: w['ISBN'], type: pub?.['類'] || 'N/A', title: pub?.['標題'] || 'Unknown', vol: pub?.['巻'] || '', ch: w['收錄話'] };
                                     });
                             }
-        
                             return { ...p, movieAppearances, animeAppearances, mangaInfo: manInfo, mangaRecords };
                         });
-                    // --- END PERFORMANCE OPTIMIZATION ---
         
                     this.loading = false;
                     
+                    // 2. Handle URL Parameters AFTER data is processed
                     await nextTick();
-                    // Handle URL Parameters
                     const params = new URLSearchParams(window.location.search);
                     const movieID = params.get('movieid');
                     const isbn = params.get('isbn');
@@ -428,20 +417,32 @@
                         const movie = this.movieMeta.find(m => String(m['Media ID']) === String(movieID));
                         if (movie) {
                             this.searchQuery = movie['JP Title'];
-                            this.movieChild.forEach(c => { if(String(c['Movie ID']) === String(movieID)) this.tabStates[c['Object ID']] = 'movie'; });
+                            this.processedData.forEach(p => {
+                                if (p.movieAppearances.some(ma => String(ma['Movie ID']) === String(movieID))) {
+                                    this.tabStates[p['Object ID']] = 'movie';
+                                }
+                            });
                         }
                     } else if (isbn) {
                         const pub = this.pubCatalog.find(p => String(p['ISBN']) === String(isbn));
                         if (pub) {
                             this.searchQuery = `[${pub['類']}] ${pub['標題']} ${pub['巻'] || ''}`.trim();
                             const workIds = this.workInclude.filter(w => String(w['ISBN']) === String(isbn)).map(w => String(w['作品番']));
-                            this.mangaChild.forEach(m => { if(workIds.includes(String(m['Work ID']))) this.tabStates[m['Object ID']] = 'manga'; });
+                            this.processedData.forEach(p => {
+                                if (p.mangaInfo && workIds.includes(String(p.mangaInfo['Work ID']))) {
+                                    this.tabStates[p['Object ID']] = 'manga';
+                                }
+                            });
                         }
                     } else if (animeID) {
                         const anime = this.animeMeta.find(a => String(a['Media ID']) === String(animeID));
                         if (anime) {
                             this.searchQuery = anime['JP Title'];
-                            this.animeChild.forEach(c => { if(String(c['Anime ID']) === String(animeID)) this.tabStates[c['Object ID']] = 'anime'; });
+                            this.processedData.forEach(p => {
+                                if (p.animeAppearances.some(aa => String(aa['Anime ID']) === String(animeID))) {
+                                    this.tabStates[p['Object ID']] = 'anime';
+                                }
+                            });
                         }
                     }
                 } catch (e) { 
@@ -455,7 +456,8 @@
                 scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },
                 highlight(text) {
                     if (!this.searchQuery) return text;
-                    const regex = new RegExp(`(${this.searchQuery.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
+                    const escaped = this.searchQuery.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                    const regex = new RegExp(`(${escaped})`, 'gi');
                     return String(text).replace(regex, '<mark>$1</mark>');
                 },
                 getTab(id) { return this.tabStates[id] || 'movie'; },
@@ -472,32 +474,32 @@
                     return allTypes;
                 },
                 displayData() {
-                    const q = (this.searchQuery || '').toLowerCase();
+                    const q = (this.searchQuery || '').toLowerCase().trim();
+                    
                     return this.processedData.filter(p => {
-                        // Category Filters
                         const matchClass = this.selectedClass === 'All' || p['Object Classification'] === this.selectedClass;
                         const matchType = this.selectedType === 'All' || p['Object Type'] === this.selectedType;
                         if (!(matchClass && matchType)) return false;
         
                         if (!q) return true;
         
-                        // Search Core Info
+                        // Search Core
                         if ((p['JP Title'] || '').toLowerCase().includes(q) || 
                             (p['Description'] || '').toLowerCase().includes(q) || 
                             (p['Confirmed Translation'] || '').toLowerCase().includes(q)) return true;
         
-                        // Search Manga Info
+                        // Search Manga
                         if (p.mangaInfo) {
                             if ((p.mangaInfo['CultureCom Trans'] || '').toLowerCase().includes(q) || 
                                 (p.mangaInfo['HKChingWin Trans'] || '').toLowerCase().includes(q)) return true;
                             if (p.mangaRecords.some(r => `[${r.type}] ${r.title} ${r.vol}`.toLowerCase().includes(q))) return true;
                         }
         
-                        // Search Movies & Anime Titles
-                        const hasMovie = p.movieAppearances.some(m => m.movieTitle.toLowerCase().includes(q));
-                        const hasAnime = p.animeAppearances.some(a => a.animeTitle.toLowerCase().includes(q));
+                        // Search Movie/Anime Titles
+                        if (p.movieAppearances.some(m => m.movieTitle.toLowerCase().includes(q))) return true;
+                        if (p.animeAppearances.some(a => a.animeTitle.toLowerCase().includes(q))) return true;
         
-                        return hasMovie || hasAnime;
+                        return false;
                     });
                 },
                 totalPages() { return Math.ceil(this.displayData.length / this.itemsPerPage); },
@@ -505,6 +507,12 @@
                     const start = (this.currentPage - 1) * this.itemsPerPage;
                     return this.displayData.slice(start, start + this.itemsPerPage);
                 }
+            },
+            watch: {
+                // Reset to page 1 when searching or filtering
+                searchQuery() { this.currentPage = 1; },
+                selectedClass() { this.currentPage = 1; },
+                selectedType() { this.currentPage = 1; }
             }
         }).mount('#app');
     </script>

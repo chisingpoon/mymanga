@@ -354,49 +354,60 @@
                 const base = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
                 try {
                     const [parents, mChild, mMeta, manChild, works, pubs, aniChild, aniMeta] = await Promise.all([
-                        fetch(base + "人物法寶").then(r => r.json()), fetch(base + "電影人物法寶").then(r => r.json()),
-                        fetch(base + "電影動畫").then(r => r.json()), fetch(base + "漫畫人物法寶").then(r => r.json()),
-                        fetch(base + "書籍收錄作品").then(r => r.json()), fetch(base + "出版目録JP").then(r => r.json()),
-                        fetch(base + "動畫人物法寶").then(r => r.json()), fetch(base + "電視動畫").then(r => r.json())
+                        fetch(base + "人物法寶").then(r => r.json()),
+                        fetch(base + "電影人物法寶").then(r => r.json()),
+                        fetch(base + "電影動畫").then(r => r.json()),
+                        fetch(base + "漫畫人物法寶").then(r => r.json()),
+                        fetch(base + "書籍收錄作品").then(r => r.json()),
+                        fetch(base + "出版目録JP").then(r => r.json()),
+                        fetch(base + "動畫人物法寶").then(r => r.json()),
+                        fetch(base + "電視動畫").then(r => r.json())
                     ]);
                     
                     this.parentData = parents; this.movieChild = mChild; this.movieMeta = mMeta;
                     this.mangaChild = manChild; this.workInclude = works; this.pubCatalog = pubs;
                     this.animeChild = aniChild; this.animeMeta = aniMeta;
         
-                    // PRE-PROCESS: Build the "Super Object" so search is instant
+                    // PRE-PROCESS: Build the "Super Object"
                     this.processedData = this.parentData
                         .filter(p => p['Active']?.toLowerCase() === 'yes')
                         .map(p => {
                             const objId = String(p['Object ID']);
                             
-                            const movieAppearances = this.movieChild.filter(c => String(c['Object ID']) === objId).map(c => {
-                                const m = this.movieMeta.find(mm => String(mm['Media ID']) === String(c['Movie ID']));
-                                return { ...c, movieTitle: m?.['JP Title'] || 'Unknown', movieYear: (m?.['JP Release Date']?.match(/\d{4}/) || ['N/A'])[0] };
-                            });
+                            const movieAppearances = this.movieChild
+                                .filter(c => String(c['Object ID']) === objId)
+                                .map(c => {
+                                    const m = this.movieMeta.find(mm => String(mm['Media ID']) === String(c['Movie ID']));
+                                    return { ...c, movieTitle: m?.['JP Title'] || 'Unknown', movieYear: (m?.['JP Release Date']?.match(/\d{4}/) || ['N/A'])[0] };
+                                });
         
-                            const animeAppearances = this.animeChild.filter(c => String(c['Object ID']) === objId).map(c => {
-                                const a = this.animeMeta.find(am => String(am['Media ID']) === String(c['Anime ID']));
-                                return { ...c, animeTitle: a?.['JP Title'] || 'Unknown', animeDate: a?.['JP Show Date'] || 'N/A' };
-                            });
+                            const animeAppearances = this.animeChild
+                                .filter(c => String(c['Object ID']) === objId)
+                                .map(c => {
+                                    const a = this.animeMeta.find(am => String(am['Media ID']) === String(c['Anime ID']));
+                                    return { ...c, animeTitle: a?.['JP Title'] || 'Unknown', animeDate: a?.['JP Show Date'] || 'N/A' };
+                                });
         
                             const manInfo = this.mangaChild.find(c => String(c['Object ID']) === objId);
                             let mangaRecords = [];
                             if (manInfo) {
-                                mangaRecords = this.workInclude.filter(w => String(w['作品番']) === String(manInfo['Work ID'])).map(w => {
-                                    const pub = this.pubCatalog.find(pc => String(pc['ISBN']) === String(w['ISBN']));
-                                    return { isbn: w['ISBN'], type: pub?.['類'] || 'N/A', title: pub?.['標題'] || 'Unknown', vol: pub?.['巻'] || '', ch: w['收錄話'] };
-                                });
+                                mangaRecords = this.workInclude
+                                    .filter(w => String(w['作品番']) === String(manInfo['Work ID']))
+                                    .map(w => {
+                                        const pub = this.pubCatalog.find(pc => String(pc['ISBN']) === String(w['ISBN']));
+                                        return { isbn: w['ISBN'], type: pub?.['類'] || 'N/A', title: pub?.['標題'] || 'Unknown', vol: pub?.['巻'] || '', ch: w['收錄話'] };
+                                    });
                             }
         
                             return { ...p, movieAppearances, animeAppearances, mangaInfo: manInfo, mangaRecords };
                         });
         
+                    console.log("Data Ready: ", this.processedData.length, " items processed.");
                     this.loading = false;
                     
                     await nextTick();
                     this.applyUrlParams();
-                } catch (e) { console.error(e); this.loading = false; }
+                } catch (e) { console.error("Load Error:", e); this.loading = false; }
             },
             methods: {
                 applyUrlParams() {
@@ -421,7 +432,7 @@
                         if (pub) {
                             this.searchQuery = `[${pub['類']}] ${pub['標題']} ${pub['巻'] || ''}`.trim();
                             this.processedData.forEach(p => {
-                                if (p.mangaRecords.some(r => r.isbn === isbn)) this.tabStates[p['Object ID']] = 'manga';
+                                if (p.mangaRecords.some(r => String(r.isbn) === String(isbn))) this.tabStates[p['Object ID']] = 'manga';
                             });
                         }
                     } else if (animeID) {
@@ -438,7 +449,7 @@
                 scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },
                 highlight(text) {
                     if (!this.searchQuery) return text;
-                    const escaped = this.searchQuery.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                    const escaped = String(this.searchQuery).replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
                     const regex = new RegExp(`(${escaped})`, 'gi');
                     return String(text).replace(regex, '<mark>$1</mark>');
                 },
@@ -448,7 +459,9 @@
                 handleClassChange() { this.selectedType = 'All'; this.currentPage = 1; }
             },
             computed: {
-                classifications() { return [...new Set(this.parentData.filter(i => i['Active']?.toLowerCase() === 'yes').map(i => i['Object Classification']))].sort(); },
+                classifications() { 
+                    return [...new Set(this.parentData.filter(i => i['Active']?.toLowerCase() === 'yes').map(i => i['Object Classification']))].sort(); 
+                },
                 filteredObjectTypes() {
                     let all = [...new Set(this.parentData.filter(i => i['Active']?.toLowerCase() === 'yes').map(i => i['Object Type']))].sort();
                     if (this.selectedClass === '法寶') return all.filter(t => t === '法寶');
@@ -457,25 +470,25 @@
                 },
                 displayData() {
                     const q = (this.searchQuery || '').toLowerCase().trim();
+                    // Filter the processed list
                     return this.processedData.filter(p => {
                         const matchClass = this.selectedClass === 'All' || p['Object Classification'] === this.selectedClass;
                         const matchType = this.selectedType === 'All' || p['Object Type'] === this.selectedType;
                         if (!(matchClass && matchType)) return false;
                         if (!q) return true;
         
-                        // 1. Search Basic Fields
-                        if ((p['JP Title'] || '').toLowerCase().includes(q) || 
-                            (p['Description'] || '').toLowerCase().includes(q) || 
-                            (p['Confirmed Translation'] || '').toLowerCase().includes(q)) return true;
+                        // Search everything
+                        const inCore = (p['JP Title'] || '').toLowerCase().includes(q) || 
+                                       (p['Description'] || '').toLowerCase().includes(q) || 
+                                       (p['Confirmed Translation'] || '').toLowerCase().includes(q);
+                        if (inCore) return true;
         
-                        // 2. Search Manga Fields
-                        if (p.mangaInfo) {
-                            if ((p.mangaInfo['CultureCom Trans'] || '').toLowerCase().includes(q) || 
-                                (p.mangaInfo['HKChingWin Trans'] || '').toLowerCase().includes(q)) return true;
-                        }
+                        if (p.mangaInfo && (
+                            (p.mangaInfo['CultureCom Trans'] || '').toLowerCase().includes(q) || 
+                            (p.mangaInfo['HKChingWin Trans'] || '').toLowerCase().includes(q)
+                        )) return true;
+        
                         if (p.mangaRecords.some(r => `[${r.type}] ${r.title} ${r.vol}`.toLowerCase().includes(q))) return true;
-        
-                        // 3. Search Movie/Anime Titles
                         if (p.movieAppearances.some(m => m.movieTitle.toLowerCase().includes(q))) return true;
                         if (p.animeAppearances.some(a => a.animeTitle.toLowerCase().includes(q))) return true;
         

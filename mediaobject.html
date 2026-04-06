@@ -77,7 +77,7 @@
             <div class="flex flex-col gap-3 mb-6 bg-white/95 p-3 rounded-2xl border border-slate-200 sticky top-2 z-30 shadow-lg mx-2 md:mx-0 md:flex-row md:items-center md:gap-4 md:p-4 md:rounded-3xl md:top-24">
                 
                 <div class="relative w-full md:flex-1 md:min-w-[250px]">
-                    <input type="text" v-model.trim="searchQuery" placeholder="Search across all fields..." 
+                    <input type="text" @input="handleSearchInput" :value="searchQuery" placeholder="Search across all fields..." 
                            class="w-full bg-slate-50 border-2 border-slate-100 rounded-xl pl-4 pr-10 py-2 text-sm font-bold outline-none focus:border-indigo-500 transition-all md:py-3 md:rounded-2xl">
                     <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 transition-colors">
                         <span class="text-lg">×</span>
@@ -335,11 +335,20 @@
         createApp({
             data() {
                 return {
-                    loading: true, searchQuery: '', selectedClass: 'All', selectedType: 'All', currentPage: 1, itemsPerPage: 12,
-                    parentData: [], movieChild: [], movieMeta: [], mangaChild: [], workInclude: [], pubCatalog: [],
-                    animeChild: [], animeMeta: [],
+                    loading: true, 
+                    searchQuery: '', 
+                    selectedClass: 'All', 
+                    selectedType: 'All', 
+                    currentPage: 1, 
+                    itemsPerPage: 12,
+                    // Raw Data from Sheets
+                    parentData: [], movieChild: [], movieMeta: [], mangaChild: [], 
+                    workInclude: [], pubCatalog: [], animeChild: [], animeMeta: [],
+                    // Optimized Master List
+                    processedData: [], 
                     viewMode: 'card',
-                    tabStates: reactive({}), showBackToTop: false
+                    tabStates: reactive({}), 
+                    showBackToTop: false
                 }
             },
             async mounted() {
@@ -360,20 +369,61 @@
                     this.parentData = parents; this.movieChild = mChild; this.movieMeta = mMeta;
                     this.mangaChild = manChild; this.workInclude = works; this.pubCatalog = pubs;
                     this.animeChild = aniChild; this.animeMeta = aniMeta;
+        
+                    // --- START PERFORMANCE OPTIMIZATION ---
+                    // We "Join" all the data tables together once right here.
+                    this.processedData = this.parentData
+                        .filter(p => p['Active']?.toLowerCase() === 'yes')
+                        .map(p => {
+                            const objId = String(p['Object ID']);
+        
+                            // 1. Link Movies
+                            const movieAppearances = this.movieChild
+                                .filter(c => String(c['Object ID']) === objId)
+                                .map(c => {
+                                    const m = this.movieMeta.find(mm => String(mm['Media ID']) === String(c['Movie ID']));
+                                    return { ...c, movieTitle: m ? m['JP Title'] : 'Unknown', movieYear: (m?.['JP Release Date']?.match(/\d{4}/) || ['N/A'])[0] };
+                                });
+        
+                            // 2. Link Anime
+                            const animeAppearances = this.animeChild
+                                .filter(c => String(c['Object ID']) === objId)
+                                .map(c => {
+                                    const a = this.animeMeta.find(am => String(am['Media ID']) === String(c['Anime ID']));
+                                    return { ...c, animeTitle: a ? a['JP Title'] : 'Unknown', animeDate: a?.['JP Show Date'] || 'N/A' };
+                                });
+        
+                            // 3. Link Manga
+                            const manInfo = this.mangaChild.find(c => String(c['Object ID']) === objId);
+                            let mangaRecords = [];
+                            if (manInfo) {
+                                mangaRecords = this.workInclude
+                                    .filter(w => String(w['作品番']) === String(manInfo['Work ID']))
+                                    .map(w => {
+                                        const pub = this.pubCatalog.find(pc => String(pc['ISBN']) === String(w['ISBN']));
+                                        return { isbn: w['ISBN'], type: pub?.['類'] || 'N/A', title: pub?.['標題'] || 'Unknown', vol: pub?.['巻'] || '', ch: w['收錄話'] };
+                                    });
+                            }
+        
+                            return { ...p, movieAppearances, animeAppearances, mangaInfo: manInfo, mangaRecords };
+                        });
+                    // --- END PERFORMANCE OPTIMIZATION ---
+        
                     this.loading = false;
                     
                     await nextTick();
+                    // Handle URL Parameters
                     const params = new URLSearchParams(window.location.search);
                     const movieID = params.get('movieid');
                     const isbn = params.get('isbn');
                     const animeID = params.get('animeid');
                     const fClass = params.get('filterclass');
-
+        
                     if (fClass === '法寶' || fClass === '人物') {
                         this.selectedClass = fClass;
-                        this.handleClassChange(); // Resets Type and Page via your existing method
+                        this.handleClassChange();
                     }
-
+        
                     if (movieID) {
                         const movie = this.movieMeta.find(m => String(m['Media ID']) === String(movieID));
                         if (movie) {
@@ -394,7 +444,10 @@
                             this.animeChild.forEach(c => { if(String(c['Anime ID']) === String(animeID)) this.tabStates[c['Object ID']] = 'anime'; });
                         }
                     }
-                } catch (e) { this.loading = false; }
+                } catch (e) { 
+                    console.error(e);
+                    this.loading = false; 
+                }
             },
             unmounted() { window.removeEventListener('scroll', this.handleScroll); },
             methods: {
@@ -420,62 +473,31 @@
                 },
                 displayData() {
                     const q = (this.searchQuery || '').toLowerCase();
-                    return this.parentData.filter(p => {
-                        if (p['Active']?.toLowerCase() !== 'yes') return false;
+                    return this.processedData.filter(p => {
+                        // Category Filters
                         const matchClass = this.selectedClass === 'All' || p['Object Classification'] === this.selectedClass;
                         const matchType = this.selectedType === 'All' || p['Object Type'] === this.selectedType;
                         if (!(matchClass && matchType)) return false;
+        
                         if (!q) return true;
-                        
-                        // Check Core Info
-                        //if ((p['JP Title'] || '').toLowerCase().includes(q) || (p['Description'] || '').toLowerCase().includes(q)) return true;
+        
+                        // Search Core Info
                         if ((p['JP Title'] || '').toLowerCase().includes(q) || 
                             (p['Description'] || '').toLowerCase().includes(q) || 
                             (p['Confirmed Translation'] || '').toLowerCase().includes(q)) return true;
-                        // Check Manga
-                        const manInfo = this.mangaChild.find(c => String(c['Object ID']) === String(p['Object ID']));
-                        if (manInfo) {
-                            if ((manInfo['CultureCom Trans'] || '').toLowerCase().includes(q) || (manInfo['HKChingWin Trans'] || '').toLowerCase().includes(q)) return true;
-                            const subRecords = this.workInclude.filter(w => String(w['作品番']) === String(manInfo['Work ID']));
-                            if (subRecords.some(w => {
-                                const pub = this.pubCatalog.find(pc => String(pc['ISBN']) === String(w['ISBN']));
-                                return `[${pub?.['類']}] ${pub?.['標題']} ${pub?.['巻']}`.toLowerCase().includes(q);
-                            })) return true;
+        
+                        // Search Manga Info
+                        if (p.mangaInfo) {
+                            if ((p.mangaInfo['CultureCom Trans'] || '').toLowerCase().includes(q) || 
+                                (p.mangaInfo['HKChingWin Trans'] || '').toLowerCase().includes(q)) return true;
+                            if (p.mangaRecords.some(r => `[${r.type}] ${r.title} ${r.vol}`.toLowerCase().includes(q))) return true;
                         }
-                        
-                        // Check Movie & Anime
-                        const hasMovie = this.movieChild.filter(c => String(c['Object ID']) === String(p['Object ID'])).some(c => {
-                            const m = this.movieMeta.find(mm => String(mm['Media ID']) === String(c['Movie ID']));
-                            return m && (m['JP Title'] || '').toLowerCase().includes(q);
-                        });
-                        const hasAnime = this.animeChild.filter(c => String(c['Object ID']) === String(p['Object ID'])).some(c => {
-                            const a = this.animeMeta.find(am => String(am['Media ID']) === String(c['Anime ID']));
-                            return a && (a['JP Title'] || '').toLowerCase().includes(q);
-                        });
-                        
+        
+                        // Search Movies & Anime Titles
+                        const hasMovie = p.movieAppearances.some(m => m.movieTitle.toLowerCase().includes(q));
+                        const hasAnime = p.animeAppearances.some(a => a.animeTitle.toLowerCase().includes(q));
+        
                         return hasMovie || hasAnime;
-                    }).map(p => {
-                        const movieAppearances = this.movieChild.filter(c => String(c['Object ID']) === String(p['Object ID'])).map(c => {
-                            const m = this.movieMeta.find(movie => String(movie['Media ID']) === String(c['Movie ID']));
-                            return { ...c, movieTitle: m ? m['JP Title'] : 'Unknown', movieYear: (m?.['JP Release Date']?.match(/\d{4}/) || ['N/A'])[0] };
-                        });
-                        const animeAppearances = this.animeChild.filter(c => String(c['Object ID']) === String(p['Object ID'])).map(c => {
-                            const a = this.animeMeta.find(ani => String(ani['Media ID']) === String(c['Anime ID']));
-                            return { 
-                                ...c, 
-                                animeTitle: a ? a['JP Title'] : 'Unknown', 
-                                animeDate: a && a['JP Show Date'] ? a['JP Show Date'] : 'N/A' 
-                            };
-                        });
-                        const manInfo = this.mangaChild.find(c => String(c['Object ID']) === String(p['Object ID']));
-                        let mangaRecords = [];
-                        if (manInfo) {
-                            mangaRecords = this.workInclude.filter(w => String(w['作品番']) === String(manInfo['Work ID'])).map(w => {
-                                const pub = this.pubCatalog.find(pc => String(pc['ISBN']) === String(w['ISBN']));
-                                return { isbn: w['ISBN'], type: pub?.['類'] || 'N/A', title: pub?.['標題'] || 'Unknown', vol: pub?.['巻'] || '', ch: w['收錄話'] };
-                            });
-                        }
-                        return { ...p, movieAppearances, animeAppearances, mangaInfo: manInfo, mangaRecords };
                     });
                 },
                 totalPages() { return Math.ceil(this.displayData.length / this.itemsPerPage); },

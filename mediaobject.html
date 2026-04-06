@@ -50,10 +50,11 @@
         td { padding: 18px 12px; border-bottom: 1px solid #f1f5f9; font-size: 15px; vertical-align: middle; }
         /* Scrollable container for sub-records */
         .sub-record-scroll {
-            max-height: 4.5rem; 
-            overflow-y: auto;
-            padding-right: 4px;
             display: block;
+            width: 100%;
+            max-height: 120px; 
+            overflow-y: auto;
+            scrollbar-gutter: stable; /* Prevents layout jump when scrollbar appears */
         }
         
         /* Custom scrollbar to make it look "thinner" and cleaner */
@@ -74,6 +75,10 @@
             font-size: 0.75rem; /* text-xs */
             line-height: 1.25;
             margin-bottom: 0.25rem;
+        }
+        .table-view-cell {
+            height: 1px; /* The "Houdini" trick: forces the div inside to fill height */
+            vertical-align: top;
         }
     </style>
 </head>
@@ -291,7 +296,7 @@
                                             <p class="text-sm text-slate-600 font-medium max-w-[400px] leading-snug" v-html="highlight(parent['Description'])"></p>
                                         </td>
                                 
-                                        <td class="px-6 py-6 align-top border-b border-transparent group-hover:border-b-indigo-500 transition-all">
+                                        <td class="px-6 py-6 align-top border-b table-view-cell border-transparent group-hover:border-b-indigo-500 transition-all">
                                             <div class="space-y-3">
                                                 <div class="sub-record-scroll text-xs w-48">
                                                     <div v-for="m in parent.movieAppearances" class="bg-white p-3 rounded-xl border-2 border-slate-100 shadow-sm table-sub-text">
@@ -306,7 +311,7 @@
                                             </div>
                                         </td>
                                 
-                                        <td class="px-6 py-6 align-top border-b border-transparent group-hover:border-b-indigo-500 transition-all">
+                                        <td class="px-6 py-6 align-top border-b table-view-cell border-transparent group-hover:border-b-indigo-500 transition-all">
                                             <div v-if="parent.mangaInfo" class="mb-4 space-y-2 border-b-2 border-slate-100 pb-3">
                                                 <div class="flex items-center gap-2">
                                                     <span class="text-[9px] font-black text-slate-400 uppercase tracking-tighter shrink-0">文傳譯/</span>
@@ -330,7 +335,7 @@
                                             </div>
                                         </td>
                                 
-                                        <td class="px-6 py-6 align-top border-b border-transparent group-hover:border-b-indigo-500 transition-all">
+                                        <td class="px-6 py-6 align-top border-b table-view-cell border-transparent group-hover:border-b-indigo-500 transition-all">
                                             <div class="space-y-3">
                                                 <div class="sub-record-scroll text-xs w-48">
                                                     <div v-for="a in parent.animeAppearances" class="bg-white p-3 rounded-xl border-2 border-slate-100 shadow-sm table-sub-text">

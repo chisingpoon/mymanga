@@ -456,7 +456,11 @@
                 getTab(id) { return this.tabStates[id] || 'movie'; },
                 setTab(id, tab) { this.tabStates[id] = tab; },
                 changePage(p) { this.currentPage = p; window.scrollTo({ top: 0, behavior: 'smooth' }); },
-                handleClassChange() { this.selectedType = 'All'; this.currentPage = 1; }
+                handleClassChange() { this.selectedType = 'All'; this.currentPage = 1; },
+                handleSearchInput(e) {
+                    this.searchQuery = e.target.value;
+                    this.currentPage = 1; // Reset to page 1 when typing
+                }
             },
             computed: {
                 classifications() { 
@@ -469,29 +473,39 @@
                     return all;
                 },
                 displayData() {
+                    // Ensure q is a string and lowercase
                     const q = (this.searchQuery || '').toLowerCase().trim();
-                    // Filter the processed list
-                    return this.processedData.filter(p => {
-                        const matchClass = this.selectedClass === 'All' || p['Object Classification'] === this.selectedClass;
-                        const matchType = this.selectedType === 'All' || p['Object Type'] === this.selectedType;
+                    
+                    return this.processedData.filter(parent => {
+                        // 1. Category Filters
+                        const matchClass = this.selectedClass === 'All' || parent['Object Classification'] === this.selectedClass;
+                        const matchType = this.selectedType === 'All' || parent['Object Type'] === this.selectedType;
                         if (!(matchClass && matchType)) return false;
+            
+                        // 2. If no search text, show all in category
                         if (!q) return true;
-        
-                        // Search everything
-                        const inCore = (p['JP Title'] || '').toLowerCase().includes(q) || 
-                                       (p['Description'] || '').toLowerCase().includes(q) || 
-                                       (p['Confirmed Translation'] || '').toLowerCase().includes(q);
-                        if (inCore) return true;
-        
-                        if (p.mangaInfo && (
-                            (p.mangaInfo['CultureCom Trans'] || '').toLowerCase().includes(q) || 
-                            (p.mangaInfo['HKChingWin Trans'] || '').toLowerCase().includes(q)
+            
+                        // 3. Search Logic
+                        // Check Main Fields
+                        const inMain = (parent['JP Title'] || '').toLowerCase().includes(q) || 
+                                       (parent['Description'] || '').toLowerCase().includes(q) || 
+                                       (parent['Confirmed Translation'] || '').toLowerCase().includes(q);
+                        if (inMain) return true;
+            
+                        // Check Manga
+                        if (parent.mangaInfo) {
+                            const inMangaMeta = (parent.mangaInfo['CultureCom Trans'] || '').toLowerCase().includes(q) || 
+                                                (parent.mangaInfo['HKChingWin Trans'] || '').toLowerCase().includes(q);
+                            if (inMangaMeta) return true;
+                        }
+                        if (parent.mangaRecords && parent.mangaRecords.some(r => 
+                            `${r.type} ${r.title}`.toLowerCase().includes(q)
                         )) return true;
-        
-                        if (p.mangaRecords.some(r => `[${r.type}] ${r.title} ${r.vol}`.toLowerCase().includes(q))) return true;
-                        if (p.movieAppearances.some(m => m.movieTitle.toLowerCase().includes(q))) return true;
-                        if (p.animeAppearances.some(a => a.animeTitle.toLowerCase().includes(q))) return true;
-        
+            
+                        // Check Movie/Anime
+                        if (parent.movieAppearances && parent.movieAppearances.some(m => m.movieTitle.toLowerCase().includes(q))) return true;
+                        if (parent.animeAppearances && parent.animeAppearances.some(a => a.animeTitle.toLowerCase().includes(q))) return true;
+            
                         return false;
                     });
                 },

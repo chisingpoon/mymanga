@@ -366,7 +366,7 @@
                     parentData: [], movieChild: [], movieMeta: [], mangaChild: [], 
                     workInclude: [], pubCatalog: [], animeChild: [], animeMeta: [],
                     processedData: [], 
-                    viewMode: 'card',
+                    viewMode: 'card', // Ensure this matches your HTML v-if="viewMode === 'card'"
                     tabStates: reactive({}), 
                     showBackToTop: false
                 }
@@ -386,27 +386,31 @@
                         fetch(base + "電視動畫").then(r => r.json())
                     ]);
                     
-                    this.parentData = parents; this.movieChild = mChild; this.movieMeta = mMeta;
-                    this.mangaChild = manChild; this.workInclude = works; this.pubCatalog = pubs;
-                    this.animeChild = aniChild; this.animeMeta = aniMeta;
+                    this.parentData = parents || []; 
+                    this.movieChild = mChild || []; 
+                    this.movieMeta = mMeta || [];
+                    this.mangaChild = manChild || []; 
+                    this.workInclude = works || []; 
+                    this.pubCatalog = pubs || [];
+                    this.animeChild = aniChild || []; 
+                    this.animeMeta = aniMeta || [];
     
-                    // --- OPTIMIZATION: PRE-BUILD LOOKUP MAPS ---
-                    // This converts O(n) searches into O(1) lookups
-                    const movieMap = new Map(this.movieMeta.map(m => [String(m['Media ID']).trim(), m]));
-                    const animeMap = new Map(this.animeMeta.map(a => [String(a['Media ID']).trim(), a]));
-                    const pubMap = new Map(this.pubCatalog.map(p => [String(p['ISBN']).trim(), p]));
+                    // 1. Build Lookup Maps with Safety
+                    const movieMap = new Map(this.movieMeta.map(m => [String(m['Media ID'] || '').trim(), m]));
+                    const animeMap = new Map(this.animeMeta.map(a => [String(a['Media ID'] || '').trim(), a]));
+                    const pubMap = new Map(this.pubCatalog.map(p => [String(p['ISBN'] || '').trim(), p]));
     
-                    // --- THE SAFE JOIN ---
+                    // 2. The Main Data Join
                     this.processedData = this.parentData
-                        .filter(p => String(p['Active']).toLowerCase() === 'yes')
+                        .filter(p => String(p['Active'] || '').toLowerCase() === 'yes')
                         .map(p => {
-                            const objId = String(p['Object ID']).trim();
+                            const objId = String(p['Object ID'] || '').trim();
     
-                            // Movies: Using the Map lookup
+                            // Movie Join
                             const movieAppearances = this.movieChild
-                                .filter(c => String(c['Object ID']).trim() === objId)
+                                .filter(c => String(c['Object ID'] || '').trim() === objId)
                                 .map(c => {
-                                    const m = movieMap.get(String(c['Movie ID']).trim());
+                                    const m = movieMap.get(String(c['Movie ID'] || '').trim());
                                     return { 
                                         ...c, 
                                         movieTitle: m ? m['JP Title'] : 'Unknown Movie', 
@@ -414,11 +418,11 @@
                                     };
                                 });
     
-                            // Anime: Using the Map lookup
+                            // Anime Join
                             const animeAppearances = this.animeChild
-                                .filter(c => String(c['Object ID']).trim() === objId)
+                                .filter(c => String(c['Object ID'] || '').trim() === objId)
                                 .map(c => {
-                                    const a = animeMap.get(String(c['Anime ID']).trim());
+                                    const a = animeMap.get(String(c['Anime ID'] || '').trim());
                                     return { 
                                         ...c, 
                                         animeTitle: a ? a['JP Title'] : 'Unknown Anime', 
@@ -426,22 +430,22 @@
                                     };
                                 });
     
-                            // Manga
-                            const mangaInfo = this.mangaChild.find(c => String(c['Object ID']).trim() === objId) || null;
+                            // Manga Join (Fixes point 3 - Manga subtab issue)
+                            const mangaInfo = this.mangaChild.find(c => String(c['Object ID'] || '').trim() === objId) || null;
                             let mangaRecords = [];
                             if (mangaInfo) {
-                                const workId = String(mangaInfo['Work ID']).trim();
+                                const workId = String(mangaInfo['Work ID'] || '').trim();
                                 mangaRecords = this.workInclude
-                                    .filter(w => String(w['作品番']).trim() === workId)
+                                    .filter(w => String(w['作品番'] || '').trim() === workId)
                                     .map(w => {
-                                        const pub = pubMap.get(String(w['ISBN']).trim());
+                                        const pub = pubMap.get(String(w['ISBN'] || '').trim());
                                         return { 
                                             isbn: w['ISBN'], 
                                             type: pub ? pub['類'] : 'N/A', 
                                             title: pub ? pub['標題'] : 'Unknown Title', 
                                             vol: pub ? pub['巻'] : '', 
-                                            ch: w['收錄話'] ,
-                                            subTitle: w['出版副題'] || ''
+                                            ch: w['收錄話'],
+                                            subTitle: w['出版副題'] || '' // Your requirement
                                         };
                                     });
                             }
@@ -454,7 +458,6 @@
                 } catch (e) {
                     console.error("Critical Load Error:", e);
                 } finally {
-                    // Ensures loading screen disappears even if a fetch fails
                     this.loading = false;
                 }
             },
@@ -466,68 +469,75 @@
                     const animeID = params.get('animeid');
                     const fClass = params.get('filterclass');
                 
-                    console.log("Applying URL Filters...");
-                
                     if (fClass) {
                         this.selectedClass = fClass;
-                        if (typeof this.handleClassChange === 'function') {
-                            this.handleClassChange();
-                        }
+                        this.handleClassChange();
                     }
                 
                     let targetSearch = '';
                 
-                    if (movieID) {
-                        const movie = this.movieMeta.find(m => String(m['Media ID']).trim() === String(movieID).trim());
-                        if (movie) {
-                            targetSearch = movie['JP Title'];
-                            this.processedData.forEach(p => {
-                                if (p.movieAppearances.some(ma => String(ma['Movie ID']).trim() === String(movieID).trim())) {
-                                    this.tabStates[p['Object ID']] = 'movie';
-                                }
-                            });
-                        }
-                    } 
-                    
+                    // Fixes point 1 - ISBN Spinning issue
                     if (isbn) {
-                        const pub = this.pubCatalog.find(p => String(p['ISBN']).trim() === String(isbn).trim());
+                        const cleanIsbn = String(isbn).trim();
+                        const pub = this.pubCatalog.find(p => String(p['ISBN'] || '').trim() === cleanIsbn);
                         if (pub) {
                             targetSearch = pub['標題'];
                             this.processedData.forEach(p => {
-                                if (p.mangaRecords.some(r => String(r.isbn).trim() === String(isbn).trim())) {
+                                if (p.mangaRecords && p.mangaRecords.some(r => String(r.isbn || '').trim() === cleanIsbn)) {
                                     this.tabStates[p['Object ID']] = 'manga';
                                 }
                             });
                         }
                     } 
                     
-                    if (animeID) {
-                        const anime = this.animeMeta.find(a => String(a['Media ID']).trim() === String(animeID).trim());
-                        if (anime) {
-                            targetSearch = anime['JP Title'];
+                    // Movie & Anime URL logic remains same but with safety checks
+                    if (movieID) {
+                        const m = this.movieMeta.find(m => String(m['Media ID'] || '').trim() === String(movieID).trim());
+                        if (m) {
+                            targetSearch = m['JP Title'];
                             this.processedData.forEach(p => {
-                                if (p.animeAppearances.some(aa => String(aa['Anime ID']).trim() === String(animeID).trim())) {
+                                if (p.movieAppearances.some(ma => String(ma['Movie ID'] || '').trim() === String(movieID).trim())) {
+                                    this.tabStates[p['Object ID']] = 'movie';
+                                }
+                            });
+                        }
+                    }
+    
+                    if (animeID) {
+                        const a = this.animeMeta.find(a => String(a['Media ID'] || '').trim() === String(animeID).trim());
+                        if (a) {
+                            targetSearch = a['JP Title'];
+                            this.processedData.forEach(p => {
+                                if (p.animeAppearances.some(aa => String(aa['Anime ID'] || '').trim() === String(animeID).trim())) {
                                     this.tabStates[p['Object ID']] = 'anime';
                                 }
                             });
                         }
                     }
                 
-                    if (targetSearch) {
-                        this.searchQuery = targetSearch;
-                    }
-                
+                    if (targetSearch) this.searchQuery = targetSearch;
                     this.currentPage = 1;
                 },
                 handleScroll() { this.showBackToTop = window.scrollY > 300; },
                 scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },
                 highlight(text) {
                     if (!this.searchQuery) return text;
-                    const escaped = String(this.searchQuery).replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-                    const regex = new RegExp(`(${escaped})`, 'gi');
-                    return String(text).replace(regex, '<mark>$1</mark>');
+                    try {
+                        const escaped = String(this.searchQuery).replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                        const regex = new RegExp(`(${escaped})`, 'gi');
+                        return String(text).replace(regex, '<mark>$1</mark>');
+                    } catch(e) { return text; }
                 },
-                getTab(id) { return this.tabStates[id] || 'movie'; },
+                // Fixes point 3 - Tab switching reliability
+                getTab(id) { 
+                    if (!this.tabStates[id]) {
+                        // Default to 'manga' if that's the only data available, else 'movie'
+                        const p = this.processedData.find(item => item['Object ID'] === id);
+                        if (p && p.mangaRecords.length > 0 && p.movieAppearances.length === 0) return 'manga';
+                        return 'movie';
+                    }
+                    return this.tabStates[id]; 
+                },
                 setTab(id, tab) { this.tabStates[id] = tab; },
                 changePage(p) {
                     if (p >= 1 && p <= this.totalPages) {
@@ -542,6 +552,7 @@
                 }
             },
             computed: {
+                // View mode toggle should now work as reactivity is restored
                 classifications() { 
                     return [...new Set(this.parentData.filter(i => i['Active']?.toLowerCase() === 'yes').map(i => i['Object Classification']))].sort(); 
                 },
@@ -552,14 +563,13 @@
                     return all;
                 },
                 displayData() {
-                    if (!this.processedData || this.processedData.length === 0) return [];
+                    if (!this.processedData) return [];
                     const q = (this.searchQuery || '').toLowerCase().trim();
                     
                     return this.processedData.filter(p => {
                         const matchClass = this.selectedClass === 'All' || p['Object Classification'] === this.selectedClass;
                         const matchType = this.selectedType === 'All' || p['Object Type'] === this.selectedType;
                         if (!(matchClass && matchType)) return false;
-    
                         if (!q) return true;
     
                         const inCore = (p['JP Title'] || '').toLowerCase().includes(q) || 
@@ -567,26 +577,23 @@
                                        (p['Description'] || '').toLowerCase().includes(q);
                         if (inCore) return true;
     
-                        const inManga = p.mangaRecords.some(r => `${r.type} ${r.title}`.toLowerCase().includes(q)) ||
+                        const inManga = (p.mangaRecords || []).some(r => `${r.type} ${r.title} ${r.subTitle}`.toLowerCase().includes(q)) ||
                                         (p.mangaInfo?.['CultureCom Trans'] || '').toLowerCase().includes(q);
                         if (inManga) return true;
     
-                        const inMovie = p.movieAppearances.some(m => m.movieTitle.toLowerCase().includes(q));
-                        const inAnime = p.animeAppearances.some(a => a.animeTitle.toLowerCase().includes(q));
-    
-                        return inMovie || inAnime;
+                        return p.movieAppearances.some(m => m.movieTitle.toLowerCase().includes(q)) || 
+                               p.animeAppearances.some(a => a.animeTitle.toLowerCase().includes(q));
                     });
                 },
                 totalPages() { return Math.ceil(this.displayData.length / this.itemsPerPage); },
                 visiblePages() {
                     const total = this.totalPages;
                     const current = this.currentPage;
-                    const range = 2; 
                     let pages = [];
                     for (let i = 1; i <= total; i++) {
-                        if (i === 1 || i === total || (i >= current - range && i <= current + range)) {
+                        if (i === 1 || i === total || (i >= current - 2 && i <= current + 2)) {
                             pages.push(i);
-                        } else if (i === current - range - 1 || i === current + range + 1) {
+                        } else if (i === current - 3 || i === current + 3) {
                             if (pages[pages.length - 1] !== '...') pages.push('...');
                         }
                     }

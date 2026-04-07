@@ -6,10 +6,140 @@
     <title>Database View</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
+        /* Prevent flickering before Vue loads */
         [v-cloak] { display: none; }
-        mark { background: #ffd700; color: black; padding: 0 2px; border-radius: 2px; }
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: flex; align-items: center; justify-content: center; z-index: 999; }
-        /* Add basic card and pagination styles here if needed */
+    
+        :root {
+            --primary-blue: #0099e5;
+            --accent-red: #f03e3e;
+            --bg-light: #f8fbff;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+    
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+    
+        /* Search & Filter Bar */
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+        }
+    
+        input, select {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+    
+        input[type="text"] { flex-grow: 1; }
+    
+        /* Grid Layout */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+    
+        .item-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.2s;
+            border-top: 5px solid var(--primary-blue);
+        }
+    
+        .item-card:hover { transform: translateY(-5px); }
+    
+        mark { background: #fff3bf; color: #855d00; padding: 0 2px; }
+    
+        /* Tabs Styling */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            margin: 15px 0;
+            gap: 5px;
+        }
+    
+        .tabs button {
+            background: none;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #666;
+            border-bottom: 2px solid transparent;
+        }
+    
+        .tabs button.active {
+            color: var(--primary-blue);
+            border-bottom: 2px solid var(--primary-blue);
+            font-weight: bold;
+        }
+    
+        .tab-content {
+            font-size: 13px;
+            min-height: 100px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 40px;
+            padding-bottom: 40px;
+        }
+    
+        .pagination button {
+            min-width: 40px;
+            height: 40px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    
+        .pagination button.active {
+            background: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+        }
+    
+        /* Utilities */
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--accent-red);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+    
+        .loading-overlay {
+            text-align: center;
+            padding: 100px;
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+        }
     </style>
 </head>
 <body>

@@ -398,14 +398,13 @@
                     this.parentData = parents; this.movieChild = mChild; this.movieMeta = mMeta;
                     this.mangaChild = manChild; this.workInclude = works; this.pubCatalog = pubs;
                     this.animeChild = aniChild; this.animeMeta = aniMeta;
-            
-                    // --- THE SAFE JOIN ---
+    
                     this.processedData = this.parentData
                         .filter(p => String(p['Active']).toLowerCase() === 'yes')
                         .map(p => {
                             const objId = String(p['Object ID']).trim();
-            
-                            // Movies
+    
+                            // Movies Join
                             const movieAppearances = this.movieChild
                                 .filter(c => String(c['Object ID']).trim() === objId)
                                 .map(c => {
@@ -416,8 +415,8 @@
                                         movieYear: m ? (m['JP Release Date']?.match(/\d{4}/) || ['N/A'])[0] : 'N/A' 
                                     };
                                 });
-            
-                            // Anime
+    
+                            // Anime Join
                             const animeAppearances = this.animeChild
                                 .filter(c => String(c['Object ID']).trim() === objId)
                                 .map(c => {
@@ -428,8 +427,8 @@
                                         animeDate: a ? a['JP Show Date'] : 'N/A' 
                                     };
                                 });
-            
-                            // Manga
+    
+                            // Manga Join (Enhanced with subTitle)
                             const mangaInfo = this.mangaChild.find(c => String(c['Object ID']).trim() === objId) || null;
                             let mangaRecords = [];
                             if (mangaInfo) {
@@ -439,19 +438,19 @@
                                     .map(w => {
                                         const pub = this.pubCatalog.find(pc => String(pc['ISBN']).trim() === String(w['ISBN']).trim());
                                         return { 
-                                            isbn: w['ISBN'], 
+                                            isbn: w['ISBN'] || '', 
                                             type: pub ? pub['類'] : 'N/A', 
                                             title: pub ? pub['標題'] : 'Unknown Title', 
                                             vol: pub ? pub['巻'] : '', 
-                                            ch: w['收錄話'] ,
-                                            subTitle: w['出版副題'] || ''
+                                            ch: w['收錄話'] || '',
+                                            subTitle: w['出版副題'] || '' // The requested change
                                         };
                                     });
                             }
-            
+    
                             return { ...p, movieAppearances, animeAppearances, mangaInfo, mangaRecords };
                         });
-            
+    
                     this.loading = false;
                     await nextTick();
                     this.applyUrlParams();
@@ -467,29 +466,14 @@
                     const isbn = params.get('isbn');
                     const animeID = params.get('animeid');
                     const fClass = params.get('filterclass');
-                
-                    console.log("Applying URL Filters...");
-                
-                    // 1. Apply Class Filter (e.g., ?filterclass=法寶)
-                    // This happens regardless of whether there is a search ID
-                    if (fClass) {
-                        this.selectedClass = fClass;
-                        // If your HTML has a secondary dropdown for "Type", 
-                        // handleClassChange usually resets that to 'All'
-                        if (typeof this.handleClassChange === 'function') {
-                            this.handleClassChange();
-                        }
-                    }
-                
-                    // 2. Determine Search Keyword & Open Tabs
-                    // We check all three ID types. If multiple exist, the last one found wins the search text.
+    
+                    if (fClass) { this.selectedClass = fClass; if (this.handleClassChange) this.handleClassChange(); }
+    
                     let targetSearch = '';
-                
                     if (movieID) {
                         const movie = this.movieMeta.find(m => String(m['Media ID']).trim() === String(movieID).trim());
                         if (movie) {
                             targetSearch = movie['JP Title'];
-                            // Auto-switch cards to 'movie' tab
                             this.processedData.forEach(p => {
                                 if (p.movieAppearances.some(ma => String(ma['Movie ID']).trim() === String(movieID).trim())) {
                                     this.tabStates[p['Object ID']] = 'movie';
@@ -497,7 +481,6 @@
                             });
                         }
                     } 
-                    
                     if (isbn) {
                         const pub = this.pubCatalog.find(p => String(p['ISBN']).trim() === String(isbn).trim());
                         if (pub) {
@@ -509,7 +492,6 @@
                             });
                         }
                     } 
-                    
                     if (animeID) {
                         const anime = this.animeMeta.find(a => String(a['Media ID']).trim() === String(animeID).trim());
                         if (anime) {
@@ -521,13 +503,7 @@
                             });
                         }
                     }
-                
-                    // 3. Finalize the search state
-                    if (targetSearch) {
-                        this.searchQuery = targetSearch;
-                    }
-                
-                    // 4. Reset pagination to show results from the beginning
+                    if (targetSearch) this.searchQuery = targetSearch;
                     this.currentPage = 1;
                 },
                 handleScroll() { this.showBackToTop = window.scrollY > 300; },
@@ -549,7 +525,7 @@
                 handleClassChange() { this.selectedType = 'All'; this.currentPage = 1; },
                 handleSearchInput(e) {
                     this.searchQuery = e.target.value;
-                    this.currentPage = 1; // Reset to page 1 when typing
+                    this.currentPage = 1;
                 }
             },
             computed: {
@@ -563,32 +539,32 @@
                     return all;
                 },
                 displayData() {
-                    // Fallback to empty array if processedData failed
                     if (!this.processedData || this.processedData.length === 0) return [];
-            
                     const q = (this.searchQuery || '').toLowerCase().trim();
                     
                     return this.processedData.filter(p => {
-                        // 1. Classification & Type Filters
                         const matchClass = this.selectedClass === 'All' || p['Object Classification'] === this.selectedClass;
                         const matchType = this.selectedType === 'All' || p['Object Type'] === this.selectedType;
                         if (!(matchClass && matchType)) return false;
-            
-                        // 2. Search Filter
+    
                         if (!q) return true;
-            
+    
                         const inCore = (p['JP Title'] || '').toLowerCase().includes(q) || 
                                        (p['Confirmed Translation'] || '').toLowerCase().includes(q) ||
                                        (p['Description'] || '').toLowerCase().includes(q);
                         if (inCore) return true;
-            
-                        const inManga = p.mangaRecords.some(r => `${r.type} ${r.title}`.toLowerCase().includes(q)) ||
-                                        (p.mangaInfo?.['CultureCom Trans'] || '').toLowerCase().includes(q);
+    
+                        // Updated Search to safely include subTitle
+                        const inManga = p.mangaRecords.some(r => {
+                            const searchStr = `${r.type} ${r.title} ${r.subTitle}`.toLowerCase();
+                            return searchStr.includes(q);
+                        }) || (p.mangaInfo?.['CultureCom Trans'] || '').toLowerCase().includes(q);
+                        
                         if (inManga) return true;
-            
-                        const inMovie = p.movieAppearances.some(m => m.movieTitle.toLowerCase().includes(q));
-                        const inAnime = p.animeAppearances.some(a => a.animeTitle.toLowerCase().includes(q));
-            
+    
+                        const inMovie = p.movieAppearances.some(m => (m.movieTitle || '').toLowerCase().includes(q));
+                        const inAnime = p.animeAppearances.some(a => (a.animeTitle || '').toLowerCase().includes(q));
+    
                         return inMovie || inAnime;
                     });
                 },

@@ -147,14 +147,14 @@
                                 <p class="text-sm text-slate-600 leading-relaxed font-medium" v-html="highlight(parent['Description'])"></p>
                             </div>
                         </div>
-                        <div class="pt-2 border-t border-slate-100">
+                        <div class="flex border-b border-slate-200 mb-4 gap-2 overflow-x-auto no-scrollbar">
                             <div class="flex border-b border-slate-200 mb-4 gap-4">
                                 <button @click="setTab(parent['Object ID'], 'movie')" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'movie' ? 'active' : 'text-slate-400']">Movie ({{ parent.movieAppearances.length }})</button>
                                 <button @click="setTab(parent['Object ID'], 'manga')" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'manga' ? 'active' : 'text-slate-400']">Manga ({{ parent.mangaRecords.length }})</button>
                                 <button @click="setTab(parent['Object ID'], 'anime')" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'anime' ? 'active' : 'text-slate-400']">Anime ({{ parent.animeAppearances.length }})</button>
                             </div>
                             <div class="tab-content-wrapper" style="flex-grow: 1; display: flex; flex-direction: column; min-height: 0;">
-                                <div style="flex-grow: 1; overflow-y: auto; min-height: 150px; max-height: 400px; padding-right: 5px;">
+                                <div class="flex-grow overflow-y-auto pr-1 custom-scrollbar" style="max-height: 280px;">
                                     <div v-if="getTab(parent['Object ID']) === 'movie'">
                                         <div v-if="parent.movieAppearances.length > 0">
                                             <div class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
@@ -259,8 +259,8 @@
                                             <p class="text-sm text-slate-600 font-medium max-w-[400px] leading-snug" v-html="highlight(parent['Description'])"></p>
                                         </td>
                                 
-                                        <td class="px-6 py-6 align-top border-b border-transparent group-hover:border-b-indigo-500 transition-all" style="vertical-align: top; min-width: 200px;">
-                                            <div class="space-y-3" style="display: block; max-height: 120px; overflow-y: auto; width: 100%; min-width: 150px;">
+                                        <td class="px-6 py-6 align-top border-b border-transparent group-hover:border-b-indigo-500 transition-all" style="vertical-align: top; min-width: 250px;">
+                                            <div style="display: block; max-height: 200px; overflow-y: auto; width: 100%;">
                                                 <div v-for="m in parent.movieAppearances" class="bg-white p-3 rounded-xl border-2 border-slate-100 shadow-sm">
                                                     <span class="text-[9px] font-black bg-slate-900 text-white px-2 py-0.5 rounded w-fit uppercase block mb-1">Movie {{ m.movieYear }}</span>
                                                     <span class="text-xs font-black text-slate-800 block mb-1" v-html="'<span class=\'text-[9px] text-slate-400 uppercase font-bold mr-1\'>港譯/</span>' + highlight(m['HK Translation'])"></span>

@@ -48,7 +48,30 @@
         }
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         td { padding: 18px 12px; border-bottom: 1px solid #f1f5f9; font-size: 15px; vertical-align: middle; }
-
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background: white;
+            width: 90%; max-width: 800px;
+            max-height: 80vh;
+            border-radius: 8px;
+            overflow-y: auto;
+            padding: 20px;
+            position: relative;
+        }
+        .modal-header {
+            display: flex; justify-content: space-between;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+        .close-btn {
+            font-size: 2rem; border: none; background: none; cursor: pointer;
+        }
     </style>
 </head>
 <body class="bg-grid">
@@ -353,6 +376,32 @@
                 </div>
             </div>
         </main>
+        <div v-if="selectedItem" class="modal-overlay" @click.self="closeModal">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <h2>{{ selectedItem['JP Title'] }} <small>{{ selectedItem['Confirmed Translation'] }}</small></h2>
+                    <button @click="closeModal" class="close-btn">&times;</button>
+                </header>
+        
+                <div class="modal-body">
+                    <div class="tabs">
+                        <button :class="{active: getTab(selectedItem['Object ID']) === 'movie'}" @click="setTab(selectedItem['Object ID'], 'movie')">Movie</button>
+                        <button :class="{active: getTab(selectedItem['Object ID']) === 'manga'}" @click="setTab(selectedItem['Object ID'], 'manga')">Manga</button>
+                        <button :class="{active: getTab(selectedItem['Object ID']) === 'anime'}" @click="setTab(selectedItem['Object ID'], 'anime')">Anime</button>
+                    </div>
+        
+                    <div class="tab-panel">
+                        <div v-if="getTab(selectedItem['Object ID']) === 'movie'">
+                            <ul>
+                                <li v-for="m in selectedItem.movieAppearances" :key="m['Movie ID']">
+                                    <strong>{{ m.movieYear }}</strong> - {{ m.movieTitle }}
+                                </li>
+                            </ul>
+                        </div>
+                        </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>

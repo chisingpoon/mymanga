@@ -149,6 +149,9 @@
                                 <p class="text-sm text-slate-600 leading-relaxed font-medium" v-html="highlight(parent['Description'])"></p>
                             </div>
                         </div>
+                        <button @click="openModal(item)" class="btn-details">
+                            View Appearances ({{ item.movieAppearances.length + item.mangaRecords.length + item.animeAppearances.length }})
+                        </button>
                         <div class="pt-2 border-t border-slate-100">
                             <div class="flex border-b border-slate-200 mb-4 gap-4">
                                 <button @click="setTab(parent['Object ID'], 'movie')" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'movie' ? 'active' : 'text-slate-400']">Movie ({{ parent.movieAppearances.length }})</button>
@@ -368,6 +371,7 @@
                     processedData: [], 
                     viewMode: 'card',
                     tabStates: reactive({}), 
+                    selectedItem: null,
                     showBackToTop: false
                 }
             },
@@ -540,6 +544,16 @@
                 handleSearchInput(e) {
                     this.searchQuery = e.target.value;
                     this.currentPage = 1; // Reset to page 1 when typing
+                },
+                openModal(item) {
+                    this.selectedItem = item;
+                    // Optional: Reset the tab to 'movie' every time a modal opens
+                    this.setTab(item['Object ID'], 'movie');
+                    document.body.style.overflow = 'hidden'; // Prevent background scroll
+                },
+                closeModal() {
+                    this.selectedItem = null;
+                    document.body.style.overflow = 'auto'; // Restore scroll
                 }
             },
             computed: {

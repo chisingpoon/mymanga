@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database View</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        [v-cloak] { display: none; }
+        mark { background: #ffd700; color: black; padding: 0 2px; border-radius: 2px; }
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: flex; align-items: center; justify-content: center; z-index: 999; }
+        /* Add basic card and pagination styles here if needed */
+    </style>
+</head>
+<body>
+    <div id="app" v-cloak>
+        <div v-if="loading" class="loading-overlay">
+            <p>Loading Data... Please wait...</p>
+        </div>
+
+        <div v-else>
+            <div class="controls">
+                <input 
+                    type="text" 
+                    :value="searchQuery" 
+                    @input="handleSearchInput" 
+                    placeholder="Search by title, description, or ID..."
+                >
+                
+                <select v-model="selectedClass" @change="handleClassChange">
+                    <option value="All">All Classifications</option>
+                    <option v-for="c in classifications" :key="c" :value="c">{{ c }}</option>
+                </select>
+
+                <select v-model="selectedType">
+                    <option value="All">All Types</option>
+                    <option v-for="t in filteredObjectTypes" :key="t" :value="t">{{ t }}</option>
+                </select>
+            </div>
+
+            <div :class="viewMode === 'card' ? 'card-grid' : 'list-view'">
+                <div v-for="item in paginatedData" :key="item['Object ID']" class="item-card">
+                    <h3 v-html="highlight(item['JP Title'])"></h3>
+                    <p v-html="highlight(item['Description'])"></p>
+                    
+                    <div class="tabs">
+                        <button @click="setTab(item['Object ID'], 'movie')" :class="{active: getTab(item['Object ID']) === 'movie'}">Movie</button>
+                        <button @click="setTab(item['Object ID'], 'manga')" :class="{active: getTab(item['Object ID']) === 'manga'}">Manga</button>
+                        <button @click="setTab(item['Object ID'], 'anime')" :class="{active: getTab(item['Object ID']) === 'anime'}">Anime</button>
+                    </div>
+
+                    <div class="tab-content">
+                        <div v-if="getTab(item['Object ID']) === 'movie'">
+                            <ul>
+                                <li v-for="m in item.movieAppearances" :key="m.movieTitle">
+                                    {{ m.movieYear }} - {{ m.movieTitle }}
+                                </li>
+                            </ul>
+                        </div>
+                        </div>
+                </div>
+            </div>
+
+            <div class="pagination" v-if="totalPages > 1">
+                <button v-for="p in visiblePages" 
+                        :key="p" 
+                        @click="p !== '...' ? changePage(p) : null"
+                        :class="{ active: currentPage === p }">
+                    {{ p }}
+                </button>
+            </div>
+
+            <button v-if="showBackToTop" @click="scrollToTop" class="back-to-top">↑ Top</button>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, reactive, watch, nextTick } = Vue;
+        createApp({
+            data() {
+                return {
+                    loading: true, 
+                    searchQuery: '', 
+                    selectedClass: 'All', 
+                    selectedType: 'All', 
+                    currentPage: 1, 
+                    itemsPerPage: 12,
+                    parentData: [], movieChild: [], movieMeta: [], mangaChild: [], 
+                    workInclude: [], pubCatalog: [], animeChild: [], animeMeta: [],
+                    processedData: [], 
+                    viewMode: 'card',
+                    tabStates: reactive({}), 
+                    showBackToTop: false
+                }
+            },
+            async mounted() {
+                window.addEventListener('scroll', this.handleScroll);
+                const base = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
+                try {
+                    const [parents, mChild, mMeta, manChild, works, pubs, aniChild, aniMeta] = await Promise.all([
+                        fetch(base + "人物法寶").then(r => r.json()),
+                        fetch(base + "電影人物法寶").then(r => r.json()),
+                        fetch(base + "電影動畫").then(r => r.json()),
+                        fetch(base + "漫畫人物法寶").then(r => r.json()),
+                        fetch(base + "書籍收錄作品").then(r => r.json()),
+                        fetch(base + "出版目録JP").then(r => r.json()),
+                        fetch(base + "動畫人物法寶").then(r => r.json()),
+                        fetch(base + "電視動畫").then(r => r.json())
+                    ]);
+                    
+                    this.parentData = parents; this.movieChild = mChild; this.movieMeta = mMeta;
+                    this.mangaChild = manChild; this.workInclude = works; this.pubCatalog = pubs;
+                    this.animeChild = aniChild; this.animeMeta = aniMeta;
+            
+                    this.processedData = this.parentData
+                        .filter(p => String(p['Active']).toLowerCase() === 'yes')
+                        .map(p => {
+                            const objId = String(p['Object ID']).trim();
+                            const movieAppearances = this.movieChild
+                                .filter(c => String(c['Object ID']).trim() === objId)
+                                .map(c => {
+                                    const m = this.movieMeta.find(mm => String(mm['Media ID']).trim() === String(c['Movie ID']).trim());
+                                    return { 
+                                        ...c, 
+                                        movieTitle: m ? m['JP Title'] : 'Unknown Movie', 
+                                        movieYear: m ? (m['JP Release Date']?.match(/\d{4}/) || ['N/A'])[0] : 'N/A' 
+                                    };
+                                });
+            
+                            const animeAppearances = this.animeChild
+                                .filter(c => String(c['Object ID']).trim() === objId)
+                                .map(c => {
+                                    const a = this.animeMeta.find(am => String(am['Media ID']).trim() === String(c['Anime ID']).trim());
+                                    return { 
+                                        ...c, 
+                                        animeTitle: a ? a['JP Title'] : 'Unknown Anime', 
+                                        animeDate: a ? a['JP Show Date'] : 'N/A' 
+                                    };
+                                });
+            
+                            const mangaInfo = this.mangaChild.find(c => String(c['Object ID']).trim() === objId) || null;
+                            let mangaRecords = [];
+                            if (mangaInfo) {
+                                const workId = String(mangaInfo['Work ID']).trim();
+                                mangaRecords = this.workInclude
+                                    .filter(w => String(w['作品番']).trim() === workId)
+                                    .map(w => {
+                                        const pub = this.pubCatalog.find(pc => String(pc['ISBN']).trim() === String(w['ISBN']).trim());
+                                        return { 
+                                            isbn: w['ISBN'], 
+                                            type: pub ? pub['類'] : 'N/A', 
+                                            title: pub ? pub['標題'] : 'Unknown Title', 
+                                            vol: pub ? pub['巻'] : '', 
+                                            ch: w['收錄話'] 
+                                        };
+                                    });
+                            }
+                            return { ...p, movieAppearances, animeAppearances, mangaInfo, mangaRecords };
+                        });
+            
+                    this.loading = false;
+                    await nextTick();
+                    this.applyUrlParams();
+                } catch (e) {
+                    console.error("Critical Load Error:", e);
+                    this.loading = false;
+                }
+            },
+            methods: {
+                applyUrlParams() {
+                    const params = new URLSearchParams(window.location.search);
+                    const movieID = params.get('movieid');
+                    const isbn = params.get('isbn');
+                    const animeID = params.get('animeid');
+                    const fClass = params.get('filterclass');
+                
+                    if (fClass) {
+                        this.selectedClass = fClass;
+                        this.handleClassChange();
+                    }
+                
+                    let targetSearch = '';
+                    if (movieID) {
+                        const movie = this.movieMeta.find(m => String(m['Media ID']).trim() === String(movieID).trim());
+                        if (movie) {
+                            targetSearch = movie['JP Title'];
+                            this.processedData.forEach(p => {
+                                if (p.movieAppearances.some(ma => String(ma['Movie ID']).trim() === String(movieID).trim())) {
+                                    this.tabStates[p['Object ID']] = 'movie';
+                                }
+                            });
+                        }
+                    } 
+                    
+                    if (isbn) {
+                        const pub = this.pubCatalog.find(p => String(p['ISBN']).trim() === String(isbn).trim());
+                        if (pub) {
+                            targetSearch = pub['標題'];
+                            this.processedData.forEach(p => {
+                                if (p.mangaRecords.some(r => String(r.isbn).trim() === String(isbn).trim())) {
+                                    this.tabStates[p['Object ID']] = 'manga';
+                                }
+                            });
+                        }
+                    } 
+                    
+                    if (animeID) {
+                        const anime = this.animeMeta.find(a => String(a['Media ID']).trim() === String(animeID).trim());
+                        if (anime) {
+                            targetSearch = anime['JP Title'];
+                            this.processedData.forEach(p => {
+                                if (p.animeAppearances.some(aa => String(aa['Anime ID']).trim() === String(animeID).trim())) {
+                                    this.tabStates[p['Object ID']] = 'anime';
+                                }
+                            });
+                        }
+                    }
+                
+                    if (targetSearch) this.searchQuery = targetSearch;
+                    this.currentPage = 1;
+                },
+                handleScroll() { this.showBackToTop = window.scrollY > 300; },
+                scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },
+                highlight(text) {
+                    if (!this.searchQuery) return text;
+                    const escaped = String(this.searchQuery).replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                    const regex = new RegExp(`(${escaped})`, 'gi');
+                    return String(text).replace(regex, '<mark>$1</mark>');
+                },
+                getTab(id) { return this.tabStates[id] || 'movie'; },
+                setTab(id, tab) { this.tabStates[id] = tab; },
+                changePage(p) {
+                    if (p >= 1 && p <= this.totalPages) {
+                        this.currentPage = p;
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                },
+                handleClassChange() { this.selectedType = 'All'; this.currentPage = 1; },
+                handleSearchInput(e) {
+                    this.searchQuery = e.target.value;
+                    this.currentPage = 1;
+                }
+            },
+            computed: {
+                classifications() { 
+                    return [...new Set(this.parentData.filter(i => i['Active']?.toLowerCase() === 'yes').map(i => i['Object Classification']))].sort(); 
+                },
+                filteredObjectTypes() {
+                    let all = [...new Set(this.parentData.filter(i => i['Active']?.toLowerCase() === 'yes').map(i => i['Object Type']))].sort();
+                    if (this.selectedClass === '法寶') return all.filter(t => t === '法寶');
+                    if (this.selectedClass === '人物') return all.filter(t => t !== '法寶');
+                    return all;
+                },
+                displayData() {
+                    if (!this.processedData || this.processedData.length === 0) return [];
+                    const q = (this.searchQuery || '').toLowerCase().trim();
+                    return this.processedData.filter(p => {
+                        const matchClass = this.selectedClass === 'All' || p['Object Classification'] === this.selectedClass;
+                        const matchType = this.selectedType === 'All' || p['Object Type'] === this.selectedType;
+                        if (!(matchClass && matchType)) return false;
+                        if (!q) return true;
+                        const inCore = (p['JP Title'] || '').toLowerCase().includes(q) || 
+                                       (p['Confirmed Translation'] || '').toLowerCase().includes(q) ||
+                                       (p['Description'] || '').toLowerCase().includes(q);
+                        if (inCore) return true;
+                        const inManga = p.mangaRecords.some(r => `${r.type} ${r.title}`.toLowerCase().includes(q)) ||
+                                         (p.mangaInfo?.['CultureCom Trans'] || '').toLowerCase().includes(q);
+                        if (inManga) return true;
+                        const inMovie = p.movieAppearances.some(m => m.movieTitle.toLowerCase().includes(q));
+                        const inAnime = p.animeAppearances.some(a => a.animeTitle.toLowerCase().includes(q));
+                        return inMovie || inAnime;
+                    });
+                },
+                totalPages() { return Math.ceil(this.displayData.length / this.itemsPerPage); },
+                visiblePages() {
+                    const total = this.totalPages;
+                    const current = this.currentPage;
+                    const range = 2; 
+                    let pages = [];
+                    for (let i = 1; i <= total; i++) {
+                        if (i === 1 || i === total || (i >= current - range && i <= current + range)) {
+                            pages.push(i);
+                        } else if (i === current - range - 1 || i === current + range + 1) {
+                            if (!pages.includes('...')) pages.push('...');
+                        }
+                    }
+                    return pages;
+                },
+                paginatedData() { 
+                    const start = (this.currentPage - 1) * this.itemsPerPage;
+                    return this.displayData.slice(start, start + this.itemsPerPage);
+                }
+            },
+            watch: {
+                searchQuery() { this.currentPage = 1; },
+                selectedClass() { this.currentPage = 1; },
+                selectedType() { this.currentPage = 1; }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

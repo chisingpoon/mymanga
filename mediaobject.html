@@ -538,8 +538,11 @@
                 },
                 handleClassChange() { this.selectedType = 'All'; this.currentPage = 1; },
                 handleSearchInput(e) {
-                    this.searchQuery = e.target.value;
-                    this.currentPage = 1; // Reset to page 1 when typing
+                    clearTimeout(this.searchTimeout);
+                    this.searchTimeout = setTimeout(() => {
+                        this.searchQuery = e.target.value;
+                        this.currentPage = 1; 
+                    },150);
                 }
             },
             computed: {

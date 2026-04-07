@@ -131,6 +131,8 @@
             </div>
         
             <div v-if="displayData.length > 0">
+                
+                <!--<div v-if="viewMode === 'card'" class="grid gap-8 mb-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">-->
                 <div v-if="viewMode === 'card'" class="grid gap-8 mb-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6">
                     <div v-for="parent in paginatedData" :key="parent['Object ID']" class="data-card p-8 shadow-sm">
                         <div>
@@ -156,27 +158,16 @@
                             <div class="tab-content">
                                 <div v-if="getTab(parent['Object ID']) === 'movie'">
                                     <div v-if="parent.movieAppearances.length > 0">
-                                        <div class="space-y-3">
-                                            <div v-for="m in parent.movieAppearances" 
-                                                 class="group/subcard bg-slate-50/50 p-3 rounded-xl border border-slate-200/60 hover:border-indigo-200 hover:bg-white hover:shadow-md transition-all duration-200">
-                                                <div class="flex items-center gap-2 mb-1.5">
-                                                    <span class="text-[9px] font-black bg-slate-800 text-white px-2 py-0.5 rounded shadow-sm">
-                                                        {{ m.movieYear }}
-                                                    </span>
-                                                    <span class="h-px flex-1 bg-slate-200"></span>
+                                        <div class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
+                                            <div v-for="(child, idx) in parent.movieAppearances" :key="idx" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition-all">
+                                                <div class="flex flex-col gap-2">
+                                                    <span class="text-[8px] font-black bg-slate-900 text-white px-2 py-0.5 rounded w-fit uppercase">Movie {{ child.movieYear }}</span>
+                                                    <span class="text-sm font-black text-slate-800" v-html="'<span class=\'text-[9px] text-slate-400 uppercase font-bold mr-1\'>港譯/</span>' + highlight(child['HK Translation'])"></span>
+                                                    <a :href="'movie.html?mediaid=' + encodeURIComponent(child['Movie ID'])" target="_blank" class="text-[11px] font-bold text-indigo-500 hover:text-indigo-700 flex items-center justify-between group">
+                                                        <span v-html="highlight(child.movieTitle)"></span>
+                                                        <svg class="w-3.5 h-3.5 shrink-0 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round"></path></svg>
+                                                    </a>
                                                 </div>
-                                                
-                                                <div class="flex items-start gap-2 mb-2">
-                                                    <span class="text-[10px] font-bold text-slate-400 uppercase shrink-0 mt-0.5">港譯</span>
-                                                    <span class="text-sm font-black text-slate-800 leading-tight" v-html="highlight(m['HK Translation'])"></span>
-                                                </div>
-                                        
-                                                <a :href="'movie.html?mediaid=' + encodeURIComponent(m['Movie ID'])" 
-                                                   target="_blank" 
-                                                   class="inline-flex items-center gap-1.5 text-[11px] font-bold text-indigo-500 hover:text-indigo-700 transition-colors">
-                                                    <span v-html="highlight(m.movieTitle)"></span>
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                                                </a>
                                             </div>
                                         </div>
                                     </div>

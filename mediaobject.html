@@ -175,8 +175,8 @@
                             <button @click="setTab(parent['Object ID'], 'manga')" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'manga' ? 'active' : 'text-slate-400']">Manga ({{ parent.mangaRecords.length }})</button>
                             <button @click="setTab(parent['Object ID'], 'anime')" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'anime' ? 'active' : 'text-slate-400']">Anime ({{ parent.animeAppearances.length }})</button>
                         </div>
-                        <div class="tab-content-wrapper flex flex-col flex-grow min-h-[200px]">
-                            <div class="overflow-y-auto pr-1 custom-scrollbar" style="height: 300px;">
+                        <div class="tab-content-wrapper flex-grow flex flex-col">
+                            <div class="flex-grow overflow-y-auto pr-1 custom-scrollbar" style="flex-basis: 0; min-height: 200px; max-height: 400px;">
                                 <div v-if="getTab(parent['Object ID']) === 'movie'">
                                     <div v-if="parent.movieAppearances.length > 0">
                                         <div class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">

@@ -23,7 +23,8 @@
         .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
         .data-card { background: white; border-radius: 24px; border: 2px solid #f1f5f9; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); min-height: 200px; display: flex; flex-direction: column; }
         .data-card:hover { border-color: #6366f1; transform: translateY(-4px); }
-        .tab-btn { transition: all 0.2s ease-in-out; border-bottom: 3px solid transparent; cursor: pointer; }
+        .tab-btn { transition: all 0.2s ease-in-out; border-bottom: 4px solid transparent; cursor: pointer; padding-bottom: 4px !important;}
+        .tab-content-wrapper {margin-top: -4px;}
         .tab-btn.active { border-color: #6366f1; color: #6366f1; font-weight: 900; }
         .scroll-area { max-height: 320px; overflow-y: auto; scrollbar-width: thin; padding-right: 4px; }
         mark { background: #fef08a; color: #854d0e; padding: 0 2px; border-radius: 2px; font-weight: bold; }
@@ -185,13 +186,13 @@
             <div v-if="displayData.length > 0">
                 <div v-if="viewMode === 'card'" class="grid gap-8 mb-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6">
                     <!-- <div v-for="parent in paginatedData" :key="parent['Object ID']" class="data-card p-8 shadow-sm"> -->
-                    <div v-for="parent in paginatedData" :key="parent['Object ID']" class="data-card p-8 shadow-sm flex flex-col">
+                    <div v-for="parent in paginatedData" :key="parent['Object ID']" class="data-card p-3 shadow-sm flex flex-col">
                         <div>
-                            <div class="flex justify-between items-start mb-4">
+                            <div class="flex justify-between items-start mb-2">
                                 <span class="px-4 py-1.5 bg-slate-100 text-slate-700 text-xs font-black rounded-xl uppercase tracking-wider">{{ parent['Object Classification'] }}</span>
                                 <span class="text-xs font-black text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-xl uppercase tracking-wider">{{ parent['Object Type'] }}</span>
                             </div>
-                            <h2 class="text-2xl font-black text-slate-900 leading-tight mb-2" v-html="highlight(parent['JP Title'])"></h2>
+                            <h2 class="text-2xl font-black text-slate-900 leading-tight mb-1" v-html="highlight(parent['JP Title'])"></h2>
                             <div v-if="parent['Confirmed Translation'] && parent['Confirmed Translation'] !== '-'" class="flex items-baseline gap-1 mb-4">
                                 <span class="text-[10px] font-bold text-slate-400 shrink-0">採用港譯/</span>
                                 <span class="text-lg font-black text-slate-800" v-html="highlight(parent['Confirmed Translation'])"></span>
@@ -200,7 +201,7 @@
                                 <p class="text-sm text-slate-600 leading-relaxed font-medium" v-html="highlight(parent['Description'])"></p>
                             </div>
                         </div>
-                        <div class="flex border-b border-slate-200 mb-4 gap-4 overflow-x-auto no-scrollbar whitespace-nowrap">            
+                        <div class="flex border-b border-slate-200 mb-2 gap-4 overflow-x-auto no-scrollbar whitespace-nowrap">            
                             <button @click="setTab(parent['Object ID'], 'movie')" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'movie' ? 'active' : 'text-slate-400']">Movie ({{ parent.movieAppearances.length }})</button>
                             <button @click="setTab(parent['Object ID'], 'manga')" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'manga' ? 'active' : 'text-slate-400']">Manga ({{ parent.mangaRecords.length }})</button>
                             <button @click="setTab(parent['Object ID'], 'anime')" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'anime' ? 'active' : 'text-slate-400']">Anime ({{ parent.animeAppearances.length }})</button>
@@ -209,8 +210,8 @@
                             <div class="flex-grow overflow-y-auto pr-1 custom-scrollbar scroll-hint" style="flex-basis: 0; min-height: 200px; max-height: 400px;">
                                 <div v-if="getTab(parent['Object ID']) === 'movie'">
                                     <div v-if="parent.movieAppearances.length > 0">
-                                        <div class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
-                                            <div v-for="(child, idx) in parent.movieAppearances" :key="idx" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition-all">
+                                        <div class="scroll-area space-y-1 bg-slate-50/50 p-1 rounded-2xl border border-slate-100">
+                                            <div v-for="(child, idx) in parent.movieAppearances" :key="idx" class="bg-white p-2 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition-all">
                                                 <div class="flex flex-col gap-2">
                                                     <span class="text-[8px] font-black bg-slate-900 text-white px-2 py-0.5 rounded w-fit uppercase">Movie {{ child.movieYear }}</span>
                                                     <span class="text-sm font-black text-slate-800" v-html="'<span class=\'text-[9px] text-slate-400 uppercase font-bold mr-1\'>港譯/</span>' + highlight(child['HK Translation'])"></span>
@@ -225,7 +226,7 @@
                                     <div v-else class="scroll-area bg-slate-50/50 p-3 rounded-2xl border border-slate-100"><p class="text-[13px] font-bold text-slate-300 italic py-4 text-center uppercase tracking-widest">No Movie Data</p></div>
                                 </div>
                                 <div v-if="getTab(parent['Object ID']) === 'manga'">
-                                    <div v-if="parent.mangaInfo" class="mb-4 px-1 space-y-2 border-b border-slate-100 pb-3">
+                                    <div v-if="parent.mangaInfo" class="mb-2 px-1 space-y-2 border-b border-slate-100 pb-3">
                                         <div class="flex items-center gap-2">
                                             <span class="text-[11px] font-black text-slate-400 uppercase tracking-tighter shrink-0">文傳譯/</span>
                                             <span class="text-base text-slate-900 font-black truncate" v-html="highlight(parent.mangaInfo['CultureCom Trans'] || '-')"></span>
@@ -241,7 +242,7 @@
                                         </div>
                                     </div>
                                     <div v-if="parent.mangaRecords.length > 0">
-                                        <div class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
+                                        <div class="scroll-area space-y-1 bg-slate-50/50 p-1 rounded-2xl border border-slate-100">
                                             <div v-for="(rec, idx) in parent.mangaRecords" :key="idx" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition-all">
                                                 <a :href="'manga-database.html?region=JP&isbn=' + encodeURIComponent(rec.isbn)" target="_blank" class="text-[11px] font-bold text-indigo-500 hover:text-indigo-700 flex items-center justify-between group">
                                                     <span v-html="highlight(`[${rec.type}] ${rec.title} ${rec.vol} Ch.${rec.ch}`)"></span>
@@ -254,7 +255,7 @@
                                 </div>
                                 <div v-if="getTab(parent['Object ID']) === 'anime'">
                                     <div v-if="parent.animeAppearances.length > 0">
-                                        <div class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
+                                        <div class="scroll-area space-y-1 bg-slate-50/50 p-1 rounded-2xl border border-slate-100">
                                             <div v-for="(ani, idx) in parent.animeAppearances" :key="idx" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-300 transition-all">
                                                 <div class="flex flex-col gap-2">
                                                     <span class="text-[8px] font-black bg-indigo-600 text-white px-2 py-0.5 rounded w-fit uppercase">{{ ani.animeDate }}</span>
@@ -303,7 +304,7 @@
                                 
                                         <td class="px-6 py-6 align-top border-b border-transparent group-hover:border-b-indigo-500 transition-all">
                                             <h3 class="text-lg font-black text-slate-900 leading-tight mb-2 group-hover:text-indigo-700 transition-colors" v-html="highlight(parent['JP Title'])"></h3>
-                                            <div v-if="parent['Confirmed Translation'] !== '-'" class="flex items-baseline gap-1 mb-3">
+                                            <div v-if="parent['Confirmed Translation'] !== '-'" class="flex items-baseline gap-1 mb-1">
                                                 <span class="text-[9px] font-bold text-slate-400 uppercase">採用港譯/</span>
                                                 <span class="text-sm font-black text-slate-800" v-html="highlight(parent['Confirmed Translation'])"></span>
                                             </div>

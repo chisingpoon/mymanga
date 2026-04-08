@@ -78,6 +78,29 @@
             scrollbar-color: #cbd5e1 #f8fafc; /* Firefox [Thumb] [Track] */
             -webkit-overflow-scrolling: touch; /* Ensures smooth swiping on iOS */
         }
+        .scroll-hint {
+            background: 
+                linear-gradient(white 30%, rgba(255,255,255,0)),
+                linear-gradient(rgba(255,255,255,0), white 70%) 0 100%,
+                radial-gradient(farthest-side at 50% 0, rgba(0,0,0,.05), rgba(0,0,0,0)),
+                /* The shadow below is the "hint" that there is more content */
+                radial-gradient(farthest-side at 50% 100%, rgba(0,0,0,.1), rgba(0,0,0,0)) 0 100%;
+            background-repeat: no-repeat;
+            background-size: 100% 40px, 100% 40px, 100% 14px, 100% 14px;
+            background-attachment: local, local, scroll, scroll;
+        }
+        @media (max-width: 768px) {
+            .custom-scrollbar::-webkit-scrollbar {
+                width: 4px;
+                display: block !important;
+            }
+            .custom-scrollbar::-webkit-scrollbar-track {
+                background: rgba(0,0,0,0.03); /* Extremely faint lane */
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+                background: rgba(0,0,0,0.1); /* Faint handle */
+            }
+        }
     </style>
 </head>
 <body class="bg-grid">
@@ -183,7 +206,7 @@
                             <button @click="setTab(parent['Object ID'], 'anime')" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'anime' ? 'active' : 'text-slate-400']">Anime ({{ parent.animeAppearances.length }})</button>
                         </div>
                         <div class="tab-content-wrapper flex-grow flex flex-col">
-                            <div class="flex-grow overflow-y-auto pr-1 custom-scrollbar" style="flex-basis: 0; min-height: 200px; max-height: 400px;">
+                            <div class="flex-grow overflow-y-auto pr-1 custom-scrollbar scroll-hint" style="flex-basis: 0; min-height: 200px; max-height: 400px;">
                                 <div v-if="getTab(parent['Object ID']) === 'movie'">
                                     <div v-if="parent.movieAppearances.length > 0">
                                         <div class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">

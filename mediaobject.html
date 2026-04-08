@@ -154,7 +154,8 @@
         
             <div v-if="displayData.length > 0">
                 <div v-if="viewMode === 'card'" class="grid gap-8 mb-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6">
-                    <div v-for="parent in paginatedData" :key="parent['Object ID']" class="data-card p-8 shadow-sm">
+                    <!-- <div v-for="parent in paginatedData" :key="parent['Object ID']" class="data-card p-8 shadow-sm"> -->
+                    <div v-for="parent in paginatedData" :key="parent['Object ID']" class="data-card p-8 shadow-sm flex flex-col">
                         <div>
                             <div class="flex justify-between items-start mb-4">
                                 <span class="px-4 py-1.5 bg-slate-100 text-slate-700 text-xs font-black rounded-xl uppercase tracking-wider">{{ parent['Object Classification'] }}</span>
@@ -174,8 +175,8 @@
                             <button @click="setTab(parent['Object ID'], 'manga')" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'manga' ? 'active' : 'text-slate-400']">Manga ({{ parent.mangaRecords.length }})</button>
                             <button @click="setTab(parent['Object ID'], 'anime')" :class="['tab-btn px-2 pb-2 text-[10px] font-black uppercase tracking-wider', getTab(parent['Object ID']) === 'anime' ? 'active' : 'text-slate-400']">Anime ({{ parent.animeAppearances.length }})</button>
                         </div>
-                        <div class="tab-content-wrapper w-full">
-                            <div class="flex-grow overflow-y-auto pr-1 custom-scrollbar" style="max-height: 280px;">
+                        <div class="tab-content-wrapper flex flex-col flex-grow min-h-[200px]">
+                            <div class="flex-grow overflow-y-auto pr-1 custom-scrollbar" style="max-height: 500px;">
                                 <div v-if="getTab(parent['Object ID']) === 'movie'">
                                     <div v-if="parent.movieAppearances.length > 0">
                                         <div class="scroll-area space-y-3 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">

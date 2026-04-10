@@ -199,7 +199,7 @@
                             </div>
                             <div v-if="parent['Library Ref'] && parent['Library Ref'] !== '（未収録）'" class="flex items-baseline gap-1 mb-4">
                                 <span class="text-[10px] font-bold text-slate-400 shrink-0">最新神奇百寶大事典/</span>
-                                <span class="text-lg font-black text-slate-800" v-html="highlight(parent['Library Ref'])"></span>
+                                <span class="text-[10px] font-black text-slate-800" v-html="highlight(parent['Library Ref'])"></span>
                             </div>                            
                             <div v-if="parent['Description'] && parent['Description'] !== '-'" class="bg-slate-50 border-l-4 border-indigo-500 p-4 rounded-r-xl mb-2">
                                 <p class="text-sm text-slate-600 leading-relaxed font-medium" v-html="highlight(parent['Description'])"></p>
@@ -308,13 +308,13 @@
                                 
                                         <td class="px-6 py-6 align-top border-b border-transparent group-hover:border-b-indigo-500 transition-all">
                                             <h3 class="text-lg font-black text-slate-900 leading-tight mb-2 group-hover:text-indigo-700 transition-colors" v-html="highlight(parent['JP Title'])"></h3>
-                                            <div v-if="parent['Confirmed Translation'] !== '-'" class="flex items-baseline gap-1 mb-1">
+                                            <div v-if="parent['Confirmed Translation'] && parent['Confirmed Translation'] !== '-'" class="flex items-baseline gap-1 mb-1">
                                                 <span class="text-[9px] font-bold text-slate-400 uppercase">採用港譯/</span>
                                                 <span class="text-sm font-black text-slate-800" v-html="highlight(parent['Confirmed Translation'])"></span>
                                             </div>
-                                            <div v-if="parent['Library Ref'] !== '（未収録）'" class="flex items-baseline gap-1 mb-1">
+                                            <div v-if="parent['Library Ref'] && parent['Library Ref'] !== '（未収録）'" class="flex items-baseline gap-1 mb-1">
                                                 <span class="text-[9px] font-bold text-slate-400 uppercase">最新神奇百寶大事典</span>
-                                                <span class="text-sm font-black text-slate-800" v-html="highlight(parent['Library Ref'])"></span>
+                                                <span class="text-[9px] font-black text-slate-800" v-html="highlight(parent['Library Ref'])"></span>
                                             </div>
                                             <p class="text-sm text-slate-600 font-medium max-w-[400px] leading-snug" v-html="highlight(parent['Description'])"></p>
                                         </td>

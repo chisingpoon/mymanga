@@ -193,10 +193,14 @@
                                 <span class="text-xs font-black text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-xl uppercase tracking-wider">{{ parent['Object Type'] }}</span>
                             </div>
                             <h2 class="text-2xl font-black text-slate-900 leading-tight mb-1" v-html="highlight(parent['JP Title'])"></h2>
-                            <div v-if="parent['Confirmed Translation'] && parent['Confirmed Translation'] !== '-'" class="flex items-baseline gap-1 mb-4">
-                                <span class="text-[10px] font-bold text-slate-400 shrink-0">採用港譯/</span>
+                            <div v-if="parent['Confirmed Translation'] && parent['Confirmed Translation'] !== '（未収録）'" class="flex items-baseline gap-1 mb-4">
+                                <span class="text-[10px] font-bold text-slate-400 shrink-0">最新神奇百寶大事典</span>
                                 <span class="text-lg font-black text-slate-800" v-html="highlight(parent['Confirmed Translation'])"></span>
                             </div>
+                            <div v-if="parent['Library Ref'] && parent['Library Ref'] !== '-'" class="flex items-baseline gap-1 mb-4">
+                                <span class="text-[10px] font-bold text-slate-400 shrink-0">採用港譯/</span>
+                                <span class="text-lg font-black text-slate-800" v-html="highlight(parent['Library Ref'])"></span>
+                            </div>                            
                             <div v-if="parent['Description'] && parent['Description'] !== '-'" class="bg-slate-50 border-l-4 border-indigo-500 p-4 rounded-r-xl mb-2">
                                 <p class="text-sm text-slate-600 leading-relaxed font-medium" v-html="highlight(parent['Description'])"></p>
                             </div>
@@ -623,6 +627,7 @@
             
                         const inCore = (p['JP Title'] || '').toLowerCase().includes(q) || 
                                        (p['Confirmed Translation'] || '').toLowerCase().includes(q) ||
+                                       (p['Library Ref'] || '').toLowerCase().includes(q) ||
                                        (p['Description'] || '').toLowerCase().includes(q);
                         if (inCore) return true;
             

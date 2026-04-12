@@ -85,21 +85,7 @@
             </div>
             <h1 class="text-3xl font-black tracking-tight text-slate-900 uppercase mt-4">叮噹多啦A夢香港影視漫畫資料庫 Archive Portal</h1>
             <p class="text-slate-400 font-bold text-xs uppercase tracking-[0.2em]">電影 | 漫畫 | 角色 | 人物 | 法寶</p>
-            <div class="bg-gray-50 border border-gray-200 p-6 my-4 text-sm text-gray-700">
-                DoraDexHK：香港多啦A夢 (Doraemon) 影視漫畫文獻資料庫
 
-                本項目致力於系統化記錄及整理自 1970 年代起 多啦A夢 (叮噹) 在香港的出版與播映紀錄。核心研究範疇涵蓋：
-                
-               <!-- 粵語配音 (CV) 考據： 追蹤歷代電視及電影版之角色配音名單。-->
-                
-                影視存檔： 紀錄 1980 年至今之大長篇電影及動畫發行資訊。
-                
-                出版史研究： 整理包括「文化傳信」及「香港青文」在內之香港版漫畫版本演變。
-                
-                法寶索引： 建立神奇法寶之香港譯名、用途及文獻來源對照表。
-                
-                DoraDexHK is an objective research project documenting the history of Doraemon in Hong Kong. This database provides structured data on Cantonese voice acting (CV), film archives, manga publishing history, and gadget nomenclature.
-            </div>
         </header>
 
         <div class="flex justify-center mb-6">
@@ -232,6 +218,21 @@
         </div>
 
         <footer class="text-center space-y-4 pt-8 pb-12">
+            <div class="bg-gray-50 border border-gray-200 p-6 my-4 text-sm text-gray-700">
+                DoraDexHK：香港多啦A夢 (Doraemon) 影視漫畫文獻資料庫
+
+                本項目致力於系統化記錄及整理自 1970 年代起 多啦A夢 (叮噹) 在香港的出版與播映紀錄。核心研究範疇涵蓋：
+                
+               <!-- 粵語配音 (CV) 考據： 追蹤歷代電視及電影版之角色配音名單。-->
+                
+                影視存檔： 紀錄 1980 年至今之大長篇電影及動畫發行資訊。
+                
+                出版史研究： 整理包括「文化傳信」及「香港青文」在內之香港版漫畫版本演變。
+                
+                法寶索引： 建立神奇法寶之香港譯名、用途及文獻來源對照表。
+                
+                DoraDexHK is an objective research project documenting the history of Doraemon in Hong Kong. This database provides structured data on Cantonese voice acting (CV), film archives, manga publishing history, and gadget nomenclature.
+            </div>
             <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
                 Last Updated: <span id="current-date"></span>
             </p>
@@ -262,7 +263,7 @@
             }
         }
 
-        document.getElementById('current-date').innerText = new Date().toLocaleDateString('zh-HK', { year: 'numeric', month: 'long', day: 'numeric' });
+        document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
         window.addEventListener('keydown', function(e) {
             if ((e.ctrlKey || e.metaKey) && ['c','s','p','u','a'].includes(e.key)) e.preventDefault();

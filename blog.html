@@ -171,7 +171,7 @@
             </div>
             <div class="p-2 md:p-4">
                 <div class="text-[10px] font-black text-slate-400 mb-8 border-b border-slate-100 pb-4 uppercase tracking-widest">
-                    By {{ activePost.Author }} — Published {{ formatDate(activePost.PostDate) }}
+                    By {{ activePost.Author }} — Published {{ formatDate(post.PostDate) }}
                 </div>
                 <div class="prose max-w-none" v-html="renderMarkdown(activePost.Content)"></div>
             </div>
@@ -205,11 +205,9 @@ createApp({
             return [...new Set(activeOnly.map(p => p.Category))].filter(Boolean);
         },
         isFiltered() {
-            // Check if user has changed anything from the default "Last 30 days" or Category/Search
             return this.selectedCategory !== 'All' || this.searchQuery !== '' || this.isCustomDateRange;
         },
         isCustomDateRange() {
-            // Only show "Reset" if the user has manually changed the dates from the initial 30-day window
             const now = new Date();
             const lastMonth = new Date();
             lastMonth.setDate(now.getDate() - 30);
@@ -272,6 +270,9 @@ createApp({
                     return normalized;
                 });
                 this.loading = false;
+
+                // Check URL parameters after data loads to auto-open shared posts
+                this.checkUrlForPost();
             } catch (error) { this.loading = false; }
         },
         parseSheetDate(dateStr) {
@@ -313,19 +314,56 @@ createApp({
         },
         openPost(post) {
             this.activePost = post;
-            document.body.style.overflow = 'hidden';
         },
         setPage(num) {
             this.currentPage = num;
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+        checkUrlForPost() {
+            const params = new URLSearchParams(window.location.search);
+            const postTitle = params.get('post');
+            if (postTitle) {
+                // Find matching active post based on title
+                const matchedPost = this.posts.find(p => p.Title === postTitle && String(p.Active).toLowerCase() === 'yes');
+                if (matchedPost) {
+                    this.activePost = matchedPost;
+                }
+            } else {
+                this.activePost = null;
+            }
         }
     },
     watch: {
-        activePost(val) { if (!val) document.body.style.overflow = 'auto'; }
+        activePost(newPost) {
+            const params = new URLSearchParams(window.location.search);
+            
+            if (newPost) {
+                document.body.style.overflow = 'hidden';
+                // Only update the URL state if it's different to prevent recursive history injection
+                if (params.get('post') !== newPost.Title) {
+                    params.set('post', newPost.Title);
+                    window.history.pushState({}, '', `${window.location.pathname}?${params.toString()}`);
+                }
+            } else {
+                document.body.style.overflow = 'auto';
+                if (params.has('post')) {
+                    params.delete('post');
+                    const queryString = params.toString();
+                    const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
+                    window.history.pushState({}, '', newUrl);
+                }
+            }
+        }
     },
     mounted() {
         this.setDefaultDates();
         this.fetchData();
+
+        // Listen for the browser's Back/Forward buttons to seamlessly sync pop-up state
+        window.addEventListener('popstate', this.checkUrlForPost);
+    },
+    unmounted() {
+        window.removeEventListener('popstate', this.checkUrlForPost);
     }
 }).mount('#app');
 </script>

@@ -162,11 +162,11 @@
         <div class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl relative z-10">
             <div class="sticky top-0 bg-white/95 backdrop-blur-md px-5 md:px-8 py-5 md:py-6 border-b border-slate-100">
             
-                <!-- Top Section -->
-                <div class="flex flex-col gap-4">
+                <!-- Top Row -->
+                <div class="flex items-start justify-between gap-4">
             
-                    <!-- Title Area -->
-                    <div class="min-w-0">
+                    <!-- Title -->
+                    <div class="flex-1 min-w-0">
                         <span class="text-indigo-600 font-black text-[10px] tracking-widest uppercase block mb-2">
                             {{ activePost.Category }}
                         </span>
@@ -177,112 +177,108 @@
                         </h2>
                     </div>
             
-                    <!-- Action Buttons -->
-                    <div class="flex items-center justify-between gap-3 flex-wrap">
+                    <!-- Close Button -->
+                    <button
+                        @click="activePost = null"
+                        title="Close"
+                        class="group shrink-0 bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-500 hover:text-rose-500 p-2.5 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
             
-                        <!-- Share Buttons -->
-                        <div class="flex items-center gap-2 flex-wrap">
+                        <svg class="w-5 h-5 transition-transform duration-200 group-hover:rotate-90"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24">
             
-                            <!-- Copy -->
-                            <button
-                                @click="copyPostLink"
-                                title="Copy Link"
-                                class="group relative overflow-hidden bg-gradient-to-b from-white to-slate-100 hover:from-indigo-50 hover:to-indigo-100 border border-slate-200 hover:border-indigo-200 text-slate-500 hover:text-indigo-600 p-2.5 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+                            <path d="M6 18L18 6M6 6l12 12"
+                                stroke-width="2"
+                                stroke-linecap="round">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
             
-                                <svg class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24">
+                <!-- Share Buttons Row -->
+                <div class="flex items-center gap-2 flex-wrap mt-5">
             
-                                    <path stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M10 13a5 5 0 007.07 0l1.41-1.41a5 5 0 00-7.07-7.07L10 5m4 6a5 5 0 01-7.07 0L5.51 9.59a5 5 0 017.07-7.07L14 4">
-                                    </path>
-                                </svg>
-                            </button>
+                    <!-- Copy -->
+                    <button
+                        @click="copyPostLink"
+                        title="Copy Link"
+                        class="group relative overflow-hidden bg-gradient-to-b from-white to-slate-100 hover:from-indigo-50 hover:to-indigo-100 border border-slate-200 hover:border-indigo-200 text-slate-500 hover:text-indigo-600 p-2.5 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
             
-                            <!-- Facebook -->
-                            <button
-                                @click="shareTo('facebook')"
-                                title="Facebook"
-                                class="group relative overflow-hidden bg-gradient-to-b from-white to-slate-100 hover:from-blue-50 hover:to-blue-100 border border-slate-200 hover:border-blue-200 text-slate-500 hover:text-blue-600 p-2.5 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+                        <svg class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24">
             
-                                <svg class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24">
+                            <path stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M10 13a5 5 0 007.07 0l1.41-1.41a5 5 0 00-7.07-7.07L10 5m4 6a5 5 0 01-7.07 0L5.51 9.59a5 5 0 017.07-7.07L14 4">
+                            </path>
+                        </svg>
+                    </button>
             
-                                    <path d="M22 12a10 10 0 10-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.5-3.88 3.78-3.88 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.62.76-1.62 1.55V12h2.76l-.44 2.89h-2.32v6.99A10 10 0 0022 12z"/>
-                                </svg>
-                            </button>
+                    <!-- Facebook -->
+                    <button
+                        @click="shareTo('facebook')"
+                        title="Facebook"
+                        class="group relative overflow-hidden bg-gradient-to-b from-white to-slate-100 hover:from-blue-50 hover:to-blue-100 border border-slate-200 hover:border-blue-200 text-slate-500 hover:text-blue-600 p-2.5 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
             
-                            <!-- X -->
-                            <button
-                                @click="shareTo('twitter')"
-                                title="X"
-                                class="group relative overflow-hidden bg-gradient-to-b from-white to-slate-100 hover:from-slate-100 hover:to-slate-200 border border-slate-200 hover:border-slate-300 text-slate-500 hover:text-black p-2.5 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+                        <svg class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"
+                            fill="currentColor"
+                            viewBox="0 0 24 24">
             
-                                <svg class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24">
+                            <path d="M22 12a10 10 0 10-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.5-3.88 3.78-3.88 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.62.76-1.62 1.55V12h2.76l-.44 2.89h-2.32v6.99A10 10 0 0022 12z"/>
+                        </svg>
+                    </button>
             
-                                    <path d="M18.244 2H21l-6.56 7.5L22 22h-6.828l-5.345-6.99L3.5 22H1l7.02-8.02L2 2h7l4.833 6.35L18.244 2z"/>
-                                </svg>
-                            </button>
+                    <!-- X -->
+                    <button
+                        @click="shareTo('twitter')"
+                        title="X"
+                        class="group relative overflow-hidden bg-gradient-to-b from-white to-slate-100 hover:from-slate-100 hover:to-slate-200 border border-slate-200 hover:border-slate-300 text-slate-500 hover:text-black p-2.5 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
             
-                            <!-- WhatsApp -->
-                            <button
-                                @click="shareTo('whatsapp')"
-                                title="WhatsApp"
-                                class="group relative overflow-hidden bg-gradient-to-b from-white to-slate-100 hover:from-green-50 hover:to-green-100 border border-slate-200 hover:border-green-200 text-slate-500 hover:text-green-600 p-2.5 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+                        <svg class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"
+                            fill="currentColor"
+                            viewBox="0 0 24 24">
             
-                                <svg class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24">
+                            <path d="M18.244 2H21l-6.56 7.5L22 22h-6.828l-5.345-6.99L3.5 22H1l7.02-8.02L2 2h7l4.833 6.35L18.244 2z"/>
+                        </svg>
+                    </button>
             
-                                    <path d="M20 3.5A11 11 0 003 19l-1 4 4-1A11 11 0 1020 3.5z"/>
-                                </svg>
-                            </button>
+                    <!-- WhatsApp -->
+                    <button
+                        @click="shareTo('whatsapp')"
+                        title="WhatsApp"
+                        class="group relative overflow-hidden bg-gradient-to-b from-white to-slate-100 hover:from-green-50 hover:to-green-100 border border-slate-200 hover:border-green-200 text-slate-500 hover:text-green-600 p-2.5 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
             
-                            <!-- Native Share -->
-                            <button
-                                v-if="navigatorShare"
-                                @click="nativeShare"
-                                title="Share"
-                                class="group relative overflow-hidden bg-gradient-to-b from-white to-slate-100 hover:from-purple-50 hover:to-purple-100 border border-slate-200 hover:border-purple-200 text-slate-500 hover:text-purple-600 p-2.5 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+                        <svg class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"
+                            fill="currentColor"
+                            viewBox="0 0 24 24">
             
-                                <svg class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24">
+                            <path d="M20 3.5A11 11 0 003 19l-1 4 4-1A11 11 0 1020 3.5z"/>
+                        </svg>
+                    </button>
             
-                                    <path stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M8.684 13.342C9.133 12.56 10 12 11 12s1.867.56 2.316 1.342">
-                                    </path>
-                                </svg>
-                            </button>
-                        </div>
+                    <!-- Native Share 
+                    <button
+                        v-if="navigatorShare"
+                        @click="nativeShare"
+                        title="Share"
+                        class="group relative overflow-hidden bg-gradient-to-b from-white to-slate-100 hover:from-purple-50 hover:to-purple-100 border border-slate-200 hover:border-purple-200 text-slate-500 hover:text-purple-600 p-2.5 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
             
-                        <!-- Close Button -->
-                        <button
-                            @click="activePost = null"
-                            title="Close"
-                            class="group bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-500 hover:text-rose-500 p-2.5 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+                        <svg class="w-5 h-5 transition-transform duration-200 group-hover:scale-110"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24">
             
-                            <svg class="w-5 h-5 transition-transform duration-200 group-hover:rotate-90"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24">
-            
-                                <path d="M6 18L18 6M6 6l12 12"
-                                    stroke-width="2"
-                                    stroke-linecap="round">
-                                </path>
-                            </svg>
-                        </button>
-                    </div>
+                            <path stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M8.684 13.342C9.133 12.56 10 12 11 12s1.867.56 2.316 1.342">
+                            </path>
+                        </svg>
+                    </button> -->
                 </div>
             </div>
             <div class="p-2 md:p-4">

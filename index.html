@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <meta name="google-site-verification" content="Kn107jcc6DcGqfEWkruJ_D-2PXMpiYR7brqYttQPBxU" />
-    <meta name="description" content="Explore the definitive database of Doraemon in Hong Kong. Cross-reference HK comics with Japanese originals, and browse movie characters and gadgets.">
+    <!-- OPTIMIZED: Changed standard description to Chinese to match localized search behavior -->
+    <meta name="description" content="多啦A夢 (叮噹) 香港影視漫畫資料庫：提供歷年大長篇電影、香港版漫畫出版史及法寶文獻考據。專為研究者與資深收藏家提供的深度香港譯名及版本比對資訊。">
 
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://doradexhk.pages.dev/">
@@ -23,13 +24,27 @@
     <link rel="apple-touch-icon" href="./img/icon.png">
     <title>叮噹多啦A夢香港影視漫畫資料庫 | doradexhk</title>
     
+    <!-- OPTIMIZED: Custom JSON-LD Schema added for Google Rich Snippets -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "DoraDex HK",
+      "alternateName": ["叮噹多啦A夢香港影視漫畫資料庫", "DoraDex Hong Kong"],
+      "url": "https://doradexhk.pages.dev/",
+      "description": "多啦A夢 (叮噹) 香港影視漫畫資料庫：提供歷年大長篇電影、香港版漫畫出版史及法寶文獻考據。",
+      "about": {
+        "@type": "DataCatalog",
+        "name": "香港多啦A夢文獻資料庫",
+        "description": "Systematic archive documenting the publishing history, voice acting, film records, and gadget nomenclature of Doraemon in Hong Kong since the 1970s."
+      },
+      "inLanguage": "zh-Hant"
+    }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Security: Disable Selection */
-        body {
-            -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
-        }
-
+        /* OPTIMIZED: Text selection re-enabled to improve engagement metrics and backlink potential */
         .bg-grid {
             background-color: #f8fafc;
             background-image: 
@@ -50,7 +65,6 @@
             border-color: #3b82f6; background-color: #ffffff;
         }
         
-        /* Slide Animation Logic */
         .viewport-container {
             width: 100%; overflow: hidden; position: relative;
         }
@@ -69,10 +83,10 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-8N04Z8726M');
 </script>   
-<body class="bg-grid text-slate-900 font-sans min-h-screen py-12 px-4 relative overflow-x-hidden" oncontextmenu="return false;">
+<!-- OPTIMIZED: Removed oncontextmenu blocking -->
+<body class="bg-grid text-slate-900 font-sans min-h-screen py-12 px-4 relative overflow-x-hidden">
 
     <div class="watermark">ARCHIVE</div>
 
@@ -85,7 +99,6 @@
             </div>
             <h1 class="text-3xl font-black tracking-tight text-slate-900 uppercase mt-4">叮噹多啦A夢香港影視漫畫資料庫 Archive Portal</h1>
             <p class="text-slate-400 font-bold text-xs uppercase tracking-[0.2em]">電影 | 漫畫 | 角色 | 人物 | 法寶</p>
-
         </header>
 
         <div class="flex justify-center mb-6">
@@ -218,20 +231,16 @@
         </div>
 
         <footer class="text-center space-y-4 pt-8 pb-12">
-            <div class="bg-gray-50 border border-gray-200 p-6 my-4 text-sm text-gray-700">
-                DoraDexHK：香港多啦A夢 (Doraemon) 影視漫畫文獻資料庫
-
+            <div class="bg-gray-50 border border-gray-200 p-6 my-4 text-sm text-gray-700 text-left">
+                <strong>DoraDexHK：香港多啦A夢 (Doraemon) 影視漫畫文獻資料庫</strong><br><br>
                 本項目致力於系統化記錄及整理自 1970 年代起 多啦A夢 (叮噹) 在香港的出版與播映紀錄。核心研究範疇涵蓋：
-                
-               <!-- 粵語配音 (CV) 考據： 追蹤歷代電視及電影版之角色配音名單。-->
-                
-                影視存檔： 紀錄 1980 年至今之大長篇電影及動畫發行資訊。
-                
-                出版史研究： 整理包括「文化傳信」及「香港青文」在內之香港版漫畫版本演變。
-                
-                法寶索引： 建立神奇法寶之香港譯名、用途及文獻來源對照表。
-                
+                <br><br>
+                • 影視存檔： 紀錄 1980 年至今之大長篇電影及動畫發行資訊。<br>
+                • 出版史研究： 整理包括「文化傳信」及「香港青文」在內之香港版漫畫版本演變。<br>
+                • 法寶索引： 建立神奇法寶之香港譯名、用途及文獻來源對照表。<br><br>
+                <span class="text-xs text-gray-400 block pt-2 border-t border-gray-100">
                 DoraDexHK is an objective research project documenting the history of Doraemon in Hong Kong. This database provides structured data on Cantonese voice acting (CV), film archives, manga publishing history, and gadget nomenclature.
+                </span>
             </div>
             <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
                 Last Updated: <span id="current-date"></span>
@@ -246,7 +255,6 @@
             const animateBtn = document.getElementById('btn-animate');
             const slider = document.getElementById('tab-slider');
 
-            // Reset all tabs to neutral
             [mangaBtn, gadgetsBtn, animateBtn].forEach(btn => {
                 btn.className = 'flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all text-slate-500 hover:text-slate-700';
             });
@@ -262,12 +270,8 @@
                 animateBtn.className = 'flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-rose-600 text-white shadow-md shadow-rose-100';
             }
         }
-
         document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-
-        window.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && ['c','s','p','u','a'].includes(e.key)) e.preventDefault();
-        });
+        // OPTIMIZED: Removed keydown listener blocking shortcut copies
     </script>
 </body>
 </html>

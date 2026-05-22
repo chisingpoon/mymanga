@@ -321,9 +321,14 @@ createApp({
         },
         checkUrlForPost() {
             const params = new URLSearchParams(window.location.search);
-            const postTitle = params.get('post');
-            if (postTitle) {
-                const matchedPost = this.posts.find(p => p.Title === postTitle && String(p.Active).toLowerCase() === 'yes');
+            const postId = params.get('post');
+            
+            if (postId) {
+                // First try matching by BlogID, fallback to Title just in case old links are clicked
+                const matchedPost = this.posts.find(p => 
+                    (String(p.blogID) === String(postId) || p.Title === postId) && 
+                    String(p.Active).toLowerCase() === 'yes'
+                );
                 if (matchedPost) {
                     this.activePost = matchedPost;
                 }
@@ -338,8 +343,10 @@ createApp({
             
             if (newPost) {
                 document.body.style.overflow = 'hidden';
-                if (params.get('post') !== newPost.Title) {
-                    params.set('post', newPost.Title);
+                // Use blogID for the URL parameter. Fallback to Title if blogID doesn't exist on a row.
+                const identifier = newPost.blogID || newPost.Title;
+                if (params.get('post') !== String(identifier)) {
+                    params.set('post', identifier);
                     window.history.pushState({}, '', `${window.location.pathname}?${params.toString()}`);
                 }
             } else {

@@ -180,196 +180,204 @@
 </div>
 
 <script>
-const { createApp } = Vue;
-
-createApp({
-    data() {
-        return {
-            posts: [],
-            loading: true,
-            selectedCategory: 'All',
-            searchQuery: '',
-            startDate: '', // Set in mounted
-            endDate: '',   // Set in mounted
-            sortBy: 'newest',
-            currentLayout: 'grid',
-            currentPage: 1,
-            pageSize: 6,
-            activePost: null,
-            sheetUrl: 'https://opensheet.elk.sh/1PkFmYV1rVoJqFmysUyHQBOC1jS-MWRodr9OyOFOloKs/BlogList'
-        }
-    },
-    computed: {
-        categories() {
-            const activeOnly = this.posts.filter(p => String(p.Active).toLowerCase() === 'yes');
-            return [...new Set(activeOnly.map(p => p.Category))].filter(Boolean);
-        },
-        isFiltered() {
-            return this.selectedCategory !== 'All' || this.searchQuery !== '' || this.isCustomDateRange;
-        },
-        isCustomDateRange() {
-            const now = new Date();
-            const lastMonth = new Date();
-            lastMonth.setDate(now.getDate() - 30);
-            return this.startDate !== lastMonth.toISOString().split('T')[0] || this.endDate !== now.toISOString().split('T')[0];
-        },
-        filteredPosts() {
-            let filtered = this.posts.filter(p => String(p.Active).toLowerCase() === 'yes');
-            
-            if (this.selectedCategory !== 'All') {
-                filtered = filtered.filter(p => p.Category === this.selectedCategory);
+    const { createApp } = Vue;
+    
+    createApp({
+        data() {
+            return {
+                posts: [],
+                loading: true,
+                selectedCategory: 'All',
+                searchQuery: '',
+                startDate: '', // Set in mounted
+                endDate: '',   // Set in mounted
+                sortBy: 'newest',
+                currentLayout: 'grid',
+                currentPage: 1,
+                pageSize: 6,
+                activePost: null,
+                sheetUrl: 'https://opensheet.elk.sh/1PkFmYV1rVoJqFmysUyHQBOC1jS-MWRodr9OyOFOloKs/BlogList'
             }
-            
-            if (this.searchQuery) {
-                const q = this.searchQuery.toLowerCase();
-                filtered = filtered.filter(p => 
-                    (p.Title || "").toLowerCase().includes(q) || 
-                    (p.Summary || "").toLowerCase().includes(q)
-                );
-            }
-
-            if (this.startDate || this.endDate) {
-                filtered = filtered.filter(p => {
-                    if (!p.PostDate) return false;
-                    const postDate = this.parseSheetDate(p.PostDate);
-                    const start = this.startDate ? new Date(this.startDate) : null;
-                    const end = this.endDate ? new Date(this.endDate) : null;
-                    if (start) start.setHours(0,0,0,0);
-                    if (end) end.setHours(23,59,59,999);
-                    if (start && postDate < start) return false;
-                    if (end && postDate > end) return false;
-                    return true;
+        },
+        computed: {
+            categories() {
+                const activeOnly = this.posts.filter(p => String(p.Active).toLowerCase() === 'yes');
+                return [...new Set(activeOnly.map(p => p.Category))].filter(Boolean);
+            },
+            isFiltered() {
+                return this.selectedCategory !== 'All' || this.searchQuery !== '' || this.isCustomDateRange;
+            },
+            isCustomDateRange() {
+                const now = new Date();
+                const lastMonth = new Date();
+                lastMonth.setDate(now.getDate() - 30);
+                return this.startDate !== lastMonth.toISOString().split('T')[0] || this.endDate !== now.toISOString().split('T')[0];
+            },
+            filteredPosts() {
+                let filtered = this.posts.filter(p => String(p.Active).toLowerCase() === 'yes');
+                
+                if (this.selectedCategory !== 'All') {
+                    filtered = filtered.filter(p => p.Category === this.selectedCategory);
+                }
+                
+                if (this.searchQuery) {
+                    const q = this.searchQuery.toLowerCase();
+                    filtered = filtered.filter(p => 
+                        (p.Title || "").toLowerCase().includes(q) || 
+                        (p.Summary || "").toLowerCase().includes(q)
+                    );
+                }
+    
+                if (this.startDate || this.endDate) {
+                    filtered = filtered.filter(p => {
+                        if (!p.PostDate) return false;
+                        const postDate = this.parseSheetDate(p.PostDate);
+                        const start = this.startDate ? new Date(this.startDate) : null;
+                        const end = this.endDate ? new Date(this.endDate) : null;
+                        if (start) start.setHours(0,0,0,0);
+                        if (end) end.setHours(23,59,59,999);
+                        if (start && postDate < start) return false;
+                        if (end && postDate > end) return false;
+                        return true;
+                    });
+                }
+    
+                filtered.sort((a, b) => {
+                    const dateA = this.parseSheetDate(a.PostDate || "1/1/1900");
+                    const dateB = this.parseSheetDate(b.PostDate || "1/1/1900");
+                    return this.sortBy === 'newest' ? dateB - dateA : dateA - dateB;
                 });
+    
+                return filtered;
+            },
+            paginatedPosts() {
+                const start = (this.currentPage - 1) * this.pageSize;
+                return this.filteredPosts.slice(start, start + this.pageSize);
+            },
+            totalPages() {
+                return Math.ceil(this.filteredPosts.length / this.pageSize);
             }
-
-            filtered.sort((a, b) => {
-                const dateA = this.parseSheetDate(a.PostDate || "1/1/1900");
-                const dateB = this.parseSheetDate(b.PostDate || "1/1/1900");
-                return this.sortBy === 'newest' ? dateB - dateA : dateA - dateB;
-            });
-
-            return filtered;
         },
-        paginatedPosts() {
-            const start = (this.currentPage - 1) * this.pageSize;
-            return this.filteredPosts.slice(start, start + this.pageSize);
-        },
-        totalPages() {
-            return Math.ceil(this.filteredPosts.length / this.pageSize);
-        }
-    },
-    methods: {
-        async fetchData() {
-            try {
-                const response = await fetch(this.sheetUrl);
-                const rawData = await response.json();
-                this.posts = rawData.map(post => {
-                    const normalized = {};
-                    Object.keys(post).forEach(key => normalized[key.trim()] = post[key]);
-                    if (!normalized.PostDate && normalized.Date) normalized.PostDate = normalized.Date;
-                    return normalized;
-                });
-                this.loading = false;
-
-                // Check URL parameters after data loads to auto-open shared posts
-                this.checkUrlForPost();
-            } catch (error) { this.loading = false; }
-        },
-        parseSheetDate(dateStr) {
-            const parts = dateStr.trim().split('/');
-            if (parts.length === 3) {
-                const [m, d, y] = parts.map(Number);
-                return new Date(y, m - 1, d);
+        methods: {
+            async fetchData() {
+                try {
+                    const response = await fetch(this.sheetUrl);
+                    const rawData = await response.json();
+                    this.posts = rawData.map(post => {
+                        const normalized = {};
+                        Object.keys(post).forEach(key => normalized[key.trim()] = post[key]);
+                        if (!normalized.PostDate && normalized.Date) normalized.PostDate = normalized.Date;
+                        
+                        // Explicitly lock onto BlogID, with fallback variants
+                        const idKey = Object.keys(normalized).find(k => 
+                            k === 'BlogID' || k.toLowerCase() === 'blogid' || k.toLowerCase() === 'blog id'
+                        );
+                        normalized._computedId = idKey ? String(normalized[idKey]).trim() : '';
+    
+                        return normalized;
+                    });
+                    this.loading = false;
+    
+                    // Process URL parameter now that data is safe
+                    this.checkUrlForPost();
+                } catch (error) { this.loading = false; }
+            },
+            parseSheetDate(dateStr) {
+                const parts = dateStr.trim().split('/');
+                if (parts.length === 3) {
+                    const [m, d, y] = parts.map(Number);
+                    return new Date(y, m - 1, d);
+                }
+                return new Date(dateStr);
+            },
+            formatDate(dateStr) {
+                if (!dateStr) return '';
+                const dateObj = this.parseSheetDate(dateStr);
+                return dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            },
+            highlight(text) {
+                if (!this.searchQuery || !text) return text;
+                const reg = new RegExp(`(${this.searchQuery.trim()})`, 'gi');
+                return String(text).replace(reg, '<mark>$1</mark>');
+            },
+            renderMarkdown(text) {
+                const html = marked.parse(text || '');
+                return this.highlight(html);
+            },
+            resetAll() {
+                this.selectedCategory = 'All';
+                this.searchQuery = '';
+                this.sortBy = 'newest';
+                this.currentPage = 1;
+                this.setDefaultDates();
+            },
+            setDefaultDates() {
+                const today = new Date();
+                const lastMonth = new Date();
+                lastMonth.setDate(today.getDate() - 30);
+                
+                this.startDate = lastMonth.toISOString().split('T')[0];
+                this.endDate = today.toISOString().split('T')[0];
+            },
+            openPost(post) {
+                this.activePost = post;
+            },
+            setPage(num) {
+                this.currentPage = num;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
+            checkUrlForPost() {
+                const params = new URLSearchParams(window.location.search);
+                const postParam = params.get('post');
+                
+                if (postParam) {
+                    const cleanedParam = String(postParam).trim();
+                    // Check match against the explicit BlogID values first
+                    const matchedPost = this.posts.find(p => 
+                        (p._computedId === cleanedParam || p.Title === cleanedParam) && 
+                        String(p.Active).toLowerCase() === 'yes'
+                    );
+                    if (matchedPost) {
+                        this.activePost = matchedPost;
+                    }
+                } else {
+                    this.activePost = null;
+                }
             }
-            return new Date(dateStr);
         },
-        formatDate(dateStr) {
-            if (!dateStr) return '';
-            const dateObj = this.parseSheetDate(dateStr);
-            return dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        watch: {
+            activePost(newPost) {
+                const params = new URLSearchParams(window.location.search);
+                
+                if (newPost) {
+                    document.body.style.overflow = 'hidden';
+                    // Prioritize the discovered BlogID string, fallback to title if empty
+                    const identifier = newPost._computedId || newPost.Title;
+                    if (params.get('post') !== String(identifier)) {
+                        params.set('post', identifier);
+                        window.history.pushState({}, '', `${window.location.pathname}?${params.toString()}`);
+                    }
+                } else {
+                    document.body.style.overflow = 'auto';
+                    if (params.has('post')) {
+                        params.delete('post');
+                        const queryString = params.toString();
+                        const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
+                        window.history.pushState({}, '', newUrl);
+                    }
+                }
+            }
         },
-        highlight(text) {
-            if (!this.searchQuery || !text) return text;
-            const reg = new RegExp(`(${this.searchQuery.trim()})`, 'gi');
-            return String(text).replace(reg, '<mark>$1</mark>');
-        },
-        renderMarkdown(text) {
-            const html = marked.parse(text || '');
-            return this.highlight(html);
-        },
-        resetAll() {
-            this.selectedCategory = 'All';
-            this.searchQuery = '';
-            this.sortBy = 'newest';
-            this.currentPage = 1;
+        mounted() {
             this.setDefaultDates();
+            this.fetchData();
+    
+            window.addEventListener('popstate', this.checkUrlForPost);
         },
-        setDefaultDates() {
-            const today = new Date();
-            const lastMonth = new Date();
-            lastMonth.setDate(today.getDate() - 30);
-            
-            this.startDate = lastMonth.toISOString().split('T')[0];
-            this.endDate = today.toISOString().split('T')[0];
-        },
-        openPost(post) {
-            this.activePost = post;
-        },
-        setPage(num) {
-            this.currentPage = num;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        },
-        checkUrlForPost() {
-            const params = new URLSearchParams(window.location.search);
-            const postId = params.get('post');
-            
-            if (postId) {
-                // First try matching by BlogID, fallback to Title just in case old links are clicked
-                const matchedPost = this.posts.find(p => 
-                    (String(p.blogID) === String(postId) || p.Title === postId) && 
-                    String(p.Active).toLowerCase() === 'yes'
-                );
-                if (matchedPost) {
-                    this.activePost = matchedPost;
-                }
-            } else {
-                this.activePost = null;
-            }
+        unmounted() {
+            window.removeEventListener('popstate', this.checkUrlForPost);
         }
-    },
-    watch: {
-        activePost(newPost) {
-            const params = new URLSearchParams(window.location.search);
-            
-            if (newPost) {
-                document.body.style.overflow = 'hidden';
-                // Use blogID for the URL parameter. Fallback to Title if blogID doesn't exist on a row.
-                const identifier = newPost.blogID || newPost.Title;
-                if (params.get('post') !== String(identifier)) {
-                    params.set('post', identifier);
-                    window.history.pushState({}, '', `${window.location.pathname}?${params.toString()}`);
-                }
-            } else {
-                document.body.style.overflow = 'auto';
-                if (params.has('post')) {
-                    params.delete('post');
-                    const queryString = params.toString();
-                    const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
-                    window.history.pushState({}, '', newUrl);
-                }
-            }
-        }
-    },
-    mounted() {
-        this.setDefaultDates();
-        this.fetchData();
-
-        window.addEventListener('popstate', this.checkUrlForPost);
-    },
-    unmounted() {
-        window.removeEventListener('popstate', this.checkUrlForPost);
-    }
-}).mount('#app');
+    }).mount('#app');
 </script>
 </body>
 </html>

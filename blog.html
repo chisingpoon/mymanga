@@ -17,6 +17,10 @@
         mark { background-color: #fef08a; color: #854d0e; border-radius: 2px; padding: 0 2px; }
         .prose p { margin-bottom: 1rem; line-height: 1.7; color: #475569; }
         select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1.5em; }
+        @keyframes pop {
+          0% { transform: scale(0.8); opacity: 0.6; }
+          100% { transform: scale(1); opacity: 1; }
+        }
     </style>
 </head>
 <body class="text-slate-900">
@@ -204,15 +208,41 @@
                         @click="copyPostLink"
                         title="Copy Link"
                         class="group relative flex items-center justify-center w-11 h-11 rounded-2xl
-                               bg-slate-100 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200
-                               shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
-                
-                        <svg class="w-5 h-5 text-slate-500 group-hover:text-indigo-600 transition-colors"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                               border shadow-sm transition-all duration-200 hover:-translate-y-0.5
+                               overflow-hidden"
+                        :class="copied ? 
+                            'bg-green-100 border-green-200 text-green-600' : 
+                            'bg-slate-100 hover:bg-indigo-50 border-slate-200 hover:border-indigo-200 text-slate-500 hover:text-indigo-600'
+                        ">
+                    
+                        <!-- Default icon -->
+                        <svg v-if="!copied"
+                            class="w-5 h-5 transition-all duration-200 group-hover:scale-110"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24">
+                    
+                            <path stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
                                 d="M10 13a5 5 0 007.07 0l1.41-1.41a5 5 0 00-7.07-7.07L10 5m4 6a5 5 0 01-7.07 0L5.51 9.59a5 5 0 017.07-7.07L14 4">
                             </path>
                         </svg>
+                    
+                        <!-- Success icon -->
+                        <svg v-else
+                            class="w-5 h-5 animate-[pop_0.25s_ease-out]"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24">
+                    
+                            <path stroke-width="3"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M5 13l4 4L19 7">
+                            </path>
+                        </svg>
+                    
                     </button>
                 
                     <!-- Facebook -->
@@ -282,6 +312,7 @@
                 currentPage: 1,
                 pageSize: 6,
                 activePost: null,
+                copied: false,
                 sheetUrl: 'https://opensheet.elk.sh/1PkFmYV1rVoJqFmysUyHQBOC1jS-MWRodr9OyOFOloKs/BlogList'
             }
         },
@@ -433,16 +464,23 @@
                     this.activePost = null;
                 }
             },
-            copyPostLink() {
+            async copyPostLink() {
                 const url = window.location.href;
             
-                navigator.clipboard.writeText(url)
-                    .then(() => {
-                        alert('Post link copied!');
-                    })
-                    .catch(() => {
-                        alert('Failed to copy link.');
-                    });
+                try {
+                    await navigator.clipboard.writeText(url);
+            
+                    this.copied = true;
+            
+                    // auto reset after animation
+                    setTimeout(() => {
+                        this.copied = false;
+                    }, 1500);
+            
+                } catch (err) {
+                    console.log(err);
+                    alert('Failed to copy link.');
+                }
             },
             
             shareTo(platform) {

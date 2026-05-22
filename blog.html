@@ -160,14 +160,93 @@
     <div v-if="activePost" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-sm" @click="activePost = null"></div>
         <div class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl relative z-10">
-            <div class="sticky top-0 bg-white/95 backdrop-blur-md px-8 py-6 border-b border-slate-100 flex justify-between items-center">
-                <div>
-                    <span class="text-indigo-600 font-black text-[10px] tracking-widest uppercase">{{ activePost.Category }}</span>
-                    <h2 class="text-2xl font-black text-slate-900 mt-1" v-html="highlight(activePost.Title)"></h2>
+            <div class="sticky top-0 bg-white/95 backdrop-blur-md px-8 py-6 border-b border-slate-100 flex justify-between items-start gap-4">
+                
+                <div class="flex-1">
+                    <span class="text-indigo-600 font-black text-[10px] tracking-widest uppercase">
+                        {{ activePost.Category }}
+                    </span>
+            
+                    <h2 class="text-2xl font-black text-slate-900 mt-1"
+                        v-html="highlight(activePost.Title)">
+                    </h2>
                 </div>
-                <button @click="activePost = null" class="bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition-colors">
-                    <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round"></path></svg>
-                </button>
+            
+                <div class="flex items-center gap-2 shrink-0">
+            
+                    <!-- Copy Link -->
+                    <button
+                        @click="copyPostLink"
+                        class="bg-slate-100 hover:bg-indigo-100 hover:text-indigo-600 text-slate-500 p-2 rounded-xl transition-all"
+                        title="Copy Link">
+            
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                d="M10 13a5 5 0 007.07 0l1.41-1.41a5 5 0 00-7.07-7.07L10 5m4 6a5 5 0 01-7.07 0L5.51 9.59a5 5 0 017.07-7.07L14 4">
+                            </path>
+                        </svg>
+                    </button>
+            
+                    <!-- Facebook -->
+                    <button
+                        @click="shareTo('facebook')"
+                        class="bg-slate-100 hover:bg-blue-100 hover:text-blue-600 text-slate-500 p-2 rounded-xl transition-all"
+                        title="Share to Facebook">
+            
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M22 12a10 10 0 10-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.5-3.88 3.78-3.88 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.62.76-1.62 1.55V12h2.76l-.44 2.89h-2.32v6.99A10 10 0 0022 12z"/>
+                        </svg>
+                    </button>
+            
+                    <!-- Twitter/X -->
+                    <button
+                        @click="shareTo('twitter')"
+                        class="bg-slate-100 hover:bg-sky-100 hover:text-sky-600 text-slate-500 p-2 rounded-xl transition-all"
+                        title="Share to X">
+            
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M18.244 2H21l-6.56 7.5L22 22h-6.828l-5.345-6.99L3.5 22H1l7.02-8.02L2 2h7l4.833 6.35L18.244 2z"/>
+                        </svg>
+                    </button>
+            
+                    <!-- WhatsApp -->
+                    <button
+                        @click="shareTo('whatsapp')"
+                        class="bg-slate-100 hover:bg-green-100 hover:text-green-600 text-slate-500 p-2 rounded-xl transition-all"
+                        title="Share to WhatsApp">
+            
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20 3.5A11 11 0 003 19l-1 4 4-1A11 11 0 1020 3.5zm-8.5 16a9 9 0 01-4.58-1.25l-.33-.2-2.72.68.73-2.65-.22-.34A9 9 0 1111.5 19.5zm5.2-6.73c-.28-.14-1.66-.82-1.92-.91-.26-.1-.45-.14-.64.14s-.73.91-.89 1.1-.33.21-.61.07a7.3 7.3 0 01-2.15-1.33 8.1 8.1 0 01-1.5-1.87c-.16-.28-.02-.43.12-.57.13-.13.28-.33.42-.49.14-.16.19-.28.28-.47.1-.19.05-.35-.02-.49-.07-.14-.64-1.54-.88-2.1-.23-.56-.46-.47-.64-.48h-.55c-.19 0-.49.07-.74.35-.26.28-1 1-.97 2.43.02 1.43 1.03 2.8 1.18 2.99.14.19 2.03 3.1 4.93 4.35.69.3 1.22.47 1.64.6.69.22 1.32.19 1.82.11.56-.08 1.66-.68 1.9-1.34.23-.66.23-1.22.16-1.34-.07-.11-.26-.18-.54-.32z"/>
+                        </svg>
+                    </button>
+            
+                    <!-- Native Share -->
+                    <button
+                        v-if="navigatorShare"
+                        @click="nativeShare"
+                        class="bg-slate-100 hover:bg-purple-100 hover:text-purple-600 text-slate-500 p-2 rounded-xl transition-all"
+                        title="Share">
+            
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                d="M8.684 13.342C9.133 12.56 10 12 11 12s1.867.56 2.316 1.342m0 0A2 2 0 1016 17a2 2 0 00-3.684-1.658zm-3.632-2.684A2 2 0 106 9a2 2 0 002.684 1.658zm7.632-2.684A2 2 0 1018 5a2 2 0 00-2.684 1.658z">
+                            </path>
+                        </svg>
+                    </button>
+            
+                    <!-- Close -->
+                    <button
+                        @click="activePost = null"
+                        class="bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition-colors">
+            
+                        <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M6 18L18 6M6 6l12 12"
+                                stroke-width="2"
+                                stroke-linecap="round">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
             </div>
             <div class="p-2 md:p-4">
                 <div class="text-[10px] font-black text-slate-400 mb-8 border-b border-slate-100 pb-4 uppercase tracking-widest">
@@ -256,7 +335,10 @@
             },
             totalPages() {
                 return Math.ceil(this.filteredPosts.length / this.pageSize);
-            }
+            },
+            navigatorShare() {
+                return !!navigator.share;
+            },
         },
         methods: {
             async fetchData() {
@@ -343,7 +425,57 @@
                 } else {
                     this.activePost = null;
                 }
-            }
+            },
+            copyPostLink() {
+                const url = window.location.href;
+            
+                navigator.clipboard.writeText(url)
+                    .then(() => {
+                        alert('Post link copied!');
+                    })
+                    .catch(() => {
+                        alert('Failed to copy link.');
+                    });
+            },
+            
+            shareTo(platform) {
+                const url = encodeURIComponent(window.location.href);
+                const title = encodeURIComponent(this.activePost?.Title || '');
+            
+                let shareUrl = '';
+            
+                switch(platform) {
+                    case 'facebook':
+                        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+                        break;
+            
+                    case 'twitter':
+                        shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${title}`;
+                        break;
+            
+                    case 'whatsapp':
+                        shareUrl = `https://wa.me/?text=${title}%20${url}`;
+                        break;
+                }
+            
+                if (shareUrl) {
+                    window.open(shareUrl, '_blank', 'width=600,height=500');
+                }
+            },
+            
+            async nativeShare() {
+                if (!navigator.share) return;
+            
+                try {
+                    await navigator.share({
+                        title: this.activePost?.Title || '',
+                        text: this.activePost?.Summary || '',
+                        url: window.location.href
+                    });
+                } catch(err) {
+                    console.log(err);
+                }
+            },
         },
         watch: {
             activePost(newPost) {

@@ -327,17 +327,11 @@
             },            
             isCustomDateRange() {
                 const now = new Date();
-                
-                const sixMonthsAgo = new Date(now);
-                sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-                
-                const defaultStartDate = sixMonthsAgo.toISOString().split('T')[0];
-                const defaultEndDate = now.toISOString().split('T')[0];
-                
-                return (
-                    this.startDate !== defaultStartDate ||
-                    this.endDate !== defaultEndDate
-                );
+                const sixMonthsAgo = new Date();
+                sixMonthsAgo.setMonth(now.getMonth() - 6);
+            
+                return this.startDate !== sixMonthsAgo.toISOString().split('T')[0] ||
+                       this.endDate !== now.toISOString().split('T')[0];
             },
             filteredPosts() {
                 let filtered = this.posts.filter(p => String(p.Active).toLowerCase() === 'yes');

@@ -325,17 +325,24 @@
             isFiltered() {
                 return this.selectedCategory !== 'All' || this.searchQuery !== '' || this.isCustomDateRange;
             },
+            const formatDate = (date) => {
+              const year = date.getFullYear();
+              const month = String(date.getMonth() + 1).padStart(2, '0');
+              const day = String(date.getDate()).padStart(2, '0');
+              return `${year}-${month}-${day}`;
+            };
+            
             isCustomDateRange() {
               const now = new Date();
             
               const sixMonthsAgo = new Date(now);
-              sixMonthsAgo.setMonth(now.getMonth() - 6);
+              sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
             
               return (
-                this.startDate !== sixMonthsAgo.toISOString().split('T')[0] ||
-                this.endDate !== now.toISOString().split('T')[0]
+                this.startDate !== formatDate(sixMonthsAgo) ||
+                this.endDate !== formatDate(now)
               );
-            }
+            },
             filteredPosts() {
                 let filtered = this.posts.filter(p => String(p.Active).toLowerCase() === 'yes');
                 

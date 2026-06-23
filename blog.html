@@ -436,10 +436,10 @@
             },
             setDefaultDates() {
                 const today = new Date();
-                const lastMonth = new Date();
-                lastMonth.setDate(today.getDate() - 30);
-                
-                this.startDate = lastMonth.toISOString().split('T')[0];
+                const sixMonthsAgo = new Date();
+                sixMonthsAgo.setMonth(today.getMonth() - 6);
+            
+                this.startDate = sixMonthsAgo.toISOString().split('T')[0];
                 this.endDate = today.toISOString().split('T')[0];
             },
             openPost(post) {

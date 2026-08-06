@@ -53,6 +53,24 @@ backdrop-filter: blur(12px);
 -webkit-backdrop-filter: blur(12px);
 }
 
+/* STREAMING_CHUNK:Fixing dropdown menu persistent visibility and overlap bugs... */
+.nav-dropdown-menu {
+opacity: 0;
+visibility: hidden;
+pointer-events: none;
+transform: translateY(8px);
+transition: opacity 0.15s ease-in-out, transform 0.15s ease-in-out, visibility 0.15s ease-in-out;
+}
+
+.group:hover > .nav-dropdown-menu,
+.group:focus-within > .nav-dropdown-menu,
+.nav-dropdown-menu.is-active {
+opacity: 1;
+visibility: visible;
+pointer-events: auto;
+transform: translateY(0);
+}
+
 .hero-pattern {
 background-color: #f8fafc;
 background-image: radial-gradient(#0066cc 0.5px, transparent 0.5px), radial-gradient(#0066cc 0.5px, #f8fafc 0.5px);

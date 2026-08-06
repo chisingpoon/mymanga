@@ -1,44 +1,141 @@
-body {
-    font-family: 'Noto Sans TC', sans-serif;
-    background-color: #FAFAFC;
-    color: #1E293B;
+/* STREAMING_CHUNK:Defining custom CSS variables and base typography... /
+/ ==========================================================================
+DoraDexHK - Common Shared Stylesheet
+香港多啦A夢 (叮噹) 影視漫畫法寶資料庫 - 核心樣式表
+========================================================================== */
+
+:root {
+--dora-primary: #0066cc;
+--dora-dark: #0f2b48;
+--dora-light: #f0f7ff;
+--dora-accent: #ffcc00;
+--dora-red: #e63946;
 }
+
+/* --------------------------------------------------------------------------
+
+BASE TYPOGRAPHY & FONT FALLBACKS
+-------------------------------------------------------------------------- */
+body {
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans HK", "PingFang HK", "Microsoft JhengHei", sans-serif;
+color: #1e293b;
+background-color: #f8fafc;
+}
+
+/* Japanese Text Optimization for Original Manga Titles (ドラえもん / 日本原名) */
+.font-jp {
+font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", "Noto Sans JP", sans-serif;
+}
+
+/* Archival Custom Scrollbar */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+width: 8px;
+height: 8px;
 }
 ::-webkit-scrollbar-track {
-    background: #F1F5F9;
+background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-    background: #CBD5E1;
-    border-radius: 4px;
+background: #cbd5e1;
+border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: #0095E0;
+background: #94a3b8;
 }
-.nav-dropdown {
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(8px);
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+/* STREAMING_CHUNK:Styling glass navigation and background pattern utilities... /
+/ --------------------------------------------------------------------------
+2. NAVIGATION & BACKGROUND PATTERNS
+-------------------------------------------------------------------------- */
+.glass-nav {
+background: rgba(255, 255, 255, 0.92);
+backdrop-filter: blur(12px);
+-webkit-backdrop-filter: blur(12px);
 }
-.nav-item:hover .nav-dropdown {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
+
+.hero-pattern {
+background-color: #f8fafc;
+background-image: radial-gradient(#0066cc 0.5px, transparent 0.5px), radial-gradient(#0066cc 0.5px, #f8fafc 0.5px);
+background-size: 20px 20px;
+background-position: 0 0, 10px 10px;
 }
-.bell-accent {
-    position: relative;
+
+/* STREAMING_CHUNK:Configuring archival cards and interactive hover effects... /
+/ --------------------------------------------------------------------------
+3. CARDS & INTERACTIVE COMPONENTS
+-------------------------------------------------------------------------- */
+.card-hover-effect {
+transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.bell-accent::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 6px;
-    height: 6px;
-    background-color: #FFC800;
-    border-radius: 50%;
+
+.card-hover-effect:hover {
+transform: translateY(-4px);
+box-shadow: 0 12px 24px -8px rgba(15, 43, 72, 0.12);
+}
+
+/* STREAMING_CHUNK:Defining region, publication, and category badge styles... /
+/ --------------------------------------------------------------------------
+4. METADATA & REGION BADGES
+-------------------------------------------------------------------------- */
+.badge-hk {
+background-color: #eff6ff;
+color: #1d4ed8;
+border: 1px solid #bfdbfe;
+}
+
+.badge-jp {
+background-color: #fef2f2;
+color: #b91c1c;
+border: 1px solid #fecaca;
+}
+
+.badge-original {
+background-color: #fffbe0;
+color: #b45309;
+border: 1px solid #fde68a;
+}
+
+.badge-gadget {
+background-color: #ecfeff;
+color: #0e7490;
+border: 1px solid #a5f3fc;
+}
+
+.badge-character {
+background-color: #ecfdf5;
+color: #047857;
+border: 1px solid #a7f3d0;
+}
+
+/* STREAMING_CHUNK:Styling interactive database tables and search overlays... /
+/ --------------------------------------------------------------------------
+5. DATABASE TABLES & OVERLAYS
+-------------------------------------------------------------------------- */
+.db-table-header {
+position: sticky;
+top: 0;
+z-index: 10;
+background-color: #f8fafc;
+}
+
+#searchModal {
+transition: opacity 0.2s ease-in-out;
+}
+
+#searchModalBox {
+transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* STREAMING_CHUNK:Adding print styles for academic research and citations... /
+/ --------------------------------------------------------------------------
+6. ACADEMIC PRINT & CITATION STYLES
+-------------------------------------------------------------------------- */
+@media print {
+header, footer, #searchModal, .no-print {
+display: none !important;
+}
+body {
+background: #ffffff !important;
+color: #000000 !important;
+}
 }

@@ -1,4 +1,50 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Top Navigation Dropdown Management (Fix for overlapping / stuck dropdown menus)
+    const dropdownItems = document.querySelectorAll('.nav-dropdown-item');
+
+    dropdownItems.forEach(item => {
+        const button = item.querySelector('button');
+        const menu = item.querySelector('.nav-dropdown-menu');
+
+        // Close other dropdowns on mouse enter
+        item.addEventListener('mouseenter', () => {
+            dropdownItems.forEach(other => {
+                if (other !== item) {
+                    other.querySelector('button')?.blur();
+                    other.querySelector('.nav-dropdown-menu')?.classList.remove('is-active');
+                }
+            });
+        });
+
+        // Click handler to toggle dropdown cleanly on tap/click
+        if (button && menu) {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = menu.classList.contains('is-active');
+                
+                // Close all dropdowns first
+                dropdownItems.forEach(d => {
+                    d.querySelector('button')?.blur();
+                    d.querySelector('.nav-dropdown-menu')?.classList.remove('is-active');
+                });
+
+                if (!isOpen) {
+                    menu.classList.add('is-active');
+                }
+            });
+        }
+    });
+
+    // Close all open dropdown menus when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.nav-dropdown-item')) {
+            dropdownItems.forEach(item => {
+                item.querySelector('button')?.blur();
+                item.querySelector('.nav-dropdown-menu')?.classList.remove('is-active');
+            });
+        }
+    });
+
     // Mobile Menu Toggle Logic
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const mobileMenu = document.getElementById('mobileMenu');

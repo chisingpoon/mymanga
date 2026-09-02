@@ -1,321 +1,250 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>叮噹多啦A夢香港影視漫畫資料Blog | DoraDexHK</title>
+    
     <link rel="icon" type="image/png" href="./img/icon.png">
     <link rel="apple-touch-icon" href="./img/icon.png">
-    <title>叮噹多啦A夢香港影視漫畫資料Blog | DoraDexHK</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap');
         [v-cloak] { display: none; }
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        mark { background-color: #fef08a; color: #854d0e; border-radius: 2px; padding: 0 2px; }
-        .prose p { margin-bottom: 1rem; line-height: 1.7; color: #475569; }
-        select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1.5em; }
-        @keyframes pop {
-          0% { transform: scale(0.8); opacity: 0.6; }
-          100% { transform: scale(1); opacity: 1; }
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        mark { 
+            background-color: #fef08a; 
+            color: #854d0e; 
+            border-radius: 2px; 
+            padding: 0 2px; 
+        }
+        select { 
+            appearance: none; 
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); 
+            background-repeat: no-repeat; 
+            background-position: right 0.75rem center; 
+            background-size: 1.2em; 
         }
     </style>
 </head>
-<body class="text-slate-900">
+<body>
 
-<div id="app" v-cloak>
-    <nav class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-200">
-        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <a href="index.html" class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white hover:bg-indigo-600 transition-all shadow-sm">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                </a>
-                <span class="font-black text-xl tracking-tighter text-slate-800 uppercase">Blogsssss</span>
+<div id="app" v-cloak class="min-h-screen flex flex-col justify-between">
+
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <a href="index_v2.html" class="flex items-center gap-3 group">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-400 text-white flex items-center justify-center font-black text-xl shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
+                            D
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="font-extrabold text-lg leading-none tracking-tight text-slate-900 group-hover:text-blue-600 transition-colors">DoraDex<span class="text-blue-600">HK</span></span>
+                            <span class="text-[10px] font-medium text-slate-500 tracking-wider">香港多啦A夢文獻資料庫</span>
+                        </div>
+                    </a>
+                </div>
+
+                <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+                    <a href="index_v2.html" class="text-slate-600 hover:text-blue-600 transition-colors">首頁</a>
+                    <a href="manga-database.html?region=HK" class="text-slate-600 hover:text-blue-600 transition-colors">香港版漫畫</a>
+                    <a href="manga-database.html?region=JP" class="text-slate-600 hover:text-blue-600 transition-colors">日本版漫畫</a>
+                    <a href="mediaobject.html?filterclass=法寶" class="text-slate-600 hover:text-blue-600 transition-colors">法寶記錄</a>
+                    <a href="blog.html" class="text-blue-600 font-bold border-b-2 border-blue-600 pb-1">研究網誌</a>
+                </nav>
+
+                <div>
+                    <a href="index_v2.html" class="text-xs sm:text-sm font-semibold text-slate-600 hover:text-blue-600 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-house"></i> 返回首頁
+                    </a>
+                </div>
             </div>
-            <a href="index.html" class="text-sm font-bold text-slate-500 hover:text-indigo-600 transition-colors uppercase tracking-tight">Back to Archive</a>
-        </div>
-    </nav>
-
-    <header class="bg-slate-900 py-16 px-6">
-        <div class="max-w-4xl mx-auto text-center">
-            <span class="text-indigo-400 font-bold tracking-[0.2em] text-[10px] uppercase mb-4 block">Archive Insights</span>
-            <h1 class="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight uppercase">The Collective Blog</h1>
-            <p class="text-slate-400 text-lg max-w-2xl mx-auto font-medium">Deep dives, updates, and stories behind our latest archive collections.</p>
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-6 -mt-8 pb-24">
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4 mb-8">
+    <section class="bg-slate-900 py-12 px-4 sm:px-6 lg:px-8 text-center relative overflow-hidden">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <span class="text-blue-400 font-bold tracking-widest text-xs uppercase mb-2 block">Archive Insights</span>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-3 tracking-tight">香港多啦A夢研究網誌</h1>
+            <p class="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto font-normal leading-relaxed">
+                深入探討香港譯名、版本考證、出版歷史與動畫廣播文獻。
+            </p>
+        </div>
+    </section>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 space-y-4 mb-8">
             <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                
                 <div class="flex flex-wrap gap-2 items-center">
                     <button @click="selectedCategory = 'All'; currentPage = 1" 
-                        :class="selectedCategory === 'All' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'"
-                        class="px-4 py-2 rounded-xl text-[11px] font-black transition-all uppercase tracking-wider">All</button>
-                    <button v-for="cat in categories" @click="selectedCategory = cat; currentPage = 1"
-                        :class="selectedCategory === cat ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'"
-                        class="px-4 py-2 rounded-xl text-[11px] font-black transition-all uppercase tracking-wider">{{ cat }}</button>
+                        :class="selectedCategory === 'All' ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                        class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all">全部</button>
+                    
+                    <button v-for="cat in categories" :key="cat" @click="selectedCategory = cat; currentPage = 1"
+                        :class="selectedCategory === cat ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                        class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all">{{ cat }}</button>
                     
                     <div class="ml-2 flex items-center gap-3">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">{{ filteredPosts.length }} Results</span>
-                        <button v-if="isFiltered" @click="resetAll" class="text-[10px] font-black text-rose-500 hover:text-rose-700 uppercase tracking-widest flex items-center gap-1">
-                            Reset All
+                        <span class="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200/60">
+                            {{ filteredPosts.length }} 篇結果
+                        </span>
+                        <button v-if="isFiltered" @click="resetAll" class="text-xs font-bold text-rose-500 hover:text-rose-700 flex items-center gap-1 transition-colors">
+                            <i class="fa-solid fa-rotate-left"></i> 重置條件
                         </button>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-3 w-full lg:w-auto">
                     <div class="relative flex-grow lg:w-64">
-                        <input v-model="searchQuery" @input="currentPage = 1" type="text" placeholder="Search..." 
-                            class="block w-full pl-4 pr-10 py-2.5 bg-slate-100 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <input v-model="searchQuery" @input="currentPage = 1" type="text" placeholder="搜尋文章標題或摘要..." 
+                            class="block w-full pl-4 pr-10 py-2 bg-slate-100 border-none rounded-xl text-xs sm:text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     
-                    <select v-model="sortBy" class="bg-slate-100 border-none rounded-xl px-4 pr-10 py-2.5 text-xs font-black text-slate-600 uppercase tracking-wider focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer">
-                        <option value="newest">Newest First</option>
-                        <option value="oldest">Oldest First</option>
+                    <select v-model="sortBy" class="bg-slate-100 border-none rounded-xl pl-3 pr-8 py-2 text-xs font-bold text-slate-600 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+                        <option value="newest">最新發佈</option>
+                        <option value="oldest">最早發佈</option>
                     </select>
 
                     <div class="flex bg-slate-100 p-1 rounded-xl shrink-0">
-                        <button @click="currentLayout = 'grid'" :class="currentLayout === 'grid' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'" class="p-2 rounded-lg transition-all">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                        <button @click="currentLayout = 'grid'" :class="currentLayout === 'grid' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400'" class="p-1.5 rounded-lg transition-all" title="卡片圖排">
+                            <i class="fa-solid fa-border-all text-sm w-5 h-5 flex items-center justify-center"></i>
                         </button>
-                        <button @click="currentLayout = 'table'" :class="currentLayout === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'" class="p-2 rounded-lg transition-all">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
+                        <button @click="currentLayout = 'table'" :class="currentLayout === 'table' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400'" class="p-1.5 rounded-lg transition-all" title="列表模式">
+                            <i class="fa-solid fa-list text-sm w-5 h-5 flex items-center justify-center"></i>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div class="pt-4 border-t border-slate-100 flex flex-wrap items-center gap-4">
-                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Filter Date Range:</span>
+            <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-3">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">日期範圍：</span>
                 <div class="flex items-center gap-2">
-                    <input type="date" v-model="startDate" @change="currentPage = 1" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500">
-                    <span class="text-slate-300 text-xs font-bold">to</span>
-                    <input type="date" v-model="endDate" @change="currentPage = 1" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500">
+                    <input type="date" v-model="startDate" @change="currentPage = 1" class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-medium text-slate-600 outline-none focus:ring-2 focus:ring-blue-500">
+                    <span class="text-slate-400 text-xs font-medium">至</span>
+                    <input type="date" v-model="endDate" @change="currentPage = 1" class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-medium text-slate-600 outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
             </div>
         </div>
 
-        <div v-if="loading" class="text-center py-20">
-        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto"></div></div>
+        <div v-if="loading" class="text-center py-20 text-slate-500">
+            <i class="fa-solid fa-spinner fa-spin text-3xl mb-3 text-blue-600"></i>
+            <p>載入文章列表中...</p>
+        </div>
 
-        <div v-if="!loading && currentLayout === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <article v-for="post in paginatedPosts" @click="openPost(post)" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300">
+        <div v-if="!loading && currentLayout === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <article v-for="post in paginatedPosts" :key="post._computedId || post.Title" @click="openPost(post)" 
+                class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden cursor-pointer hover:border-blue-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
                 <div class="p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded uppercase tracking-tighter">{{ post.Category }}</span>
-                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{{ formatDate(post.PostDate) }}</span>
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-xs font-bold text-blue-700 bg-blue-50 border border-blue-100 px-2.5 py-0.5 rounded-full">{{ post.Category }}</span>
+                        <time class="text-xs text-slate-400 font-medium flex items-center gap-1">
+                            <i class="fa-regular fa-calendar"></i>
+                            {{ formatDate(post.PostDate) }}
+                        </time>
                     </div>
-                    <h2 v-if="post.Title" class="text-xl font-black text-slate-800 mb-3 leading-tight" v-html="highlight(post.Title)"></h2>
-                    <p v-if="post.Summary" class="text-slate-500 text-xs font-medium line-clamp-3 mb-6 leading-relaxed" v-html="highlight(post.Summary)"></p>
-                    <div class="text-[11px] font-bold text-slate-400 italic">By {{ post.Author }}</div>
+                    <h2 v-if="post.Title" class="text-lg font-bold text-slate-800 group-hover:text-blue-600 mb-2 leading-snug transition-colors" v-html="highlight(post.Title)"></h2>
+                    <p v-if="post.Summary" class="text-slate-500 text-xs line-clamp-3 mb-4 leading-relaxed" v-html="highlight(post.Summary)"></p>
+                </div>
+                <div class="px-6 py-3 bg-slate-50/50 border-t border-slate-100 text-xs font-medium text-slate-500 flex justify-between items-center">
+                    <span>作者：{{ post.Author || 'DoraDex 編輯團隊' }}</span>
+                    <span class="text-blue-600 font-semibold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                        閱讀全文 <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </span>
                 </div>
             </article>
         </div>
 
-        <div v-if="!loading && currentLayout === 'table'" class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-slate-50/50 border-b border-slate-100">
-                        <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</th>
-                        <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Post Title</th>
-                        <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Category</th>
-                        <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Author</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-50">
-                    <tr v-for="post in paginatedPosts" @click="openPost(post)" class="hover:bg-blue-50/30 transition-colors cursor-pointer group">
-                        <td class="px-6 py-5 text-[10px] font-bold text-slate-400 uppercase whitespace-nowrap">
-                            {{ formatDate(post.PostDate) }}
-                        </td>
-                        <td class="px-6 py-5 text-sm font-black text-slate-800 group-hover:text-blue-600" v-html="highlight(post.Title)">
-                        </td>
-                        <td class="px-6 py-5">
-                            <span class="text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg uppercase tracking-widest">
-                                {{ post.Category }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-tighter">
-                            {{ post.Author }}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+        <div v-if="!loading && currentLayout === 'table'" class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200/80 text-xs font-bold text-slate-500">
+                            <th class="px-6 py-4">發佈日期</th>
+                            <th class="px-6 py-4">文章標題</th>
+                            <th class="px-6 py-4">分類</th>
+                            <th class="px-6 py-4">作者</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-sm">
+                        <tr v-for="post in paginatedPosts" :key="post._computedId || post.Title" @click="openPost(post)" class="hover:bg-blue-50/40 transition-colors cursor-pointer group">
+                            <td class="px-6 py-4 text-xs font-medium text-slate-400 whitespace-nowrap">
+                                {{ formatDate(post.PostDate) }}
+                            </td>
+                            <td class="px-6 py-4 font-bold text-slate-800 group-hover:text-blue-600 transition-colors" v-html="highlight(post.Title)"></td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-xs font-bold text-blue-700 bg-blue-50 border border-blue-100 px-2.5 py-0.5 rounded-full">
+                                    {{ post.Category }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-xs font-medium text-slate-500 whitespace-nowrap">
+                                {{ post.Author || 'DoraDex 編輯團隊' }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div v-if="!loading && filteredPosts.length === 0" class="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-300">
-            <p class="text-slate-400 font-bold uppercase text-[10px] tracking-widest mb-2">No entries in this date range</p>
-            <button @click="resetAll" class="text-indigo-600 font-black text-xs uppercase hover:underline tracking-widest">View all posts</button>
+            <i class="fa-solid fa-folder-open text-4xl text-slate-300 mb-3"></i>
+            <p class="text-slate-500 font-bold text-sm mb-2">未有找到符合條件的文章</p>
+            <button @click="resetAll" class="text-blue-600 font-bold text-xs hover:underline flex items-center gap-1 mx-auto">
+                <i class="fa-solid fa-rotate-left"></i> 重置所有篩選
+            </button>
         </div>
 
-        <div v-if="totalPages > 1" class="flex justify-center items-center gap-2 py-12">
-            <button @click="setPage(currentPage - 1)" :disabled="currentPage === 1" class="p-2 rounded-lg bg-white border border-slate-200 disabled:opacity-30">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round"></path></svg>
+        <div v-if="totalPages > 1" class="flex justify-center items-center gap-2 py-10">
+            <button @click="setPage(currentPage - 1)" :disabled="currentPage === 1" class="p-2 w-9 h-9 flex items-center justify-center rounded-lg bg-white border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors">
+                <i class="fa-solid fa-chevron-left text-xs"></i>
             </button>
-            <button v-for="n in totalPages" @click="setPage(n)" 
-                :class="n === currentPage ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-100' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'"
-                class="w-10 h-10 rounded-lg border font-black text-xs transition-all">{{ n }}</button>
-            <button @click="setPage(currentPage + 1)" :disabled="currentPage === totalPages" class="p-2 rounded-lg bg-white border border-slate-200 disabled:opacity-30">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round"></path></svg>
+            <button v-for="n in totalPages" :key="n" @click="setPage(n)" 
+                :class="n === currentPage ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'"
+                class="w-9 h-9 rounded-lg border font-bold text-xs transition-all">{{ n }}</button>
+            <button @click="setPage(currentPage + 1)" :disabled="currentPage === totalPages" class="p-2 w-9 h-9 flex items-center justify-center rounded-lg bg-white border border-slate-200 disabled:opacity-30 hover:bg-slate-50 transition-colors">
+                <i class="fa-solid fa-chevron-right text-xs"></i>
             </button>
         </div>
     </main>
-    <footer class="mt-12 border-t border-slate-200 bg-white py-8 px-6">
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
-            <div class="space-y-1">
-                <p class="text-xs font-black text-slate-400 uppercase tracking-widest">
-                    &copy; {{ currentYear }} DoraDexHK. All Rights Reserved.
+
+    <footer class="bg-slate-900 text-slate-400 py-12 border-t border-slate-800 text-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6 border-b border-slate-800 pb-8 mb-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-lg">D</div>
+                    <span class="font-bold text-white text-base">DoraDex<span class="text-blue-500">HK</span></span>
+                </div>
+                <p class="text-xs text-slate-500 text-center md:text-left">
+                    多啦A夢 (叮噹) 香港影視漫畫法寶資料庫。專為研究者與收藏家提供文獻考據。
                 </p>
-                <p class="text-[11px] font-medium text-slate-400 leading-relaxed">
-                    【版權所有，翻印必究】
-                    版權所有：本網站之所有文章、文字、插圖圖源、考證結構、獨家發現、考證、版權深層成因分析）均屬原作者之獨創文獻研究成果。
-                    禁止轉載與複製：未經原作者書面明確授權與許可，嚴禁任何個人、網絡平台、社交媒體群組、論壇或商業機構以任何形式進行全文轉載、部分節錄、局部複製、改編或將其輸入至任何人工智慧（AI）模型進行訓練與生成。
-                    引述規範：如因學術研究或同好交流需要進行片段引述，必須完整標明出處及原作者姓名。
-                </p>
-                <p class="text-[11px] font-medium text-slate-400 leading-relaxed">                    
-                    【Copyright & Terms of Use Notice】
-                    All Rights Reserved: All text, research methodology, bibliographical alignment, and unique analytical findings within this site are the intellectual property of the original author.
-                    Strict Non-Copy Policy: NO part of this article may be copied, reproduced, redistributed, summarized, or transmitted in any form or by any means (including digital, mechanical, photocopying, or recording) without prior written permission from the copyright owner.
-                    Legal Action: Any unauthorized copying, plagiarism, or commercial exploitation will be considered a direct infringement of copyright and may be subject to legal remedies and enforcement under applicable intellectual property laws.
-                </p>
+            </div>
+            
+            <div class="text-[11px] text-slate-500 space-y-2 mb-8 leading-relaxed">
+                <p>【版權所有，翻印必究】本網站之所有文章、文字、插圖圖源、考證結構、獨家發現、考證、版權深層成因分析均屬原作者之獨創文獻研究成果。未經原作者書面明確授權與許可，嚴禁任何個人或平台進行轉載或輸入至 AI 模型訓練。</p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+                <div>© {{ currentYear }} DoraDexHK Archive. All rights reserved.</div>
+                <div class="flex gap-4">
+                    <a href="index_v2.html" class="hover:text-slate-300 transition-colors">首頁</a>
+                    <a href="blog.html" class="hover:text-slate-300 transition-colors">網誌專題</a>
+                </div>
             </div>
         </div>
     </footer>
 
-    <div v-if="activePost" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-sm" @click="activePost = null"></div>
-        <div class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl relative z-10">
-            <div class="sticky top-0 bg-white/95 backdrop-blur-md px-5 md:px-8 py-5 md:py-6 border-b border-slate-100">
-            
-                <!-- Top Row -->
-                <div class="flex items-start justify-between gap-4">
-            
-                    <!-- Title -->
-                    <div class="flex-1 min-w-0">
-                        <span class="text-indigo-600 font-black text-[10px] tracking-widest uppercase block mb-2">
-                            {{ activePost.Category }}
-                        </span>
-            
-                        <h2
-                            class="text-2xl md:text-3xl font-black text-slate-900 leading-tight break-words"
-                            v-html="highlight(activePost.Title)">
-                        </h2>
-                    </div>
-            
-                    <!-- Close Button -->
-                    <button
-                        @click="activePost = null"
-                        title="Close"
-                        class="group shrink-0 bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-500 hover:text-rose-500 p-2.5 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-            
-                        <svg class="w-5 h-5 transition-transform duration-200 group-hover:rotate-90"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24">
-            
-                            <path d="M6 18L18 6M6 6l12 12"
-                                stroke-width="2"
-                                stroke-linecap="round">
-                            </path>
-                        </svg>
-                    </button>
-                </div>
-            
-                <!-- Share Buttons Row -->
-                <div class="flex items-center gap-2 flex-wrap mt-5">
-            
-                    <!-- Copy -->
-                    <button
-                        @click="copyPostLink"
-                        title="Copy Link"
-                        class="group relative flex items-center justify-center w-11 h-11 rounded-2xl
-                               border shadow-sm transition-all duration-200 hover:-translate-y-0.5
-                               overflow-hidden"
-                        :class="copied ? 
-                            'bg-green-100 border-green-200 text-green-600' : 
-                            'bg-slate-100 hover:bg-indigo-50 border-slate-200 hover:border-indigo-200 text-slate-500 hover:text-indigo-600'
-                        ">
-                    
-                        <!-- Default icon -->
-                        <svg v-if="!copied"
-                            class="w-5 h-5 transition-all duration-200 group-hover:scale-110"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24">
-                    
-                            <path stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M6 12m-2 0a2 2 0 104 0 2 2 0 10-4 0M18 6m-2 0a2 2 0 104 0 2 2 0 10-4 0M18 18m-2 0a2 2 0 104 0 2 2 0 10-4 0M8 11l8-4M8 13l8 4">
-                            </path>
-                        </svg>
-                    
-                        <!-- Success icon -->
-                        <svg v-else
-                            class="w-5 h-5 animate-[pop_0.25s_ease-out]"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24">
-                    
-                            <path stroke-width="3"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M5 13l4 4L19 7">
-                            </path>
-                        </svg>
-                    
-                    </button>
-                
-                    <!-- Facebook -->
-                    <button
-                        @click="shareTo('facebook')"
-                        title="Facebook"
-                        class="group relative flex items-center justify-center w-11 h-11 rounded-2xl
-                               bg-blue-50 hover:bg-blue-100 border border-blue-100 hover:border-blue-200
-                               shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
-                
-                        <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M22 12a10 10 0 10-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.5-3.88 3.78-3.88 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.62.76-1.62 1.55V12h2.76l-.44 2.89h-2.32v6.99A10 10 0 0022 12z"/>
-                        </svg>
-                    </button>
-                
-                    <!-- X -->
-                    <button
-                        @click="shareTo('twitter')"
-                        title="X"
-                        class="group relative flex items-center justify-center w-11 h-11 rounded-2xl
-                               bg-slate-100 hover:bg-slate-200 border border-slate-200 hover:border-slate-300
-                               shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
-                
-                        <svg class="w-5 h-5 text-slate-700" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M18.244 2H21l-6.56 7.5L22 22h-6.828l-5.345-6.99L3.5 22H1l7.02-8.02L2 2h7l4.833 6.35L18.244 2z"/>
-                        </svg>
-                    </button>
-                
-                    <!-- WhatsApp -->
-                    <button
-                        @click="shareTo('whatsapp')"
-                        title="WhatsApp"
-                        class="group relative flex items-center justify-center w-11 h-11 rounded-2xl
-                               bg-green-50 hover:bg-green-100 border border-green-100 hover:border-green-200
-                               shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
-                
-                        <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M20 3.5A11 11 0 003 19l-1 4 4-1A11 11 0 1020 3.5z"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            <div class="p-2 md:p-4">
-                <div class="text-[10px] font-black text-slate-400 mb-8 border-b border-slate-100 pb-4 uppercase tracking-widest">
-                    By {{ activePost.Author }} — Published {{ formatDate(activePost.PostDate) }}
-                </div>
-                <div class="prose max-w-none" v-html="renderMarkdown(activePost.Content)"></div>
-            </div>
-        </div>
-    </div>
-</div>
+</div> 
 
 <script>
     const { createApp } = Vue;
@@ -327,8 +256,8 @@
                 loading: true,
                 selectedCategory: 'All',
                 searchQuery: '',
-                startDate: '', // Set in mounted
-                endDate: '',   // Set in mounted
+                startDate: '',
+                endDate: '',
                 sortBy: 'newest',
                 currentLayout: 'grid',
                 currentPage: 1,
@@ -398,10 +327,7 @@
             },
             totalPages() {
                 return Math.ceil(this.filteredPosts.length / this.pageSize);
-            },
-            navigatorShare() {
-                return !!navigator.share;
-            },
+            }
         },
         methods: {
             async fetchData() {
@@ -413,7 +339,6 @@
                         Object.keys(post).forEach(key => normalized[key.trim()] = post[key]);
                         if (!normalized.PostDate && normalized.Date) normalized.PostDate = normalized.Date;
                         
-                        // Explicitly lock onto BlogID, with fallback variants
                         const idKey = Object.keys(normalized).find(k => 
                             k === 'BlogID' || k.toLowerCase() === 'blogid' || k.toLowerCase() === 'blog id'
                         );
@@ -422,12 +347,10 @@
                         return normalized;
                     });
                     this.loading = false;
-    
-                    // Process URL parameter now that data is safe
-                    this.checkUrlForPost();
                 } catch (error) { this.loading = false; }
             },
             parseSheetDate(dateStr) {
+                if (!dateStr) return new Date();
                 const parts = dateStr.trim().split('/');
                 if (parts.length === 3) {
                     const [m, d, y] = parts.map(Number);
@@ -445,10 +368,6 @@
                 const reg = new RegExp(`(${this.searchQuery.trim()})`, 'gi');
                 return String(text).replace(reg, '<mark>$1</mark>');
             },
-            renderMarkdown(text) {
-                const html = marked.parse(text || '');
-                return this.highlight(html);
-            },
             resetAll() {
                 this.selectedCategory = 'All';
                 this.searchQuery = '';
@@ -465,121 +384,17 @@
                 this.endDate = today.toISOString().split('T')[0];
             },
             openPost(post) {
-                //this.activePost = post;
                 const identifier = post._computedId || post.Title;
                 window.location.href = `blogmessage.html?post=${encodeURIComponent(identifier)}`;                
             },
             setPage(num) {
                 this.currentPage = num;
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-            },
-            checkUrlForPost() {
-                const params = new URLSearchParams(window.location.search);
-                const postParam = params.get('post');
-                
-                if (postParam) {
-                    const cleanedParam = String(postParam).trim();
-                    // Check match against the explicit BlogID values first
-                    const matchedPost = this.posts.find(p => 
-                        (p._computedId === cleanedParam || p.Title === cleanedParam) && 
-                        String(p.Active).toLowerCase() === 'yes'
-                    );
-                    if (matchedPost) {
-                        this.activePost = matchedPost;
-                    }
-                } else {
-                    this.activePost = null;
-                }
-            },
-            async copyPostLink() {
-                const url = window.location.href;
-            
-                try {
-                    await navigator.clipboard.writeText(url);
-            
-                    this.copied = true;
-            
-                    // auto reset after animation
-                    setTimeout(() => {
-                        this.copied = false;
-                    }, 1500);
-            
-                } catch (err) {
-                    console.log(err);
-                    alert('Failed to copy link.');
-                }
-            },
-            
-            shareTo(platform) {
-                const url = encodeURIComponent(window.location.href);
-                const title = encodeURIComponent(this.activePost?.Title || '');
-            
-                let shareUrl = '';
-            
-                switch(platform) {
-                    case 'facebook':
-                        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
-                        break;
-            
-                    case 'twitter':
-                        shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${title}`;
-                        break;
-            
-                    case 'whatsapp':
-                        shareUrl = `https://wa.me/?text=${title}%20${url}`;
-                        break;
-                }
-            
-                if (shareUrl) {
-                    window.open(shareUrl, '_blank', 'width=600,height=500');
-                }
-            },
-            
-            async nativeShare() {
-                if (!navigator.share) return;
-            
-                try {
-                    await navigator.share({
-                        title: this.activePost?.Title || '',
-                        text: this.activePost?.Summary || '',
-                        url: window.location.href
-                    });
-                } catch(err) {
-                    console.log(err);
-                }
-            },
-        },
-        watch: {
-            activePost(newPost) {
-                const params = new URLSearchParams(window.location.search);
-                
-                if (newPost) {
-                    document.body.style.overflow = 'hidden';
-                    // Prioritize the discovered BlogID string, fallback to title if empty
-                    const identifier = newPost._computedId || newPost.Title;
-                    if (params.get('post') !== String(identifier)) {
-                        params.set('post', identifier);
-                        window.history.pushState({}, '', `${window.location.pathname}?${params.toString()}`);
-                    }
-                } else {
-                    document.body.style.overflow = 'auto';
-                    if (params.has('post')) {
-                        params.delete('post');
-                        const queryString = params.toString();
-                        const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
-                        window.history.pushState({}, '', newUrl);
-                    }
-                }
             }
         },
         mounted() {
             this.setDefaultDates();
             this.fetchData();
-    
-            window.addEventListener('popstate', this.checkUrlForPost);
-        },
-        unmounted() {
-            window.removeEventListener('popstate', this.checkUrlForPost);
         }
     }).mount('#app');
 </script>

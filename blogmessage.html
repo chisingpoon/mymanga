@@ -8,9 +8,10 @@
     <link rel="icon" type="image/png" href="./img/icon.png">
     <link rel="apple-touch-icon" href="./img/icon.png">
     
-    <!-- Vue 3 and Tailwind CSS -->
+    <!-- Dependencies: Vue 3, Tailwind CSS, FontAwesome, Marked.js -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -33,12 +34,17 @@
             margin-bottom: 1rem;
             color: #0f172a;
         }
+        .prose img {
+            border-radius: 0.75rem;
+            margin: 1.5rem auto;
+            max-width: 100%;
+        }
     </style>
 </head>
 <body>
     <div id="app" class="min-h-screen flex flex-col justify-between">
 
-        <!-- HEADER (Matches index_v2.html) -->
+        <!-- HEADER (Style matched with index_v2.html) -->
         <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16">
@@ -74,16 +80,19 @@
         <!-- MAIN ARTICLE SECTION -->
         <main class="flex-grow max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
             
+            <!-- Loading Indicator -->
             <div v-if="loading" class="text-center py-20 text-slate-500">
                 <i class="fa-solid fa-spinner fa-spin text-3xl mb-3 text-blue-600"></i>
                 <p>載入文章內容中...</p>
             </div>
 
+            <!-- Single Post Content -->
             <article v-else-if="post" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-10">
+                
                 <!-- Category & Date Header -->
                 <div class="flex items-center gap-3 text-sm text-slate-500 mb-4">
-                    <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-100">
-                        {{ post.Category || '研究網誌' }}
+                    <span v-if="post.Category" class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-100">
+                        {{ post.Category }}
                     </span>
                     <span>•</span>
                     <time class="flex items-center gap-1">
@@ -100,22 +109,25 @@
                 <!-- Author & Meta Info Panel -->
                 <div class="flex items-center justify-between border-y border-slate-100 py-4 mb-8 text-sm text-slate-600">
                     <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 text-xs">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">
                             {{ (post.Author || 'D').charAt(0) }}
                         </div>
                         <span>作者：<strong class="text-slate-800">{{ post.Author || 'DoraDex 編輯團隊' }}</strong></span>
                     </div>
-                    <button @click="sharePost" class="text-slate-500 hover:text-blue-600 transition-colors flex items-center gap-1.5 text-xs font-semibold">
-                        <i class="fa-solid fa-share-nodes"></i> 分享文章
-                    </button>
+
+                    <!-- Share Buttons -->
+                    <div class="flex items-center gap-2">
+                        <button @click="copyPostLink" class="px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium transition-colors flex items-center gap-1">
+                            <i class="fa-regular fa-copy"></i>
+                            <span>{{ copied ? '已複製！' : '複製連結' }}</span>
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Article Content Body -->
-                <div class="prose prose-slate max-w-none text-slate-800 whitespace-pre-line leading-relaxed">
-                    {{ post.Content || post.Summary }}
-                </div>
+                <!-- Article Body Content (Supports Markdown & HTML) -->
+                <div class="prose prose-slate max-w-none text-slate-800 leading-relaxed" v-html="renderedContent"></div>
 
-                <!-- Navigation Controls -->
+                <!-- Footer Navigation inside Article -->
                 <div class="mt-12 pt-6 border-t border-slate-100 flex items-center justify-between">
                     <a href="blog.html" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition-all">
                         <i class="fa-solid fa-chevron-left text-xs"></i> 所有文章
@@ -126,11 +138,11 @@
                 </div>
             </article>
 
-            <!-- Error / Empty State -->
+            <!-- Error State if Post ID isn't found -->
             <div v-else class="text-center py-20 bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
                 <i class="fa-solid fa-file-circle-xmark text-4xl text-slate-300 mb-4"></i>
                 <h2 class="text-xl font-bold text-slate-800 mb-2">找不到此文章</h2>
-                <p class="text-slate-500 mb-6">該文章可能已被移動、刪除或連結無效。</p>
+                <p class="text-slate-500 mb-6">該文章可能已被下架或連結參數無效。</p>
                 <a href="blog.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
                     返回網誌列表
                 </a>
@@ -150,7 +162,7 @@
                     </p>
                 </div>
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500">
-                    <div>© 2026 DoraDexHK Archive. All rights reserved.</div>
+                    <div>© {{ currentYear }} DoraDexHK Archive. All rights reserved.</div>
                     <div class="flex gap-4">
                         <a href="index_v2.html" class="hover:text-slate-300 transition-colors">首頁</a>
                         <a href="blog.html" class="hover:text-slate-300 transition-colors">網誌專題</a>
@@ -161,6 +173,7 @@
 
     </div>
 
+    <!-- SCRIPT (Google Sheets OpenSheet Integration) -->
     <script>
         const { createApp } = Vue;
 
@@ -168,58 +181,85 @@
             data() {
                 return {
                     post: null,
-                    loading: true
+                    loading: true,
+                    copied: false,
+                    currentYear: new Date().getFullYear(),
+                    sheetUrl: 'https://opensheet.elk.sh/1PkFmYV1rVoJqFmysUyHQBOC1jS-MWRodr9OyOFOloKs/BlogList'
                 }
             },
-            mounted() {
-                this.loadPost();
+            computed: {
+                renderedContent() {
+                    if (!this.post) return '';
+                    const rawText = this.post.Content || this.post.Summary || '';
+                    return typeof marked !== 'undefined' ? marked.parse(rawText) : rawText;
+                }
             },
             methods: {
-                loadPost() {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const postId = urlParams.get('id');
-                    const postTitle = urlParams.get('title');
+                async fetchPost() {
+                    try {
+                        const response = await fetch(this.sheetUrl);
+                        const rawData = await response.json();
 
-                    // Fetch blog post database/JSON source
-                    fetch('./data/blog.json') // Adjust filename/path if loading from an external JSON
-                        .then(res => res.json())
-                        .then(data => {
-                            if (postId) {
-                                this.post = data.find(p => p.id == postId || p.ID == postId);
-                            } else if (postTitle) {
-                                this.post = data.find(p => p.Title === decodeURIComponent(postTitle));
-                            }
-                            this.loading = false;
-                        })
-                        .catch(err => {
-                            // Fallback if data is stored inline or window local state is used
-                            console.warn("External fetch unavailable, checking localStorage/state", err);
-                            const stored = localStorage.getItem('current_blog_post');
-                            if (stored) {
-                                this.post = JSON.parse(stored);
-                            }
-                            this.loading = false;
+                        // Normalize fields and identify BlogID just like blog.html
+                        const posts = rawData.map(post => {
+                            const normalized = {};
+                            Object.keys(post).forEach(key => normalized[key.trim()] = post[key]);
+                            if (!normalized.PostDate && normalized.Date) normalized.PostDate = normalized.Date;
+
+                            const idKey = Object.keys(normalized).find(k => 
+                                k === 'BlogID' || k.toLowerCase() === 'blogid' || k.toLowerCase() === 'blog id'
+                            );
+                            normalized._computedId = idKey ? String(normalized[idKey]).trim() : '';
+
+                            return normalized;
                         });
+
+                        // Get URL param ?post=... or ?id=...
+                        const params = new URLSearchParams(window.location.search);
+                        const targetParam = params.get('post') || params.get('id') || params.get('BlogID');
+
+                        if (targetParam) {
+                            const cleanedParam = String(targetParam).trim();
+                            this.post = posts.find(p => 
+                                (p._computedId === cleanedParam || p.Title === cleanedParam) &&
+                                String(p.Active).toLowerCase() === 'yes'
+                            );
+                        }
+                        this.loading = false;
+                    } catch (error) {
+                        console.error('Failed to retrieve post from OpenSheet API:', error);
+                        this.loading = false;
+                    }
+                },
+                parseSheetDate(dateStr) {
+                    if (!dateStr) return new Date();
+                    const parts = dateStr.trim().split('/');
+                    if (parts.length === 3) {
+                        const [m, d, y] = parts.map(Number);
+                        return new Date(y, m - 1, d);
+                    }
+                    return new Date(dateStr);
                 },
                 formatDate(dateStr) {
                     if (!dateStr) return '';
-                    const d = new Date(dateStr);
-                    return isNaN(d.getTime()) ? dateStr : d.toISOString().split('T')[0];
+                    const dateObj = this.parseSheetDate(dateStr);
+                    return dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
                 },
-                sharePost() {
-                    if (navigator.share) {
-                        navigator.share({
-                            title: this.post ? this.post.Title : 'DoraDexHK 文章',
-                            url: window.location.href
-                        });
-                    } else {
-                        navigator.clipboard.writeText(window.location.href);
-                        alert('文章連結已複製到剪貼簿！');
+                async copyPostLink() {
+                    try {
+                        await navigator.clipboard.writeText(window.location.href);
+                        this.copied = true;
+                        setTimeout(() => { this.copied = false; }, 1500);
+                    } catch (err) {
+                        alert('無法複製連結');
                     }
                 },
                 scrollToTop() {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
+            },
+            mounted() {
+                this.fetchPost();
             }
         }).mount('#app');
     </script>

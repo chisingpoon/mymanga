@@ -78,8 +78,17 @@
         </header>
 
         <!-- MAIN ARTICLE SECTION -->
-        <main class="flex-grow max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <main class="flex-grow max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
             
+            <!-- Breadcrumbs -->
+            <nav v-if="post" class="flex items-center gap-2 text-xs text-slate-500 mb-6 overflow-x-auto whitespace-nowrap">
+                <a href="index_v2.html" class="hover:text-blue-600 transition-colors">首頁</a>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+                <a href="blog.html" class="hover:text-blue-600 transition-colors">研究網誌</a>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+                <span class="text-slate-800 font-medium truncate max-w-[200px] sm:max-w-xs">{{ post.Title }}</span>
+            </nav>
+
             <!-- Loading Indicator -->
             <div v-if="loading" class="text-center py-20 text-slate-500">
                 <i class="fa-solid fa-spinner fa-spin text-3xl mb-3 text-blue-600"></i>
@@ -115,7 +124,7 @@
                         <span>作者：<strong class="text-slate-800">{{ post.Author || 'DoraDex 編輯團隊' }}</strong></span>
                     </div>
 
-                    <!-- Share Buttons -->
+                    <!-- Share Button -->
                     <div class="flex items-center gap-2">
                         <button @click="copyPostLink" class="px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium transition-colors flex items-center gap-1">
                             <i class="fa-regular fa-copy"></i>
@@ -127,13 +136,40 @@
                 <!-- Article Body Content (Supports Markdown & HTML) -->
                 <div class="prose prose-slate max-w-none text-slate-800 leading-relaxed" v-html="renderedContent"></div>
 
+                <!-- NEXT / PREVIOUS ARTICLE NAVIGATION CARD -->
+                <div class="mt-12 pt-8 border-t border-slate-200">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        
+                        <!-- Previous Article -->
+                        <div v-if="prevPost" @click="navigateToPost(prevPost)" class="group cursor-pointer p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/40 transition-all flex flex-col justify-between">
+                            <span class="text-xs font-bold text-slate-400 group-hover:text-blue-600 transition-colors flex items-center gap-1 mb-2">
+                                <i class="fa-solid fa-arrow-left"></i> 上一篇研究文章
+                            </span>
+                            <span class="text-sm font-bold text-slate-800 group-hover:text-blue-600 line-clamp-2 transition-colors">
+                                {{ prevPost.Title }}
+                            </span>
+                        </div>
+                        <div v-else class="hidden sm:block"></div>
+
+                        <!-- Next Article -->
+                        <div v-if="nextPost" @click="navigateToPost(nextPost)" class="group cursor-pointer p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/40 transition-all flex flex-col justify-between text-right sm:text-right">
+                            <span class="text-xs font-bold text-slate-400 group-hover:text-blue-600 transition-colors flex items-center justify-end gap-1 mb-2">
+                                下一篇研究文章 <i class="fa-solid fa-arrow-right"></i>
+                            </span>
+                            <span class="text-sm font-bold text-slate-800 group-hover:text-blue-600 line-clamp-2 transition-colors">
+                                {{ nextPost.Title }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Footer Navigation inside Article -->
-                <div class="mt-12 pt-6 border-t border-slate-100 flex items-center justify-between">
-                    <a href="blog.html" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition-all">
-                        <i class="fa-solid fa-chevron-left text-xs"></i> 所有文章
+                <div class="mt-8 pt-4 flex items-center justify-between text-xs text-slate-500">
+                    <a href="blog.html" class="inline-flex items-center gap-1.5 hover:text-blue-600 font-semibold transition-colors">
+                        <i class="fa-solid fa-list-ul text-xs"></i> 檢索所有文章目錄
                     </a>
-                    <button @click="scrollToTop" class="text-xs text-slate-500 hover:text-slate-800 transition-colors">
-                        回到頁首 <i class="fa-solid fa-arrow-up text-xs ml-1"></i>
+                    <button @click="scrollToTop" class="hover:text-slate-800 transition-colors flex items-center gap-1">
+                        回到頁首 <i class="fa-solid fa-arrow-up text-xs"></i>
                     </button>
                 </div>
             </article>
@@ -173,7 +209,7 @@
 
     </div>
 
-    <!-- SCRIPT (Google Sheets OpenSheet Integration) -->
+    <!-- SCRIPT -->
     <script>
         const { createApp } = Vue;
 
@@ -181,6 +217,7 @@
             data() {
                 return {
                     post: null,
+                    allPosts: [],
                     loading: true,
                     copied: false,
                     currentYear: new Date().getFullYear(),
@@ -192,16 +229,26 @@
                     if (!this.post) return '';
                     const rawText = this.post.Content || this.post.Summary || '';
                     return typeof marked !== 'undefined' ? marked.parse(rawText) : rawText;
+                },
+                currentIndex() {
+                    if (!this.post || !this.allPosts.length) return -1;
+                    return this.allPosts.findIndex(p => p._computedId === this.post._computedId || p.Title === this.post.Title);
+                },
+                prevPost() {
+                    return this.currentIndex > 0 ? this.allPosts[this.currentIndex - 1] : null;
+                },
+                nextPost() {
+                    return (this.currentIndex >= 0 && this.currentIndex < this.allPosts.length - 1) ? this.allPosts[this.currentIndex + 1] : null;
                 }
             },
             methods: {
-                async fetchPost() {
+                async fetchPosts() {
                     try {
                         const response = await fetch(this.sheetUrl);
                         const rawData = await response.json();
 
-                        // Normalize fields and identify BlogID just like blog.html
-                        const posts = rawData.map(post => {
+                        // Clean and normalize posts
+                        const normalizedPosts = rawData.map(post => {
                             const normalized = {};
                             Object.keys(post).forEach(key => normalized[key.trim()] = post[key]);
                             if (!normalized.PostDate && normalized.Date) normalized.PostDate = normalized.Date;
@@ -212,24 +259,39 @@
                             normalized._computedId = idKey ? String(normalized[idKey]).trim() : '';
 
                             return normalized;
+                        }).filter(p => String(p.Active).toLowerCase() === 'yes');
+
+                        // Sort chronological order (Newest First)
+                        normalizedPosts.sort((a, b) => {
+                            const dateA = this.parseSheetDate(a.PostDate || "1/1/1900");
+                            const dateB = this.parseSheetDate(b.PostDate || "1/1/1900");
+                            return dateB - dateA;
                         });
 
-                        // Get URL param ?post=... or ?id=...
-                        const params = new URLSearchParams(window.location.search);
-                        const targetParam = params.get('post') || params.get('id') || params.get('BlogID');
+                        this.allPosts = normalizedPosts;
 
-                        if (targetParam) {
-                            const cleanedParam = String(targetParam).trim();
-                            this.post = posts.find(p => 
-                                (p._computedId === cleanedParam || p.Title === cleanedParam) &&
-                                String(p.Active).toLowerCase() === 'yes'
-                            );
-                        }
+                        // Match URL post ID
+                        this.loadPostFromUrl();
                         this.loading = false;
                     } catch (error) {
-                        console.error('Failed to retrieve post from OpenSheet API:', error);
+                        console.error('Failed to retrieve posts from OpenSheet API:', error);
                         this.loading = false;
                     }
+                },
+                loadPostFromUrl() {
+                    const params = new URLSearchParams(window.location.search);
+                    const targetParam = params.get('post') || params.get('id') || params.get('BlogID');
+
+                    if (targetParam) {
+                        const cleanedParam = String(targetParam).trim();
+                        this.post = this.allPosts.find(p => 
+                            p._computedId === cleanedParam || p.Title === cleanedParam
+                        );
+                    }
+                },
+                navigateToPost(targetPost) {
+                    const identifier = targetPost._computedId || targetPost.Title;
+                    window.location.href = `blogmessage.html?post=${encodeURIComponent(identifier)}`;
                 },
                 parseSheetDate(dateStr) {
                     if (!dateStr) return new Date();
@@ -259,7 +321,7 @@
                 }
             },
             mounted() {
-                this.fetchPost();
+                this.fetchPosts();
             }
         }).mount('#app');
     </script>

@@ -465,7 +465,9 @@
                 this.endDate = today.toISOString().split('T')[0];
             },
             openPost(post) {
-                this.activePost = post;
+                //this.activePost = post;
+                const identifier = post._computedId || post.Title;
+                window.location.href = `blogmessage.html?post=${encodeURIComponent(identifier)}`;                
             },
             setPage(num) {
                 this.currentPage = num;

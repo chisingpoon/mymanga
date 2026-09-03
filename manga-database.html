@@ -238,7 +238,7 @@
                                 </div>
                                 <div>
                                     <span class="text-slate-400 block font-bold mb-0.5">出版日期</span> 
-                                    <span class="font-bold text-slate-800 text-sm">{{ getYear(selectedBook?.IssueDate) }}</span>
+                                    <span class="font-bold text-slate-800 text-sm">{{ selectedBook?.IssueDate || 'N/A' }}</span>
                                 </div>
                                 <div>
                                     <span class="text-slate-400 block font-bold mb-0.5">作者 (Author)</span> 
@@ -270,7 +270,7 @@
                                 </div>
                                 <div>
                                     <span class="text-slate-400 block font-bold mb-0.5">初版發行日</span> 
-                                    <span class="font-bold text-slate-800 text-sm">{{ getYear(selectedBook?.初版発行日) }}</span>
+                                    <span class="font-bold text-slate-800 text-sm">{{ selectedBook?.初版発行日 || 'N/A' }}</span>
                                 </div>
                                 <div>
                                     <span class="text-slate-400 block font-bold mb-0.5">著者 (著)</span> 
@@ -290,7 +290,7 @@
                                 </div>
                                 <div>
                                     <span class="text-slate-400 block font-bold mb-0.5">定價 (定価)</span> 
-                                    <span class="font-bold text-slate-800 text-sm">{{ selectedBook?.定価 || '-' }}</span>
+                                    <span class="font-bold text-slate-800 text-sm">{{ selectedBook?.定価 ? (selectedBook?.定価.toString().startsWith('¥') ? selectedBook?.定価 : '¥ ' + selectedBook?.定価) : '-' }}</span>
                                 </div>
                                 <div>
                                     <span class="text-slate-400 block font-bold mb-0.5">判型尺寸</span> 

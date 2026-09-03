@@ -9,41 +9,43 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-indigo-500 selection:text-white">
 
-    <div id="app" class="min-h-screen flex flex-col">
-        <!-- Main Content Area -->
+    <div id="app" class="min-h-screen flex flex-col justify-between">
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <button v-if="view !== 'series'" @click="updateView('series')" class="p-2 hover:bg-slate-100 rounded-full transition-colors" title="Back to Series">
+                        <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    <a href="index.html" class="flex items-center gap-2 text-indigo-600 font-black text-lg tracking-tight">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                        <span>出版目録資料庫</span>
+                    </a>
+                </div>
+
+                <div class="flex bg-slate-100 p-1 rounded-full border border-slate-200/50">
+                    <button @click="toggleRegion('HK')" 
+                            :class="region === 'HK' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'"
+                            class="px-4 py-1 rounded-full text-xs font-bold transition-all">
+                        香港版 (HK)
+                    </button>
+                    <button @click="toggleRegion('JP')" 
+                            :class="region === 'JP' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'"
+                            class="px-4 py-1 rounded-full text-xs font-bold transition-all">
+                        日本版 (JP)
+                    </button>
+                </div>
+            </div>
+        </header>
+
         <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8">
-            <!-- Loading Indicator -->
             <div v-if="loading" class="flex flex-col items-center justify-center py-20 gap-4">
                 <div class="w-10 h-10 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
                 <p class="text-xs font-bold text-slate-400 tracking-wider uppercase">Loading Database...</p>
             </div>
 
             <div v-else>
-                <!-- Header / Navigation Bar -->
-                <header class="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60">
-                    <div class="flex items-center gap-3">
-                        <button v-if="view !== 'series'" @click="updateView('series')" class="p-2 hover:bg-slate-100 rounded-full transition-colors">
-                            <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                        </button>
-                        <h1 class="text-xl font-bold text-slate-800 tracking-tight">出版目録資料庫</h1>
-                    </div>
-
-                    <!-- Region Selector -->
-                    <div class="flex bg-slate-100 p-1 rounded-full border border-slate-200/50">
-                        <button @click="toggleRegion('HK')" 
-                                :class="region === 'HK' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'"
-                                class="px-5 py-1.5 rounded-full text-xs font-bold transition-all">
-                            香港版 (HK)
-                        </button>
-                        <button @click="toggleRegion('JP')" 
-                                :class="region === 'JP' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'"
-                                class="px-5 py-1.5 rounded-full text-xs font-bold transition-all">
-                            日本版 (JP)
-                        </button>
-                    </div>
-                </header>
-
-                <!-- VIEW 1: Series List -->
                 <div v-if="view === 'series'" class="space-y-6">
                     <div class="relative">
                         <input type="text" v-model="seriesSearchQuery" placeholder="搜尋系列名稱..." class="w-full px-5 py-3 pl-12 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm">
@@ -60,7 +62,6 @@
                     </div>
                 </div>
 
-                <!-- VIEW 2: Books List -->
                 <div v-else-if="view === 'books'" class="space-y-6">
                     <div class="flex items-center justify-between">
                         <h2 class="text-2xl font-bold text-slate-800">{{ selectedSeries }}</h2>
@@ -85,9 +86,7 @@
                     </div>
                 </div>
 
-                <!-- VIEW 3: Book Detail -->
                 <div v-else-if="view === 'detail'" class="space-y-8">
-                    <!-- Book Summary Card -->
                     <div class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row gap-6">
                         <div class="w-32 md:w-48 aspect-[3/4] bg-slate-100 rounded-2xl overflow-hidden flex-shrink-0 flex items-center justify-center shadow-inner">
                             <img v-if="selectedBook?.['封面圖片'] || selectedBook?.['圖片']" 
@@ -108,7 +107,6 @@
                         </div>
                     </div>
 
-                    <!-- Movie Adaptations Section -->
                     <div v-if="getMovies(selectedBook?.ISBN || selectedBook?.ISBN_JP).length > 0" class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/60 rounded-3xl p-6 shadow-sm">
                         <div class="flex items-center gap-2 mb-4">
                             <span class="p-2 bg-amber-500 text-white rounded-xl shadow-sm">
@@ -147,7 +145,6 @@
                         </div>
                     </div>
 
-                    <!-- Included Stories Section -->
                     <div v-if="currentStories.length > 0" class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-4">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <h3 class="font-bold text-slate-800 text-lg">收錄作品列表 ({{ currentStories.length }})</h3>
@@ -184,15 +181,6 @@
                     </div>
                 </div>
 
-                <!-- Footer -->
-                <footer class="mt-20 py-10 border-t border-slate-200 text-center">
-                    <button @click="forceRefresh" class="inline-flex items-center gap-2 px-6 py-2 bg-white border border-slate-200 rounded-full text-[10px] font-black uppercase text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
-                        <svg class="w-3 h-3" :class="refreshing ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                        {{ refreshing ? 'Syncing...' : 'Force Data Refresh' }}
-                    </button>
-                </footer>
-
-                <!-- Lightbox Modal -->
                 <div v-if="activeLightboxImage" 
                      class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
                      @click="activeLightboxImage = null">
@@ -212,6 +200,16 @@
                 </div>
             </div>
         </main>
+
+        <footer class="bg-white border-t border-slate-200 py-10 mt-20 text-center">
+            <div class="max-w-7xl mx-auto px-4 flex flex-col items-center justify-center gap-4">
+                <p class="text-xs text-slate-400">© 出版目録漫畫資料庫. All rights reserved.</p>
+                <button @click="forceRefresh" class="inline-flex items-center gap-2 px-6 py-2 bg-slate-50 border border-slate-200 rounded-full text-[10px] font-black uppercase text-slate-600 hover:bg-slate-100 transition-all shadow-sm">
+                    <svg class="w-3 h-3" :class="refreshing ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    {{ refreshing ? 'Syncing...' : 'Force Data Refresh' }}
+                </button>
+            </div>
+        </footer>
     </div>
 
 <script>

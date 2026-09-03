@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-HK" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+    <title>DoraDexHK - 多啦A夢 (叮噹) 香港影視漫畫法寶資料庫</title>
+
+    <!-- Required Google SEO and Social Media Tags -->
     <meta name="google-site-verification" content="Kn107jcc6DcGqfEWkruJ_D-2PXMpiYR7brqYttQPBxU" />
-    <!-- OPTIMIZED: Changed standard description to Chinese to match localized search behavior -->
     <meta name="description" content="多啦A夢 (叮噹) 叮噹多啦A夢香港影視漫畫法寶資料庫：提供歷年大長篇電影、香港版漫畫出版史及法寶文獻考據。專為研究者與資深收藏家提供的深度香港譯名及版本比對資訊。">
 
     <meta property="og:type" content="website">
@@ -22,256 +23,719 @@
     <meta name="twitter:image:alt" content="A collection of Hong Kong Doraemon comic book covers">
     <link rel="icon" type="image/png" href="./img/icon.png">
     <link rel="apple-touch-icon" href="./img/icon.png">
-    <title>叮噹多啦A夢香港影視漫畫法寶資料庫 | DoraDexHK</title>
-    
-    <!-- OPTIMIZED: Custom JSON-LD Schema added for Google Rich Snippets -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "DoraDex HK",
-      "alternateName": ["叮噹多啦A夢香港影視漫畫法寶資料庫", "DoraDex Hong Kong"],
-      "url": "https://doradexhk.pages.dev/",
-      "description": "多啦A夢 (叮噹) 香港影視漫畫法寶資料庫：提供歷年大長篇電影、香港版漫畫出版史及法寶文獻考據。",
-      "about": {
-        "@type": "DataCatalog",
-        "name": "叮噹多啦A夢香港影視漫畫法寶資料庫",
-        "description": "Systematic archive documenting the publishing history, voice acting, film records, and gadget nomenclature of Doraemon in Hong Kong since the 1970s."
-      },
-      "inLanguage": "zh-Hant"
-    }
-    </script>
 
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* OPTIMIZED: Text selection re-enabled to improve engagement metrics and backlink potential */
-        .bg-grid {
-            background-color: #f8fafc;
-            background-image: 
-                linear-gradient(to right, #e2e8f0 1px, transparent 1px),
-                linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
-
-        .watermark {
-            position: fixed; bottom: -20px; right: -20px; font-size: 12rem; font-weight: 900;
-            color: rgba(0, 0, 0, 0.03); pointer-events: none; z-index: -1; transform: rotate(-15deg);
-        }
-
-        .hover-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .hover-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px -10px rgba(0,0,0,0.1);
-            border-color: #3b82f6; background-color: #ffffff;
-        }
-        
-        .viewport-container {
-            width: 100%; overflow: hidden; position: relative;
-        }
-        .tab-slider {
-            display: flex; transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
-            width: 300%;
-        }
-        .tab-pane {
-            width: 33.333%;
-            flex-shrink: 0;
-        }
-    </style>
-</head>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-8N04Z8726M"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-8N04Z8726M');
-</script>   
-<!-- OPTIMIZED: Removed oncontextmenu blocking -->
-<body class="bg-grid text-slate-900 font-sans min-h-screen py-12 px-4 relative overflow-x-hidden">
-
-    <div class="watermark">ARCHIVE</div>
-
-    <div class="max-w-3xl mx-auto space-y-8 relative z-10">
-        
-        <header class="text-center space-y-2 mb-8">
-            <div class="relative inline-block">
-                <div class="absolute -inset-1 bg-blue-500 rounded-2xl blur opacity-20"></div>
-                <div class="relative w-16 h-16 bg-blue-600 rounded-2xl text-white text-3xl flex items-center justify-center font-black italic shadow-xl">M</div>
-            </div>
-            <h1 class="text-3xl font-black tracking-tight text-slate-900 uppercase mt-4">叮噹多啦A夢香港影視漫畫法寶資料庫 Archive Portal</h1>
-            <p class="text-slate-400 font-bold text-xs uppercase tracking-[0.2em]">電影 | 漫畫 | 角色 | 人物 | 法寶</p>
-        </header>
-
-        <div class="flex justify-center mb-6">
-            <a href="blog.html" class="group flex items-center gap-2 bg-slate-800 text-white px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all hover:bg-black hover:scale-105 shadow-lg">
-                <span>Latest DoraBlog 網誌更新</span>
-                <span class="text-blue-400 group-hover:translate-x-1 transition-transform">→</span>
-            </a>
-        </div>
-
-        <div class="flex p-1 bg-slate-200/50 backdrop-blur-md rounded-2xl mb-8 gap-1">
-            <button onclick="switchTab('manga')" id="btn-manga" class="flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-blue-600 text-white shadow-md shadow-blue-100">
-                Manga Archive / 漫畫資料庫
-            </button>
-            <button onclick="switchTab('gadgets')" id="btn-gadgets" class="flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all text-slate-500 hover:text-emerald-600">
-                Gadgets & Tools / 神奇法寶
-            </button>
-            <button onclick="switchTab('animate')" id="btn-animate" class="flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all text-slate-500 hover:text-rose-600">
-                Movies Anime / 電影動畫
-            </button>
-        </div>
-
-        <div class="viewport-container">
-            <div id="tab-slider" class="tab-slider">
-                
-                <div class="tab-pane space-y-8 pr-2">
-                    <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <span class="w-2 h-8 bg-blue-600 rounded-full"></span>
-                                <h2 class="text-xl font-black text-slate-800">香港版漫畫</h2>
-                            </div>
-                            <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase">HK Edition</span>
-                        </div>
-                        <a href="manga-database.html?region=HK" class="group flex items-center justify-between bg-blue-600 p-5 rounded-2xl text-white font-black transition-all hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-200">
-                            <span class="tracking-tight text-lg">香港叮噹/多啦A夢漫畫版本考據</span>
-                            <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
-                        </a>
-                    </section>
-
-                    <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <span class="w-2 h-8 bg-red-600 rounded-full"></span>
-                                <h2 class="text-xl font-black text-slate-800">日本版漫畫</h2>
-                            </div>
-                            <span class="text-[10px] font-black text-red-600 bg-red-50 px-3 py-1 rounded-full uppercase">JP Edition</span>
-                        </div>
-                        <a href="manga-database.html?region=JP" class="group flex items-center justify-between bg-red-600 p-5 rounded-2xl text-white font-black transition-all hover:bg-red-700 hover:shadow-lg hover:shadow-red-200">
-                            <span class="tracking-tight text-lg">日本ドラえもん漫畫版本考據</span>
-                            <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
-                        </a>
-                    </section>
-
-                    <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <span class="w-2 h-8 bg-green-800 rounded-full"></span>
-                                <h2 class="text-xl font-black text-slate-800">ドラえもん日本原作大全</h2>
-                            </div>
-                            <span class="text-[10px] font-black text-green-600 bg-green-100 px-3 py-1 rounded-full uppercase">Original Works</span>
-                        </div>
-                        <a href="originalworks.html" class="group flex items-center justify-between bg-green-800 p-5 rounded-2xl text-white font-black transition-all hover:bg-green-900 hover:shadow-lg hover:shadow-green-200">
-                            <span class="tracking-tight text-lg">所有日本原作作品列表與搜尋</span>
-                            <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
-                        </a>
-                    </section>
-                </div>
-
-                <div class="tab-pane space-y-8 px-2">
-                    <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <span class="w-2 h-8 bg-emerald-500 rounded-full"></span>
-                                <h2 class="text-xl font-black text-slate-800">法寶記錄</h2>
-                            </div>
-                            <span class="text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full uppercase">Gadget Archive</span>
-                        </div>
-                        <a href="mediaobject.html?filterclass=法寶" class="group flex items-center justify-between bg-emerald-500 p-5 rounded-2xl text-white font-black transition-all hover:bg-emerald-600 hover:shadow-lg hover:shadow-emerald-200">
-                            <span class="tracking-tight text-lg">法寶記錄搜尋</span>
-                            <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
-                        </a>
-                    </section>
-
-                    <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <span class="w-2 h-8 bg-violet-600 rounded-full"></span>
-                                <h2 class="text-xl font-black text-slate-800">角色人物</h2>
-                            </div>
-                            <span class="text-[10px] font-black text-violet-600 bg-violet-50 px-3 py-1 rounded-full uppercase">Characters and Things Archive</span>
-                        </div>
-                        <a href="mediaobject.html?filterclass=人物" class="group flex items-center justify-between bg-violet-600 p-5 rounded-2xl text-white font-black transition-all hover:bg-violet-700 hover:shadow-lg hover:shadow-violet-200">
-                            <span class="tracking-tight text-lg">角色人物事理列表與搜尋</span>
-                            <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
-                        </a>
-                    </section>
-                </div>
-
-                <div class="tab-pane space-y-8 pl-2">
-                    <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <span class="w-2 h-8 bg-rose-600 rounded-full"></span>
-                                <h2 class="text-xl font-black text-slate-800">電影作品</h2>
-                            </div>
-                            <span class="text-[10px] font-black text-rose-600 bg-rose-50 px-3 py-1 rounded-full uppercase">Films</span>
-                        </div>
-                        <a href="movie.html" class="group flex items-center justify-between bg-rose-600 p-5 rounded-2xl text-white font-black transition-all hover:bg-rose-700 hover:shadow-lg hover:shadow-rose-200">
-                            <span class="tracking-tight text-lg">電影作品列表</span>
-                            <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
-                        </a>
-                    </section>
-
-                    <section class="bg-white/80 backdrop-blur-sm rounded-[2.5rem] p-8 border border-slate-200 shadow-sm space-y-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <span class="w-2 h-8 bg-amber-500 rounded-full"></span>
-                                <h2 class="text-xl font-black text-slate-800">動畫作品</h2>
-                            </div>
-                            <span class="text-[10px] font-black text-amber-600 bg-amber-50 px-3 py-1 rounded-full uppercase">Animes</span>
-                        </div>
-                        <a href="anime.html" class="group flex items-center justify-between bg-amber-500 p-5 rounded-2xl text-white font-black transition-all hover:bg-amber-600 hover:shadow-lg hover:shadow-amber-200">
-                            <span class="tracking-tight text-lg">動畫作品列表</span>
-                            <span class="transform group-hover:translate-x-2 transition-transform text-xl">→</span>
-                        </a>
-                    </section>
-                </div>
-
-            </div>
-        </div>
-
-        <footer class="text-center space-y-4 pt-8 pb-12">
-            <div class="bg-gray-50 border border-gray-200 p-6 my-4 text-sm text-gray-700 text-left">
-                <strong>DoraDexHK：香港多啦A夢 (Doraemon) 影視漫畫法寶資料庫</strong><br><br>
-                本項目致力於系統化記錄及整理自 1970 年代起 多啦A夢 (叮噹) 在香港的出版與播映紀錄。核心研究範疇涵蓋：
-                <br><br>
-                • 影視存檔： 紀錄 1980 年至今之大長篇電影及動畫發行資訊。<br>
-                • 出版史研究： 整理包括「文化傳信」及「香港青文」在內之香港版漫畫版本演變。<br>
-                • 法寶索引： 建立神奇法寶之香港譯名、用途及文獻來源對照表。<br><br>
-                <span class="text-xs text-gray-400 block pt-2 border-t border-gray-100">
-                DoraDexHK is an objective research project documenting the history of Doraemon in Hong Kong. This database provides structured data on Cantonese voice acting (CV), film archives, manga publishing history, and gadget nomenclature.
-                </span>
-            </div>
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
-                Last Updated: <span id="current-date"></span>
-            </p>
-        </footer>
-    </div>
-
     <script>
-        function switchTab(tab) {
-            const mangaBtn = document.getElementById('btn-manga');
-            const gadgetsBtn = document.getElementById('btn-gadgets');
-            const animateBtn = document.getElementById('btn-animate');
-            const slider = document.getElementById('tab-slider');
-
-            [mangaBtn, gadgetsBtn, animateBtn].forEach(btn => {
-                btn.className = 'flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all text-slate-500 hover:text-slate-700';
-            });
-
-            if (tab === 'manga') {
-                slider.style.transform = 'translateX(0%)';
-                mangaBtn.className = 'flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-blue-600 text-white shadow-md shadow-blue-100';
-            } else if (tab === 'gadgets') {
-                slider.style.transform = 'translateX(-33.333%)';
-                gadgetsBtn.className = 'flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-emerald-500 text-white shadow-md shadow-emerald-100';
-            } else if (tab === 'animate') {
-                slider.style.transform = 'translateX(-66.666%)';
-                animateBtn.className = 'flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-rose-600 text-white shadow-md shadow-rose-100';
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dora: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            200: '#bae0fd',
+                            500: '#0084ff',
+                            600: '#0066cc',
+                            700: '#004c99',
+                            800: '#0f2b48',
+                            900: '#0a1d33',
+                            accent: '#ffcc00', // Subtle yellow accent
+                            red: '#e63946'    // Collar red
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', '"Noto Sans HK"', '"PingFang HK"', '"Microsoft JhengHei"', 'sans-serif'],
+                        serif: ['"Noto Serif HK"', 'Georgia', 'serif']
+                    }
+                }
             }
         }
-        document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-        // OPTIMIZED: Removed keydown listener blocking shortcut copies
     </script>
+    <!-- FontAwesome for Archival Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- External Shared Stylesheet -->
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-dora-500 selection:text-white">
+
+    <!-- Navigation Bar -->
+    <header class="sticky top-0 z-40 w-full border-b border-slate-200 glass-nav transition-all duration-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                
+                <!-- Brand / Logo -->
+                <div class="flex items-center space-x-3">
+                    <a href="index.html" class="flex items-center space-x-3 group">
+                        <div class="w-10 h-10 rounded-xl bg-dora-800 text-white flex items-center justify-center font-bold text-xl shadow-sm group-hover:bg-dora-600 transition-colors">
+                            <span class="text-dora-accent">D</span>D
+                        </div>
+                        <div>
+                            <span class="text-xl font-bold tracking-tight text-dora-800 block leading-tight">DoraDex<span class="text-dora-600 font-normal">HK</span></span>
+                            <span class="text-[10px] text-slate-500 font-medium tracking-wider block">香港多啦A夢文獻資料庫</span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation Menu -->
+                <nav class="hidden md:flex items-center space-x-1 lg:space-x-2 text-sm font-medium">
+                    
+                    <!-- 漫畫資料庫 Dropdown -->
+                    <div class="relative group nav-dropdown-item">
+                        <button class="px-3 py-2 rounded-lg text-slate-700 hover:text-dora-600 hover:bg-slate-100/80 flex items-center space-x-1.5 transition-colors focus:outline-none">
+                            <i class="fa-solid fa-book-bookmark text-dora-600"></i>
+                            <span>漫畫資料庫</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] opacity-60"></i>
+                        </button>
+                        <div class="nav-dropdown-menu absolute left-0 mt-1 w-64 bg-white rounded-xl shadow-xl border border-slate-100 z-50 p-2">
+                            <div class="text-[11px] font-semibold text-slate-400 px-3 py-1 uppercase tracking-wider">出版史與版本考據</div>
+                            <a href="manga-database.html?region=HK" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
+                                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                                <div>
+                                    <div class="font-medium">香港版漫畫</div>
+                                    <div class="text-xs text-slate-400">香港叮噹 / 多啦A夢版本考據</div>
+                                </div>
+                            </a>
+                            <a href="manga-database.html?region=JP" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
+                                <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                                <div>
+                                    <div class="font-medium">日本版漫畫</div>
+                                    <div class="text-xs text-slate-400">日本ドラえもん漫畫版本考據</div>
+                                </div>
+                            </a>
+                            <div class="border-t border-slate-100 my-1"></div>
+                            <a href="originalworks.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
+                                <i class="fa-solid fa-layer-group text-slate-400 text-xs"></i>
+                                <div>
+                                    <div class="font-medium">ドラえもん日本原作大全</div>
+                                    <div class="text-xs text-slate-400">所有日本原作作品列表與搜尋</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 神奇法寶資料庫 Dropdown -->
+                    <div class="relative group nav-dropdown-item">
+                        <button class="px-3 py-2 rounded-lg text-slate-700 hover:text-dora-600 hover:bg-slate-100/80 flex items-center space-x-1.5 transition-colors focus:outline-none">
+                            <i class="fa-solid fa-wand-magic-sparkles text-dora-600"></i>
+                            <span>神奇法寶資料庫</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] opacity-60"></i>
+                        </button>
+                        <div class="nav-dropdown-menu absolute left-0 mt-1 w-60 bg-white rounded-xl shadow-xl border border-slate-100 z-50 p-2">
+                            <a href="mediaobject.html?filterclass=法寶" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
+                                <i class="fa-solid fa-toolbox text-dora-500 text-xs"></i>
+                                <div>
+                                    <div class="font-medium">法寶記錄</div>
+                                    <div class="text-xs text-slate-400">神奇法寶考據與譯名檢索</div>
+                                </div>
+                            </a>
+                            <a href="mediaobject.html?filterclass=人物" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
+                                <i class="fa-solid fa-users text-amber-500 text-xs"></i>
+                                <div>
+                                    <div class="font-medium">角色人物</div>
+                                    <div class="text-xs text-slate-400">登場角色事理列表與事蹟</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 電影動畫資料庫 Dropdown -->
+                    <div class="relative group nav-dropdown-item">
+                        <button class="px-3 py-2 rounded-lg text-slate-700 hover:text-dora-600 hover:bg-slate-100/80 flex items-center space-x-1.5 transition-colors focus:outline-none">
+                            <i class="fa-solid fa-film text-dora-600"></i>
+                            <span>電影動畫資料庫</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] opacity-60"></i>
+                        </button>
+                        <div class="nav-dropdown-menu absolute left-0 mt-1 w-56 bg-white rounded-xl shadow-xl border border-slate-100 z-50 p-2">
+                            <a href="movie.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
+                                <i class="fa-solid fa-clapperboard text-indigo-500 text-xs"></i>
+                                <div>
+                                    <div class="font-medium">電影作品</div>
+                                    <div class="text-xs text-slate-400">歷年大長篇與劇場版</div>
+                                </div>
+                            </a>
+                            <a href="anime.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
+                                <i class="fa-solid fa-tv text-teal-500 text-xs"></i>
+                                <div>
+                                    <div class="font-medium">動畫作品</div>
+                                    <div class="text-xs text-slate-400">電視動畫集數與播映紀錄</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 網誌 -->
+                    <a href="blog.html" class="px-3 py-2 rounded-lg text-slate-700 hover:text-dora-600 hover:bg-slate-100/80 flex items-center space-x-1.5 transition-colors">
+                        <i class="fa-solid fa-newspaper text-dora-600"></i>
+                        <span>網誌</span>
+                    </a>
+                </nav>
+
+                <!-- Action Button & Search Trigger -->
+                <div class="hidden sm:flex items-center space-x-3">
+                    <button id="openSearchBtn" class="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200/80 text-slate-500 hover:text-slate-700 text-xs font-medium border border-slate-200 transition-colors">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span>搜尋資料庫...</span>
+                        <kbd class="px-1.5 py-0.5 text-[10px] font-semibold bg-white rounded shadow-sm text-slate-400 border border-slate-200">⌘K</kbd>
+                    </button>
+                    <a href="originalworks.html" class="px-3.5 py-1.5 rounded-lg bg-dora-800 hover:bg-dora-700 text-white text-xs font-semibold shadow-sm transition-all hover:shadow">
+                        速查全集
+                    </a>
+                </div>
+
+                <!-- Mobile Hamburger Button -->
+                <div class="flex items-center md:hidden">
+                    <button id="mobileMenuBtn" aria-label="切換選單" class="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-none">
+                        <i class="fa-solid fa-bars text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Slide Drawer Menu -->
+        <div id="mobileMenu" class="hidden md:hidden border-b border-slate-200 bg-white px-4 pt-2 pb-6 space-y-3">
+            <div class="pt-2">
+                <button id="openSearchBtnMobile" class="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-slate-100 text-slate-500 text-sm">
+                    <span class="flex items-center space-x-2">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span>搜尋法寶、漫畫或電影...</span>
+                    </span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-1">
+                <div class="px-3 py-1 text-xs font-semibold text-slate-400 uppercase tracking-wider">漫畫資料庫</div>
+                <a href="manga-database.html?region=HK" class="block px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 font-medium text-sm">香港版漫畫考據</a>
+                <a href="manga-database.html?region=JP" class="block px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 font-medium text-sm">日本版漫畫考據</a>
+                <a href="originalworks.html" class="block px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 font-medium text-sm">ドラえもん日本原作大全</a>
+            </div>
+
+            <div class="space-y-1 pt-2 border-t border-slate-100">
+                <div class="px-3 py-1 text-xs font-semibold text-slate-400 uppercase tracking-wider">神奇法寶資料庫</div>
+                <a href="mediaobject.html?filterclass=法寶" class="block px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 font-medium text-sm">法寶記錄檢索</a>
+                <a href="mediaobject.html?filterclass=人物" class="block px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 font-medium text-sm">角色人物檔案</a>
+            </div>
+
+            <div class="space-y-1 pt-2 border-t border-slate-100">
+                <div class="px-3 py-1 text-xs font-semibold text-slate-400 uppercase tracking-wider">電影動畫資料庫</div>
+                <a href="movie.html" class="block px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 font-medium text-sm">電影作品列表</a>
+                <a href="anime.html" class="block px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 font-medium text-sm">動畫作品列表</a>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100">
+                <a href="blog.html" class="block px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 font-medium text-sm">研究網誌文章</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative bg-gradient-to-b from-slate-900 via-dora-900 to-dora-800 text-white overflow-hidden py-16 md:py-24">
+        <!-- Abstract Archival Background Grid Effect -->
+        <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: linear-gradient(#ffffff 1px, transparent 1px), linear-gradient(90deg, #ffffff 1px, transparent 1px); background-size: 32px 32px;"></div>
+        <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-dora-500 blur-3xl opacity-20 pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="max-w-3xl">
+                
+                <!-- Tag Badge -->
+                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-medium text-dora-100 mb-6">
+                    <span class="w-2 h-2 rounded-full bg-dora-accent animate-pulse"></span>
+                    <span>香港繁體中文與日本原版對照大系</span>
+                </div>
+
+                <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-tight text-white mb-4">
+                    多啦A夢 <span class="text-dora-200 font-normal">/ 叮噹</span><br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 via-sky-300 to-white">香港影視漫畫法寶文獻庫</span>
+                </h1>
+                
+                <p class="text-base sm:text-lg text-slate-300 mb-8 leading-relaxed font-normal">
+                    收錄歷年大長篇電影、香港版漫畫出版史（海豹叢書、青文、文化傳信）與神奇法寶考據。專為研究者、譯者與資深收藏家提供深度譯名比對與版本文獻檢索。
+                </p>
+
+                <!-- Search Input Header -->
+                <div class="bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/20 shadow-2xl max-w-2xl">
+                    <form action="mediaobject.html" method="GET" class="flex flex-col sm:flex-row items-center gap-2">
+                        <div class="relative w-full">
+                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" name="q" placeholder="請輸入法寶名稱、香港譯名或單行本卷數（如：隨意門, 竹蜻蜓）..." 
+                                class="w-full pl-11 pr-4 py-3 bg-white text-slate-900 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-dora-500 shadow-inner">
+                        </div>
+                        <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-dora-500 hover:bg-dora-600 text-white font-semibold text-sm rounded-xl transition-colors whitespace-nowrap shadow-md">
+                            立即檢索
+                        </button>
+                    </form>
+                    <div class="flex flex-wrap items-center gap-2 mt-3 px-2 text-xs text-slate-300">
+                        <span class="text-slate-400">熱門搜尋：</span>
+                        <a href="mediaobject.html?filterclass=法寶&q=隨意門" class="hover:text-white underline decoration-slate-500">隨意門</a>
+                        <a href="mediaobject.html?filterclass=法寶&q=竹蜻蜓" class="hover:text-white underline decoration-slate-500">竹蜻蜓</a>
+                        <a href="manga-database.html?region=HK" class="hover:text-white underline decoration-slate-500">文化傳信單行本</a>
+                        <a href="movie.html" class="hover:text-white underline decoration-slate-500">歷年大長篇</a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Quantitative Archive Counters -->
+            <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-white/10 pt-8">
+                <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+                    <div class="text-2xl sm:text-3xl font-extrabold text-dora-200 font-mono">45+</div>
+                    <div class="text-xs text-slate-400 mt-1">歷年大長篇與劇場版</div>
+                </div>
+                <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+                    <div class="text-2xl sm:text-3xl font-extrabold text-dora-200 font-mono">1,300+</div>
+                    <div class="text-xs text-slate-400 mt-1">祕密法寶資料條目</div>
+                </div>
+                <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+                    <div class="text-2xl sm:text-3xl font-extrabold text-dora-200 font-mono">45 卷</div>
+                    <div class="text-xs text-slate-400 mt-1">日港單行本全對照</div>
+                </div>
+                <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+                    <div class="text-2xl sm:text-3xl font-extrabold text-dora-200 font-mono">30+ 年</div>
+                    <div class="text-xs text-slate-400 mt-1">香港本地出版與譯名演變</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Database Navigational Section -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
+        
+        <!-- Section Header -->
+        <div>
+            <div class="flex items-center space-x-3 mb-2">
+                <div class="w-1.5 h-6 bg-dora-600 rounded-full"></div>
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900">核心資料庫分類目錄</h2>
+            </div>
+            <p class="text-sm text-slate-500">點擊分類即可進入對應文獻條目，支援港日雙語比對及篩選參數</p>
+        </div>
+
+        <!-- 1. 漫畫資料庫 (Manga Databases) -->
+        <section class="space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center space-x-2">
+                    <i class="fa-solid fa-book text-dora-600"></i>
+                    <span>漫畫資料庫</span>
+                </h3>
+                <span class="text-xs text-slate-400">Manga Archive & Publication History</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Card 1: 香港版漫畫 -->
+                <a href="manga-database.html?region=HK" class="group block bg-white rounded-2xl border border-slate-200 p-6 card-hover-effect relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -z-0 transition-all group-hover:scale-110"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold badge-hk">
+                                Region: HK
+                            </span>
+                            <i class="fa-solid fa-arrow-right text-slate-300 group-hover:text-dora-600 group-hover:translate-x-1 transition-all"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-slate-900 group-hover:text-dora-600 transition-colors mb-2">
+                            香港版漫畫考據
+                        </h4>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-4">
+                            記錄海豹叢書、青文出版社、文化傳信等香港歷年授權與早期譯本，收錄單行本目錄與特色考據。
+                        </p>
+                        <div class="text-xs font-medium text-dora-600 flex items-center space-x-1">
+                            <span>瀏覽香港漫畫資料</span>
+                            <i class="fa-solid fa-angle-right text-[10px]"></i>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Card 2: 日本版漫畫 -->
+                <a href="manga-database.html?region=JP" class="group block bg-white rounded-2xl border border-slate-200 p-6 card-hover-effect relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-bl-full -z-0 transition-all group-hover:scale-110"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold badge-jp">
+                                Region: JP
+                            </span>
+                            <i class="fa-solid fa-arrow-right text-slate-300 group-hover:text-dora-600 group-hover:translate-x-1 transition-all"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-slate-900 group-hover:text-dora-600 transition-colors mb-2">
+                            日本版漫畫考據
+                        </h4>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-4">
+                            整理小學館 Tentobusi Comics 45卷單行本、FF文庫、大手印原畫集與日本初版連載刊物細節。
+                        </p>
+                        <div class="text-xs font-medium text-dora-600 flex items-center space-x-1">
+                            <span>瀏覽日本原版考據</span>
+                            <i class="fa-solid fa-angle-right text-[10px]"></i>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Card 3: 日本原作大全 -->
+                <a href="originalworks.html" class="group block bg-white rounded-2xl border border-slate-200 p-6 card-hover-effect relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-amber-50 rounded-bl-full -z-0 transition-all group-hover:scale-110"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                Original Index
+                            </span>
+                            <i class="fa-solid fa-arrow-right text-slate-300 group-hover:text-dora-600 group-hover:translate-x-1 transition-all"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-slate-900 group-hover:text-dora-600 transition-colors mb-2">
+                            ドラえもん日本原作大全
+                        </h4>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-4">
+                            藤子·F·不二雄全集章節完整索引，提供所有短篇、大長篇初次掲載雜誌與年代檢索。
+                        </p>
+                        <div class="text-xs font-medium text-dora-600 flex items-center space-x-1">
+                            <span>檢索原作作品大全</span>
+                            <i class="fa-solid fa-angle-right text-[10px]"></i>
+                        </div>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- 2. 神奇法寶與人物資料庫 (Gadgets & Characters) -->
+        <section class="space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center space-x-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-dora-600"></i>
+                    <span>神奇法寶與人物資料庫</span>
+                </h3>
+                <span class="text-xs text-slate-400">Gadget Archive & Character Codex</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Card 4: 法寶記錄 -->
+                <a href="mediaobject.html?filterclass=法寶" class="group block bg-white rounded-2xl border border-slate-200 p-6 card-hover-effect relative overflow-hidden">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="space-y-2 max-w-lg">
+                            <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cyan-50 text-cyan-700 border border-cyan-200">
+                                MediaObject: 法寶
+                            </div>
+                            <h4 class="text-2xl font-bold text-slate-900 group-hover:text-dora-600 transition-colors">
+                                法寶記錄考據
+                            </h4>
+                            <p class="text-xs text-slate-500 leading-relaxed">
+                                收錄四次元口袋中所有神奇法寶的中文譯名（香港譯名 / 舊譯叮噹法寶 / 台灣譯名 / 日文原名）、功能分類及登場集數。
+                            </p>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-dora-50 text-dora-600 flex items-center justify-center text-xl shrink-0 group-hover:bg-dora-600 group-hover:text-white transition-colors">
+                            <i class="fa-solid fa-toolbox"></i>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Card 5: 角色人物 -->
+                <a href="mediaobject.html?filterclass=人物" class="group block bg-white rounded-2xl border border-slate-200 p-6 card-hover-effect relative overflow-hidden">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="space-y-2 max-w-lg">
+                            <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                MediaObject: 人物
+                            </div>
+                            <h4 class="text-2xl font-bold text-slate-900 group-hover:text-dora-600 transition-colors">
+                                角色人物事理列表
+                            </h4>
+                            <p class="text-xs text-slate-500 leading-relaxed">
+                                多啦A夢、大雄、靜香、胖虎、小夫等主要角色、道具配角與大長篇登場人物詳細事蹟與香港配音員演變。
+                            </p>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- 3. 電影與動畫資料庫 (Movies & Anime) -->
+        <section class="space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center space-x-2">
+                    <i class="fa-solid fa-film text-dora-600"></i>
+                    <span>電影與動畫資料庫</span>
+                </h3>
+                <span class="text-xs text-slate-400">Cinematic & Broadcast History</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Card 6: 電影作品 -->
+                <a href="movie.html" class="group block bg-white rounded-2xl border border-slate-200 p-6 card-hover-effect">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="inline-block text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md mb-2">
+                                Movies Archive
+                            </span>
+                            <h4 class="text-xl font-bold text-slate-900 group-hover:text-dora-600 transition-colors">
+                                電影作品列表 (大長篇)
+                            </h4>
+                            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                                從1980年《大雄的恐龍》至最新年度電影，包含香港上映日期、票房紀錄、粵語配音陣容及主題曲資料。
+                            </p>
+                        </div>
+                        <i class="fa-solid fa-clapperboard text-2xl text-slate-300 group-hover:text-indigo-500 transition-colors"></i>
+                    </div>
+                </a>
+
+                <!-- Card 7: 動畫作品 -->
+                <a href="anime.html" class="group block bg-white rounded-2xl border border-slate-200 p-6 card-hover-effect">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="inline-block text-xs font-semibold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-md mb-2">
+                                Anime Series
+                            </span>
+                            <h4 class="text-xl font-bold text-slate-900 group-hover:text-dora-600 transition-colors">
+                                動畫作品列表
+                            </h4>
+                            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                                大山版（1979-2005）與水田版（2005-至今）電視動畫播映記錄，無綫電視 (TVB) 香港首播集數對照。
+                            </p>
+                        </div>
+                        <i class="fa-solid fa-tv text-2xl text-slate-300 group-hover:text-teal-500 transition-colors"></i>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- Featured Scholarly Highlights / Sample Comparison Showcase -->
+        <section class="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-sm">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 pb-4 border-b border-slate-100 gap-4">
+                <div>
+                    <span class="text-xs font-bold text-dora-600 uppercase tracking-widest">Research Highlight</span>
+                    <h3 class="text-2xl font-bold text-slate-900 mt-1">香港譯名與版本對照示範</h3>
+                </div>
+                <a href="mediaobject.html?filterclass=法寶" class="text-xs font-semibold text-dora-600 hover:text-dora-800 flex items-center space-x-1">
+                    <span>探索完整法寶文獻庫</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Interactive Sample Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase">
+                            <th class="py-3 px-4 font-semibold">日本原名</th>
+                            <th class="py-3 px-4 font-semibold">香港現行譯名 (文化傳信)</th>
+                            <th class="py-3 px-4 font-semibold">香港早期譯名 (叮噹時代)</th>
+                            <th class="py-3 px-4 font-semibold">首次登場文獻</th>
+                            <th class="py-3 px-4 font-semibold text-right">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-slate-700">
+                        <tr class="hover:bg-slate-50/80 transition-colors">
+                            <td class="py-3.5 px-4 font-jp font-medium">どこでもドア</td>
+                            <td class="py-3.5 px-4 font-semibold text-dora-700">隨意門</td>
+                            <td class="py-3.5 px-4 text-slate-500">任意門 / 隨意門</td>
+                            <td class="py-3.5 px-4 text-xs text-slate-500">單行本第6卷《萬能門》</td>
+                            <td class="py-3.5 px-4 text-right">
+                                <a href="mediaobject.html?filterclass=法寶&q=隨意門" class="text-xs bg-slate-100 hover:bg-dora-50 text-dora-600 px-2.5 py-1 rounded font-medium border border-slate-200">詳情</a>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50/80 transition-colors">
+                            <td class="py-3.5 px-4 font-jp font-medium">タケコプター</td>
+                            <td class="py-3.5 px-4 font-semibold text-dora-700">竹蜻蜓</td>
+                            <td class="py-3.5 px-4 text-slate-500">直升機 / 竹蜻蜓</td>
+                            <td class="py-3.5 px-4 text-xs text-slate-500">單行本第1卷《來自未來的客仔》</td>
+                            <td class="py-3.5 px-4 text-right">
+                                <a href="mediaobject.html?filterclass=法寶&q=竹蜻蜓" class="text-xs bg-slate-100 hover:bg-dora-50 text-dora-600 px-2.5 py-1 rounded font-medium border border-slate-200">詳情</a>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50/80 transition-colors">
+                            <td class="py-3.5 px-4 font-jp font-medium">タイムマシン</td>
+                            <td class="py-3.5 px-4 font-semibold text-dora-700">時光機</td>
+                            <td class="py-3.5 px-4 text-slate-500">時光機 / 時間機</td>
+                            <td class="py-3.5 px-4 text-xs text-slate-500">單行本第1卷《來自未來的客仔》</td>
+                            <td class="py-3.5 px-4 text-right">
+                                <a href="mediaobject.html?filterclass=法寶&q=時光機" class="text-xs bg-slate-100 hover:bg-dora-50 text-dora-600 px-2.5 py-1 rounded font-medium border border-slate-200">詳情</a>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50/80 transition-colors">
+                            <td class="py-3.5 px-4 font-jp font-medium">タイムふろしき</td>
+                            <td class="py-3.5 px-4 font-semibold text-dora-700">時間布</td>
+                            <td class="py-3.5 px-4 text-slate-500">時光布 / 返老還童布</td>
+                            <td class="py-3.5 px-4 text-xs text-slate-500">單行本第2卷《時間布》</td>
+                            <td class="py-3.5 px-4 text-right">
+                                <a href="mediaobject.html?filterclass=法寶&q=時間布" class="text-xs bg-slate-100 hover:bg-dora-50 text-dora-600 px-2.5 py-1 rounded font-medium border border-slate-200">詳情</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+<Script> /***
+        <!-- 4. 研究網誌與考據專題 (Blog & Articles Section) -->
+        <section class="space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-newspaper text-dora-600"></i>
+                    <h3 class="text-lg font-bold text-slate-800">最新研究網誌與專題文章</h3>
+                </div>
+                <a href="blog.html" class="text-xs font-semibold text-dora-600 hover:underline">查看所有文章 &rarr;</a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Blog Entry 1 -->
+                <article class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm flex flex-col justify-between">
+                    <div class="p-6">
+                        <div class="flex items-center space-x-2 text-xs text-slate-400 mb-3">
+                            <span class="bg-blue-50 text-blue-700 font-semibold px-2 py-0.5 rounded">出版史考據</span>
+                            <span>•</span>
+                            <time>2026-04-12</time>
+                        </div>
+                        <h4 class="font-bold text-slate-900 hover:text-dora-600 text-base mb-2">
+                            <a href="blog.html">從《叮噹》到《多啦A夢》：香港譯名統一歷史全記錄</a>
+                        </h4>
+                        <p class="text-xs text-slate-500 line-clamp-3 leading-relaxed">
+                            探討1990年代藤子·F·不二雄老師遺願統一全球譯名後，香港電視台與漫畫出版社在改名過渡期的社會反應與文獻記錄。
+                        </p>
+                    </div>
+                    <div class="px-6 py-3 bg-slate-50 border-t border-slate-100 text-xs font-medium text-slate-600">
+                        作者：DoraDex 編輯團隊
+                    </div>
+                </article>
+
+                <!-- Blog Entry 2 -->
+                <article class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm flex flex-col justify-between">
+                    <div class="p-6">
+                        <div class="flex items-center space-x-2 text-xs text-slate-400 mb-3">
+                            <span class="bg-emerald-50 text-emerald-700 font-semibold px-2 py-0.5 rounded">配音員專題</span>
+                            <span>•</span>
+                            <time>2026-03-20</time>
+                        </div>
+                        <h4 class="font-bold text-slate-900 hover:text-dora-600 text-base mb-2">
+                            <a href="blog.html">粵語配音歲月：林保全老師與香港叮噹的聲音記憶</a>
+                        </h4>
+                        <p class="text-xs text-slate-500 line-clamp-3 leading-relaxed">
+                            整理自1980年代TVB播映以來，歷代香港粵語配音陣容之異同與大長篇配音文獻考據。
+                        </p>
+                    </div>
+                    <div class="px-6 py-3 bg-slate-50 border-t border-slate-100 text-xs font-medium text-slate-600">
+                        作者：香港動漫畫文獻研究會
+                    </div>
+                </article>
+
+                <!-- Blog Entry 3 -->
+                <article class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm flex flex-col justify-between">
+                    <div class="p-6">
+                        <div class="flex items-center space-x-2 text-xs text-slate-400 mb-3">
+                            <span class="bg-purple-50 text-purple-700 font-semibold px-2 py-0.5 rounded">版本對照</span>
+                            <span>•</span>
+                            <time>2026-02-15</time>
+                        </div>
+                        <h4 class="font-bold text-slate-900 hover:text-dora-600 text-base mb-2">
+                            <a href="blog.html">早期海豹叢書版《叮噹》與日本原版對照研究</a>
+                        </h4>
+                        <p class="text-xs text-slate-500 line-clamp-3 leading-relaxed">
+                            詳細對比1970-1980年代香港海豹叢書非正式授權時期的翻譯風格、印刷格式與畫面修正考據。
+                        </p>
+                    </div>
+                    <div class="px-6 py-3 bg-slate-50 border-t border-slate-100 text-xs font-medium text-slate-600">
+                        作者：DoraDex 編輯團隊
+                    </div>
+                </article>
+
+            </div>
+        </section>
+***/ </script>
+    </main>
+
+    <!-- Global Quick Search Overlay Modal -->
+    <div id="searchModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-200 flex items-start justify-center pt-16 px-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl overflow-hidden transform scale-95 transition-transform duration-200" id="searchModalBox">
+            <div class="p-4 border-b border-slate-100 flex items-center space-x-3">
+                <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
+                <input type="text" id="quickSearchInput" placeholder="輸入關鍵字 (如: 隨意門, 大雄的恐龍, 1980)..." class="w-full text-base border-none focus:outline-none focus:ring-0 text-slate-800 placeholder-slate-400">
+                <button id="closeSearchBtn" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <div class="p-4 bg-slate-50 text-xs text-slate-500 border-b border-slate-100 flex items-center justify-between">
+                <span>快速跳轉至資料庫：</span>
+                <div class="flex space-x-2">
+                    <button data-target="mediaobject.html?filterclass=法寶" class="quick-jump-btn hover:text-dora-600 underline">法寶庫</button>
+                    <span>•</span>
+                    <button data-target="manga-database.html?region=HK" class="quick-jump-btn hover:text-dora-600 underline">港版漫畫</button>
+                    <span>•</span>
+                    <button data-target="movie.html" class="quick-jump-btn hover:text-dora-600 underline">電影庫</button>
+                </div>
+            </div>
+
+            <div class="p-6 text-center text-slate-400 text-sm" id="searchQuickResults">
+                <i class="fa-solid fa-keyboard text-2xl mb-2 text-slate-300"></i>
+                <p>請輸入關鍵字，按 <kbd class="px-1.5 py-0.5 text-xs bg-slate-100 border rounded font-mono">Enter</kbd> 進行全庫比對檢索</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Footer -->
+    <footer class="bg-dora-900 text-slate-300 border-t border-slate-800 mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                
+                <!-- Col 1: Brand Info -->
+                <div class="space-y-4 md:col-span-1">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-lg bg-dora-600 text-white flex items-center justify-center font-bold text-lg">
+                            D
+                        </div>
+                        <span class="text-xl font-bold text-white tracking-tight">DoraDex<span class="text-dora-500">HK</span></span>
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        多啦A夢 (叮噹) 香港影視漫畫法寶資料庫。致力提供歷年大長篇電影、香港版漫畫出版史及法寶文獻考據。
+                    </p>
+                </div>
+
+                <!-- Col 2: Quick Links -->
+                <div>
+                    <h5 class="text-xs font-bold text-white uppercase tracking-wider mb-4">漫畫與作品目錄</h5>
+                    <ul class="space-y-2 text-xs">
+                        <li><a href="manga-database.html?region=HK" class="hover:text-white transition-colors">香港版漫畫考據 (HK)</a></li>
+                        <li><a href="manga-database.html?region=JP" class="hover:text-white transition-colors">日本版漫畫考據 (JP)</a></li>
+                        <li><a href="originalworks.html" class="hover:text-white transition-colors">ドラえもん日本原作大全</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Secret Gadgets & Media -->
+                <div>
+                    <h5 class="text-xs font-bold text-white uppercase tracking-wider mb-4">神奇法寶與影視</h5>
+                    <ul class="space-y-2 text-xs">
+                        <li><a href="mediaobject.html?filterclass=法寶" class="hover:text-white transition-colors">神奇法寶記錄搜尋</a></li>
+                        <li><a href="mediaobject.html?filterclass=人物" class="hover:text-white transition-colors">登場角色人物檔案</a></li>
+                        <li><a href="movie.html" class="hover:text-white transition-colors">歷年大長篇電影作品</a></li>
+                        <li><a href="anime.html" class="hover:text-white transition-colors">電視動畫播映記錄</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Academic Note & SEO Disclaimer -->
+                <div>
+                    <h5 class="text-xs font-bold text-white uppercase tracking-wider mb-4">學術與研究聲明</h5>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">
+                        本網站為非牟利研究考據檔案庫，所有《多啦A夢 / 叮噹》商標、角色與著作權均屬 Fujiko Pro、Shogakukan 及 TV-Asahi 所有。本站香港譯名文獻由熱心研究者共同整理。
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bottom Copyright & URL Information -->
+            <div class="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+                <div>
+                    &copy; 2026 DoraDexHK Archive (https://doradexhk.pages.dev/). All rights reserved.
+                </div>
+                <div class="flex space-x-4 text-xs">
+                    <a href="blog.html" class="hover:text-slate-300">網誌文章</a>
+                    <a href="index.html" class="hover:text-slate-300">首頁 index.html</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- External Shared Application Script -->
+    <script src="./js/main.js"></script>
 </body>
 </html>

@@ -156,7 +156,7 @@
                              @click="selectBook(book)"
                              class="bg-white border border-slate-200/90 rounded-2xl p-3 hover:border-blue-400 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group flex flex-col justify-between">
                             
-                            <!-- Cover Image targeting the 'Image' column from spreadsheet -->
+                            <!-- Cover Image (Image column) -->
                             <div class="aspect-[3/4] bg-slate-100 rounded-xl overflow-hidden mb-3 relative flex items-center justify-center shadow-inner group-hover:shadow-md transition-shadow">
                                 <img v-if="book['Image']" 
                                      :src="book['Image']" 
@@ -168,16 +168,23 @@
                                     <span class="text-[10px] font-bold">無封面</span>
                                 </div>
 
-                                <!-- Volume Badge Overlay -->
-                                <div v-if="book.卷 || book.巻" class="absolute top-2 left-2 bg-slate-900/80 backdrop-blur-sm text-white px-2 py-0.5 rounded-md text-[10px] font-black shadow-sm">
-                                    {{ book.卷 ? '第 ' + book.卷 + ' 卷' : '第 ' + book.巻 + ' 卷' }}
+                                <!-- Volume Badge Overlay (HK: Volumn column; JP: 巻/卷 column) -->
+                                <div v-if="region === 'HK' ? (book['Volumn'] || book['Volume'] || book['卷']) : (book['巻'] || book['卷'] || book['Volumn'])" 
+                                     class="absolute top-2 left-2 bg-slate-900/80 backdrop-blur-sm text-white px-2 py-0.5 rounded-md text-[10px] font-black shadow-sm">
+                                    第 {{ region === 'HK' ? (book['Volumn'] || book['Volume'] || book['卷']) : (book['巻'] || book['卷'] || book['Volumn']) }} 卷
                                 </div>
                             </div>
 
                             <div class="space-y-1">
                                 <!-- Volume & Series Badge -->
                                 <div class="flex items-center gap-1.5 text-[10px] font-black text-blue-600">
-                                    <span>{{ book.卷 ? ' Vol.' + book.卷 : (book.巻 ? ' Vol.' + book.巻 : '單行本') }}</span>
+                                    <span v-if="region === 'HK' && (book['Volumn'] || book['Volume'] || book['卷'])">
+                                        Vol.{{ book['Volumn'] || book['Volume'] || book['卷'] }}
+                                    </span>
+                                    <span v-else-if="region === 'JP' && (book['巻'] || book['卷'] || book['Volumn'])">
+                                        Vol.{{ book['巻'] || book['卷'] || book['Volumn'] }}
+                                    </span>
+                                    <span v-else>單行本</span>
                                 </div>
 
                                 <!-- Title -->
@@ -185,9 +192,12 @@
                                     {{ region === 'HK' ? (book.Title || '未命名') : (book.類 || book.標題 || '未命名') }}
                                 </h3>
 
-                                <!-- Subtitle -->
-                                <p v-if="book.副題 || book.標題" class="text-[11px] text-slate-500 font-medium line-clamp-1">
-                                    {{ book.副題 || book.標題 }}
+                                <!-- Subtitle (HK: Subtitle column; JP: 副標題 column) -->
+                                <p v-if="region === 'HK' && (book['Subtitle'] || book['副題'])" class="text-[11px] text-slate-500 font-medium line-clamp-1">
+                                    {{ book['Subtitle'] || book['副題'] }}
+                                </p>
+                                <p v-else-if="region === 'JP' && (book['副標題'] || book['副題'] || book['標題'])" class="text-[11px] text-slate-500 font-medium line-clamp-1">
+                                    {{ book['副標題'] || book['副題'] || book['標題'] }}
                                 </p>
 
                                 <p class="text-[10px] text-slate-400 pt-1 font-mono">ISBN: {{ book.ISBN || book.ISBN_JP || 'N/A' }}</p>
@@ -219,12 +229,12 @@
                                 </span>
                                 <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
                                     {{ region === 'HK' ? (selectedBook?.Title) : (selectedBook?.類 || selectedBook?.標題) }}
-                                    <span v-if="selectedBook?.卷 || selectedBook?.巻" class="text-blue-600 ml-1">
-                                        (第 {{ selectedBook?.卷 || selectedBook?.巻 }} 卷)
+                                    <span v-if="selectedBook?.['Volumn'] || selectedBook?.['巻'] || selectedBook?.['卷']" class="text-blue-600 ml-1">
+                                        (第 {{ selectedBook?.['Volumn'] || selectedBook?.['巻'] || selectedBook?.['卷'] }} 卷)
                                     </span>
                                 </h2>
-                                <p v-if="selectedBook?.副題 || selectedBook?.標題" class="text-base font-bold text-slate-600 mt-1">
-                                    {{ selectedBook?.副題 || selectedBook?.標題 }}
+                                <p v-if="selectedBook?.['Subtitle'] || selectedBook?.['副標題'] || selectedBook?.['副題']" class="text-base font-bold text-slate-600 mt-1">
+                                    {{ selectedBook?.['Subtitle'] || selectedBook?.['副標題'] || selectedBook?.['副題'] }}
                                 </p>
                             </div>
 

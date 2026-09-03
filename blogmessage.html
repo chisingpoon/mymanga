@@ -16,7 +16,39 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dora: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            200: '#bae0fd',
+                            500: '#0084ff',
+                            600: '#0066cc',
+                            700: '#004c99',
+                            800: '#0f2b48',
+                            900: '#0a1d33',
+                            accent: '#ffcc00', // Subtle yellow accent
+                            red: '#e63946'    // Collar red
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', '"Noto Sans HK"', '"PingFang HK"', '"Microsoft JhengHei"', 'sans-serif'],
+                        serif: ['"Noto Serif HK"', 'Georgia', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for Archival Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- External Shared Stylesheet -->
+    <link rel="stylesheet" href="./css/style.css">    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap');
         body {
@@ -62,7 +94,7 @@
                             </div>
                         </a>
                     </div>
-
+<!--
                     <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
                         <a href="index.html" class="text-slate-600 hover:text-blue-600 transition-colors">首頁</a>
                         <a href="manga-database.html?region=HK" class="text-slate-600 hover:text-blue-600 transition-colors">香港版漫畫</a>
@@ -70,7 +102,7 @@
                         <a href="mediaobject.html?filterclass=法寶" class="text-slate-600 hover:text-blue-600 transition-colors">法寶記錄</a>
                         <a href="blog.html" class="text-blue-600 font-bold border-b-2 border-blue-600 pb-1">研究網誌</a>
                     </nav>
-
+-->
                     <div>
                         <a href="blog.html" class="text-xs sm:text-sm font-semibold text-slate-600 hover:text-blue-600 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
                             <i class="fa-solid fa-arrow-left"></i> 返回網誌列表

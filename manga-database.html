@@ -18,11 +18,10 @@
 
     <div id="app" class="min-h-screen flex flex-col justify-between">
 
-        <!-- ================= HEADER (Aligned Exactly with index.html) ================= -->
+        <!-- ================= HEADER ================= -->
         <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm transition-all">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 
-                <!-- Logo Branding -->
                 <div class="flex items-center gap-6">
                     <a href="index.html" class="flex items-center gap-3 group">
                         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-md shadow-blue-500/20 group-hover:scale-105 transition-all">
@@ -38,7 +37,6 @@
                         </div>
                     </a>
 
-                    <!-- Navigation Links -->
                     <nav class="hidden md:flex items-center gap-1 text-xs font-bold text-slate-600">
                         <a href="index.html" class="px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-blue-600 transition-colors">首頁</a>
                         <a href="manga-database.html?region=HK" class="px-3 py-2 rounded-lg bg-blue-50 text-blue-600">漫畫資料庫</a>
@@ -49,7 +47,6 @@
                     </nav>
                 </div>
 
-                <!-- Region Selector Bar -->
                 <div class="flex items-center gap-3">
                     <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
                         <button @click="toggleRegion('HK')" 
@@ -91,7 +88,6 @@
                     </h1>
                 </div>
 
-                <!-- Context Breadcrumb / Back Action -->
                 <div v-if="view !== 'series'" class="flex items-center gap-2">
                     <button @click="updateView('series')" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600/60 rounded-xl text-xs font-bold text-slate-200 transition-all shadow-sm">
                         <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
@@ -114,8 +110,6 @@
                 
                 <!-- ================= VIEW 1: SERIES SELECTION ================= -->
                 <div v-if="view === 'series'" class="space-y-6">
-                    
-                    <!-- Search Input -->
                     <div class="relative max-w-2xl">
                         <input type="text" v-model="seriesSearchQuery" placeholder="搜尋漫畫系列名稱 (如: 單行本, 大長編, 文庫版)..." 
                                class="w-full px-5 py-3.5 pl-12 bg-white border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm">
@@ -124,7 +118,6 @@
                         </svg>
                     </div>
 
-                    <!-- Series Cards Grid -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         <div v-for="s in searchedSeries" :key="s.name" 
                              @click="selectSeries(s.name)"
@@ -150,13 +143,11 @@
                         <span class="text-xs font-black text-slate-400 bg-slate-100 px-3 py-1 rounded-full">共 {{ filteredBooks.length }} 本收錄</span>
                     </div>
 
-                    <!-- Book Cards Grid -->
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
                         <div v-for="book in filteredBooks" :key="book.ISBN || book.ISBN_JP" 
                              @click="selectBook(book)"
                              class="bg-white border border-slate-200/90 rounded-2xl p-3 hover:border-blue-400 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group flex flex-col justify-between">
                             
-                            <!-- Cover Image (Image column) -->
                             <div class="aspect-[3/4] bg-slate-100 rounded-xl overflow-hidden mb-3 relative flex items-center justify-center shadow-inner group-hover:shadow-md transition-shadow">
                                 <img v-if="book['Image']" 
                                      :src="book['Image']" 
@@ -168,7 +159,6 @@
                                     <span class="text-[10px] font-bold">無封面</span>
                                 </div>
 
-                                <!-- Volume Badge Overlay (HK: Volumn column; JP: 巻/卷 column) -->
                                 <div v-if="region === 'HK' ? (book['Volumn'] || book['Volume'] || book['卷']) : (book['巻'] || book['卷'] || book['Volumn'])" 
                                      class="absolute top-2 left-2 bg-slate-900/80 backdrop-blur-sm text-white px-2 py-0.5 rounded-md text-[10px] font-black shadow-sm">
                                     第 {{ region === 'HK' ? (book['Volumn'] || book['Volume'] || book['卷']) : (book['巻'] || book['卷'] || book['Volumn']) }} 卷
@@ -176,7 +166,6 @@
                             </div>
 
                             <div class="space-y-1">
-                                <!-- Volume & Series Badge -->
                                 <div class="flex items-center gap-1.5 text-[10px] font-black text-blue-600">
                                     <span v-if="region === 'HK' && (book['Volumn'] || book['Volume'] || book['卷'])">
                                         Vol.{{ book['Volumn'] || book['Volume'] || book['卷'] }}
@@ -187,12 +176,10 @@
                                     <span v-else>單行本</span>
                                 </div>
 
-                                <!-- Title -->
                                 <h3 class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors text-xs sm:text-sm line-clamp-1 leading-tight">
                                     {{ region === 'HK' ? (book.Title || '未命名') : (book.類 || book.標題 || '未命名') }}
                                 </h3>
 
-                                <!-- Subtitle (HK: Subtitle column; JP: 副標題 column) -->
                                 <p v-if="region === 'HK' && (book['Subtitle'] || book['副題'])" class="text-[11px] text-slate-500 font-medium line-clamp-1">
                                     {{ book['Subtitle'] || book['副題'] }}
                                 </p>
@@ -227,31 +214,90 @@
                                 <span class="text-xs font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase tracking-wider">
                                     {{ region === 'HK' ? '香港授權版' : '日本原畫刊物' }}
                                 </span>
+                                
+                                <!-- Main Title & Volume Display -->
                                 <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
-                                    {{ region === 'HK' ? (selectedBook?.Title) : (selectedBook?.類 || selectedBook?.標題) }}
+                                    {{ region === 'HK' ? (selectedBook?.Title) : (selectedBook?.標題 || selectedBook?.類 || '未命名') }}
                                     <span v-if="selectedBook?.['Volumn'] || selectedBook?.['巻'] || selectedBook?.['卷']" class="text-blue-600 ml-1">
                                         (第 {{ selectedBook?.['Volumn'] || selectedBook?.['巻'] || selectedBook?.['卷'] }} 卷)
                                     </span>
                                 </h2>
+
+                                <!-- Subtitle Display -->
                                 <p v-if="selectedBook?.['Subtitle'] || selectedBook?.['副標題'] || selectedBook?.['副題']" class="text-base font-bold text-slate-600 mt-1">
                                     {{ selectedBook?.['Subtitle'] || selectedBook?.['副標題'] || selectedBook?.['副題'] }}
                                 </p>
                             </div>
 
-                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 py-4 border-y border-slate-100 text-xs">
+                            <!-- Detailed Metadata Grid -->
+                            <!-- HK Card Metadata -->
+                            <div v-if="region === 'HK'" class="grid grid-cols-2 sm:grid-cols-3 gap-4 py-4 border-y border-slate-100 text-xs">
+                                <div>
+                                    <span class="text-slate-400 block font-bold mb-0.5">ISBN 書號</span> 
+                                    <span class="font-mono font-bold text-slate-800 text-sm">{{ selectedBook?.ISBN || 'N/A' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block font-bold mb-0.5">出版日期</span> 
+                                    <span class="font-bold text-slate-800 text-sm">{{ getYear(selectedBook?.IssueDate) }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block font-bold mb-0.5">作者 (Author)</span> 
+                                    <span class="font-bold text-slate-800 text-sm">{{ selectedBook?.Author || '-' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block font-bold mb-0.5">出版社 (Publisher)</span> 
+                                    <span class="font-bold text-slate-800 text-sm">{{ selectedBook?.Publisher || '-' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block font-bold mb-0.5">定價 (Price)</span> 
+                                    <span class="font-bold text-slate-800 text-sm">{{ selectedBook?.Price ? 'HK$ ' + selectedBook?.Price : '-' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block font-bold mb-0.5">頁數 (Page)</span> 
+                                    <span class="font-bold text-slate-800 text-sm">{{ selectedBook?.Page ? selectedBook?.Page + ' 頁' : '-' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block font-bold mb-0.5">開本尺寸 (Size)</span> 
+                                    <span class="font-bold text-slate-800 text-sm">{{ selectedBook?.Size || '-' }}</span>
+                                </div>
+                            </div>
+
+                            <!-- JP Card Metadata -->
+                            <div v-else-if="region === 'JP'" class="grid grid-cols-2 sm:grid-cols-3 gap-4 py-4 border-y border-slate-100 text-xs">
                                 <div>
                                     <span class="text-slate-400 block font-bold mb-0.5">ISBN 書號</span> 
                                     <span class="font-mono font-bold text-slate-800 text-sm">{{ selectedBook?.ISBN || selectedBook?.ISBN_JP || 'N/A' }}</span>
                                 </div>
                                 <div>
-                                    <span class="text-slate-400 block font-bold mb-0.5">出版日期</span> 
-                                    <span class="font-bold text-slate-800 text-sm">{{ getYear(selectedBook?.出版日期 || selectedBook?.發售日) }}</span>
+                                    <span class="text-slate-400 block font-bold mb-0.5">初版發行日</span> 
+                                    <span class="font-bold text-slate-800 text-sm">{{ getYear(selectedBook?.初版発行日) }}</span>
                                 </div>
                                 <div>
-                                    <span class="text-slate-400 block font-bold mb-0.5">類別/系列</span> 
-                                    <span class="font-bold text-slate-800 text-sm">{{ selectedBook?.Title || selectedBook?.類 }}</span>
+                                    <span class="text-slate-400 block font-bold mb-0.5">著者 (著)</span> 
+                                    <span class="font-bold text-slate-800 text-sm">{{ selectedBook?.著 || '-' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block font-bold mb-0.5">類別 (類)</span> 
+                                    <span class="font-bold text-slate-800 text-sm">{{ selectedBook?.類 || '-' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block font-bold mb-0.5">收錄話數 (話)</span> 
+                                    <span class="font-bold text-slate-800 text-sm">{{ selectedBook?.話 ? selectedBook?.話 + ' 話' : '-' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block font-bold mb-0.5">頁數 (頁)</span> 
+                                    <span class="font-bold text-slate-800 text-sm">{{ selectedBook?.頁 ? selectedBook?.頁 + ' 頁' : '-' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block font-bold mb-0.5">定價 (定価)</span> 
+                                    <span class="font-bold text-slate-800 text-sm">{{ selectedBook?.定価 || '-' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block font-bold mb-0.5">判型尺寸</span> 
+                                    <span class="font-bold text-slate-800 text-sm">{{ selectedBook?.判型 || '-' }}</span>
                                 </div>
                             </div>
+
                         </div>
                     </div>
 
@@ -365,7 +411,7 @@
             </div>
         </main>
 
-        <!-- ================= FOOTER (Aligned with index.html) ================= -->
+        <!-- ================= FOOTER ================= -->
         <footer class="bg-slate-900 text-slate-400 pt-12 pb-8 mt-20 border-t border-slate-800">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">

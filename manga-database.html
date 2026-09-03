@@ -19,8 +19,95 @@
             </div>
 
             <div v-else>
-                <!-- Detail View -->
-                <div v-if="view === 'detail'" class="space-y-8">
+                <!-- Header / Navigation Bar -->
+                <header class="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60">
+                    <div class="flex items-center gap-3">
+                        <button v-if="view !== 'series'" @click="updateView('series')" class="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                            <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        </button>
+                        <h1 class="text-xl font-bold text-slate-800 tracking-tight">出版目録資料庫</h1>
+                    </div>
+
+                    <!-- Region Selector -->
+                    <div class="flex bg-slate-100 p-1 rounded-full border border-slate-200/50">
+                        <button @click="toggleRegion('HK')" 
+                                :class="region === 'HK' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'"
+                                class="px-5 py-1.5 rounded-full text-xs font-bold transition-all">
+                            香港版 (HK)
+                        </button>
+                        <button @click="toggleRegion('JP')" 
+                                :class="region === 'JP' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'"
+                                class="px-5 py-1.5 rounded-full text-xs font-bold transition-all">
+                            日本版 (JP)
+                        </button>
+                    </div>
+                </header>
+
+                <!-- VIEW 1: Series List -->
+                <div v-if="view === 'series'" class="space-y-6">
+                    <div class="relative">
+                        <input type="text" v-model="seriesSearchQuery" placeholder="搜尋系列名稱..." class="w-full px-5 py-3 pl-12 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm">
+                        <svg class="w-5 h-5 text-slate-400 absolute left-4 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        <div v-for="s in searchedSeries" :key="s.name" 
+                             @click="selectSeries(s.name)"
+                             class="p-5 bg-white border border-slate-200/80 rounded-2xl hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer group flex items-center justify-between">
+                            <span class="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">{{ s.name }}</span>
+                            <span class="px-3 py-1 bg-slate-100 group-hover:bg-indigo-50 text-slate-500 group-hover:text-indigo-600 text-xs font-bold rounded-full transition-colors">{{ s.count }} 本</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 2: Books List -->
+                <div v-else-if="view === 'books'" class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-slate-800">{{ selectedSeries }}</h2>
+                        <span class="text-xs font-bold text-slate-400">{{ filteredBooks.length }} 個結果</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        <div v-for="book in filteredBooks" :key="book.ISBN" 
+                             @click="selectBook(book)"
+                             class="bg-white border border-slate-200 rounded-2xl p-3 hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer group flex flex-col justify-between">
+                            <div class="aspect-[3/4] bg-slate-100 rounded-xl overflow-hidden mb-3 relative flex items-center justify-center">
+                                <img v-if="book['封面圖片'] || book['圖片']" :src="book['封面圖片'] || book['圖片']" class="w-full h-full object-cover">
+                                <span v-else class="text-xs text-slate-400 font-bold">無封面</span>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors text-sm line-clamp-2">
+                                    {{ region === 'HK' ? (book.標題 || book.Title) : (book.標題 || book.類) }}
+                                </h3>
+                                <p class="text-xs text-slate-400 mt-1 font-mono">ISBN: {{ book.ISBN }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 3: Book Detail -->
+                <div v-else-if="view === 'detail'" class="space-y-8">
+                    <!-- Book Summary Card -->
+                    <div class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row gap-6">
+                        <div class="w-32 md:w-48 aspect-[3/4] bg-slate-100 rounded-2xl overflow-hidden flex-shrink-0 flex items-center justify-center shadow-inner">
+                            <img v-if="selectedBook?.['封面圖片'] || selectedBook?.['圖片']" 
+                                 :src="selectedBook?.['封面圖片'] || selectedBook?.['圖片']" 
+                                 @click="activeLightboxImage = (selectedBook?.['封面圖片'] || selectedBook?.['圖片'])"
+                                 class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity">
+                            <span v-else class="text-xs text-slate-400 font-bold">無封面</span>
+                        </div>
+                        <div class="flex-1 space-y-3">
+                            <h2 class="text-2xl font-bold text-slate-800">
+                                {{ region === 'HK' ? (selectedBook?.標題 || selectedBook?.Title) : (selectedBook?.標題 || selectedBook?.類) }}
+                            </h2>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 py-3 border-y border-slate-100 text-xs">
+                                <div><span class="text-slate-400 block">ISBN</span> <span class="font-mono font-bold">{{ selectedBook?.ISBN || 'N/A' }}</span></div>
+                                <div><span class="text-slate-400 block">出版日期</span> <span class="font-bold">{{ getYear(selectedBook?.出版日期 || selectedBook?.發售日) }}</span></div>
+                                <div><span class="text-slate-400 block">類別/系列</span> <span class="font-bold">{{ selectedBook?.Title || selectedBook?.類 }}</span></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Movie Adaptations Section -->
                     <div v-if="getMovies(selectedBook?.ISBN || selectedBook?.ISBN_JP).length > 0" class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/60 rounded-3xl p-6 shadow-sm">
                         <div class="flex items-center gap-2 mb-4">
@@ -59,6 +146,42 @@
                             </a>
                         </div>
                     </div>
+
+                    <!-- Included Stories Section -->
+                    <div v-if="currentStories.length > 0" class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <h3 class="font-bold text-slate-800 text-lg">收錄作品列表 ({{ currentStories.length }})</h3>
+                            <input type="text" v-model="tableQuery" placeholder="搜尋章節/篇名..." class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider">
+                                        <th class="py-3 px-2">話數</th>
+                                        <th class="py-3 px-2">出版副題</th>
+                                        <th class="py-3 px-2">港譯副題</th>
+                                        <th class="py-3 px-2">大全集對應</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <tr v-for="story in searchedTableStories" :key="story.UniqueKey" class="hover:bg-slate-50/80 transition-colors">
+                                        <td class="py-3 px-2 font-bold text-indigo-600">{{ story.收錄話 || '-' }}</td>
+                                        <td class="py-3 px-2 font-medium text-slate-800">{{ story.出版副題 || '-' }}</td>
+                                        <td class="py-3 px-2 text-slate-500">{{ story.副題港譯 || '-' }}</td>
+                                        <td class="py-3 px-2">
+                                            <a v-if="story.collectionLink" 
+                                               @click.prevent="handleCollectionClick(story.collectionLink)"
+                                               href="#" class="text-indigo-600 hover:underline font-bold">
+                                                {{ story.collectionCategory }} Vol.{{ story.collectionVol }}
+                                            </a>
+                                            <span v-else class="text-slate-400">-</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Footer -->
@@ -73,23 +196,15 @@
                 <div v-if="activeLightboxImage" 
                      class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
                      @click="activeLightboxImage = null">
-                    
-                    <div class="relative bg-white p-2 rounded-[2rem] shadow-2xl max-w-lg w-full overflow-hidden animate-in zoom-in-95 duration-300" 
-                         @click.stop>
-                        
+                    <div class="relative bg-white p-2 rounded-[2rem] shadow-2xl max-w-lg w-full overflow-hidden animate-in zoom-in-95 duration-300" @click.stop>
                         <div class="absolute top-4 right-4 z-10">
-                            <button @click="activeLightboxImage = null" 
-                                    class="bg-slate-900/10 hover:bg-slate-900/20 text-slate-900 p-2 rounded-full transition-colors">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path d="M6 18L18 6M6 6l12 12" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
-                                </svg>
+                            <button @click="activeLightboxImage = null" class="bg-slate-900/10 hover:bg-slate-900/20 text-slate-900 p-2 rounded-full transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                             </button>
                         </div>
-                
                         <div class="bg-slate-50 rounded-[1.5rem] overflow-hidden flex items-center justify-center aspect-[3/4]">
                             <img :src="activeLightboxImage" class="max-w-full max-h-full object-contain">
                         </div>
-                
                         <div class="p-4 text-center">
                             <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Cover Art Preview</p>
                         </div>

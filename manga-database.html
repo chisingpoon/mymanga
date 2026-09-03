@@ -18,21 +18,23 @@
 
     <div id="app" class="min-h-screen flex flex-col justify-between">
 
-        <!-- ================= HEADER (Aligned with index.html) ================= -->
+        <!-- ================= HEADER (Aligned Exactly with index.html) ================= -->
         <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm transition-all">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 
                 <!-- Logo Branding -->
                 <div class="flex items-center gap-6">
                     <a href="index.html" class="flex items-center gap-3 group">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-400 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-                            <span class="text-white font-black text-xl">D</span>
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-md shadow-blue-500/20 group-hover:scale-105 transition-all">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
                         </div>
                         <div class="flex flex-col">
                             <span class="font-black text-slate-900 tracking-tight text-lg leading-tight group-hover:text-blue-600 transition-colors">
                                 DoraDex<span class="text-blue-600">HK</span>
                             </span>
-                            <span class="text-[10px] text-slate-500 font-medium tracking-widest uppercase">香港多啦A夢文獻資料庫</span>
+                            <span class="text-[10px] text-slate-500 font-bold tracking-widest uppercase">香港多啦A夢文獻資料庫</span>
                         </div>
                     </a>
 
@@ -150,23 +152,45 @@
 
                     <!-- Book Cards Grid -->
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
-                        <div v-for="book in filteredBooks" :key="book.ISBN" 
+                        <div v-for="book in filteredBooks" :key="book.ISBN || book.ISBN_JP" 
                              @click="selectBook(book)"
                              class="bg-white border border-slate-200/90 rounded-2xl p-3 hover:border-blue-400 hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group flex flex-col justify-between">
                             
+                            <!-- Cover Image targeting the 'Image' column from spreadsheet -->
                             <div class="aspect-[3/4] bg-slate-100 rounded-xl overflow-hidden mb-3 relative flex items-center justify-center shadow-inner group-hover:shadow-md transition-shadow">
-                                <img v-if="book['封面圖片'] || book['圖片']" :src="book['封面圖片'] || book['圖片']" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
+                                <img v-if="book['Image']" 
+                                     :src="book['Image']" 
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                                     loading="lazy"
+                                     :alt="book.Title || book.類">
                                 <div v-else class="flex flex-col items-center gap-1 text-slate-300">
                                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                                     <span class="text-[10px] font-bold">無封面</span>
                                 </div>
+
+                                <!-- Volume Badge Overlay -->
+                                <div v-if="book.卷 || book.巻" class="absolute top-2 left-2 bg-slate-900/80 backdrop-blur-sm text-white px-2 py-0.5 rounded-md text-[10px] font-black shadow-sm">
+                                    {{ book.卷 ? '第 ' + book.卷 + ' 卷' : '第 ' + book.巻 + ' 卷' }}
+                                </div>
                             </div>
 
-                            <div>
-                                <h3 class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors text-xs sm:text-sm line-clamp-2 leading-tight">
-                                    {{ region === 'HK' ? (book.標題 || book.Title) : (book.標題 || book.類) }}
+                            <div class="space-y-1">
+                                <!-- Volume & Series Badge -->
+                                <div class="flex items-center gap-1.5 text-[10px] font-black text-blue-600">
+                                    <span>{{ book.卷 ? ' Vol.' + book.卷 : (book.巻 ? ' Vol.' + book.巻 : '單行本') }}</span>
+                                </div>
+
+                                <!-- Title -->
+                                <h3 class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors text-xs sm:text-sm line-clamp-1 leading-tight">
+                                    {{ region === 'HK' ? (book.Title || '未命名') : (book.類 || book.標題 || '未命名') }}
                                 </h3>
-                                <p class="text-[11px] text-slate-400 mt-1.5 font-mono">ISBN: {{ book.ISBN || 'N/A' }}</p>
+
+                                <!-- Subtitle -->
+                                <p v-if="book.副題 || book.標題" class="text-[11px] text-slate-500 font-medium line-clamp-1">
+                                    {{ book.副題 || book.標題 }}
+                                </p>
+
+                                <p class="text-[10px] text-slate-400 pt-1 font-mono">ISBN: {{ book.ISBN || book.ISBN_JP || 'N/A' }}</p>
                             </div>
                         </div>
                     </div>
@@ -178,12 +202,12 @@
                     <!-- Book Header Overview Card -->
                     <div class="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col md:flex-row gap-8">
                         <div class="w-36 md:w-52 aspect-[3/4] bg-slate-100 rounded-2xl overflow-hidden flex-shrink-0 flex items-center justify-center shadow-lg border border-slate-200/60 relative group">
-                            <img v-if="selectedBook?.['封面圖片'] || selectedBook?.['圖片']" 
-                                 :src="selectedBook?.['封面圖片'] || selectedBook?.['圖片']" 
-                                 @click="activeLightboxImage = (selectedBook?.['封面圖片'] || selectedBook?.['圖片'])"
+                            <img v-if="selectedBook?.['Image']" 
+                                 :src="selectedBook?.['Image']" 
+                                 @click="activeLightboxImage = selectedBook?.['Image']"
                                  class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300">
                             <span v-else class="text-xs text-slate-400 font-bold">無封面預覽</span>
-                            <div v-if="selectedBook?.['封面圖片'] || selectedBook?.['圖片']" class="absolute bottom-2 right-2 bg-slate-900/70 text-white p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                            <div v-if="selectedBook?.['Image']" class="absolute bottom-2 right-2 bg-slate-900/70 text-white p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"></path></svg>
                             </div>
                         </div>
@@ -194,14 +218,20 @@
                                     {{ region === 'HK' ? '香港授權版' : '日本原畫刊物' }}
                                 </span>
                                 <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
-                                    {{ region === 'HK' ? (selectedBook?.標題 || selectedBook?.Title) : (selectedBook?.標題 || selectedBook?.類) }}
+                                    {{ region === 'HK' ? (selectedBook?.Title) : (selectedBook?.類 || selectedBook?.標題) }}
+                                    <span v-if="selectedBook?.卷 || selectedBook?.巻" class="text-blue-600 ml-1">
+                                        (第 {{ selectedBook?.卷 || selectedBook?.巻 }} 卷)
+                                    </span>
                                 </h2>
+                                <p v-if="selectedBook?.副題 || selectedBook?.標題" class="text-base font-bold text-slate-600 mt-1">
+                                    {{ selectedBook?.副題 || selectedBook?.標題 }}
+                                </p>
                             </div>
 
                             <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 py-4 border-y border-slate-100 text-xs">
                                 <div>
                                     <span class="text-slate-400 block font-bold mb-0.5">ISBN 書號</span> 
-                                    <span class="font-mono font-bold text-slate-800 text-sm">{{ selectedBook?.ISBN || 'N/A' }}</span>
+                                    <span class="font-mono font-bold text-slate-800 text-sm">{{ selectedBook?.ISBN || selectedBook?.ISBN_JP || 'N/A' }}</span>
                                 </div>
                                 <div>
                                     <span class="text-slate-400 block font-bold mb-0.5">出版日期</span> 

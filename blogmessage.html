@@ -2,11 +2,23 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="1024">
-    <meta property="og:image:height" content="1024">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ post ? post.Title : '網誌文章' }} - DoraDexHK 香港多啦A夢文獻資料庫</title>
+    
+    <!-- Open Graph Meta Tags (Facebook, WhatsApp, LinkedIn) -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" id="og-title" content="DoraDexHK 香港多啦A夢文獻資料庫">
+    <meta property="og:description" id="og-description" content="多啦A夢 (叮噹) 香港影視漫畫法寶資料庫。專為研究者與收藏家提供文獻考據。">
+    <meta property="og:image" id="og-image" content="https://yourwebsite.com/img/icon.png"> <!-- Replace with your default absolute URL -->
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Twitter / X Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" id="tw-title" content="DoraDexHK 香港多啦A夢文獻資料庫">
+    <meta name="twitter:description" id="tw-description" content="多啦A夢 (叮噹) 香港影視漫畫法寶資料庫。專為研究者與收藏家提供文獻考據。">
+    <meta name="twitter:image" id="tw-image" content="https://yourwebsite.com/img/icon.png"> <!-- Replace with your default absolute URL -->
     
     <link rel="icon" type="image/png" href="./img/icon.png">
     <link rel="apple-touch-icon" href="./img/icon.png">
@@ -16,8 +28,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    
     <script>
         tailwind.config = {
             theme: {
@@ -32,8 +43,8 @@
                             700: '#004c99',
                             800: '#0f2b48',
                             900: '#0a1d33',
-                            accent: '#ffcc00', // Subtle yellow accent
-                            red: '#e63946'    // Collar red
+                            accent: '#ffcc00',
+                            red: '#e63946'
                         }
                     },
                     fontFamily: {
@@ -44,8 +55,6 @@
             }
         }
     </script>
-    <!-- FontAwesome for Archival Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- External Shared Stylesheet -->
     <link rel="stylesheet" href="./css/style.css">    
@@ -79,7 +88,7 @@
 <body>
     <div id="app" class="min-h-screen flex flex-col justify-between">
 
-        <!-- HEADER (Style matched with index.html) -->
+        <!-- HEADER -->
         <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16">
@@ -94,15 +103,6 @@
                             </div>
                         </a>
                     </div>
-<!--
-                    <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
-                        <a href="index.html" class="text-slate-600 hover:text-blue-600 transition-colors">首頁</a>
-                        <a href="manga-database.html?region=HK" class="text-slate-600 hover:text-blue-600 transition-colors">香港版漫畫</a>
-                        <a href="manga-database.html?region=JP" class="text-slate-600 hover:text-blue-600 transition-colors">日本版漫畫</a>
-                        <a href="mediaobject.html?filterclass=法寶" class="text-slate-600 hover:text-blue-600 transition-colors">法寶記錄</a>
-                        <a href="blog.html" class="text-blue-600 font-bold border-b-2 border-blue-600 pb-1">研究網誌</a>
-                    </nav>
--->
                     <div>
                         <a href="blog.html" class="text-xs sm:text-sm font-semibold text-slate-600 hover:text-blue-600 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
                             <i class="fa-solid fa-arrow-left"></i> 返回網誌列表
@@ -168,14 +168,12 @@
                     </div>
                 </div>
 
-                <!-- Article Body Content (Supports Markdown & HTML) -->
+                <!-- Article Body Content -->
                 <div class="prose prose-slate max-w-none text-slate-800 leading-relaxed" v-html="renderedContent"></div>
 
-                <!-- NEXT / PREVIOUS ARTICLE NAVIGATION CARD -->
+                <!-- Navigation Card -->
                 <div class="mt-12 pt-8 border-t border-slate-200">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        
-                        <!-- Previous Article -->
                         <div v-if="prevPost" @click="navigateToPost(prevPost)" class="group cursor-pointer p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/40 transition-all flex flex-col justify-between">
                             <span class="text-xs font-bold text-slate-400 group-hover:text-blue-600 transition-colors flex items-center gap-1 mb-2">
                                 <i class="fa-solid fa-arrow-left"></i> 上一篇研究文章
@@ -186,7 +184,6 @@
                         </div>
                         <div v-else class="hidden sm:block"></div>
 
-                        <!-- Next Article -->
                         <div v-if="nextPost" @click="navigateToPost(nextPost)" class="group cursor-pointer p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/40 transition-all flex flex-col justify-between text-right sm:text-right">
                             <span class="text-xs font-bold text-slate-400 group-hover:text-blue-600 transition-colors flex items-center justify-end gap-1 mb-2">
                                 下一篇研究文章 <i class="fa-solid fa-arrow-right"></i>
@@ -198,7 +195,7 @@
                     </div>
                 </div>
 
-                <!-- Footer Navigation inside Article -->
+                <!-- Footer Navigation -->
                 <div class="mt-8 pt-4 flex items-center justify-between text-xs text-slate-500">
                     <a href="blog.html" class="inline-flex items-center gap-1.5 hover:text-blue-600 font-semibold transition-colors">
                         <i class="fa-solid fa-list-ul text-xs"></i> 檢索所有文章目錄
@@ -209,7 +206,7 @@
                 </div>
             </article>
 
-            <!-- Error State if Post ID isn't found -->
+            <!-- Error State -->
             <div v-else class="text-center py-20 bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
                 <i class="fa-solid fa-file-circle-xmark text-4xl text-slate-300 mb-4"></i>
                 <h2 class="text-xl font-bold text-slate-800 mb-2">找不到此文章</h2>
@@ -220,7 +217,7 @@
             </div>
         </main>
 
-        <!-- FOOTER (Matches index_v2.html) -->
+        <!-- FOOTER -->
         <footer class="bg-slate-900 text-slate-400 py-12 border-t border-slate-800 text-sm">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col md:flex-row justify-between items-center gap-6 border-b border-slate-800 pb-8 mb-8">
@@ -282,7 +279,6 @@
                         const response = await fetch(this.sheetUrl);
                         const rawData = await response.json();
 
-                        // Clean and normalize posts
                         const normalizedPosts = rawData.map(post => {
                             const normalized = {};
                             Object.keys(post).forEach(key => normalized[key.trim()] = post[key]);
@@ -296,7 +292,6 @@
                             return normalized;
                         }).filter(p => String(p.Active).toLowerCase() === 'yes');
 
-                        // Sort chronological order (Newest First)
                         normalizedPosts.sort((a, b) => {
                             const dateA = this.parseSheetDate(a.PostDate || "1/1/1900");
                             const dateB = this.parseSheetDate(b.PostDate || "1/1/1900");
@@ -304,8 +299,6 @@
                         });
 
                         this.allPosts = normalizedPosts;
-
-                        // Match URL post ID
                         this.loadPostFromUrl();
                         this.loading = false;
                     } catch (error) {
@@ -322,11 +315,47 @@
                         this.post = this.allPosts.find(p => 
                             p._computedId === cleanedParam || p.Title === cleanedParam
                         );
+                        if (this.post) {
+                            this.updateSocialMetaTags();
+                        }
                     }
                 },
-                navigateToPost(targetPost) {
-                    const identifier = targetPost._computedId || targetPost.Title;
-                    window.location.href = `blogmessage.html?post=${encodeURIComponent(identifier)}`;
+                updateSocialMetaTags() {
+                    if (!this.post) return;
+
+                    // Update page title
+                    document.title = `${this.post.Title} - DoraDexHK 香港多啦A夢文獻資料庫`;
+
+                    // Extract image from post content or summary
+                    let imageUrl = '';
+                    const rawContent = this.renderedContent;
+                    
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(rawContent, 'text/html');
+                    const firstImg = doc.querySelector('img');
+
+                    if (firstImg && firstImg.src) {
+                        imageUrl = firstImg.src;
+                    } else if (this.post.CoverImage || this.post.Image) {
+                        imageUrl = this.post.CoverImage || this.post.Image;
+                    }
+
+                    // Fallback description
+                    const cleanDescription = (this.post.Summary || this.post.Title || '').replace(/<[^>]*>?/gm, '').slice(0, 150);
+
+                    // Update dynamic meta tags
+                    if (imageUrl) {
+                        document.getElementById('og-image')?.setAttribute('content', imageUrl);
+                        document.getElementById('tw-image')?.setAttribute('content', imageUrl);
+                    }
+                    if (this.post.Title) {
+                        document.getElementById('og-title')?.setAttribute('content', this.post.Title);
+                        document.getElementById('tw-title')?.setAttribute('content', this.post.Title);
+                    }
+                    if (cleanDescription) {
+                        document.getElementById('og-description')?.setAttribute('content', cleanDescription);
+                        document.getElementById('tw-description')?.setAttribute('content', cleanDescription);
+                    }
                 },
                 parseSheetDate(dateStr) {
                     if (!dateStr) return new Date();

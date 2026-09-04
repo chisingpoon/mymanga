@@ -60,18 +60,18 @@
 
             <template v-else>
                 <!-- Detail View Modal/Panel -->
-                <section v-if="selectedMovie" class="mb-12 bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 relative shadow-2xl">
-                    <button @click="closeDetail" class="absolute top-6 right-6 text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700 p-2 rounded-xl transition-all">
+                <section v-if="selectedMovie" class="mb-12 bg-slate-900/90 border border-slate-800 rounded-2xl p-6 md:p-8 relative shadow-2xl backdrop-blur-md">
+                    <button @click="closeDetail" class="absolute top-6 right-6 text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700 p-2.5 rounded-xl transition-all border border-slate-700/50">
                         ✕ 關閉 Close
                     </button>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <!-- Poster Preview -->
                         <div class="space-y-4">
-                            <div class="aspect-[3/4] bg-slate-800 rounded-xl overflow-hidden border border-slate-700/60 shadow-lg">
+                            <div class="aspect-[3/4] bg-slate-800 rounded-xl overflow-hidden border border-slate-700/60 shadow-xl">
                                 <img :src="selectedMovie.jpImage || selectedMovie.hkImage" :alt="selectedMovie.jpTitle" class="w-full h-full object-cover">
                             </div>
-                            <div class="text-xs text-slate-400 space-y-1">
+                            <div class="text-xs text-slate-400 space-y-1 bg-slate-950/40 p-3 rounded-xl border border-slate-800/60">
                                 <p><strong class="text-slate-200">日版上映：</strong> {{ selectedMovie.jpDate || '未知' }}</p>
                                 <p><strong class="text-slate-200">港版上映：</strong> {{ selectedMovie.hkDate || '未知' }}</p>
                             </div>
@@ -88,60 +88,78 @@
                                 <p v-if="selectedMovie.enTitle" class="text-xs text-slate-500 font-mono">{{ selectedMovie.enTitle }}</p>
                             </div>
 
-                            <!-- Restored Quick Links Buttons -->
+                            <!-- Styled Quick Links Buttons -->
                             <div class="flex flex-wrap gap-3 pt-2">
                                 <a :href="'mediaobject.html?type=gadget&mediaid=' + encodeURIComponent(selectedMovie.id)" 
-                                   class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-600/20">
-                                    <span>🪄</span>
+                                   class="group inline-flex items-center gap-2.5 bg-indigo-600/90 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-600/20 border border-indigo-400/30">
+                                    <svg class="w-4 h-4 fill-current text-indigo-200 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
+                                        <path d="M7.5 5.6L5 7l1.4-2.5L5 2l2.5 1.4L10 2 8.6 4.5 10 7 7.5 5.6zm12 9.8l2.5-1.4-1.4 2.5 1.4 2.5-2.5-1.4-2.5 1.4 1.4-2.5-1.4-2.5 2.5 1.4zM19.3 3l1.4 2.5-2.5 1.4 2.5 1.4-1.4 2.5 2.5-1.4 1.4 2.5 1.4-2.5 2.5 1.4-1.4-2.5zm-8.8 8.1l-8.5 8.5c-.4.4-.4 1 0 1.4l1.4 1.4c.4.4 1 .4 1.4 0l8.5-8.5-2.8-2.8z"/>
+                                    </svg>
                                     <span>相關法寶登場</span>
                                 </a>
                                 <a :href="'mediaobject.html?type=character&mediaid=' + encodeURIComponent(selectedMovie.id)" 
-                                   class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs font-bold transition-all">
-                                    <span>👥</span>
+                                   class="group inline-flex items-center gap-2.5 bg-slate-800/90 hover:bg-slate-700/90 text-slate-200 hover:text-white border border-slate-700/80 px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md">
+                                    <svg class="w-4 h-4 fill-current text-slate-400 group-hover:text-slate-200 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
+                                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                    </svg>
                                     <span>相關角色與事理</span>
                                 </a>
                             </div>
 
                             <!-- Cross-Media Relations (Manga / Film Comic) -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-800">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-4 border-t border-slate-800">
                                 <!-- Manga Linking -->
-                                <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+                                <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80">
                                     <div class="flex items-center justify-between mb-3">
                                         <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">原作 / 改編漫畫</h3>
-                                        <div v-if="mappedManga && mappedManga.hasHk" class="flex text-[10px] bg-slate-800 rounded-lg p-0.5">
-                                            <button @click="mangaTab = 'JP'" :class="mangaTab === 'JP' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="px-2 py-0.5 rounded-md transition-all">JP</button>
-                                            <button @click="mangaTab = 'HK'" :class="mangaTab === 'HK' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="px-2 py-0.5 rounded-md transition-all">HK</button>
+                                        <div v-if="mappedManga && mappedManga.hasHk" class="flex text-[10px] bg-slate-800 rounded-lg p-0.5 border border-slate-700/60">
+                                            <button @click="mangaTab = 'JP'" :class="mangaTab === 'JP' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="px-2.5 py-0.5 rounded-md transition-all font-bold">JP</button>
+                                            <button @click="mangaTab = 'HK'" :class="mangaTab === 'HK' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="px-2.5 py-0.5 rounded-md transition-all font-bold">HK</button>
                                         </div>
                                     </div>
-                                    <div v-if="mappedManga" class="flex gap-3">
-                                        <img :src="mappedManga.current.image" class="w-16 h-22 object-cover rounded border border-slate-700">
-                                        <div class="text-xs space-y-1">
-                                            <p class="font-bold text-slate-200 line-clamp-1">{{ mappedManga.current.title }}</p>
+                                    <div v-if="mappedManga" class="flex gap-4 items-start">
+                                        <!-- Enlarged Book Photo -->
+                                        <div class="w-24 sm:w-28 h-36 sm:h-40 shrink-0 bg-slate-900 rounded-lg overflow-hidden border border-slate-700 shadow-md">
+                                            <img :src="mappedManga.current.image" class="w-full h-full object-cover">
+                                        </div>
+                                        <div class="text-xs space-y-1.5 flex-1 min-w-0">
+                                            <p class="font-bold text-slate-100 text-sm line-clamp-2 leading-snug">{{ mappedManga.current.title }}</p>
                                             <p class="text-[11px] text-slate-400 line-clamp-1">{{ mappedManga.current.author }}</p>
-                                            <a :href="generateUrl(mappedManga.current)" class="inline-block mt-2 text-[10px] text-indigo-400 hover:underline">查看出版目錄 →</a>
+                                            <p class="text-[10px] text-slate-500 font-mono">ISBN: {{ mappedManga.current.isbnParam || 'N/A' }}</p>
+                                            <a :href="generateUrl(mappedManga.current)" class="inline-flex items-center gap-1 mt-3 px-3 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-[11px] text-indigo-400 font-semibold hover:bg-indigo-500/20 transition-all">
+                                                <span>查看出版目錄</span>
+                                                <span>→</span>
+                                            </a>
                                         </div>
                                     </div>
-                                    <p v-else class="text-xs text-slate-500 italic">暫無相關出版紀錄</p>
+                                    <p v-else class="text-xs text-slate-500 italic py-4 text-center">暫無相關出版紀錄</p>
                                 </div>
 
                                 <!-- Film Comic Linking -->
-                                <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+                                <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80">
                                     <div class="flex items-center justify-between mb-3">
                                         <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">彩色電影版漫畫</h3>
-                                        <div v-if="mappedFilmComic && mappedFilmComic.hasHk" class="flex text-[10px] bg-slate-800 rounded-lg p-0.5">
-                                            <button @click="fcTab = 'JP'" :class="fcTab === 'JP' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="px-2 py-0.5 rounded-md transition-all">JP</button>
-                                            <button @click="fcTab = 'HK'" :class="fcTab === 'HK' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="px-2 py-0.5 rounded-md transition-all">HK</button>
+                                        <div v-if="mappedFilmComic && mappedFilmComic.hasHk" class="flex text-[10px] bg-slate-800 rounded-lg p-0.5 border border-slate-700/60">
+                                            <button @click="fcTab = 'JP'" :class="fcTab === 'JP' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="px-2.5 py-0.5 rounded-md transition-all font-bold">JP</button>
+                                            <button @click="fcTab = 'HK'" :class="fcTab === 'HK' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="px-2.5 py-0.5 rounded-md transition-all font-bold">HK</button>
                                         </div>
                                     </div>
-                                    <div v-if="mappedFilmComic" class="flex gap-3">
-                                        <img :src="mappedFilmComic.current.image" class="w-16 h-22 object-cover rounded border border-slate-700">
-                                        <div class="text-xs space-y-1">
-                                            <p class="font-bold text-slate-200 line-clamp-1">{{ mappedFilmComic.current.title }}</p>
+                                    <div v-if="mappedFilmComic" class="flex gap-4 items-start">
+                                        <!-- Enlarged Book Photo -->
+                                        <div class="w-24 sm:w-28 h-36 sm:h-40 shrink-0 bg-slate-900 rounded-lg overflow-hidden border border-slate-700 shadow-md">
+                                            <img :src="mappedFilmComic.current.image" class="w-full h-full object-cover">
+                                        </div>
+                                        <div class="text-xs space-y-1.5 flex-1 min-w-0">
+                                            <p class="font-bold text-slate-100 text-sm line-clamp-2 leading-snug">{{ mappedFilmComic.current.title }}</p>
                                             <p class="text-[11px] text-slate-400 line-clamp-1">{{ mappedFilmComic.current.author }}</p>
-                                            <a :href="generateUrl(mappedFilmComic.current)" class="inline-block mt-2 text-[10px] text-indigo-400 hover:underline">查看出版目錄 →</a>
+                                            <p class="text-[10px] text-slate-500 font-mono">ISBN: {{ mappedFilmComic.current.isbnParam || 'N/A' }}</p>
+                                            <a :href="generateUrl(mappedFilmComic.current)" class="inline-flex items-center gap-1 mt-3 px-3 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-[11px] text-indigo-400 font-semibold hover:bg-indigo-500/20 transition-all">
+                                                <span>查看出版目錄</span>
+                                                <span>→</span>
+                                            </a>
                                         </div>
                                     </div>
-                                    <p v-else class="text-xs text-slate-500 italic">暫無相關出版紀錄</p>
+                                    <p v-else class="text-xs text-slate-500 italic py-4 text-center">暫無相關出版紀錄</p>
                                 </div>
                             </div>
                         </div>
@@ -183,21 +201,28 @@
             </template>
         </main>
 
-        <!-- Footer Component -->
+        <!-- Replicated Footer from index.html -->
         <footer class="bg-slate-900 border-t border-slate-800 text-slate-400 py-12 mt-20">
             <div class="max-w-[1920px] mx-auto px-6">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                    <!-- Column 1: Brand & Overview -->
                     <div class="space-y-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-sm">D</div>
+                            <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-md shadow-indigo-600/30">D</div>
                             <span class="font-black text-lg text-white tracking-tight">DoraDexHK</span>
                         </div>
                         <p class="text-xs text-slate-400 leading-relaxed">
                             香港叮噹 / 多啦A夢 影視漫畫跨媒體學術與文化研究資料庫。<br>
                             Hong Kong Doraemon Cross-Media Archival Project.
                         </p>
+                        <div class="flex items-center gap-3 text-slate-400 text-xs pt-1">
+                            <a href="https://github.com" target="_blank" class="hover:text-white transition-colors">GitHub</a>
+                            <span>•</span>
+                            <a href="https://doradexhk.pages.dev" target="_blank" class="hover:text-white transition-colors">Live Site</a>
+                        </div>
                     </div>
 
+                    <!-- Column 2: Navigation -->
                     <div>
                         <h4 class="text-xs font-black text-white uppercase tracking-widest mb-4">資料庫 Navigation</h4>
                         <ul class="space-y-2 text-xs">
@@ -208,6 +233,7 @@
                         </ul>
                     </div>
 
+                    <!-- Column 3: Archives & Quick Filters -->
                     <div>
                         <h4 class="text-xs font-black text-white uppercase tracking-widest mb-4">電影分類 Era Filter</h4>
                         <ul class="space-y-2 text-xs">
@@ -218,6 +244,7 @@
                         </ul>
                     </div>
 
+                    <!-- Column 4: Disclaimer & Licensing -->
                     <div>
                         <h4 class="text-xs font-black text-white uppercase tracking-widest mb-4">學術與版權聲明 Disclaimer</h4>
                         <p class="text-[11px] leading-relaxed text-slate-500">
@@ -226,6 +253,7 @@
                     </div>
                 </div>
 
+                <!-- Bottom Footer Bar -->
                 <div class="pt-8 border-t border-slate-800/80 flex flex-col md:flex-row items-center justify-between text-[11px] text-slate-500 gap-4">
                     <p>© DoraDexHK Archive. Designed for Hong Kong Doraemon Preservation.</p>
                     <p>Hosted on <a href="https://doradexhk.pages.dev/" target="_blank" class="underline hover:text-indigo-400">Cloudflare Pages</a></p>

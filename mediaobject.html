@@ -404,12 +404,13 @@
 
     <!-- Vue 3 Application Logic -->
         <script>
-            const { createApp } = Vue;
+            const { createApp, reactive } = Vue;
         
             createApp({
                 data() {
                     return {
                         loading: true,
+                        errorMessage: '',
                         searchQuery: '',
                         selectedClass: 'All',
                         selectedType: 'All',
@@ -433,29 +434,24 @@
                         this.showBackToTop = window.scrollY > 300;
                     });
         
+                    // Use direct reliable proxy endpoint
                     const base = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
         
-                    // Fetch single sheet with 8-second timeout safety
-                    const fetchSafe = (tab) => {
-                        const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 8000);
-        
-                        return fetch(base + encodeURIComponent(tab), { signal: controller.signal })
-                            .then(r => {
-                                clearTimeout(timeoutId);
-                                if (!r.ok) throw new Error(`HTTP ${r.status}`);
-                                return r.json();
-                            })
-                            .catch(err => {
-                                clearTimeout(timeoutId);
-                                console.warn(`[Sheet Fetch Warning] Failed to load "${tab}":`, err.message);
-                                return []; // Fallback to empty array so the app never freezes
-                            });
+                    const fetchSafe = async (tab) => {
+                        try {
+                            const res = await fetch(base + encodeURIComponent(tab));
+                            if (!res.ok) return [];
+                            const data = await res.json();
+                            return Array.isArray(data) ? data : [];
+                        } catch (e) {
+                            console.warn(`Failed fetching tab: ${tab}`, e);
+                            return [];
+                        }
                     };
         
                     try {
-                        // Fetch all sheets safely in parallel
-                        const [parents, mChild, mMeta, manChild, works, pubs, aniChild, aniMeta] = await Promise.all([
+                        // Load all endpoints safely
+                        const results = await Promise.all([
                             fetchSafe("人物法寶"),
                             fetchSafe("電影人物法寶"),
                             fetchSafe("電影動畫"),
@@ -466,25 +462,29 @@
                             fetchSafe("電視動畫")
                         ]);
         
-                        this.parentData = Array.isArray(parents) ? parents : [];
-                        this.movieChild = Array.isArray(mChild) ? mChild : [];
-                        this.movieMeta = Array.isArray(mMeta) ? mMeta : [];
-                        this.mangaChild = Array.isArray(manChild) ? manChild : [];
-                        this.workInclude = Array.isArray(works) ? works : [];
-                        this.pubCatalog = Array.isArray(pubs) ? pubs : [];
-                        this.animeChild = Array.isArray(aniChild) ? aniChild : [];
-                        this.animeMeta = Array.isArray(aniMeta) ? aniMeta : [];
+                        this.parentData = results[0];
+                        this.movieChild = results[1];
+                        this.movieMeta = results[2];
+                        this.mangaChild = results[3];
+                        this.workInclude = results[4];
+                        this.pubCatalog = results[5];
+                        this.animeChild = results[6];
+                        this.animeMeta = results[7];
         
-                        // Process relationships
+                        if (!this.parentData.length) {
+                            console.warn("No parent data received from Google Sheets.");
+                        }
+        
+                        // Process records defensively
                         this.processedData = this.parentData
-                            .filter(p => String(p['Active'] || '').trim().toLowerCase() === 'yes')
+                            .filter(p => p && String(p['Active'] || '').trim().toLowerCase() === 'yes')
                             .map(p => {
                                 const objId = String(p['Object ID'] || '').trim();
         
-                                const movieAppearances = this.movieChild
-                                    .filter(c => String(c['Object ID'] || '').trim() === objId)
+                                const movieAppearances = (this.movieChild || [])
+                                    .filter(c => c && String(c['Object ID'] || '').trim() === objId)
                                     .map(c => {
-                                        const m = this.movieMeta.find(mm => String(mm['Media ID'] || '').trim() === String(c['Movie ID'] || '').trim());
+                                        const m = (this.movieMeta || []).find(mm => mm && String(mm['Media ID'] || '').trim() === String(c['Movie ID'] || '').trim());
                                         return {
                                             ...c,
                                             movieTitle: m ? (m['JP Title'] || m['Title'] || '') : '',
@@ -492,31 +492,31 @@
                                         };
                                     });
         
-                                const animeAppearances = this.animeChild
-                                    .filter(c => String(c['Object ID'] || '').trim() === objId)
+                                const animeAppearances = (this.animeChild || [])
+                                    .filter(c => c && String(c['Object ID'] || '').trim() === objId)
                                     .map(c => {
-                                        const a = this.animeMeta.find(am => String(am['Media ID'] || '').trim() === String(c['Anime ID'] || '').trim());
+                                        const a = (this.animeMeta || []).find(am => am && String(am['Media ID'] || '').trim() === String(c['Anime ID'] || '').trim());
                                         return {
                                             ...c,
                                             animeTitle: a ? (a['JP Title'] || a['Title'] || '') : '',
-                                            animeDate: a ? a['JP Show Date'] : 'N/A'
+                                            animeDate: a ? (a['JP Show Date'] || 'N/A') : 'N/A'
                                         };
                                     });
         
-                                const mangaInfo = this.mangaChild.find(c => String(c['Object ID'] || '').trim() === objId) || null;
+                                const mangaInfo = (this.mangaChild || []).find(c => c && String(c['Object ID'] || '').trim() === objId) || null;
                                 let mangaRecords = [];
                                 if (mangaInfo) {
                                     const workId = String(mangaInfo['Work ID'] || '').trim();
-                                    mangaRecords = this.workInclude
-                                        .filter(w => String(w['作品番'] || '').trim() === workId)
+                                    mangaRecords = (this.workInclude || [])
+                                        .filter(w => w && String(w['作品番'] || '').trim() === workId)
                                         .map(w => {
-                                            const pub = this.pubCatalog.find(pc => String(pc['ISBN'] || '').trim() === String(w['ISBN'] || '').trim());
+                                            const pub = (this.pubCatalog || []).find(pc => pc && String(pc['ISBN'] || '').trim() === String(w['ISBN'] || '').trim());
                                             return {
                                                 isbn: String(w['ISBN'] || '').trim(),
                                                 type: pub ? (pub['類'] || '') : '',
                                                 title: pub ? (pub['標題'] || pub['Title'] || '') : '',
-                                                vol: pub ? pub['巻'] : '',
-                                                ch: w['收錄話']
+                                                vol: pub ? (pub['巻'] || '') : '',
+                                                ch: w['收錄話'] || ''
                                             };
                                         });
                                 }
@@ -525,10 +525,13 @@
                             });
         
                     } catch (err) {
-                        console.error("Critical Processing Error:", err);
+                        console.error("Critical Execution Error:", err);
+                        this.errorMessage = err.message;
                     } finally {
-                        // Guaranteed removal of the spinning loading icon
+                        // Ensure page stops loading regardless of state
                         this.loading = false;
+                        
+                        // Read and sync URL params immediately after mounting
                         this.$nextTick(() => {
                             this.applyUrlParams();
                         });
@@ -543,83 +546,89 @@
                         const fClass = params.get('filterclass');
         
                         if (fClass) {
-                            const targetClass = decodeURIComponent(fClass).trim().toLowerCase();
-                            const matched = this.classifications.find(c => String(c).trim().toLowerCase() === targetClass);
+                            const cleanClass = decodeURIComponent(fClass).trim().toLowerCase();
+                            const matched = this.classifications.find(c => String(c).trim().toLowerCase() === cleanClass);
                             this.selectedClass = matched || decodeURIComponent(fClass).trim();
                         }
         
-                        let query = '';
+                        let targetQuery = '';
         
                         if (movieID) {
-                            const id = decodeURIComponent(movieID).trim();
-                            const m = this.movieMeta.find(x => String(x['Media ID'] || '').trim() === id);
-                            query = m ? (m['JP Title'] || m['Title'] || id) : id;
+                            const cleanID = decodeURIComponent(movieID).trim();
+                            const movie = (this.movieMeta || []).find(m => m && String(m['Media ID'] || '').trim() === cleanID);
+                            targetQuery = movie ? (movie['JP Title'] || movie['Title'] || cleanID) : cleanID;
         
                             this.processedData.forEach(p => {
-                                if (p.movieAppearances.some(ma => String(ma['Movie ID'] || '').trim() === id)) {
-                                    this.tabStates = { ...this.tabStates, [p['Object ID']]: 'movie' };
+                                if (p.movieAppearances.some(ma => String(ma['Movie ID'] || '').trim() === cleanID)) {
+                                    this.tabStates[p['Object ID']] = 'movie';
                                 }
                             });
                         } else if (isbn) {
-                            const id = decodeURIComponent(isbn).trim();
-                            const p = this.pubCatalog.find(x => String(x['ISBN'] || '').trim() === id);
-                            query = p ? (p['標題'] || p['Title'] || id) : id;
+                            const cleanISBN = decodeURIComponent(isbn).trim();
+                            const pub = (this.pubCatalog || []).find(p => p && String(p['ISBN'] || '').trim() === cleanISBN);
+                            targetQuery = pub ? (pub['標題'] || pub['Title'] || cleanISBN) : cleanISBN;
         
-                            this.processedData.forEach(item => {
-                                if (item.mangaRecords.some(r => r.isbn === id)) {
-                                    this.tabStates = { ...this.tabStates, [item['Object ID']]: 'manga' };
+                            this.processedData.forEach(p => {
+                                if (p.mangaRecords.some(r => r.isbn === cleanISBN)) {
+                                    this.tabStates[p['Object ID']] = 'manga';
                                 }
                             });
                         } else if (animeID) {
-                            const id = decodeURIComponent(animeID).trim();
-                            const a = this.animeMeta.find(x => String(x['Media ID'] || '').trim() === id);
-                            query = a ? (a['JP Title'] || a['Title'] || id) : id;
+                            const cleanID = decodeURIComponent(animeID).trim();
+                            const anime = (this.animeMeta || []).find(a => a && String(a['Media ID'] || '').trim() === cleanID);
+                            targetQuery = anime ? (anime['JP Title'] || anime['Title'] || cleanID) : cleanID;
         
                             this.processedData.forEach(p => {
-                                if (p.animeAppearances.some(aa => String(aa['Anime ID'] || '').trim() === id)) {
-                                    this.tabStates = { ...this.tabStates, [p['Object ID']]: 'anime' };
+                                if (p.animeAppearances.some(aa => String(aa['Anime ID'] || '').trim() === cleanID)) {
+                                    this.tabStates[p['Object ID']] = 'anime';
                                 }
                             });
                         }
         
-                        if (query) {
-                            this.searchQuery = query;
+                        if (targetQuery) {
+                            this.searchQuery = targetQuery;
                         }
                         this.currentPage = 1;
                     },
                     getTab(id) { return this.tabStates[id] || 'movie'; },
-                    setTab(id, tab) { this.tabStates = { ...this.tabStates, [id]: tab }; },
+                    setTab(id, tab) { this.tabStates[id] = tab; },
                     clearSearch() { this.searchQuery = ''; this.currentPage = 1; },
                     resetFilters() { this.searchQuery = ''; this.selectedClass = 'All'; this.selectedType = 'All'; this.currentPage = 1; }
                 },
                 computed: {
                     classifications() {
+                        if (!this.processedData) return [];
                         return [...new Set(this.processedData.map(i => i['Object Classification']))].filter(Boolean).sort();
                     },
                     displayData() {
-                        if (!this.processedData.length) return [];
+                        if (!this.processedData || !this.processedData.length) return [];
         
                         const q = String(this.searchQuery || '').trim().toLowerCase();
                         const selClass = String(this.selectedClass || 'All').trim().toLowerCase();
                         const selType = String(this.selectedType || 'All').trim().toLowerCase();
         
                         return this.processedData.filter(p => {
+                            if (!p) return false;
+        
+                            // Filter Class
                             const itemClass = String(p['Object Classification'] || '').trim().toLowerCase();
                             if (selClass !== 'all' && itemClass !== selClass) return false;
         
+                            // Filter Type
                             const itemType = String(p['Object Type'] || '').trim().toLowerCase();
                             if (selType !== 'all' && itemType !== selType) return false;
         
                             if (!q) return true;
         
+                            // Comprehensive search targeting
                             const matchTitle = String(p['JP Title'] || '').toLowerCase().includes(q);
                             const matchTrans = String(p['Confirmed Translation'] || '').toLowerCase().includes(q);
                             const matchRef = String(p['Library Ref'] || '').toLowerCase().includes(q);
                             const matchDesc = String(p['Description'] || '').toLowerCase().includes(q);
         
-                            const matchManga = Array.isArray(p.mangaRecords) && p.mangaRecords.some(r => `${r.type} ${r.title}`.toLowerCase().includes(q));
-                            const matchMovie = Array.isArray(p.movieAppearances) && p.movieAppearances.some(m => String(m.movieTitle).toLowerCase().includes(q));
-                            const matchAnime = Array.isArray(p.animeAppearances) && p.animeAppearances.some(a => String(a.animeTitle).toLowerCase().includes(q));
+                            const matchManga = (p.mangaRecords || []).some(r => `${r.type || ''} ${r.title || ''}`.toLowerCase().includes(q));
+                            const matchMovie = (p.movieAppearances || []).some(m => String(m.movieTitle || '').toLowerCase().includes(q));
+                            const matchAnime = (p.animeAppearances || []).some(a => String(a.animeTitle || '').toLowerCase().includes(q));
         
                             return matchTitle || matchTrans || matchRef || matchDesc || matchManga || matchMovie || matchAnime;
                         });

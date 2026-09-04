@@ -74,7 +74,7 @@
             <p class="mt-4 text-[11px] font-black uppercase tracking-widest text-slate-500">Syncing Animation Database...</p>
         </div>
 
-        <!-- HEADER -->
+        <!-- MAIN HEADER (Aligned with movie.html) -->
         <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
             <div class="max-w-[1920px] mx-auto px-6 h-20 flex items-center justify-between">
                 <a href="index.html" class="flex items-center gap-3">
@@ -102,8 +102,24 @@
             </div>
         </header>
 
-        <main class="max-w-[1920px] mx-auto px-6 pt-10">
-            <div class="flex flex-col gap-3 mb-6 bg-white/95 p-3 rounded-2xl border border-slate-200 sticky top-2 z-30 shadow-lg mx-2 md:mx-0 md:flex-row md:items-center md:gap-4 md:p-4 md:rounded-3xl md:top-24">
+        <main class="max-w-[1920px] mx-auto px-6 pt-10 pb-16">
+            <!-- PAGE HERO HEADER (Aligned layout structure from movie.html) -->
+            <div class="mb-8">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="px-3 py-1 bg-indigo-50 border border-indigo-100 text-indigo-600 text-[11px] font-black uppercase rounded-lg tracking-wider">
+                        <i class="fa-solid fa-tv mr-1.5"></i>TV Series Archive
+                    </span>
+                </div>
+                <h1 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight uppercase">
+                    叮噹多啦A夢 動畫 Animate Archive
+                </h1>
+                <p class="text-slate-500 font-bold text-sm mt-1">
+                    收錄電視動畫集數、日本與香港播放日期，以及原作漫畫對照資料
+                </p>
+            </div>
+
+            <!-- CONTROLS & FILTER BAR (Layout & Sticky position aligned) -->
+            <div class="flex flex-col gap-3 mb-8 bg-white/95 backdrop-blur-md p-3 rounded-2xl border border-slate-200 sticky top-20 z-30 shadow-lg md:flex-row md:items-center md:gap-4 md:p-4 md:rounded-3xl">
                 
                 <div class="relative w-full md:flex-1 md:min-w-[250px]">
                     <input type="text" v-model.trim="searchQuery" placeholder="Search..." 
@@ -245,14 +261,14 @@
                 </div>
             </div>
 
-            <!-- CARD VIEW -->
+            <!-- CARD VIEW (Grid layout aligned with movie.html) -->
             <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
                 <div v-for="row in paginatedData" :key="row['Media ID']" 
-                     class="bg-white/80 backdrop-blur-sm border-2 border-slate-100 rounded-3xl p-6 hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all group relative overflow-hidden flex flex-col justify-between">
+                     class="bg-white border border-slate-200/80 rounded-3xl p-6 hover:border-indigo-500 hover:shadow-xl transition-all group relative overflow-hidden flex flex-col justify-between">
                         
                     <div>
                         <div class="flex justify-between items-start mb-4">
-                            <span class="id-badge bg-white shadow-sm border-slate-200" v-html="highlight(row['Media ID'])"></span>
+                            <span class="id-badge bg-slate-50 shadow-sm border-slate-200" v-html="highlight(row['Media ID'])"></span>
                             <div class="flex flex-col items-end gap-1 text-[9px] font-black text-slate-400 uppercase">
                                 <span v-if="row['JP Show ID']">SH: <span class="text-slate-900" v-html="highlight(row['JP Show ID'])"></span></span>
                                 <span v-if="row['JP Chapter ID']">CH: <span class="text-slate-900" v-html="highlight(row['JP Chapter ID'])"></span></span>
@@ -262,7 +278,7 @@
                         <h3 class="font-black text-slate-900 text-lg leading-tight mb-1" v-html="highlight(row['JP Title'])"></h3>
                         <p class="text-indigo-600 font-black text-[13px] mb-5 tracking-tight" v-html="highlight(row['HK Title'])"></p>
                     
-                        <div class="grid grid-cols-2 gap-2 mb-5 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
+                        <div class="grid grid-cols-2 gap-2 mb-5 bg-slate-50 p-3 rounded-2xl border border-slate-100">
                             <div class="flex flex-col">
                                 <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">🇯🇵 JP Broadcast</span>
                                 <span class="text-[11px] font-bold text-slate-700 truncate">{{ row['JP Show Date'] || '-' }}</span>
@@ -347,7 +363,7 @@
             </div>
         </main>
 
-        <!-- FOOTER -->
+        <!-- FOOTER (Exact copy from movie.html) -->
         <footer class="bg-slate-900 text-white mt-20 border-t border-slate-800">
             <div class="max-w-[1920px] mx-auto px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-6">
                 <div class="flex items-center gap-4">

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-Hant"  class="dark">
+<html lang="zh-Hant" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,9 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Vue 3 -->
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
     <!-- Vue 3 -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script>
@@ -31,9 +28,6 @@
         }
     </script>
 
-    <!-- FontAwesome for Archival Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <!-- External Shared Stylesheet -->
     <link rel="stylesheet" href="./css/style.css">
     <style>
@@ -41,25 +35,24 @@
         .loader-wrapper {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.9);
             display: flex; justify-content: center; align-items: center;
             z-index: 9999;
         }
     </style>
 </head>
-<!--<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">-->
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 antialiased min-h-screen flex flex-col transition-colors duration-200">
 
     <div id="app" v-cloak class="flex-grow flex flex-col">
         <!-- Global Loading Overlay -->
-        <div v-if="loading" class="loader-wrapper">
+        <div v-if="loading" class="loader-wrapper bg-white/90 dark:bg-slate-900/90">
             <div class="flex flex-col items-center space-y-3">
-                <i class="fa-solid font-sharp fa-spinner animate-spin text-3xl text-sky-600"></i>
-                <span class="text-sm font-medium text-slate-600">資料載入中...</span>
+                <i class="fa-solid font-sharp fa-spinner animate-spin text-3xl text-sky-600 dark:text-sky-400"></i>
+                <span class="text-sm font-medium text-slate-600 dark:text-slate-300">資料載入中...</span>
             </div>
         </div>
 
-        <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm transition-all">
+        <!-- Header Navigation -->
+        <header class="bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 shadow-sm transition-all">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 
                 <div class="flex items-center gap-6">
@@ -70,10 +63,10 @@
                             </svg>
                         </div>
                         <div class="flex flex-col">
-                            <span class="font-black text-slate-900 tracking-tight text-lg leading-tight group-hover:text-blue-600 transition-colors">
-                                DoraDex<span class="text-blue-600">HK</span>
+                            <span class="font-black text-slate-900 dark:text-white tracking-tight text-lg leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                DoraDex<span class="text-blue-600 dark:text-blue-400">HK</span>
                             </span>
-                            <span class="text-[10px] text-slate-500 font-bold tracking-widest uppercase">香港多啦A夢文獻資料庫</span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold tracking-widest uppercase">香港多啦A夢文獻資料庫</span>
                         </div>
                     </a>
 
@@ -82,91 +75,91 @@
                         
                         <!-- 漫畫資料庫 Dropdown -->
                         <div class="relative group nav-dropdown-item">
-                            <button class="px-3 py-2 rounded-lg text-slate-700 hover:text-dora-600 hover:bg-slate-100/80 flex items-center space-x-1.5 transition-colors focus:outline-none">
-                                <i class="fa-solid fa-book-bookmark text-dora-600"></i>
+                            <button class="px-3 py-2 rounded-lg text-slate-700 dark:text-slate-200 hover:text-dora-600 dark:hover:text-sky-400 hover:bg-slate-100/80 dark:hover:bg-slate-700/80 flex items-center space-x-1.5 transition-colors focus:outline-none">
+                                <i class="fa-solid fa-book-bookmark text-dora-600 dark:text-sky-400"></i>
                                 <span>漫畫資料庫</span>
                                 <i class="fa-solid fa-chevron-down text-[10px] opacity-60"></i>
                             </button>
-                            <div class="nav-dropdown-menu absolute left-0 mt-1 w-64 bg-white rounded-xl shadow-xl border border-slate-100 z-50 p-2">
-                                <div class="text-[11px] font-semibold text-slate-400 px-3 py-1 uppercase tracking-wider">出版史與版本考據</div>
-                                <a href="manga-database.html?region=HK" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
+                            <div class="nav-dropdown-menu absolute left-0 mt-1 w-64 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 p-2">
+                                <div class="text-[11px] font-semibold text-slate-400 dark:text-slate-500 px-3 py-1 uppercase tracking-wider">出版史與版本考據</div>
+                                <a href="manga-database.html?region=HK" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-dora-50 dark:hover:bg-slate-700 hover:text-dora-700 dark:hover:text-sky-400 transition-colors">
                                     <span class="w-2 h-2 rounded-full bg-blue-500"></span>
                                     <div>
                                         <div class="font-medium">香港版漫畫</div>
-                                        <div class="text-xs text-slate-400">香港叮噹 / 多啦A夢版本考據</div>
+                                        <div class="text-xs text-slate-400 dark:text-slate-500">香港叮噹 / 多啦A夢版本考據</div>
                                     </div>
                                 </a>
-                                <a href="manga-database.html?region=JP" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
+                                <a href="manga-database.html?region=JP" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-dora-50 dark:hover:bg-slate-700 hover:text-dora-700 dark:hover:text-sky-400 transition-colors">
                                     <span class="w-2 h-2 rounded-full bg-red-500"></span>
                                     <div>
                                         <div class="font-medium">日本版漫畫</div>
-                                        <div class="text-xs text-slate-400">日本ドラえもん漫畫版本考據</div>
+                                        <div class="text-xs text-slate-400 dark:text-slate-500">日本ドラえもん漫畫版本考據</div>
                                     </div>
                                 </a>
-                                <div class="border-t border-slate-100 my-1"></div>
-                                <a href="originalworks.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
-                                    <i class="fa-solid fa-layer-group text-slate-400 text-xs"></i>
+                                <div class="border-t border-slate-100 dark:border-slate-700 my-1"></div>
+                                <a href="originalworks.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-dora-50 dark:hover:bg-slate-700 hover:text-dora-700 dark:hover:text-sky-400 transition-colors">
+                                    <i class="fa-solid fa-layer-group text-slate-400 dark:text-slate-500 text-xs"></i>
                                     <div>
                                         <div class="font-medium">ドラえもん日本原作大全</div>
-                                        <div class="text-xs text-slate-400">所有日本原作作品列表與搜尋</div>
+                                        <div class="text-xs text-slate-400 dark:text-slate-500">所有日本原作作品列表與搜尋</div>
                                     </div>
                                 </a>
                             </div>
                         </div>
-    
+
                         <!-- 神奇法寶資料庫 Dropdown -->
                         <div class="relative group nav-dropdown-item">
-                            <button class="px-3 py-2 rounded-lg text-slate-700 hover:text-dora-600 hover:bg-slate-100/80 flex items-center space-x-1.5 transition-colors focus:outline-none">
-                                <i class="fa-solid fa-wand-magic-sparkles text-dora-600"></i>
+                            <button class="px-3 py-2 rounded-lg text-slate-700 dark:text-slate-200 hover:text-dora-600 dark:hover:text-sky-400 hover:bg-slate-100/80 dark:hover:bg-slate-700/80 flex items-center space-x-1.5 transition-colors focus:outline-none">
+                                <i class="fa-solid fa-wand-magic-sparkles text-dora-600 dark:text-sky-400"></i>
                                 <span>神奇法寶資料庫</span>
                                 <i class="fa-solid fa-chevron-down text-[10px] opacity-60"></i>
                             </button>
-                            <div class="nav-dropdown-menu absolute left-0 mt-1 w-60 bg-white rounded-xl shadow-xl border border-slate-100 z-50 p-2">
-                                <a href="mediaobject.html?filterclass=法寶" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
+                            <div class="nav-dropdown-menu absolute left-0 mt-1 w-60 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 p-2">
+                                <a href="mediaobject.html?filterclass=法寶" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-dora-50 dark:hover:bg-slate-700 hover:text-dora-700 dark:hover:text-sky-400 transition-colors">
                                     <i class="fa-solid fa-toolbox text-dora-500 text-xs"></i>
                                     <div>
                                         <div class="font-medium">法寶記錄</div>
-                                        <div class="text-xs text-slate-400">神奇法寶考據與譯名檢索</div>
+                                        <div class="text-xs text-slate-400 dark:text-slate-500">神奇法寶考據與譯名檢索</div>
                                     </div>
                                 </a>
-                                <a href="mediaobject.html?filterclass=人物" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
+                                <a href="mediaobject.html?filterclass=人物" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-dora-50 dark:hover:bg-slate-700 hover:text-dora-700 dark:hover:text-sky-400 transition-colors">
                                     <i class="fa-solid fa-users text-amber-500 text-xs"></i>
                                     <div>
                                         <div class="font-medium">角色人物</div>
-                                        <div class="text-xs text-slate-400">登場角色事理列表與事蹟</div>
+                                        <div class="text-xs text-slate-400 dark:text-slate-500">登場角色事理列表與事蹟</div>
                                     </div>
                                 </a>
                             </div>
                         </div>
-    
+
                         <!-- 電影動畫資料庫 Dropdown -->
                         <div class="relative group nav-dropdown-item">
-                            <button class="px-3 py-2 rounded-lg text-slate-700 hover:text-dora-600 hover:bg-slate-100/80 flex items-center space-x-1.5 transition-colors focus:outline-none">
-                                <i class="fa-solid fa-film text-dora-600"></i>
+                            <button class="px-3 py-2 rounded-lg text-slate-700 dark:text-slate-200 hover:text-dora-600 dark:hover:text-sky-400 hover:bg-slate-100/80 dark:hover:bg-slate-700/80 flex items-center space-x-1.5 transition-colors focus:outline-none">
+                                <i class="fa-solid fa-film text-dora-600 dark:text-sky-400"></i>
                                 <span>電影動畫資料庫</span>
                                 <i class="fa-solid fa-chevron-down text-[10px] opacity-60"></i>
                             </button>
-                            <div class="nav-dropdown-menu absolute left-0 mt-1 w-56 bg-white rounded-xl shadow-xl border border-slate-100 z-50 p-2">
-                                <a href="movie.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
+                            <div class="nav-dropdown-menu absolute left-0 mt-1 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 p-2">
+                                <a href="movie.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-dora-50 dark:hover:bg-slate-700 hover:text-dora-700 dark:hover:text-sky-400 transition-colors">
                                     <i class="fa-solid fa-clapperboard text-indigo-500 text-xs"></i>
                                     <div>
                                         <div class="font-medium">電影作品</div>
-                                        <div class="text-xs text-slate-400">歷年大長篇與劇場版</div>
+                                        <div class="text-xs text-slate-400 dark:text-slate-500">歷年大長篇電影</div>
                                     </div>
                                 </a>
-                                <a href="anime.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
+                                <a href="anime.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-dora-50 dark:hover:bg-slate-700 hover:text-dora-700 dark:hover:text-sky-400 transition-colors">
                                     <i class="fa-solid fa-tv text-teal-500 text-xs"></i>
                                     <div>
                                         <div class="font-medium">動畫作品</div>
-                                        <div class="text-xs text-slate-400">電視動畫集數與播映紀錄</div>
+                                        <div class="text-xs text-slate-400 dark:text-slate-500">電視動畫集數與播映紀錄</div>
                                     </div>
                                 </a>
                             </div>
                         </div>
-    
+
                         <!-- 網誌 -->
-                        <a href="blog.html" class="px-3 py-2 rounded-lg text-slate-700 hover:text-dora-600 hover:bg-slate-100/80 flex items-center space-x-1.5 transition-colors">
-                            <i class="fa-solid fa-newspaper text-dora-600"></i>
+                        <a href="blog.html" class="px-3 py-2 rounded-lg text-slate-700 dark:text-slate-200 hover:text-dora-600 dark:hover:text-sky-400 hover:bg-slate-100/80 dark:hover:bg-slate-700/80 flex items-center space-x-1.5 transition-colors">
+                            <i class="fa-solid fa-newspaper text-dora-600 dark:text-sky-400"></i>
                             <span>網誌</span>
                         </a>
                     </nav>
@@ -179,26 +172,26 @@
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-6">
             
             <!-- Page Header Banner -->
-            <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-semibold mb-2">
+                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 text-xs font-semibold mb-2 border border-sky-100 dark:border-sky-900/50">
                         <i class="fa-solid fa-database"></i>
                         <span>Media Records</span>
                     </div>
-                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">電視動畫對照資料庫</h1>
-                    <p class="text-slate-500 text-sm mt-1">即時檢索日本與香港放映紀錄，以及漫畫原著卷數對照。</p>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">電視動畫對照資料庫</h1>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">即時檢索日本與香港放映紀錄，以及漫畫原著卷數對照。</p>
                 </div>
-                <div class="flex items-center space-x-2 bg-slate-100 p-1.5 rounded-xl self-start md:self-auto border border-slate-200">
+                <div class="flex items-center space-x-2 bg-slate-100 dark:bg-slate-900 p-1.5 rounded-xl self-start md:self-auto border border-slate-200 dark:border-slate-700">
                     <button 
                         @click="viewMode = 'card'" 
-                        :class="viewMode === 'card' ? 'bg-white text-sky-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
+                        :class="viewMode === 'card' ? 'bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
                         class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center space-x-1.5">
                         <i class="fa-solid fa-grip"></i>
                         <span>卡片檢視</span>
                     </button>
                     <button 
                         @click="viewMode = 'table'" 
-                        :class="viewMode === 'table' ? 'bg-white text-sky-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
+                        :class="viewMode === 'table' ? 'bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
                         class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center space-x-1.5">
                         <i class="fa-solid fa-list-check"></i>
                         <span>列表檢視</span>
@@ -207,51 +200,51 @@
             </div>
 
             <!-- Unified Control Panel & Filters -->
-            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
                     
                     <!-- Search Input -->
                     <div class="md:col-span-12 lg:col-span-4">
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">關鍵字搜尋</label>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">關鍵字搜尋</label>
                         <div class="relative">
-                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-sm"></i>
                             <input 
                                 type="text" 
                                 :value="searchQuery"
                                 @input="debounceSearch"
                                 placeholder="搜尋 Media ID、日文/香港標題、作品番號..." 
-                                class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all"
+                                class="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-xl text-sm focus:bg-white dark:focus:bg-slate-950 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all"
                             />
                         </div>
                     </div>
 
                     <!-- Date Range Controls -->
                     <div class="md:col-span-6 lg:col-span-4">
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">日本首播日期</label>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">日本首播日期</label>
                         <div class="grid grid-cols-2 gap-2">
-                            <input type="date" v-model="filters.jpStart" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-sky-500 focus:outline-none">
-                            <input type="date" v-model="filters.jpEnd" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                            <input type="date" v-model="filters.jpStart" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl text-xs focus:bg-white dark:focus:bg-slate-950 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                            <input type="date" v-model="filters.jpEnd" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl text-xs focus:bg-white dark:focus:bg-slate-950 focus:ring-2 focus:ring-sky-500 focus:outline-none">
                         </div>
                     </div>
 
                     <div class="md:col-span-6 lg:col-span-4">
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">香港首播日期</label>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">香港首播日期</label>
                         <div class="grid grid-cols-2 gap-2">
-                            <input type="date" v-model="filters.hkStart" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-sky-500 focus:outline-none">
-                            <input type="date" v-model="filters.hkEnd" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                            <input type="date" v-model="filters.hkStart" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl text-xs focus:bg-white dark:focus:bg-slate-950 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                            <input type="date" v-model="filters.hkEnd" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl text-xs focus:bg-white dark:focus:bg-slate-950 focus:ring-2 focus:ring-sky-500 focus:outline-none">
                         </div>
                     </div>
                 </div>
 
                 <!-- Active Filter Bar & Counter -->
-                <div class="flex flex-wrap items-center justify-between pt-4 border-t border-slate-100 gap-2">
-                    <div class="text-xs text-slate-500">
-                        共找到 <span class="font-bold text-sky-600">{{ filteredData.length }}</span> 筆相關資料
+                <div class="flex flex-wrap items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700/60 gap-2">
+                    <div class="text-xs text-slate-500 dark:text-slate-400">
+                        共找到 <span class="font-bold text-sky-600 dark:text-sky-400">{{ filteredData.length }}</span> 筆相關資料
                     </div>
                     <button 
                         v-if="searchQuery || filters.jpStart || filters.jpEnd || filters.hkStart || filters.hkEnd" 
                         @click="resetFilters" 
-                        class="text-xs text-rose-600 hover:text-rose-700 font-medium flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 transition-colors">
+                        class="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 font-medium flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 transition-colors">
                         <i class="fa-solid fa-rotate-left"></i>
                         <span>重設所有篩選</span>
                     </button>
@@ -259,76 +252,76 @@
             </div>
 
             <!-- Empty Results State -->
-            <div v-if="!loading && filteredData.length === 0" class="bg-white rounded-2xl p-12 text-center border border-slate-200 shadow-sm space-y-3">
-                <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400 text-2xl">
+            <div v-if="!loading && filteredData.length === 0" class="bg-white dark:bg-slate-800 rounded-2xl p-12 text-center border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto text-slate-400 dark:text-slate-500 text-2xl">
                     <i class="fa-solid fa-inbox"></i>
                 </div>
-                <h3 class="text-base font-bold text-slate-800">未找到符合條件的動畫資料</h3>
-                <p class="text-slate-500 text-xs max-w-md mx-auto">請嘗試調整關鍵字或重設日期篩選範圍。</p>
+                <h3 class="text-base font-bold text-slate-800 dark:text-slate-200">未找到符合條件的動畫資料</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-xs max-w-md mx-auto">請嘗試調整關鍵字或重設日期篩選範圍。</p>
             </div>
 
             <!-- View Mode A: Card Grid -->
             <div v-if="viewMode === 'card' && paginatedData.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                <div v-for="item in paginatedData" :key="item['Media ID']" class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col justify-between space-y-4">
+                <div v-for="item in paginatedData" :key="item['Media ID']" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col justify-between space-y-4">
                     <div class="space-y-3">
                         <div class="flex items-center justify-between">
-                            <span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 font-mono text-xs font-semibold">
+                            <span class="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-mono text-xs font-semibold">
                                 {{ item['Media ID'] || 'N/A' }}
                             </span>
-                            <span v-if="item['Work ID']" class="text-xs text-slate-400">
+                            <span v-if="item['Work ID']" class="text-xs text-slate-400 dark:text-slate-500">
                                 作品 #{{ item['Work ID'] }}
                             </span>
                         </div>
 
                         <div>
-                            <h3 class="font-bold text-slate-900 text-base leading-snug" v-html="highlight(item['JP Title'])"></h3>
-                            <p class="text-xs text-slate-500 mt-1 flex items-center space-x-1" v-if="item['HK Title']">
-                                <span class="px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 font-medium text-[10px]">HK</span>
+                            <h3 class="font-bold text-slate-900 dark:text-white text-base leading-snug" v-html="highlight(item['JP Title'])"></h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center space-x-1" v-if="item['HK Title']">
+                                <span class="px-1.5 py-0.5 rounded bg-sky-50 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 border border-sky-100 dark:border-sky-900/40 font-medium text-[10px]">HK</span>
                                 <span v-html="highlight(item['HK Title'])"></span>
                             </p>
                         </div>
 
                         <!-- Date Metadata -->
-                        <div class="space-y-1.5 pt-2 border-t border-slate-100 text-xs">
-                            <div class="flex justify-between text-slate-600">
-                                <span class="text-slate-400">日本首播</span>
+                        <div class="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-700/60 text-xs">
+                            <div class="flex justify-between text-slate-600 dark:text-slate-300">
+                                <span class="text-slate-400 dark:text-slate-500">日本首播</span>
                                 <span class="font-medium">{{ item['JP Show Date'] || '-' }}</span>
                             </div>
-                            <div class="flex justify-between text-slate-600">
-                                <span class="text-slate-400">香港首播</span>
+                            <div class="flex justify-between text-slate-600 dark:text-slate-300">
+                                <span class="text-slate-400 dark:text-slate-500">香港首播</span>
                                 <span class="font-medium">{{ item['HK Show Date'] || '-' }}</span>
                             </div>
                         </div>
 
                         <!-- Manga Link Badge -->
                         <div v-if="getMapping(item['Work ID'], ['45卷', 'プラス', 'カラー作品集'])" class="pt-2">
-                            <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs space-y-1">
+                            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/60 text-xs space-y-1">
                                 <div class="flex items-center justify-between">
-                                    <span class="font-semibold text-slate-700">原作對照</span>
+                                    <span class="font-semibold text-slate-700 dark:text-slate-300">原作對照</span>
                                     <span class="px-1.5 py-0.5 rounded text-[10px] text-white font-medium" :class="getLabelColor(getMapping(item['Work ID'], ['45卷', 'プラス', 'カラー作品集']).type)">
                                         {{ getMapping(item['Work ID'], ['45卷', 'プラス', 'カラー作品集']).type }}
                                     </span>
                                 </div>
-                                <div class="text-slate-600 flex justify-between pt-1">
+                                <div class="text-slate-600 dark:text-slate-400 flex justify-between pt-1">
                                     <span>單行本第 {{ getMapping(item['Work ID'], ['45卷', 'プラス', 'カラー作品集']).vol }} 卷</span>
-                                    <span class="text-slate-400">話數: {{ getMapping(item['Work ID'], ['45卷', 'プラス', 'カラー作品集']).chapter }}</span>
+                                    <span class="text-slate-400 dark:text-slate-500">話數: {{ getMapping(item['Work ID'], ['45卷', 'プラス', 'カラー作品集']).chapter }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div v-if="item['Note']" class="pt-2 border-t border-slate-100">
-                        <p class="text-[11px] text-slate-400 line-clamp-2" v-html="highlight(item['Note'])"></p>
+                    <div v-if="item['Note']" class="pt-2 border-t border-slate-100 dark:border-slate-700/60">
+                        <p class="text-[11px] text-slate-400 dark:text-slate-500 line-clamp-2" v-html="highlight(item['Note'])"></p>
                     </div>
                 </div>
             </div>
 
             <!-- View Mode B: Table View -->
-            <div v-if="viewMode === 'table' && paginatedData.length > 0" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div v-if="viewMode === 'table' && paginatedData.length > 0" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                            <tr class="bg-slate-50 dark:bg-slate-900/70 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                                 <th class="py-3.5 px-4">ID</th>
                                 <th class="py-3.5 px-4">日文標題 / 香港標題</th>
                                 <th class="py-3.5 px-4">日本首播</th>
@@ -337,19 +330,19 @@
                                 <th class="py-3.5 px-4">備註</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100 text-sm">
-                            <tr v-for="item in paginatedData" :key="item['Media ID']" class="hover:bg-slate-50/80 transition-colors">
-                                <td class="py-3.5 px-4 font-mono text-xs text-slate-600 font-medium">
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-700/60 text-sm">
+                            <tr v-for="item in paginatedData" :key="item['Media ID']" class="hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition-colors">
+                                <td class="py-3.5 px-4 font-mono text-xs text-slate-600 dark:text-slate-400 font-medium">
                                     {{ item['Media ID'] || '-' }}
                                 </td>
                                 <td class="py-3.5 px-4">
-                                    <div class="font-bold text-slate-900" v-html="highlight(item['JP Title'])"></div>
-                                    <div class="text-xs text-slate-500 mt-0.5" v-if="item['HK Title']" v-html="highlight(item['HK Title'])"></div>
+                                    <div class="font-bold text-slate-900 dark:text-white" v-html="highlight(item['JP Title'])"></div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" v-if="item['HK Title']" v-html="highlight(item['HK Title'])"></div>
                                 </td>
-                                <td class="py-3.5 px-4 text-xs text-slate-600 whitespace-nowrap">
+                                <td class="py-3.5 px-4 text-xs text-slate-600 dark:text-slate-400 whitespace-nowrap">
                                     {{ item['JP Show Date'] || '-' }}
                                 </td>
-                                <td class="py-3.5 px-4 text-xs text-slate-600 whitespace-nowrap">
+                                <td class="py-3.5 px-4 text-xs text-slate-600 dark:text-slate-400 whitespace-nowrap">
                                     {{ item['HK Show Date'] || '-' }}
                                 </td>
                                 <td class="py-3.5 px-4 text-xs">
@@ -357,11 +350,11 @@
                                         <span class="px-1.5 py-0.5 rounded text-[10px] text-white font-medium" :class="getLabelColor(getMapping(item['Work ID'], ['45卷', 'プラス', 'カラー作品集']).type)">
                                             {{ getMapping(item['Work ID'], ['45卷', 'プラス', 'カラー作品集']).type }}
                                         </span>
-                                        <span class="text-slate-700 font-medium">第 {{ getMapping(item['Work ID'], ['45卷', 'プラス', 'カラー作品集']).vol }} 卷</span>
+                                        <span class="text-slate-700 dark:text-slate-300 font-medium">第 {{ getMapping(item['Work ID'], ['45卷', 'プラス', 'カラー作品集']).vol }} 卷</span>
                                     </div>
-                                    <span v-else class="text-slate-400">-</span>
+                                    <span v-else class="text-slate-400 dark:text-slate-600">-</span>
                                 </td>
-                                <td class="py-3.5 px-4 text-xs text-slate-500 max-w-xs truncate" v-html="highlight(item['Note'])"></td>
+                                <td class="py-3.5 px-4 text-xs text-slate-500 dark:text-slate-400 max-w-xs truncate" v-html="highlight(item['Note'])"></td>
                             </tr>
                         </tbody>
                     </table>
@@ -369,21 +362,21 @@
             </div>
 
             <!-- Pagination Bar -->
-            <div v-if="totalPages > 1" class="flex items-center justify-between bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+            <div v-if="totalPages > 1" class="flex items-center justify-between bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm">
                 <button 
                     @click="changePage(currentPage - 1)" 
                     :disabled="currentPage === 1" 
-                    class="px-3.5 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+                    class="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
                     <i class="fa-solid fa-chevron-left mr-1"></i> 上一頁
                 </button>
 
                 <div class="flex items-center space-x-1">
                     <template v-for="(p, idx) in paginationRange" :key="idx">
-                        <span v-if="p === '...'" class="px-2 text-slate-400 text-xs">...</span>
+                        <span v-if="p === '...'" class="px-2 text-slate-400 dark:text-slate-600 text-xs">...</span>
                         <button 
                             v-else 
                             @click="changePage(p)" 
-                            :class="p === currentPage ? 'bg-sky-600 text-white font-bold' : 'text-slate-600 hover:bg-slate-100'" 
+                            :class="p === currentPage ? 'bg-sky-600 text-white font-bold' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'" 
                             class="w-8 h-8 rounded-xl text-xs flex items-center justify-center transition-all">
                             {{ p }}
                         </button>
@@ -393,7 +386,7 @@
                 <button 
                     @click="changePage(currentPage + 1)" 
                     :disabled="currentPage === totalPages" 
-                    class="px-3.5 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+                    class="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
                     下一頁 <i class="fa-solid fa-chevron-right ml-1"></i>
                 </button>
             </div>
@@ -404,13 +397,12 @@
         <button 
             v-show="showScrollBtn" 
             @click="scrollToTop" 
-            class="fixed bottom-6 right-6 w-10 h-10 rounded-full bg-slate-900 text-white shadow-lg flex items-center justify-center hover:bg-sky-600 transition-all z-30">
+            class="fixed bottom-6 right-6 w-10 h-10 rounded-full bg-slate-900 dark:bg-sky-600 text-white shadow-lg flex items-center justify-center hover:bg-sky-600 dark:hover:bg-sky-500 transition-all z-30">
             <i class="fa-solid fa-arrow-up text-sm"></i>
         </button>
 
-        <!-- Shared Footer -->
         <!-- Global Footer -->
-        <footer class="bg-dora-900 text-slate-300 border-t border-slate-800 mt-20">
+        <footer class="bg-slate-900 dark:bg-slate-950 text-slate-300 border-t border-slate-800 dark:border-slate-800/80 mt-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
                     
@@ -418,13 +410,13 @@
                     <div class="space-y-4 md:col-span-1">
                         <div class="flex items-center space-x-2">
                             <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black text-base">D</div>
-                            <span class="text-xl font-bold text-white tracking-tight">DoraDex<span class="text-dora-500">HK</span></span>
+                            <span class="text-xl font-bold text-white tracking-tight">DoraDex<span class="text-sky-400">HK</span></span>
                         </div>
                         <p class="text-xs text-slate-400 leading-relaxed">
                             多啦A夢 (叮噹) 香港影視漫畫法寶資料庫。致力提供歷年大長篇電影、香港版漫畫出版史及法寶文獻考據。
                         </p>
                     </div>
-    
+
                     <!-- Col 2: Quick Links -->
                     <div>
                         <h5 class="text-xs font-bold text-white uppercase tracking-wider mb-4">漫畫與作品目錄</h5>
@@ -434,7 +426,7 @@
                             <li><a href="originalworks.html" class="hover:text-white transition-colors">ドラえもん日本原作大全</a></li>
                         </ul>
                     </div>
-    
+
                     <!-- Col 3: Secret Gadgets & Media -->
                     <div>
                         <h5 class="text-xs font-bold text-white uppercase tracking-wider mb-4">神奇法寶與影視</h5>
@@ -445,7 +437,7 @@
                             <li><a href="anime.html" class="hover:text-white transition-colors">電視動畫播映記錄</a></li>
                         </ul>
                     </div>
-    
+
                     <!-- Col 4: Academic Note & SEO Disclaimer -->
                     <div>
                         <h5 class="text-xs font-bold text-white uppercase tracking-wider mb-4">學術與研究聲明</h5>
@@ -454,7 +446,7 @@
                         </p>
                     </div>
                 </div>
-    
+
                 <!-- Bottom Copyright & URL Information -->
                 <div class="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
                     <div>

@@ -144,8 +144,7 @@
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
                     <input 
                         type="text" 
-                        :value="searchQuery"
-                        @input="handleSearchInput"
+                        v-model="searchQuery"
                         placeholder="搜尋名稱、譯名、描述、書籍或電影..." 
                         class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
                     >
@@ -426,7 +425,7 @@
                 async mounted() {
                     window.addEventListener('scroll', this.handleScroll);
                     const base = "https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/";
-    
+                
                     const fetchSafe = (tab) => 
                         fetch(base + tab)
                             .then(r => {
@@ -437,7 +436,7 @@
                                 console.warn(`Failed to load sheet "${tab}":`, err);
                                 return [];
                             });
-    
+                
                     try {
                         const [parents, mChild, mMeta, manChild, works, pubs, aniChild, aniMeta] = await Promise.all([
                             fetchSafe("人物法寶"),
@@ -450,9 +449,14 @@
                             fetchSafe("電視動畫")
                         ]);
                         
-                        this.parentData = parents; this.movieChild = mChild; this.movieMeta = mMeta;
-                        this.mangaChild = manChild; this.workInclude = works; this.pubCatalog = pubs;
-                        this.animeChild = aniChild; this.animeMeta = aniMeta;
+                        this.parentData = parents; 
+                        this.movieChild = mChild; 
+                        this.movieMeta = mMeta;
+                        this.mangaChild = manChild; 
+                        this.workInclude = works; 
+                        this.pubCatalog = pubs;
+                        this.animeChild = aniChild; 
+                        this.animeMeta = aniMeta;
                 
                         this.processedData = this.parentData
                             .filter(p => String(p['Active'] || '').toLowerCase() === 'yes')
@@ -502,12 +506,14 @@
                                 return { ...p, movieAppearances, animeAppearances, mangaInfo, mangaRecords };
                             });
                 
+                        // Turn off loading screen FIRST
                         this.loading = false;
+                
+                        // Run URL params in next tick & force reactive update
                         this.$nextTick(() => {
-                            setTimeout(() => {
-                                this.applyUrlParams();
-                            }, 50); // Small 50ms pause ensures reactive dependencies settle
+                            this.applyUrlParams();
                         });
+                
                     } catch (e) {
                         console.error("Critical Load Error:", e);
                         this.loading = false;
@@ -521,63 +527,76 @@
                         const animeID = params.get('animeid');
                         const fClass = params.get('filterclass');
                     
-                        // 1. Handle Filter Class
+                        console.log("=== URL Params Detected ===", { movieID, isbn, animeID, fClass });
+                    
+                        // 1. Handle Filter Class Parameter
                         if (fClass) {
-                            const cleanFClass = decodeURIComponent(fClass).trim().toLowerCase();
-                            // Look up against processed items' classifications directly
-                            const targetObj = this.processedData.find(item => 
-                                String(item['Object Classification'] || '').trim().toLowerCase() === cleanFClass
+                            const decodedClass = decodeURIComponent(fClass).trim().toLowerCase();
+                            const matched = this.classifications.find(
+                                c => String(c).trim().toLowerCase() === decodedClass
                             );
-                            
-                            if (targetObj) {
-                                this.selectedClass = targetObj['Object Classification'];
+                            if (matched) {
+                                this.selectedClass = matched;
                             } else {
-                                // Fallback direct assignment if exact text string match
-                                this.selectedClass = fClass.trim();
+                                this.selectedClass = decodeURIComponent(fClass).trim();
                             }
+                            console.log("Applied Filter Class:", this.selectedClass);
                         }
                     
-                        // 2. Handle Search & Tab Switching via IDs
+                        // 2. Handle Search Query Parameters
                         let targetSearch = '';
                     
                         if (movieID) {
-                            const cleanID = String(movieID).trim();
+                            const cleanID = decodeURIComponent(movieID).trim();
                             const movie = this.movieMeta.find(m => String(m['Media ID'] || '').trim() === cleanID);
-                            if (movie) {
+                            if (movie && movie['JP Title']) {
                                 targetSearch = movie['JP Title'];
-                                this.processedData.forEach(p => {
-                                    if (p.movieAppearances.some(ma => String(ma['Movie ID'] || '').trim() === cleanID)) {
-                                        this.tabStates[p['Object ID']] = 'movie';
-                                    }
-                                });
+                            } else {
+                                // Fallback: If Media ID is not in meta, search for the ID directly
+                                targetSearch = cleanID;
                             }
+                    
+                            // Set Tab states
+                            this.processedData.forEach(p => {
+                                if (p.movieAppearances.some(ma => String(ma['Movie ID'] || '').trim() === cleanID)) {
+                                    this.tabStates[p['Object ID']] = 'movie';
+                                }
+                            });
                         } else if (isbn) {
-                            const cleanISBN = String(isbn).trim();
+                            const cleanISBN = decodeURIComponent(isbn).trim();
                             const pub = this.pubCatalog.find(p => String(p['ISBN'] || '').trim() === cleanISBN);
-                            if (pub) {
+                            if (pub && pub['標題']) {
                                 targetSearch = pub['標題'];
-                                this.processedData.forEach(p => {
-                                    if (p.mangaRecords.some(r => String(r.isbn || '').trim() === cleanISBN)) {
-                                        this.tabStates[p['Object ID']] = 'manga';
-                                    }
-                                });
+                            } else {
+                                targetSearch = cleanISBN;
                             }
+                    
+                            // Set Tab states
+                            this.processedData.forEach(p => {
+                                if (p.mangaRecords.some(r => String(r.isbn || '').trim() === cleanISBN)) {
+                                    this.tabStates[p['Object ID']] = 'manga';
+                                }
+                            });
                         } else if (animeID) {
-                            const cleanID = String(animeID).trim();
+                            const cleanID = decodeURIComponent(animeID).trim();
                             const anime = this.animeMeta.find(a => String(a['Media ID'] || '').trim() === cleanID);
-                            if (anime) {
+                            if (anime && anime['JP Title']) {
                                 targetSearch = anime['JP Title'];
-                                this.processedData.forEach(p => {
-                                    if (p.animeAppearances.some(aa => String(aa['Anime ID'] || '').trim() === cleanID)) {
-                                        this.tabStates[p['Object ID']] = 'anime';
-                                    }
-                                });
+                            } else {
+                                targetSearch = cleanID;
                             }
+                    
+                            // Set Tab states
+                            this.processedData.forEach(p => {
+                                if (p.animeAppearances.some(aa => String(aa['Anime ID'] || '').trim() === cleanID)) {
+                                    this.tabStates[p['Object ID']] = 'anime';
+                                }
+                            });
                         }
                     
-                        // 3. Set search query & reset page
                         if (targetSearch) {
                             this.searchQuery = targetSearch;
+                            console.log("Setting Search Query to:", this.searchQuery);
                         }
                     
                         this.currentPage = 1;

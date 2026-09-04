@@ -18,6 +18,34 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
 
+    <!-- Temporary Visual Debug Bar -->
+        <div class="fixed top-4 right-4 z-50 bg-slate-900/95 text-green-400 font-mono text-xs p-4 rounded-xl shadow-2xl border border-slate-700 max-w-sm w-full space-y-2 pointer-events-auto">
+          <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+            <span class="font-bold text-white uppercase tracking-wider">🛠️ State Debugger</span>
+            <span :class="loading ? 'text-amber-400 animate-pulse' : 'text-emerald-400'">
+              {{ loading ? '● Loading Sheets...' : '● Ready' }}
+            </span>
+          </div>
+        
+          <div class="space-y-1">
+            <p><strong class="text-slate-400">URL Raw:</strong> {{ windowLocationSearch || 'None' }}</p>
+            <p><strong class="text-slate-400">searchQuery:</strong> <span class="text-amber-300">"{{ searchQuery }}"</span></p>
+            <p><strong class="text-slate-400">selectedClass:</strong> <span class="text-amber-300">"{{ selectedClass }}"</span></p>
+            <p><strong class="text-slate-400">selectedType:</strong> <span class="text-amber-300">"{{ selectedType }}"</span></p>
+          </div>
+        
+          <div class="border-t border-slate-800 pt-2 space-y-1">
+            <p><strong class="text-slate-400">parentData:</strong> {{ parentData.length }} rows</p>
+            <p><strong class="text-slate-400">processedData:</strong> {{ processedData.length }} items</p>
+            <p><strong class="text-slate-400">displayData:</strong> {{ displayData.length }} matched</p>
+            <p><strong class="text-slate-400">Page:</strong> {{ currentPage }} / {{ totalPages }}</p>
+          </div>
+        
+          <div v-if="errorMessage" class="border-t border-red-800 pt-2 text-red-400">
+            <strong>Error:</strong> {{ errorMessage }}
+          </div>
+        </div>
+
     <div id="app" class="flex-grow flex flex-col">
         <!-- Top Navigation / Header -->
         <!-- ================= HEADER ================= -->
@@ -411,6 +439,7 @@
                     return {
                         loading: true,
                         errorMessage: '',
+                        windowLocationSearch: window.location.search, // <-- Add this
                         searchQuery: '',
                         selectedClass: 'All',
                         selectedType: 'All',

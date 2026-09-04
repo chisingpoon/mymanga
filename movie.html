@@ -29,25 +29,123 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-indigo-500 selection:text-white">
 
     <div id="app" class="min-h-screen flex flex-col justify-between" v-cloak>
-        <!-- Header / Navigation -->
-        <header class="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
-            <div class="max-w-[1920px] mx-auto px-6 h-16 flex items-center justify-between">
-                <a href="index.html" class="flex items-center gap-3">
-                    <div class="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-base shadow-lg shadow-indigo-600/30">D</div>
-                    <div>
-                        <span class="font-black text-lg text-white tracking-tight">DoraDexHK</span>
-                        <span class="block text-[10px] text-slate-400 -mt-1 font-mono uppercase">Movie Archive</span>
-                    </div>
-                </a>
+       <!-- ================= HEADER ================= -->
+        <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm transition-all">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                
+                <div class="flex items-center gap-6">
+                    <a href="index.html" class="flex items-center gap-3 group">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-md shadow-blue-500/20 group-hover:scale-105 transition-all">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="font-black text-slate-900 tracking-tight text-lg leading-tight group-hover:text-blue-600 transition-colors">
+                                DoraDex<span class="text-blue-600">HK</span>
+                            </span>
+                            <span class="text-[10px] text-slate-500 font-bold tracking-widest uppercase">香港多啦A夢文獻資料庫</span>
+                        </div>
+                    </a>
 
-                <nav class="hidden md:flex items-center gap-6 text-xs font-bold uppercase tracking-wider">
-                    <a href="index.html" class="text-slate-400 hover:text-white transition-colors">首頁 Home</a>
-                    <a href="movie.html" class="text-indigo-400 font-black border-b-2 border-indigo-500 pb-1">電影影視 Movies</a>
-                    <a href="manga.html" class="text-slate-400 hover:text-white transition-colors">漫畫原作 Manga</a>
-                    <a href="mediaobject.html" class="text-slate-400 hover:text-white transition-colors">神奇法寶/角色 Gadgets</a>
-                </nav>
+                    <!-- Desktop Navigation Menu -->
+                    <nav class="hidden md:flex items-center space-x-1 lg:space-x-2 text-sm font-medium">
+                        
+                        <!-- 漫畫資料庫 Dropdown -->
+                        <div class="relative group nav-dropdown-item">
+                            <button class="px-3 py-2 rounded-lg text-slate-700 hover:text-dora-600 hover:bg-slate-100/80 flex items-center space-x-1.5 transition-colors focus:outline-none">
+                                <i class="fa-solid fa-book-bookmark text-dora-600"></i>
+                                <span>漫畫資料庫</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] opacity-60"></i>
+                            </button>
+                            <div class="nav-dropdown-menu absolute left-0 mt-1 w-64 bg-white rounded-xl shadow-xl border border-slate-100 z-50 p-2">
+                                <div class="text-[11px] font-semibold text-slate-400 px-3 py-1 uppercase tracking-wider">出版史與版本考據</div>
+                                <a href="manga-database.html?region=HK" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
+                                    <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                                    <div>
+                                        <div class="font-medium">香港版漫畫</div>
+                                        <div class="text-xs text-slate-400">香港叮噹 / 多啦A夢版本考據</div>
+                                    </div>
+                                </a>
+                                <a href="manga-database.html?region=JP" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
+                                    <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                                    <div>
+                                        <div class="font-medium">日本版漫畫</div>
+                                        <div class="text-xs text-slate-400">日本ドラえもん漫畫版本考據</div>
+                                    </div>
+                                </a>
+                                <div class="border-t border-slate-100 my-1"></div>
+                                <a href="originalworks.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
+                                    <i class="fa-solid fa-layer-group text-slate-400 text-xs"></i>
+                                    <div>
+                                        <div class="font-medium">ドラえもん日本原作大全</div>
+                                        <div class="text-xs text-slate-400">所有日本原作作品列表與搜尋</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+    
+                        <!-- 神奇法寶資料庫 Dropdown -->
+                        <div class="relative group nav-dropdown-item">
+                            <button class="px-3 py-2 rounded-lg text-slate-700 hover:text-dora-600 hover:bg-slate-100/80 flex items-center space-x-1.5 transition-colors focus:outline-none">
+                                <i class="fa-solid fa-wand-magic-sparkles text-dora-600"></i>
+                                <span>神奇法寶資料庫</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] opacity-60"></i>
+                            </button>
+                            <div class="nav-dropdown-menu absolute left-0 mt-1 w-60 bg-white rounded-xl shadow-xl border border-slate-100 z-50 p-2">
+                                <a href="mediaobject.html?filterclass=法寶" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
+                                    <i class="fa-solid fa-toolbox text-dora-500 text-xs"></i>
+                                    <div>
+                                        <div class="font-medium">法寶記錄</div>
+                                        <div class="text-xs text-slate-400">神奇法寶考據與譯名檢索</div>
+                                    </div>
+                                </a>
+                                <a href="mediaobject.html?filterclass=人物" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
+                                    <i class="fa-solid fa-users text-amber-500 text-xs"></i>
+                                    <div>
+                                        <div class="font-medium">角色人物</div>
+                                        <div class="text-xs text-slate-400">登場角色事理列表與事蹟</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+    
+                        <!-- 電影動畫資料庫 Dropdown -->
+                        <div class="relative group nav-dropdown-item">
+                            <button class="px-3 py-2 rounded-lg text-slate-700 hover:text-dora-600 hover:bg-slate-100/80 flex items-center space-x-1.5 transition-colors focus:outline-none">
+                                <i class="fa-solid fa-film text-dora-600"></i>
+                                <span>電影動畫資料庫</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] opacity-60"></i>
+                            </button>
+                            <div class="nav-dropdown-menu absolute left-0 mt-1 w-56 bg-white rounded-xl shadow-xl border border-slate-100 z-50 p-2">
+                                <a href="movie.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
+                                    <i class="fa-solid fa-clapperboard text-indigo-500 text-xs"></i>
+                                    <div>
+                                        <div class="font-medium">電影作品</div>
+                                        <div class="text-xs text-slate-400">歷年大長篇與劇場版</div>
+                                    </div>
+                                </a>
+                                <a href="anime.html" class="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:bg-dora-50 hover:text-dora-700 transition-colors">
+                                    <i class="fa-solid fa-tv text-teal-500 text-xs"></i>
+                                    <div>
+                                        <div class="font-medium">動畫作品</div>
+                                        <div class="text-xs text-slate-400">電視動畫集數與播映紀錄</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+    
+                        <!-- 網誌 -->
+                        <a href="blog.html" class="px-3 py-2 rounded-lg text-slate-700 hover:text-dora-600 hover:bg-slate-100/80 flex items-center space-x-1.5 transition-colors">
+                            <i class="fa-solid fa-newspaper text-dora-600"></i>
+                            <span>網誌</span>
+                        </a>
+                    </nav>
+                </div>
+
             </div>
         </header>
+
 
         <!-- Main Content Area -->
         <main class="max-w-[1920px] mx-auto px-6 py-8 flex-grow w-full">

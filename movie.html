@@ -305,62 +305,63 @@
             </template>
         </main>
 
-        <!-- Replicated Footer from index.html -->
-        <footer class="bg-slate-900 border-t border-slate-800 text-slate-400 py-12 mt-20">
-            <div class="max-w-[1920px] mx-auto px-6">
+        <!-- Global Footer -->
+        <footer class="bg-dora-900 text-slate-300 border-t border-slate-800 mt-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-                    <!-- Column 1: Brand & Overview -->
-                    <div class="space-y-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-md shadow-indigo-600/30">D</div>
-                            <span class="font-black text-lg text-white tracking-tight">DoraDexHK</span>
+                    
+                    <!-- Col 1: Brand Info -->
+                    <div class="space-y-4 md:col-span-1">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 rounded-lg bg-dora-600 text-white flex items-center justify-center font-bold text-lg">
+                                D
+                            </div>
+                            <span class="text-xl font-bold text-white tracking-tight">DoraDex<span class="text-dora-500">HK</span></span>
                         </div>
                         <p class="text-xs text-slate-400 leading-relaxed">
-                            香港叮噹 / 多啦A夢 影視漫畫跨媒體學術與文化研究資料庫。<br>
-                            Hong Kong Doraemon Cross-Media Archival Project.
+                            多啦A夢 (叮噹) 香港影視漫畫法寶資料庫。致力提供歷年大長篇電影、香港版漫畫出版史及法寶文獻考據。
                         </p>
-                        <div class="flex items-center gap-3 text-slate-400 text-xs pt-1">
-                            <a href="https://github.com" target="_blank" class="hover:text-white transition-colors">GitHub</a>
-                            <span>•</span>
-                            <a href="https://doradexhk.pages.dev" target="_blank" class="hover:text-white transition-colors">Live Site</a>
-                        </div>
                     </div>
-
-                    <!-- Column 2: Navigation -->
+    
+                    <!-- Col 2: Quick Links -->
                     <div>
-                        <h4 class="text-xs font-black text-white uppercase tracking-widest mb-4">資料庫 Navigation</h4>
+                        <h5 class="text-xs font-bold text-white uppercase tracking-wider mb-4">漫畫與作品目錄</h5>
                         <ul class="space-y-2 text-xs">
-                            <li><a href="index.html" class="hover:text-white transition-colors">首頁 Home</a></li>
-                            <li><a href="movie.html" class="hover:text-white transition-colors text-indigo-400 font-bold">電影影視 Movies</a></li>
-                            <li><a href="manga.html" class="hover:text-white transition-colors">漫畫原作 Manga</a></li>
-                            <li><a href="mediaobject.html" class="hover:text-white transition-colors">神奇法寶/角色 Gadgets & Cast</a></li>
+                            <li><a href="manga-database.html?region=HK" class="hover:text-white transition-colors">香港版漫畫考據 (HK)</a></li>
+                            <li><a href="manga-database.html?region=JP" class="hover:text-white transition-colors">日本版漫畫考據 (JP)</a></li>
+                            <li><a href="originalworks.html" class="hover:text-white transition-colors">ドラえもん日本原作大全</a></li>
                         </ul>
                     </div>
-
-                    <!-- Column 3: Archives & Quick Filters -->
+    
+                    <!-- Col 3: Secret Gadgets & Media -->
                     <div>
-                        <h4 class="text-xs font-black text-white uppercase tracking-widest mb-4">電影分類 Era Filter</h4>
+                        <h5 class="text-xs font-bold text-white uppercase tracking-wider mb-4">神奇法寶與影視</h5>
                         <ul class="space-y-2 text-xs">
-                            <li><button @click="searchQuery = '198'" class="hover:text-white transition-colors">昭和/大山前期 (1980s)</button></li>
-                            <li><button @click="searchQuery = '199'" class="hover:text-white transition-colors">大山黃金期 (1990s)</button></li>
-                            <li><button @click="searchQuery = '200'" class="hover:text-white transition-colors">水田新版 (2006+)</button></li>
-                            <li><button @click="searchQuery = 'STAND BY ME'" class="hover:text-white transition-colors">3D STAND BY ME 系列</button></li>
+                            <li><a href="mediaobject.html?filterclass=法寶" class="hover:text-white transition-colors">神奇法寶記錄搜尋</a></li>
+                            <li><a href="mediaobject.html?filterclass=人物" class="hover:text-white transition-colors">登場角色人物檔案</a></li>
+                            <li><a href="movie.html" class="hover:text-white transition-colors">歷年大長篇電影作品</a></li>
+                            <li><a href="anime.html" class="hover:text-white transition-colors">電視動畫播映記錄</a></li>
                         </ul>
                     </div>
-
-                    <!-- Column 4: Disclaimer & Licensing -->
+    
+                    <!-- Col 4: Academic Note & SEO Disclaimer -->
                     <div>
-                        <h4 class="text-xs font-black text-white uppercase tracking-widest mb-4">學術與版權聲明 Disclaimer</h4>
-                        <p class="text-[11px] leading-relaxed text-slate-500">
-                            本網站為非牟利學術研究及文化保育用途。所有《多啦A夢》相關圖像及商標權利歸 Fujiko-Pro、Shogakukan 及 TV-Asahi 所有。
+                        <h5 class="text-xs font-bold text-white uppercase tracking-wider mb-4">學術與研究聲明</h5>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">
+                            本網站為非牟利研究考據檔案庫，所有《多啦A夢 / 叮噹》商標、角色與著作權均屬 Fujiko Pro、Shogakukan 及 TV-Asahi 所有。本站香港譯名文獻由熱心研究者共同整理。
                         </p>
                     </div>
                 </div>
-
-                <!-- Bottom Footer Bar -->
-                <div class="pt-8 border-t border-slate-800/80 flex flex-col md:flex-row items-center justify-between text-[11px] text-slate-500 gap-4">
-                    <p>© DoraDexHK Archive. Designed for Hong Kong Doraemon Preservation.</p>
-                    <p>Hosted on <a href="https://doradexhk.pages.dev/" target="_blank" class="underline hover:text-indigo-400">Cloudflare Pages</a></p>
+    
+                <!-- Bottom Copyright & URL Information -->
+                <div class="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+                    <div>
+                        &copy; 2026 DoraDexHK Archive (https://doradexhk.pages.dev/). All rights reserved.
+                    </div>
+                    <div class="flex space-x-4 text-xs">
+                        <a href="blog.html" class="hover:text-slate-300">網誌文章</a>
+                        <a href="index.html" class="hover:text-slate-300">首頁 index.html</a>
+                    </div>
                 </div>
             </div>
         </footer>

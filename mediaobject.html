@@ -503,8 +503,11 @@
                             });
                 
                         this.loading = false;
-                        await nextTick();
-                        this.applyUrlParams();
+                        this.$nextTick(() => {
+                            setTimeout(() => {
+                                this.applyUrlParams();
+                            }, 50); // Small 50ms pause ensures reactive dependencies settle
+                        });
                     } catch (e) {
                         console.error("Critical Load Error:", e);
                         this.loading = false;
@@ -518,53 +521,61 @@
                         const animeID = params.get('animeid');
                         const fClass = params.get('filterclass');
                     
-                        // Case-insensitive matching for class filter
+                        // 1. Handle Filter Class
                         if (fClass) {
-                            const matchedClass = this.classifications.find(
-                                c => c.toLowerCase() === fClass.trim().toLowerCase()
+                            const cleanFClass = decodeURIComponent(fClass).trim().toLowerCase();
+                            // Look up against processed items' classifications directly
+                            const targetObj = this.processedData.find(item => 
+                                String(item['Object Classification'] || '').trim().toLowerCase() === cleanFClass
                             );
-                            if (matchedClass) {
-                                this.selectedClass = matchedClass;
+                            
+                            if (targetObj) {
+                                this.selectedClass = targetObj['Object Classification'];
                             } else {
-                                this.selectedClass = fClass;
+                                // Fallback direct assignment if exact text string match
+                                this.selectedClass = fClass.trim();
                             }
-                            this.handleClassChange();
                         }
                     
+                        // 2. Handle Search & Tab Switching via IDs
                         let targetSearch = '';
                     
                         if (movieID) {
-                            const movie = this.movieMeta.find(m => String(m['Media ID'] || '').trim() === String(movieID).trim());
+                            const cleanID = String(movieID).trim();
+                            const movie = this.movieMeta.find(m => String(m['Media ID'] || '').trim() === cleanID);
                             if (movie) {
                                 targetSearch = movie['JP Title'];
                                 this.processedData.forEach(p => {
-                                    if (p.movieAppearances.some(ma => String(ma['Movie ID'] || '').trim() === String(movieID).trim())) {
-                                        this.setTab(p['Object ID'], 'movie');
+                                    if (p.movieAppearances.some(ma => String(ma['Movie ID'] || '').trim() === cleanID)) {
+                                        this.tabStates[p['Object ID']] = 'movie';
                                     }
                                 });
                             }
                         } else if (isbn) {
-                            const pub = this.pubCatalog.find(p => String(p['ISBN'] || '').trim() === String(isbn).trim());
+                            const cleanISBN = String(isbn).trim();
+                            const pub = this.pubCatalog.find(p => String(p['ISBN'] || '').trim() === cleanISBN);
                             if (pub) {
                                 targetSearch = pub['標題'];
                                 this.processedData.forEach(p => {
-                                    if (p.mangaRecords.some(r => String(r.isbn || '').trim() === String(isbn).trim())) {
-                                        this.setTab(p['Object ID'], 'manga');
+                                    if (p.mangaRecords.some(r => String(r.isbn || '').trim() === cleanISBN)) {
+                                        this.tabStates[p['Object ID']] = 'manga';
                                     }
                                 });
                             }
                         } else if (animeID) {
-                            const anime = this.animeMeta.find(a => String(a['Media ID'] || '').trim() === String(animeID).trim());
+                            const cleanID = String(animeID).trim();
+                            const anime = this.animeMeta.find(a => String(a['Media ID'] || '').trim() === cleanID);
                             if (anime) {
                                 targetSearch = anime['JP Title'];
                                 this.processedData.forEach(p => {
-                                    if (p.animeAppearances.some(aa => String(aa['Anime ID'] || '').trim() === String(animeID).trim())) {
-                                        this.setTab(p['Object ID'], 'anime');
+                                    if (p.animeAppearances.some(aa => String(aa['Anime ID'] || '').trim() === cleanID)) {
+                                        this.tabStates[p['Object ID']] = 'anime';
                                     }
                                 });
                             }
                         }
                     
+                        // 3. Set search query & reset page
                         if (targetSearch) {
                             this.searchQuery = targetSearch;
                         }
@@ -616,30 +627,37 @@
                     },
                     displayData() {
                         if (!this.processedData || !Array.isArray(this.processedData)) return [];
-                
+                    
                         const q = (this.searchQuery || '').toLowerCase().trim();
-                
+                        const selClass = (this.selectedClass || 'All').trim().toLowerCase();
+                        const selType = (this.selectedType || 'All').trim().toLowerCase();
+                    
                         return this.processedData.filter(p => {
                             if (!p) return false;
-                            const matchClass = this.selectedClass === 'All' || p['Object Classification'] === this.selectedClass;
-                            const matchType = this.selectedType === 'All' || p['Object Type'] === this.selectedType;
+                    
+                            const itemClass = String(p['Object Classification'] || '').trim().toLowerCase();
+                            const itemType = String(p['Object Type'] || '').trim().toLowerCase();
+                    
+                            const matchClass = selClass === 'all' || itemClass === selClass;
+                            const matchType = selType === 'all' || itemType === selType;
+                            
                             if (!(matchClass && matchType)) return false;
-                
+                    
                             if (!q) return true;
-                
+                    
                             const inCore = String(p['JP Title'] || '').toLowerCase().includes(q) || 
                                            String(p['Confirmed Translation'] || '').toLowerCase().includes(q) ||
                                            String(p['Library Ref'] || '').toLowerCase().includes(q) ||
                                            String(p['Description'] || '').toLowerCase().includes(q);
                             if (inCore) return true;
-                
+                    
                             const inManga = Array.isArray(p.mangaRecords) && p.mangaRecords.some(r => `${r.type || ''} ${r.title || ''}`.toLowerCase().includes(q)) ||
                                             String(p.mangaInfo?.['CultureCom Trans'] || '').toLowerCase().includes(q);
                             if (inManga) return true;
-                
+                    
                             const inMovie = Array.isArray(p.movieAppearances) && p.movieAppearances.some(m => String(m.movieTitle || '').toLowerCase().includes(q));
                             const inAnime = Array.isArray(p.animeAppearances) && p.animeAppearances.some(a => String(a.animeTitle || '').toLowerCase().includes(q));
-                
+                    
                             return inMovie || inAnime;
                         });
                     },

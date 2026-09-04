@@ -9,95 +9,98 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Container Grid & Card Height Harmonization */
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-            align-items: stretch;
+        [v-cloak] { display: none; }
+        body { 
+            -webkit-user-select: text; user-select: text;
+            min-height: 100vh; background-color: #f8fafc; 
+            font-family: 'Inter', 'Noto Sans TC', 'Noto Sans JP', system-ui, sans-serif; color: #1e293b;
+            scroll-behavior: smooth;
+        }
+        .bg-grid { background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px); background-size: 40px 40px; }
+        .loader-wrapper { position: fixed; inset: 0; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .top-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .data-card { background: white; border-radius: 24px; border: 2px solid #f1f5f9; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); min-height: 200px; display: flex; flex-direction: column; }
+        .data-card:hover { border-color: #6366f1; transform: translateY(-4px); }
+        .tab-btn { transition: all 0.2s ease-in-out; border-bottom: 2px solid transparent; cursor: pointer; padding-bottom: 4px !important;}
+        .tab-content-wrapper {margin-top: -4px;}
+        .tab-btn.active { border-color: #6366f1; color: #4f46e5; font-weight: 900; border-bottom: 2px solid #4f46e5;}
+        .scroll-area { max-height: 320px; overflow-y: auto; scrollbar-width: thin; padding-right: 4px; }
+        mark { background: #fef08a; color: #854d0e; padding: 0 2px; border-radius: 2px; font-weight: bold; }
+        
+        .back-to-top {
+            position: fixed; bottom: 32px; right: 32px;
+            width: 52px; height: 52px;
+            background: #1e293b; color: white;
+            border-radius: 16px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+            cursor: pointer; z-index: 50; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0; pointer-events: none; transform: translateY(10px);
+        }
+        .back-to-top.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        .back-to-top:hover { background: #6366f1; transform: translateY(-3px); }
+        th { 
+            font-size: 12px; font-weight: 800; padding: 16px 12px; 
+            text-align: left; color: #64748b; background: #f8fafc; 
+            border-bottom: 2px solid #e2e8f0; white-space: nowrap; 
+            position: sticky; top: 0; z-index: 10; 
+            text-transform: uppercase; letter-spacing: 0.025em;
+        }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        td { padding: 18px 12px; border-bottom: 1px solid #f1f5f9; font-size: 15px; vertical-align: middle; }
+        /* Custom Scrollbar for Card View */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            display: block !important;
         }
         
-        .card {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            box-sizing: border-box;
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
         }
         
-        .card-body {
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+            border: 1px solid #f8fafc;
         }
         
-        /* Tab Navigation Alignment */
-        .card-tabs {
-            display: flex;
-            justify-content: flex-start;
-            gap: 0.25rem;
-            border-bottom: 2px solid #e5e7eb;
-            margin-bottom: 1rem;
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
         
-        .card-tabs button {
-            padding: 0.5rem 0.75rem;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            font-weight: 600;
-            color: #6b7280;
-            border-bottom: 2px solid transparent;
-            margin-bottom: -2px;
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
         }
-        
-        .card-tabs button.active {
-            color: #2563eb;
-            border-bottom-color: #2563eb;
+        .custom-scrollbar {
+            scrollbar-width: thin;          /* Firefox visibility */
+            scrollbar-color: #cbd5e1 #f8fafc; /* Firefox [Thumb] [Track] */
+            -webkit-overflow-scrolling: touch; /* Ensures smooth swiping on iOS */
         }
-        
-        .tab-content {
-            flex-grow: 1;
+        .scroll-hint {
+            background: 
+                linear-gradient(white 30%, rgba(255,255,255,0)),
+                linear-gradient(rgba(255,255,255,0), white 70%) 0 100%,
+                radial-gradient(farthest-side at 50% 0, rgba(0,0,0,.05), rgba(0,0,0,0)),
+                /* The shadow below is the "hint" that there is more content */
+                radial-gradient(farthest-side at 50% 100%, rgba(0,0,0,.1), rgba(0,0,0,0)) 0 100%;
+            background-repeat: no-repeat;
+            background-size: 100% 40px, 100% 40px, 100% 14px, 100% 14px;
+            background-attachment: local, local, scroll, scroll;
         }
-        
-        /* Highlighting Style */
-        mark {
-            background-color: #fef08a;
-            color: #854d0e;
-            padding: 0 0.2rem;
-            border-radius: 2px;
-        }
-        
-        /* Pagination Centering & Uniformity */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 0.35rem;
-            margin-top: 2rem;
-        }
-        
-        .pagination button {
-            min-width: 2.25rem;
-            height: 2.25rem;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            padding: 0 0.5rem;
-            border: 1px solid #d1d5db;
-            background-color: #ffffff;
-            border-radius: 0.375rem;
-            cursor: pointer;
-        }
-        
-        .pagination button.active {
-            background-color: #2563eb;
-            color: #ffffff;
-            border-color: #2563eb;
-        }
-        
-        .pagination button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        @media (max-width: 768px) {
+            .custom-scrollbar::-webkit-scrollbar {
+                width: 4px;
+                display: block !important;
+            }
+            .custom-scrollbar::-webkit-scrollbar-track {
+                background: rgba(0,0,0,0.03); /* Extremely faint lane */
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+                background: rgba(0,0,0,0.1); /* Faint handle */
+            }
         }
     </style>
 </head>
@@ -448,13 +451,13 @@
                     this.parentData = parents; this.movieChild = mChild; this.movieMeta = mMeta;
                     this.mangaChild = manChild; this.workInclude = works; this.pubCatalog = pubs;
                     this.animeChild = aniChild; this.animeMeta = aniMeta;
-        
+            
                     // --- THE SAFE JOIN ---
                     this.processedData = this.parentData
                         .filter(p => String(p['Active']).toLowerCase() === 'yes')
                         .map(p => {
                             const objId = String(p['Object ID']).trim();
-        
+            
                             // Movies
                             const movieAppearances = this.movieChild
                                 .filter(c => String(c['Object ID']).trim() === objId)
@@ -466,7 +469,7 @@
                                         movieYear: m ? (m['JP Release Date']?.match(/\d{4}/) || ['N/A'])[0] : 'N/A' 
                                     };
                                 });
-        
+            
                             // Anime
                             const animeAppearances = this.animeChild
                                 .filter(c => String(c['Object ID']).trim() === objId)
@@ -478,7 +481,7 @@
                                         animeDate: a ? a['JP Show Date'] : 'N/A' 
                                     };
                                 });
-        
+            
                             // Manga
                             const mangaInfo = this.mangaChild.find(c => String(c['Object ID']).trim() === objId) || null;
                             let mangaRecords = [];
@@ -497,10 +500,10 @@
                                         };
                                     });
                             }
-        
+            
                             return { ...p, movieAppearances, animeAppearances, mangaInfo, mangaRecords };
                         });
-        
+            
                     this.loading = false;
                     await nextTick();
                     this.applyUrlParams();
@@ -516,20 +519,29 @@
                     const isbn = params.get('isbn');
                     const animeID = params.get('animeid');
                     const fClass = params.get('filterclass');
-        
+                
+                    console.log("Applying URL Filters...");
+                
+                    // 1. Apply Class Filter (e.g., ?filterclass=法寶)
+                    // This happens regardless of whether there is a search ID
                     if (fClass) {
                         this.selectedClass = fClass;
+                        // If your HTML has a secondary dropdown for "Type", 
+                        // handleClassChange usually resets that to 'All'
                         if (typeof this.handleClassChange === 'function') {
                             this.handleClassChange();
                         }
                     }
-        
+                
+                    // 2. Determine Search Keyword & Open Tabs
+                    // We check all three ID types. If multiple exist, the last one found wins the search text.
                     let targetSearch = '';
-        
+                
                     if (movieID) {
                         const movie = this.movieMeta.find(m => String(m['Media ID']).trim() === String(movieID).trim());
                         if (movie) {
                             targetSearch = movie['JP Title'];
+                            // Auto-switch cards to 'movie' tab
                             this.processedData.forEach(p => {
                                 if (p.movieAppearances.some(ma => String(ma['Movie ID']).trim() === String(movieID).trim())) {
                                     this.tabStates[p['Object ID']] = 'movie';
@@ -537,7 +549,7 @@
                             });
                         }
                     } 
-        
+                    
                     if (isbn) {
                         const pub = this.pubCatalog.find(p => String(p['ISBN']).trim() === String(isbn).trim());
                         if (pub) {
@@ -549,7 +561,7 @@
                             });
                         }
                     } 
-        
+                    
                     if (animeID) {
                         const anime = this.animeMeta.find(a => String(a['Media ID']).trim() === String(animeID).trim());
                         if (anime) {
@@ -561,34 +573,23 @@
                             });
                         }
                     }
-        
+                
+                    // 3. Finalize the search state
                     if (targetSearch) {
                         this.searchQuery = targetSearch;
                     }
-        
+                
+                    // 4. Reset pagination to show results from the beginning
                     this.currentPage = 1;
                 },
                 handleScroll() { this.showBackToTop = window.scrollY > 300; },
                 scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); },
-                
-                // --- 3. XSS-SAFE HIGHLIGHTING ---
                 highlight(text) {
-                    if (!text) return '';
-                    // Escape HTML entities to prevent script injection
-                    const safeText = String(text)
-                        .replace(/&/g, '&amp;')
-                        .replace(/</g, '&lt;')
-                        .replace(/>/g, '&gt;')
-                        .replace(/"/g, '&quot;')
-                        .replace(/'/g, '&#039;');
-        
-                    if (!this.searchQuery) return safeText;
-        
-                    const escapedQuery = String(this.searchQuery).replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-                    const regex = new RegExp(`(${escapedQuery})`, 'gi');
-                    return safeText.replace(regex, '<mark>$1</mark>');
+                    if (!this.searchQuery) return text;
+                    const escaped = String(this.searchQuery).replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                    const regex = new RegExp(`(${escaped})`, 'gi');
+                    return String(text).replace(regex, '<mark>$1</mark>');
                 },
-        
                 getTab(id) { return this.tabStates[id] || 'movie'; },
                 setTab(id, tab) { this.tabStates[id] = tab; },
                 changePage(p) {
@@ -600,7 +601,7 @@
                 handleClassChange() { this.selectedType = 'All'; this.currentPage = 1; },
                 handleSearchInput(e) {
                     this.searchQuery = e.target.value;
-                    this.currentPage = 1;
+                    this.currentPage = 1; // Reset to page 1 when typing
                 }
             },
             computed: {
@@ -614,47 +615,47 @@
                     return all;
                 },
                 displayData() {
+                    // Fallback to empty array if processedData failed
                     if (!this.processedData || this.processedData.length === 0) return [];
-        
+            
                     const q = (this.searchQuery || '').toLowerCase().trim();
-        
+                    
                     return this.processedData.filter(p => {
+                        // 1. Classification & Type Filters
                         const matchClass = this.selectedClass === 'All' || p['Object Classification'] === this.selectedClass;
                         const matchType = this.selectedType === 'All' || p['Object Type'] === this.selectedType;
                         if (!(matchClass && matchType)) return false;
-        
+            
+                        // 2. Search Filter
                         if (!q) return true;
-        
+            
                         const inCore = (p['JP Title'] || '').toLowerCase().includes(q) || 
                                        (p['Confirmed Translation'] || '').toLowerCase().includes(q) ||
                                        (p['Library Ref'] || '').toLowerCase().includes(q) ||
                                        (p['Description'] || '').toLowerCase().includes(q);
                         if (inCore) return true;
-        
+            
                         const inManga = p.mangaRecords.some(r => `${r.type} ${r.title}`.toLowerCase().includes(q)) ||
                                         (p.mangaInfo?.['CultureCom Trans'] || '').toLowerCase().includes(q);
                         if (inManga) return true;
-        
+            
                         const inMovie = p.movieAppearances.some(m => m.movieTitle.toLowerCase().includes(q));
                         const inAnime = p.animeAppearances.some(a => a.animeTitle.toLowerCase().includes(q));
-        
+            
                         return inMovie || inAnime;
                     });
                 },
                 totalPages() { return Math.ceil(this.displayData.length / this.itemsPerPage); },
-                
-                // --- 2. CLEANER ELLIPSIS PAGINATION ---
                 visiblePages() {
                     const total = this.totalPages;
                     const current = this.currentPage;
                     const range = 2; 
                     let pages = [];
-        
                     for (let i = 1; i <= total; i++) {
                         if (i === 1 || i === total || (i >= current - range && i <= current + range)) {
                             pages.push(i);
-                        } else if (pages[pages.length - 1] !== '...') {
-                            pages.push('...');
+                        } else if (i === current - range - 1 || i === current + range + 1) {
+                            if (!pages.includes('...')) pages.push('...');
                         }
                     }
                     return pages;

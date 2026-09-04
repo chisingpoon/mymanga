@@ -462,221 +462,240 @@
     </div>
 
     <!-- Vue 3 Application Script -->
-    <script>
-        const { createApp } = Vue;
-        
-        createApp({
-            data() {
-                return {
-                    viewMode: 'card',
-                    loading: true,
-                    searchQuery: '',
-                    filters: {
-                        jpStart: '', 
-                        jpEnd: '',
-                        hkStart: '',
-                        hkEnd: ''
-                    },
-                    currentPage: 1,
-                    itemsPerPage: 20,
-                    showScrollBtn: false,
-                    anime: [],
-                    contents: [],
-                    publishHk: [],
-                    currentYear: new Date().getFullYear(),
-                    searchTimer: null
-                }
-            },
-            watch: {
-                searchQuery() { 
-                    this.currentPage = 1; 
-                },
-                filters: {
-                    handler() { this.currentPage = 1; },
-                    deep: true
-                }
-            },
-            computed: {
-                filteredData() {
-                    const q = this.searchQuery.toLowerCase().trim();
-                    
-                    const parseDate = (dateVal) => {
-                        if (!dateVal) return null;
-                        if (typeof dateVal === 'string' && dateVal.includes('-')) {
-                            return new Date(dateVal).getTime();
-                        }
-                        if (typeof dateVal === 'string' && dateVal.includes('/')) {
-                            const parts = dateVal.split('/');
-                            const day = parseInt(parts[0], 10);
+        <script>
+            const { createApp } = Vue;
+    
+            // Static Helper Functions (prevents recreation during re-renders)
+            const parseDate = (dateVal) => {
+                if (!dateVal) return null;
+                if (typeof dateVal === 'string') {
+                    const trimmed = dateVal.trim();
+                    // Format: YYYY-MM-DD or YYYY/MM/DD
+                    if (trimmed.includes('-') || trimmed.includes('/')) {
+                        const separator = trimmed.includes('-') ? '-' : '/';
+                        const parts = trimmed.split(separator);
+                        
+                        if (parts.length === 3) {
+                            // Check if format is YYYY/MM/DD or DD/MM/YYYY
+                            const isYearFirst = parts[0].length === 4;
+                            const year = parseInt(isYearFirst ? parts[0] : parts[2], 10);
                             const month = parseInt(parts[1], 10) - 1;
-                            const year = parseInt(parts[2], 10);
+                            const day = parseInt(isYearFirst ? parts[2] : parts[0], 10);
+                            
                             return new Date(year, month, day).getTime();
                         }
-                        const d = new Date(dateVal);
-                        return isNaN(d.getTime()) ? null : d.getTime();
-                    };
-                
-                    const f = {
-                        js: parseDate(this.filters.jpStart),
-                        je: parseDate(this.filters.jpEnd),
-                        hs: parseDate(this.filters.hkStart),
-                        he: parseDate(this.filters.hkEnd)
-                    };
-                
-                    const dayEndBuffer = 86399999; 
-                
-                    return this.anime.filter(r => {
-                        const combined = [
-                            r['Media ID'], r['JP Title'], r['HK Title'], r['Work ID'], r['Note']
-                        ].map(v => String(v || '').toLowerCase()).join(' ');
-                        
-                        if (q && !combined.includes(q)) return false;
-                        
-                        if (f.js || f.je) {
-                            const rowDate = parseDate(r['JP Show Date']);
-                            if (!rowDate) return false; 
-                            if (f.js && rowDate < f.js) return false;
-                            if (f.je && rowDate > (f.je + dayEndBuffer)) return false;
-                        }
-                
-                        if (f.hs || f.he) {
-                            const rowDate = parseDate(r['HK Show Date']);
-                            if (!rowDate) return false;
-                            if (f.hs && rowDate < f.hs) return false;
-                            if (f.he && rowDate > (f.he + dayEndBuffer)) return false;
-                        }
-                
-                        return true;
-                    });
-                },
-                totalPages() { 
-                    return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; 
-                },
-                paginatedData() {
-                    const start = (this.currentPage - 1) * this.itemsPerPage;
-                    return this.filteredData.slice(start, start + this.itemsPerPage);
-                },
-                paginationRange() {
-                    const current = this.currentPage;
-                    const last = this.totalPages;
-                    const range = [];
-                    for (let i = 1; i <= last; i++) {
-                        if (i === 1 || i === last || (i >= current - 2 && i <= current + 2)) {
-                            range.push(i);
-                        }
                     }
-                    const res = [];
-                    let l;
-                    for (let i of range) {
-                        if (l && i - l !== 1) res.push('...');
-                        res.push(i);
-                        l = i;
-                    }
-                    return res;
                 }
-            },
-            methods: {
-                async init() {
-                    try {
-                        const [a, c, h] = await Promise.all([
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/電視動畫").then(r => r.json()),
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
-                            fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
-                        ]);
-                        
-                        this.anime = a; 
-                        this.contents = c; 
-                        this.publishHk = h;
-                
-                        const params = new URLSearchParams(window.location.search);
-                        const mediaID = params.get('mediaid');
-                
-                        if (mediaID) {
-                            const target = this.anime.find(r => String(r['Media ID']) === String(mediaID));
-                            if (target) {
-                                this.searchQuery = target['JP Title'] || '';
-                                this.filters.jpStart = '';
-                                this.filters.jpEnd = '';
+                const d = new Date(dateVal);
+                return isNaN(d.getTime()) ? null : d.getTime();
+            };
+    
+            createApp({
+                data() {
+                    return {
+                        viewMode: 'card',
+                        loading: true,
+                        searchQuery: '',
+                        filters: {
+                            jpStart: '', 
+                            jpEnd: '',
+                            hkStart: '',
+                            hkEnd: ''
+                        },
+                        currentPage: 1,
+                        itemsPerPage: 20,
+                        showScrollBtn: false,
+                        anime: [],
+                        contents: [],
+                        publishHk: [],
+                        currentYear: new Date().getFullYear(),
+                        searchTimer: null
+                    }
+                },
+                watch: {
+                    searchQuery() { 
+                        this.currentPage = 1; 
+                    },
+                    filters: {
+                        handler() { this.currentPage = 1; },
+                        deep: true
+                    }
+                },
+                computed: {
+                    filteredData() {
+                        const q = this.searchQuery.toLowerCase().trim();
+                        const dayEndBuffer = 86399999; // Adds 23h 59m 59s to cover the full end-date
+    
+                        const f = {
+                            js: parseDate(this.filters.jpStart),
+                            je: parseDate(this.filters.jpEnd),
+                            hs: parseDate(this.filters.hkStart),
+                            he: parseDate(this.filters.hkEnd)
+                        };
+    
+                        return this.anime.filter(r => {
+                            // Concatenate search target fields
+                            const combined = [
+                                r['Media ID'], r['JP Title'], r['HK Title'], r['Work ID'], r['Note']
+                            ].map(v => String(v || '').toLowerCase()).join(' ');
+                            
+                            if (q && !combined.includes(q)) return false;
+                            
+                            // Japan Date Filter
+                            if (f.js || f.je) {
+                                const rowDate = parseDate(r['JP Show Date']);
+                                if (!rowDate) return false; 
+                                if (f.js && rowDate < f.js) return false;
+                                if (f.je && rowDate > (f.je + dayEndBuffer)) return false;
                             }
-                        } else {
-                            const today = new Date();
-                            const lastYear = new Date();
-                            lastYear.setFullYear(today.getFullYear() - 1);
-                            const formatDate = (date) => date.toISOString().split('T')[0];
-                
-                            this.filters.jpStart = formatDate(lastYear);
-                            this.filters.jpEnd = formatDate(today);
-                        }
-                
-                        this.loading = false;
-                        window.addEventListener('scroll', () => { 
-                            this.showScrollBtn = window.scrollY > 400; 
+                    
+                            // HK Date Filter
+                            if (f.hs || f.he) {
+                                const rowDate = parseDate(r['HK Show Date']);
+                                if (!rowDate) return false;
+                                if (f.hs && rowDate < f.hs) return false;
+                                if (f.he && rowDate > (f.he + dayEndBuffer)) return false;
+                            }
+                    
+                            return true;
                         });
-                    } catch (e) { 
-                        console.error("Initialization error:", e); 
+                    },
+                    totalPages() { 
+                        return Math.ceil(this.filteredData.length / this.itemsPerPage) || 1; 
+                    },
+                    paginatedData() {
+                        const start = (this.currentPage - 1) * this.itemsPerPage;
+                        return this.filteredData.slice(start, start + this.itemsPerPage);
+                    },
+                    paginationRange() {
+                        const current = this.currentPage;
+                        const last = this.totalPages;
+                        const range = [];
+                        
+                        for (let i = 1; i <= last; i++) {
+                            if (i === 1 || i === last || (i >= current - 2 && i <= current + 2)) {
+                                range.push(i);
+                            }
+                        }
+                        
+                        const res = [];
+                        let l;
+                        for (let i of range) {
+                            if (l && i - l !== 1) res.push('...');
+                            res.push(i);
+                            l = i;
+                        }
+                        return res;
                     }
                 },
-                highlight(text) {
-                    if (!text || !this.searchQuery) return text || '-';
-                    const q = this.searchQuery.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-                    const regex = new RegExp(`(${q})`, 'gi');
-                    return String(text).replace(regex, '<mark class="bg-amber-200 text-amber-900 px-0.5 rounded">$1</mark>');
-                },
-                getLabelColor(type) {
-                    const colors = {
-                        '45卷': 'bg-emerald-600',
-                        'プラス': 'bg-amber-500',
-                        'カラー作品集': 'bg-rose-500'
-                    };
-                    return colors[type] || 'bg-slate-600';
-                },
-                changePage(p) { 
-                    this.currentPage = p; 
-                    this.scrollToTop(); 
-                },
-                scrollToTop() { 
-                    window.scrollTo({ top: 0, behavior: 'smooth' }); 
-                },
-                debounceSearch(e) {
-                    clearTimeout(this.searchTimer);
-                    this.searchTimer = setTimeout(() => {
-                        this.searchQuery = e.target.value;
-                    }, 300);
-                },
-                resetFilters() {
-                    this.searchQuery = '';
-                    this.filters.jpStart = '';
-                    this.filters.jpEnd = '';
-                    this.filters.hkStart = '';
-                    this.filters.hkEnd = '';
-                },
-                getMapping(workId, types) {
-                    if (!workId || workId === "-") return null;
-                    const idStr = workId.toString().trim();
-                    const match = this.contents.find(c => c.作品番?.toString().trim() === idStr && types.includes(c.類));
-                    if (!match || !match.ISBN) return null;
+                methods: {
+                    async init() {
+                        try {
+                            const [a, c, h] = await Promise.all([
+                                fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/電視動畫").then(r => r.json()),
+                                fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
+                                fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json())
+                            ]);
+                            
+                            this.anime = a; 
+                            this.contents = c; 
+                            this.publishHk = h;
                     
-                    const isbn = match.ISBN.trim();
-                    const matches = this.publishHk.filter(h => 
-                        (h.ISBN_JP && h.ISBN_JP.trim() === isbn) || 
-                        (h.ISBN && h.ISBN.trim() === isbn)
-                    );
+                            const params = new URLSearchParams(window.location.search);
+                            const mediaID = params.get('mediaid');
                     
-                    if (matches.length === 0) return null;
-                    const latestHk = matches.sort((a, b) => new Date(b.IssueDate || 0) - new Date(a.IssueDate || 0))[0];
+                            if (mediaID) {
+                                const target = this.anime.find(r => String(r['Media ID']) === String(mediaID));
+                                if (target) {
+                                    this.searchQuery = target['JP Title'] || '';
+                                    this.filters.jpStart = '';
+                                    this.filters.jpEnd = '';
+                                }
+                            } else {
+                                const today = new Date();
+                                const lastYear = new Date();
+                                lastYear.setFullYear(today.getFullYear() - 1);
+                                
+                                const formatDate = (date) => date.toISOString().split('T')[0];
                     
-                    return { 
-                        vol: match.卷 || match.巻, 
-                        chapter: match.收錄話 || '-', 
-                        hkIsbn: latestHk.ISBN, 
-                        type: match.類 
-                    };
+                                this.filters.jpStart = formatDate(lastYear);
+                                this.filters.jpEnd = formatDate(today);
+                            }
+                    
+                            this.loading = false;
+                            window.addEventListener('scroll', this.handleScroll);
+                        } catch (e) { 
+                            console.error("Initialization error:", e); 
+                        }
+                    },
+                    handleScroll() {
+                        this.showScrollBtn = window.scrollY > 400;
+                    },
+                    highlight(text) {
+                        if (!text || !this.searchQuery) return text || '-';
+                        const q = this.searchQuery.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                        const regex = new RegExp(`(${q})`, 'gi');
+                        return String(text).replace(regex, '<mark class="bg-amber-200 text-amber-900 px-0.5 rounded">$1</mark>');
+                    },
+                    getLabelColor(type) {
+                        const colors = {
+                            '45卷': 'bg-emerald-600',
+                            'プラス': 'bg-amber-500',
+                            'カラー作品集': 'bg-rose-500'
+                        };
+                        return colors[type] || 'bg-slate-600';
+                    },
+                    changePage(p) { 
+                        if (p === '...' || p === this.currentPage) return;
+                        this.currentPage = p; 
+                        this.scrollToTop(); 
+                    },
+                    scrollToTop() { 
+                        window.scrollTo({ top: 0, behavior: 'smooth' }); 
+                    },
+                    debounceSearch(e) {
+                        clearTimeout(this.searchTimer);
+                        this.searchTimer = setTimeout(() => {
+                            this.searchQuery = e.target.value;
+                        }, 300);
+                    },
+                    resetFilters() {
+                        this.searchQuery = '';
+                        this.filters.jpStart = '';
+                        this.filters.jpEnd = '';
+                        this.filters.hkStart = '';
+                        this.filters.hkEnd = '';
+                    },
+                    getMapping(workId, types) {
+                        if (!workId || workId === "-") return null;
+                        const idStr = workId.toString().trim();
+                        const match = this.contents.find(c => c.作品番?.toString().trim() === idStr && types.includes(c.類));
+                        if (!match || !match.ISBN) return null;
+                        
+                        const isbn = match.ISBN.trim();
+                        const matches = this.publishHk.filter(h => 
+                            (h.ISBN_JP && h.ISBN_JP.trim() === isbn) || 
+                            (h.ISBN && h.ISBN.trim() === isbn)
+                        );
+                        
+                        if (matches.length === 0) return null;
+                        const latestHk = matches.sort((a, b) => new Date(b.IssueDate || 0) - new Date(a.IssueDate || 0))[0];
+                        
+                        return { 
+                            vol: match.卷 || match.巻, 
+                            chapter: match.收錄話 || '-', 
+                            hkIsbn: latestHk.ISBN, 
+                            type: match.類 
+                        };
+                    }
+                },
+                mounted() { 
+                    this.init(); 
+                },
+                unmounted() {
+                    window.removeEventListener('scroll', this.handleScroll);
                 }
-            },
-            mounted() { 
-                this.init(); 
-            }
-        }).mount('#app');
-    </script>
-</body>
+            }).mount('#app');
+        </script>
+    </body>
 </html>

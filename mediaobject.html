@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>法寶角色人物 - DoraDexHK 香港多啦A夢文獻資料庫</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <!-- Vue 3 CDN (Required before app initialization) -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <!-- Font Awesome Icons -->
@@ -45,6 +47,17 @@
             <strong>Error:</strong> {{ errorMessage }}
           </div>
         </div>
+
+    <!-- Use v-text to avoid backend template engine conflicts -->
+    <div id="app">
+      <div class="debug-panel">
+        <p>searchQuery: "<span v-text="searchQuery"></span>"</p>
+        <p>selectedClass: "<span v-text="selectedClass"></span>"</p>
+        <p>parentData: <span v-text="parentData.length"></span> rows</p>
+        <p>processedData: <span v-text="processedData.length"></span> items</p>
+        <p>displayData: <span v-text="displayData.length"></span> matched</p>
+      </div>
+    </div>
 
     <div id="app" class="flex-grow flex flex-col">
         <!-- Top Navigation / Header -->

@@ -254,6 +254,58 @@
         >
             <i class="fa-solid fa-arrow-up text-lg"></i>
         </button>
+
+        <!-- ================= FOOTER ================= -->
+        <footer class="bg-slate-900 text-slate-400 pt-12 pb-8 mt-20 border-t border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black text-base">D</div>
+                            <span class="font-black text-white text-lg">DoraDex<span class="text-blue-500">HK</span></span>
+                        </div>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            多啦A夢 (叮噹) 香港影視漫畫法寶資料庫。致力提供歷年大長篇電影、香港版漫畫出版史及法寶文獻考據。
+                        </p>
+                    </div>
+
+                    <div>
+                        <h5 class="text-xs font-black text-slate-200 uppercase tracking-wider mb-3">漫畫與作品目錄</h5>
+                        <ul class="space-y-2 text-xs">
+                            <li><a href="manga-database.html?region=HK" class="hover:text-blue-400 transition-colors">香港版漫畫考據 (HK)</a></li>
+                            <li><a href="manga-database.html?region=JP" class="hover:text-blue-400 transition-colors">日本版漫畫考據 (JP)</a></li>
+                            <li><a href="originalworks.html" class="hover:text-blue-400 transition-colors">ドラえもん日本原作大全</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h5 class="text-xs font-black text-slate-200 uppercase tracking-wider mb-3">神奇法寶與影視</h5>
+                        <ul class="space-y-2 text-xs">
+                            <li><a href="mediaobject.html?filterclass=法寶" class="hover:text-blue-400 transition-colors">神奇法寶記錄搜尋</a></li>
+                            <li><a href="mediaobject.html?filterclass=人物" class="hover:text-blue-400 transition-colors">登場角色人物檔案</a></li>
+                            <li><a href="movie.html" class="hover:text-blue-400 transition-colors">歷年大長篇電影作品</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h5 class="text-xs font-black text-slate-200 uppercase tracking-wider">資料庫狀態 Sync</h5>
+                        <button @click="forceRefresh" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-bold text-slate-200 transition-all shadow-sm">
+                            <svg class="w-3.5 h-3.5 text-blue-400" :class="refreshing ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                            {{ refreshing ? 'Syncing...' : 'Force Data Refresh' }}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+                    <div>© {{ currentYear }} DoraDexHK. All rights reserved.</div>
+                    <div class="flex items-center gap-4">
+                        <a href="blog.html" class="hover:text-slate-300">網誌文章</a>
+                        <a href="index.html" class="hover:text-slate-300">首頁 index.html</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
 
     <!-- Vue 3 Application Logic -->

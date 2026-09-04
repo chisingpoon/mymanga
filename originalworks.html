@@ -420,18 +420,62 @@
         </main>
 
         <!-- Global Footer -->
-        <footer class="bg-gray-900 border-t border-gray-800 mt-12 py-8">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-                <div class="text-center md:text-left">
-                    <p class="text-sm font-semibold text-white">DoraDexHK</p>
-                    <p class="text-xs text-gray-400 mt-1">香港多啦A夢文獻資料庫</p>
+        <footer class="bg-dora-900 text-slate-300 border-t border-slate-800 mt-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                    
+                    <!-- Col 1: Brand Info -->
+                    <div class="space-y-4 md:col-span-1">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 rounded-lg bg-dora-600 text-white flex items-center justify-center font-bold text-lg">
+                                D
+                            </div>
+                            <span class="text-xl font-bold text-white tracking-tight">DoraDex<span class="text-dora-500">HK</span></span>
+                        </div>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            多啦A夢 (叮噹) 香港影視漫畫法寶資料庫。致力提供歷年大長篇電影、香港版漫畫出版史及法寶文獻考據。
+                        </p>
+                    </div>
+    
+                    <!-- Col 2: Quick Links -->
+                    <div>
+                        <h5 class="text-xs font-bold text-white uppercase tracking-wider mb-4">漫畫與作品目錄</h5>
+                        <ul class="space-y-2 text-xs">
+                            <li><a href="manga-database.html?region=HK" class="hover:text-white transition-colors">香港版漫畫考據 (HK)</a></li>
+                            <li><a href="manga-database.html?region=JP" class="hover:text-white transition-colors">日本版漫畫考據 (JP)</a></li>
+                            <li><a href="originalworks.html" class="hover:text-white transition-colors">ドラえもん日本原作大全</a></li>
+                        </ul>
+                    </div>
+    
+                    <!-- Col 3: Secret Gadgets & Media -->
+                    <div>
+                        <h5 class="text-xs font-bold text-white uppercase tracking-wider mb-4">神奇法寶與影視</h5>
+                        <ul class="space-y-2 text-xs">
+                            <li><a href="mediaobject.html?filterclass=法寶" class="hover:text-white transition-colors">神奇法寶記錄搜尋</a></li>
+                            <li><a href="mediaobject.html?filterclass=人物" class="hover:text-white transition-colors">登場角色人物檔案</a></li>
+                            <li><a href="movie.html" class="hover:text-white transition-colors">歷年大長篇電影作品</a></li>
+                            <li><a href="anime.html" class="hover:text-white transition-colors">電視動畫播映記錄</a></li>
+                        </ul>
+                    </div>
+    
+                    <!-- Col 4: Academic Note & SEO Disclaimer -->
+                    <div>
+                        <h5 class="text-xs font-bold text-white uppercase tracking-wider mb-4">學術與研究聲明</h5>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">
+                            本網站為非牟利研究考據檔案庫，所有《多啦A夢 / 叮噹》商標、角色與著作權均屬 Fujiko Pro、Shogakukan 及 TV-Asahi 所有。本站香港譯名文獻由熱心研究者共同整理。
+                        </p>
+                    </div>
                 </div>
-                <div class="flex items-center space-x-6 text-xs text-gray-400">
-                    <a href="index.html" class="hover:text-white transition-colors">首頁</a>
-                    <a href="originalworks.html" class="hover:text-white transition-colors">漫畫資料庫</a>
-                </div>
-                <div class="text-xs text-gray-500 text-center md:text-right">
-                    &copy; DoraDexHK. All rights reserved.
+    
+                <!-- Bottom Copyright & URL Information -->
+                <div class="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+                    <div>
+                        &copy; 2026 DoraDexHK Archive (https://doradexhk.pages.dev/). All rights reserved.
+                    </div>
+                    <div class="flex space-x-4 text-xs">
+                        <a href="blog.html" class="hover:text-slate-300">網誌文章</a>
+                        <a href="index.html" class="hover:text-slate-300">首頁 index.html</a>
+                    </div>
                 </div>
             </div>
         </footer>

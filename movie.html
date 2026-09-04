@@ -88,6 +88,20 @@
                                 <p v-if="selectedMovie.enTitle" class="text-xs text-slate-500 font-mono">{{ selectedMovie.enTitle }}</p>
                             </div>
 
+                            <!-- Restored Quick Links Buttons -->
+                            <div class="flex flex-wrap gap-3 pt-2">
+                                <a :href="'mediaobject.html?type=gadget&mediaid=' + encodeURIComponent(selectedMovie.id)" 
+                                   class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-600/20">
+                                    <span>🪄</span>
+                                    <span>相關法寶登場</span>
+                                </a>
+                                <a :href="'mediaobject.html?type=character&mediaid=' + encodeURIComponent(selectedMovie.id)" 
+                                   class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs font-bold transition-all">
+                                    <span>👥</span>
+                                    <span>相關角色與事理</span>
+                                </a>
+                            </div>
+
                             <!-- Cross-Media Relations (Manga / Film Comic) -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-800">
                                 <!-- Manga Linking -->
@@ -259,7 +273,7 @@
                     var res = this.lookup(this.selectedMovie.mangaRaw);
                     if (!res) return null;
                     var current = this.mangaTab === 'JP' ? res.jp : res.hk;
-                    if (!current) current = res.jp; // Fallback
+                    if (!current) current = res.jp;
                     return { current: current, hasHk: !!res.hk };
                 },
                 mappedFilmComic: function() {
@@ -267,7 +281,7 @@
                     var res = this.lookup(this.selectedMovie.filmComicRaw);
                     if (!res) return null;
                     var current = this.fcTab === 'JP' ? res.jp : res.hk;
-                    if (!current) current = res.jp; // Fallback
+                    if (!current) current = res.jp;
                     return { current: current, hasHk: !!res.hk };
                 }
             },

@@ -107,6 +107,22 @@
                 background: rgba(0,0,0,0.1); /* Faint handle */
             }
         }
+        /* Responsive Controls Adjustments */
+        .controls-section {
+          position: relative; /* Removes fixed/floating positioning */
+          z-index: 10;
+        }
+        
+        /* Touch-friendly input sizing for mobile */
+        @media (max-width: 767.98px) {
+          .controls-section .form-control,
+          .controls-section .form-select,
+          .controls-section .btn {
+            font-size: 16px; /* Prevents auto-zoom on iOS */
+            padding-top: 0.6rem;
+            padding-bottom: 0.6rem;
+          }
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-600 selection:text-white min-h-screen flex flex-col justify-between">

@@ -323,110 +323,110 @@
                 <!-- Main Grid Container -->
                 <div v-if="viewMode === 'card'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     <div v-for="item in paginatedData" :key="item['Object ID']" 
-                         class="bg-white border border-slate-200 rounded-xl shadow-xs hover:shadow-md transition-shadow flex flex-col overflow-hidden">
+                         class="bg-white border border-slate-200/80 rounded-xl shadow-2xs hover:border-slate-300 transition-all flex flex-col overflow-hidden">
                         
-                        <!-- Top Section: Class Badge & ID (No Photo) -->
-                        <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-                            <div>
-                                <span class="inline-block px-2.5 py-0.5 text-xs font-medium rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+                        <!-- Header Badge Line -->
+                        <div class="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="inline-block px-2.5 py-0.5 text-[11px] font-medium rounded-full bg-slate-100 text-slate-700 border border-slate-200/60">
                                     {{ item['Object Classification'] || 'N/A' }}
                                 </span>
-                                <span class="text-xs text-slate-500 ml-2">{{ item['Object Type'] }}</span>
+                                <span class="text-[11px] text-slate-400">{{ item['Object Type'] }}</span>
                             </div>
-                            <div class="text-[11px] font-mono text-slate-400">ID: {{ item['Object ID'] }}</div>
+                            <div class="text-[10px] font-mono text-slate-400">#{{ item['Object ID'] }}</div>
                         </div>
                 
-                        <!-- Middle Section: Titles & Description -->
+                        <!-- Details -->
                         <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
                             <div>
-                                <div class="font-bold text-slate-900 text-base leading-snug" v-html="highlight(item['JP Title'])"></div>
+                                <div class="font-bold text-slate-800 text-base leading-snug" v-html="highlight(item['JP Title'])"></div>
                                 <div class="text-xs text-slate-500 mt-0.5" v-html="highlight(item['Confirmed Translation'])"></div>
-                                <div v-if="item['Library Ref']" class="text-[11px] font-mono text-slate-400 mt-1">
+                                <div v-if="item['Library Ref']" class="text-[10px] font-mono text-slate-400 mt-1">
                                     Ref: <span v-html="highlight(item['Library Ref'])"></span>
                                 </div>
                             </div>
                 
-                            <p class="text-xs text-slate-600 leading-relaxed line-clamp-3">
+                            <p class="text-[11px] text-slate-500 leading-relaxed line-clamp-3">
                                 <span v-html="highlight(item['Description'] || 'No description available.')"></span>
                             </p>
                         </div>
                 
-                        <!-- Bottom Section: Media Reference Tabs -->
+                        <!-- Sub-record Tabs -->
                         <div class="p-3 bg-slate-50/80 border-t border-slate-200/80">
-                            <!-- Tab Controls -->
-                            <div class="flex items-center gap-1 border-b border-slate-200 pb-1.5 mb-2">
+                            <!-- Segmented Pill Selector -->
+                            <div class="flex items-center gap-1 bg-slate-200/50 p-1 rounded-md mb-2">
                                 <button @click="setTab(item['Object ID'], 'movie')" 
-                                        :class="getTab(item['Object ID']) === 'movie' ? 'bg-white text-blue-600 shadow-2xs font-semibold' : 'text-slate-500 hover:text-slate-800'"
-                                        class="px-2 py-1 text-xs rounded-md transition-all flex-1 text-center">
+                                        :class="getTab(item['Object ID']) === 'movie' ? 'bg-white text-slate-800 shadow-2xs font-semibold' : 'text-slate-500 hover:text-slate-700'"
+                                        class="px-2 py-0.5 text-[11px] rounded transition-all flex-1 text-center">
                                     Movie ({{ item.movieAppearances.length }})
                                 </button>
                                 <button @click="setTab(item['Object ID'], 'manga')" 
-                                        :class="getTab(item['Object ID']) === 'manga' ? 'bg-white text-blue-600 shadow-2xs font-semibold' : 'text-slate-500 hover:text-slate-800'"
-                                        class="px-2 py-1 text-xs rounded-md transition-all flex-1 text-center">
+                                        :class="getTab(item['Object ID']) === 'manga' ? 'bg-white text-slate-800 shadow-2xs font-semibold' : 'text-slate-500 hover:text-slate-700'"
+                                        class="px-2 py-0.5 text-[11px] rounded transition-all flex-1 text-center">
                                     Manga ({{ item.mangaRecords.length }})
                                 </button>
                                 <button @click="setTab(item['Object ID'], 'anime')" 
-                                        :class="getTab(item['Object ID']) === 'anime' ? 'bg-white text-blue-600 shadow-2xs font-semibold' : 'text-slate-500 hover:text-slate-800'"
-                                        class="px-2 py-1 text-xs rounded-md transition-all flex-1 text-center">
+                                        :class="getTab(item['Object ID']) === 'anime' ? 'bg-white text-slate-800 shadow-2xs font-semibold' : 'text-slate-500 hover:text-slate-700'"
+                                        class="px-2 py-0.5 text-[11px] rounded transition-all flex-1 text-center">
                                     Anime ({{ item.animeAppearances.length }})
                                 </button>
                             </div>
                 
-                            <!-- Movie Tab Content -->
-                            <div v-if="getTab(item['Object ID']) === 'movie'" class="text-xs space-y-2 max-h-32 overflow-y-auto pr-1">
-                                <div v-if="item.movieAppearances.some(m => m['HK Translation'])" class="text-slate-600 text-[11px] pb-1 border-b border-slate-200/60">
-                                    <span class="font-semibold">港譯:</span> 
+                            <!-- Movie Tab -->
+                            <div v-if="getTab(item['Object ID']) === 'movie'" class="text-[11px] space-y-1.5 max-h-32 overflow-y-auto pr-0.5">
+                                <div v-if="item.movieAppearances.some(m => m['HK Translation'])" class="text-slate-500 pb-1 border-b border-slate-200/50">
+                                    <span class="font-semibold text-slate-600">港譯:</span> 
                                     <span v-html="highlight(item.movieAppearances.find(m => m['HK Translation'])['HK Translation'])"></span>
                                 </div>
-                                <div v-for="m in item.movieAppearances" :key="m['Movie ID']" class="p-1.5 bg-white rounded border border-slate-100 shadow-2xs">
+                                <div v-for="m in item.movieAppearances" :key="m['Movie ID']" class="p-1.5 bg-white rounded border border-slate-200/50">
                                     <div class="flex items-center justify-between font-medium">
-                                        <a :href="'movie.html?mediaid=' + encodeURIComponent(m['Movie ID'])" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">
+                                        <a :href="'movie.html?mediaid=' + encodeURIComponent(m['Movie ID'])" target="_blank" class="text-slate-700 hover:text-blue-600 flex items-center gap-1 transition-colors">
                                             <span v-html="highlight(m.movieTitle)"></span>
-                                            <i class="fas fa-external-link-alt text-[10px]"></i>
+                                            <i class="fas fa-external-link-alt text-[9px] text-slate-400"></i>
                                         </a>
                                         <span class="text-slate-400 font-mono text-[10px]">{{ m.movieYear }}</span>
                                     </div>
                                 </div>
-                                <div v-if="!item.movieAppearances.length" class="text-slate-400 italic text-[11px]">No movie records</div>
+                                <div v-if="!item.movieAppearances.length" class="text-slate-400 italic text-[10px] py-1">No movie records</div>
                             </div>
                 
-                            <!-- Manga Tab Content -->
-                            <div v-if="getTab(item['Object ID']) === 'manga'" class="text-xs space-y-2 max-h-32 overflow-y-auto pr-1">
-                                <div v-if="item.mangaInfo && (item.mangaInfo['CultureCom Trans'] || item.mangaInfo['ChingWin Trans'])" class="space-y-0.5 text-[11px] text-slate-600 pb-1 border-b border-slate-200/60">
+                            <!-- Manga Tab -->
+                            <div v-if="getTab(item['Object ID']) === 'manga'" class="text-[11px] space-y-1.5 max-h-32 overflow-y-auto pr-0.5">
+                                <div v-if="item.mangaInfo && (item.mangaInfo['CultureCom Trans'] || item.mangaInfo['ChingWin Trans'])" class="space-y-0.5 text-slate-500 pb-1 border-b border-slate-200/50">
                                     <div v-if="item.mangaInfo['CultureCom Trans']">
-                                        <span class="font-semibold">文傳譯:</span> <span v-html="highlight(item.mangaInfo['CultureCom Trans'])"></span>
+                                        <span class="font-semibold text-slate-600">文傳譯:</span> <span v-html="highlight(item.mangaInfo['CultureCom Trans'])"></span>
                                     </div>
                                     <div v-if="item.mangaInfo['ChingWin Trans']">
-                                        <span class="font-semibold">青文譯:</span> <span v-html="highlight(item.mangaInfo['ChingWin Trans'])"></span>
+                                        <span class="font-semibold text-slate-600">青文譯:</span> <span v-html="highlight(item.mangaInfo['ChingWin Trans'])"></span>
                                     </div>
                                 </div>
-                                <div v-for="rec in item.mangaRecords" :key="rec.isbn" class="p-1.5 bg-white rounded border border-slate-100 shadow-2xs">
+                                <div v-for="rec in item.mangaRecords" :key="rec.isbn" class="p-1.5 bg-white rounded border border-slate-200/50">
                                     <div class="flex items-center justify-between font-medium">
-                                        <a :href="'manga-database.html?region=JP&isbn=' + encodeURIComponent(rec.isbn)" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">
+                                        <a :href="'manga-database.html?region=JP&isbn=' + encodeURIComponent(rec.isbn)" target="_blank" class="text-slate-700 hover:text-blue-600 flex items-center gap-1 transition-colors">
                                             <span v-html="highlight(`[${rec.type}] ${rec.title} ${rec.vol} Ch.${rec.ch}`)"></span>
-                                            <i class="fas fa-external-link-alt text-[10px]"></i>
+                                            <i class="fas fa-external-link-alt text-[9px] text-slate-400"></i>
                                         </a>
                                     </div>
                                 </div>
-                                <div v-if="!item.mangaRecords.length" class="text-slate-400 italic text-[11px]">No manga records</div>
+                                <div v-if="!item.mangaRecords.length" class="text-slate-400 italic text-[10px] py-1">No manga records</div>
                             </div>
                 
-                            <!-- Anime Tab Content -->
-                            <div v-if="getTab(item['Object ID']) === 'anime'" class="text-xs space-y-2 max-h-32 overflow-y-auto pr-1">
-                                <div v-if="item.animeAppearances.some(a => a['HK Translation'])" class="text-slate-600 text-[11px] pb-1 border-b border-slate-200/60">
-                                    <span class="font-semibold">港譯:</span> 
+                            <!-- Anime Tab -->
+                            <div v-if="getTab(item['Object ID']) === 'anime'" class="text-[11px] space-y-1.5 max-h-32 overflow-y-auto pr-0.5">
+                                <div v-if="item.animeAppearances.some(a => a['HK Translation'])" class="text-slate-500 pb-1 border-b border-slate-200/50">
+                                    <span class="font-semibold text-slate-600">港譯:</span> 
                                     <span v-html="highlight(item.animeAppearances.find(a => a['HK Translation'])['HK Translation'])"></span>
                                 </div>
-                                <div v-for="a in item.animeAppearances" :key="a['Anime ID']" class="p-1.5 bg-white rounded border border-slate-100 shadow-2xs">
+                                <div v-for="a in item.animeAppearances" :key="a['Anime ID']" class="p-1.5 bg-white rounded border border-slate-200/50">
                                     <div class="flex items-center justify-between font-medium">
-                                        <a :href="'anime.html?mediaid=' + encodeURIComponent(a['Anime ID'])" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">
+                                        <a :href="'anime.html?mediaid=' + encodeURIComponent(a['Anime ID'])" target="_blank" class="text-slate-700 hover:text-blue-600 flex items-center gap-1 transition-colors">
                                             <span v-html="highlight(a.animeTitle)"></span>
-                                            <i class="fas fa-external-link-alt text-[10px]"></i>
+                                            <i class="fas fa-external-link-alt text-[9px] text-slate-400"></i>
                                         </a>
                                         <span class="text-slate-400 font-mono text-[10px]">{{ a.animeDate }}</span>
                                     </div>
                                 </div>
-                                <div v-if="!item.animeAppearances.length" class="text-slate-400 italic text-[11px]">No TV anime records</div>
+                                <div v-if="!item.animeAppearances.length" class="text-slate-400 italic text-[10px] py-1">No TV anime records</div>
                             </div>
                         </div>
                 
@@ -435,17 +435,16 @@
                 
                 <div v-else class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden mb-12">
                     <!-- Horizontal Scroll Wrapper -->
-                    <div class="w-full overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm">
+                    <div class="w-full overflow-hidden bg-white border border-slate-200/80 rounded-xl shadow-xs">
                         <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm text-slate-700 border-collapse">
-                                <!-- Header (Exact 5 Columns) -->
-                                <thead class="bg-slate-50/80 text-xs uppercase font-semibold text-slate-500 border-b border-slate-200 tracking-wider">
+                            <table class="w-full text-left text-xs text-slate-600 border-collapse">
+                                <!-- Header -->
+                                <thead class="bg-slate-50/90 text-[11px] uppercase font-semibold text-slate-500 border-b border-slate-200/80 tracking-wider">
                                     <tr>
-                                        <th scope="col" class="py-3.5 px-4 w-24">Media</th>
-                                        <th scope="col" class="py-3.5 px-4 w-32">Class</th>
-                                        <th scope="col" class="py-3.5 px-4 w-48">Title</th>
-                                        <th scope="col" class="py-3.5 px-4">Description</th>
-                                        <th scope="col" class="py-3.5 px-4 min-w-[300px]">Reference Record</th>
+                                        <th scope="col" class="py-3 px-4 w-28">Class</th>
+                                        <th scope="col" class="py-3 px-4 w-48">Title</th>
+                                        <th scope="col" class="py-3 px-4">Description</th>
+                                        <th scope="col" class="py-3 px-4 min-w-[320px]">Reference Record</th>
                                     </tr>
                                 </thead>
                                 
@@ -453,122 +452,106 @@
                                 <tbody class="divide-y divide-slate-100 bg-white">
                                     <tr v-for="item in paginatedData" :key="item['Object ID']" class="hover:bg-slate-50/60 transition-colors">
                                         
-                                        <!-- 1. Media -->
-                                        <td class="py-4 px-4 align-top">
-                                            <img :src="item['Image Link'] || 'https://via.placeholder.com/80'" 
-                                                 :alt="item['JP Title']"
-                                                 class="w-16 h-16 rounded-lg object-cover border border-slate-200 shadow-2xs flex-shrink-0" />
-                                        </td>
-                    
-                                        <!-- 2. Class -->
-                                        <td class="py-4 px-4 align-top space-y-1">
-                                            <span class="inline-block px-2.5 py-0.5 text-xs font-medium rounded-full bg-blue-50 text-blue-600 border border-blue-100">
-                                                {{ item['Object Classification'] }}
+                                        <!-- 1. Class -->
+                                        <td class="py-3.5 px-4 align-top space-y-1">
+                                            <span class="inline-block px-2.5 py-0.5 text-[11px] font-medium rounded-full bg-slate-100 text-slate-700 border border-slate-200/60">
+                                                {{ item['Object Classification'] || 'N/A' }}
                                             </span>
-                                            <div class="text-xs text-slate-500">{{ item['Object Type'] }}</div>
-                                            <div class="text-[11px] font-mono text-slate-400">ID: {{ item['Object ID'] }}</div>
+                                            <div class="text-[11px] text-slate-400">{{ item['Object Type'] }}</div>
+                                            <div class="text-[10px] font-mono text-slate-400">#{{ item['Object ID'] }}</div>
                                         </td>
                     
-                                        <!-- 3. Title -->
-                                        <td class="py-4 px-4 align-top">
-                                            <div class="font-bold text-slate-900 text-base" v-html="highlight(item['JP Title'])"></div>
-                                            <div class="text-xs text-slate-500 mt-0.5" v-html="highlight(item['Confirmed Translation'])"></div>
-                                            <div v-if="item['Library Ref']" class="text-[11px] font-mono text-slate-400 mt-1">
+                                        <!-- 2. Title -->
+                                        <td class="py-3.5 px-4 align-top">
+                                            <div class="font-bold text-slate-800 text-sm leading-snug" v-html="highlight(item['JP Title'])"></div>
+                                            <div class="text-[11px] text-slate-500 mt-0.5" v-html="highlight(item['Confirmed Translation'])"></div>
+                                            <div v-if="item['Library Ref']" class="text-[10px] font-mono text-slate-400 mt-1">
                                                 Ref: <span v-html="highlight(item['Library Ref'])"></span>
                                             </div>
                                         </td>
                     
-                                        <!-- 4. Description -->
-                                        <td class="py-4 px-4 align-top text-xs text-slate-600 leading-relaxed max-w-xs">
+                                        <!-- 3. Description -->
+                                        <td class="py-3.5 px-4 align-top text-[11px] text-slate-500 leading-relaxed max-w-xs">
                                             <span v-html="highlight(item['Description'] || 'No description available.')"></span>
                                         </td>
-
-                                        <!-- 5. Reference Record (Movies / Manga / Anime Tabs) -->
-                                        <td class="py-4 px-4 align-top">
-                                            <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80">
-                                                <!-- Tab Header Buttons -->
-                                                <div class="flex items-center gap-1 border-b border-slate-200 pb-1.5 mb-2">
+                    
+                                        <!-- 4. Reference Record (Media Sub-Tabs) -->
+                                        <td class="py-3.5 px-4 align-top">
+                                            <div class="bg-slate-50/80 p-2 rounded-lg border border-slate-200/60">
+                                                <!-- Segmented Pill Selector -->
+                                                <div class="flex items-center gap-1 bg-slate-200/50 p-1 rounded-md mb-2">
                                                     <button @click="setTab(item['Object ID'], 'movie')" 
-                                                            :class="getTab(item['Object ID']) === 'movie' ? 'bg-white text-blue-600 shadow-2xs font-semibold' : 'text-slate-500 hover:text-slate-800'"
-                                                            class="px-2 py-1 text-xs rounded-md transition-all">
+                                                            :class="getTab(item['Object ID']) === 'movie' ? 'bg-white text-slate-800 shadow-2xs font-semibold' : 'text-slate-500 hover:text-slate-700'"
+                                                            class="px-2 py-0.5 text-[11px] rounded transition-all flex-1 text-center">
                                                         Movie ({{ item.movieAppearances.length }})
                                                     </button>
                                                     <button @click="setTab(item['Object ID'], 'manga')" 
-                                                            :class="getTab(item['Object ID']) === 'manga' ? 'bg-white text-blue-600 shadow-2xs font-semibold' : 'text-slate-500 hover:text-slate-800'"
-                                                            class="px-2 py-1 text-xs rounded-md transition-all">
+                                                            :class="getTab(item['Object ID']) === 'manga' ? 'bg-white text-slate-800 shadow-2xs font-semibold' : 'text-slate-500 hover:text-slate-700'"
+                                                            class="px-2 py-0.5 text-[11px] rounded transition-all flex-1 text-center">
                                                         Manga ({{ item.mangaRecords.length }})
                                                     </button>
                                                     <button @click="setTab(item['Object ID'], 'anime')" 
-                                                            :class="getTab(item['Object ID']) === 'anime' ? 'bg-white text-blue-600 shadow-2xs font-semibold' : 'text-slate-500 hover:text-slate-800'"
-                                                            class="px-2 py-1 text-xs rounded-md transition-all">
+                                                            :class="getTab(item['Object ID']) === 'anime' ? 'bg-white text-slate-800 shadow-2xs font-semibold' : 'text-slate-500 hover:text-slate-700'"
+                                                            class="px-2 py-0.5 text-[11px] rounded transition-all flex-1 text-center">
                                                         Anime ({{ item.animeAppearances.length }})
                                                     </button>
                                                 </div>
-                                        
+                    
                                                 <!-- Movie List -->
-                                                <div v-if="getTab(item['Object ID']) === 'movie'" class="text-xs space-y-2 max-h-36 overflow-y-auto pr-1">
-                                                    <!-- HK Translation at Top -->
-                                                    <div v-if="item.movieAppearances.some(m => m['HK Translation'])" class="text-slate-600 text-[11px] pb-1 border-b border-slate-200/60">
-                                                        <span class="font-semibold">港譯:</span> 
+                                                <div v-if="getTab(item['Object ID']) === 'movie'" class="text-[11px] space-y-1.5 max-h-32 overflow-y-auto pr-0.5">
+                                                    <div v-if="item.movieAppearances.some(m => m['HK Translation'])" class="text-slate-500 pb-1 border-b border-slate-200/50">
+                                                        <span class="font-semibold text-slate-600">港譯:</span> 
                                                         <span v-html="highlight(item.movieAppearances.find(m => m['HK Translation'])['HK Translation'])"></span>
                                                     </div>
-                                        
-                                                    <!-- Movie Sub-records -->
-                                                    <div v-for="m in item.movieAppearances" :key="m['Movie ID']" class="p-1.5 bg-white rounded border border-slate-100 shadow-2xs">
+                                                    <div v-for="m in item.movieAppearances" :key="m['Movie ID']" class="p-1.5 bg-white rounded border border-slate-200/50">
                                                         <div class="flex items-center justify-between font-medium">
-                                                            <a :href="'movie.html?mediaid=' + encodeURIComponent(m['Movie ID'])" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">
+                                                            <a :href="'movie.html?mediaid=' + encodeURIComponent(m['Movie ID'])" target="_blank" class="text-slate-700 hover:text-blue-600 flex items-center gap-1 transition-colors">
                                                                 <span v-html="highlight(m.movieTitle)"></span>
-                                                                <i class="fas fa-external-link-alt text-[10px]"></i>
+                                                                <i class="fas fa-external-link-alt text-[9px] text-slate-400"></i>
                                                             </a>
                                                             <span class="text-slate-400 font-mono text-[10px]">{{ m.movieYear }}</span>
                                                         </div>
                                                     </div>
-                                                    <div v-if="!item.movieAppearances.length" class="text-slate-400 italic text-[11px]">No movie records</div>
+                                                    <div v-if="!item.movieAppearances.length" class="text-slate-400 italic text-[10px] py-1">No movie records</div>
                                                 </div>
-                                        
+                    
                                                 <!-- Manga List -->
-                                                <div v-if="getTab(item['Object ID']) === 'manga'" class="text-xs space-y-2 max-h-36 overflow-y-auto pr-1">
-                                                    <!-- Translations at Top (Displayed once) -->
-                                                    <div v-if="item.mangaInfo && (item.mangaInfo['CultureCom Trans'] || item.mangaInfo['ChingWin Trans'])" class="space-y-0.5 text-[11px] text-slate-600 pb-1 border-b border-slate-200/60">
+                                                <div v-if="getTab(item['Object ID']) === 'manga'" class="text-[11px] space-y-1.5 max-h-32 overflow-y-auto pr-0.5">
+                                                    <div v-if="item.mangaInfo && (item.mangaInfo['CultureCom Trans'] || item.mangaInfo['ChingWin Trans'])" class="space-y-0.5 text-slate-500 pb-1 border-b border-slate-200/50">
                                                         <div v-if="item.mangaInfo['CultureCom Trans']">
-                                                            <span class="font-semibold">文傳譯:</span> <span v-html="highlight(item.mangaInfo['CultureCom Trans'])"></span>
+                                                            <span class="font-semibold text-slate-600">文傳譯:</span> <span v-html="highlight(item.mangaInfo['CultureCom Trans'])"></span>
                                                         </div>
                                                         <div v-if="item.mangaInfo['ChingWin Trans']">
-                                                            <span class="font-semibold">青文譯:</span> <span v-html="highlight(item.mangaInfo['ChingWin Trans'])"></span>
+                                                            <span class="font-semibold text-slate-600">青文譯:</span> <span v-html="highlight(item.mangaInfo['ChingWin Trans'])"></span>
                                                         </div>
                                                     </div>
-                                        
-                                                    <!-- Manga Sub-records -->
-                                                    <div v-for="rec in item.mangaRecords" :key="rec.isbn" class="p-1.5 bg-white rounded border border-slate-100 shadow-2xs">
+                                                    <div v-for="rec in item.mangaRecords" :key="rec.isbn" class="p-1.5 bg-white rounded border border-slate-200/50">
                                                         <div class="flex items-center justify-between font-medium">
-                                                            <a :href="'manga-database.html?region=JP&isbn=' + encodeURIComponent(rec.isbn)" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">
+                                                            <a :href="'manga-database.html?region=JP&isbn=' + encodeURIComponent(rec.isbn)" target="_blank" class="text-slate-700 hover:text-blue-600 flex items-center gap-1 transition-colors">
                                                                 <span v-html="highlight(`[${rec.type}] ${rec.title} ${rec.vol} Ch.${rec.ch}`)"></span>
-                                                                <i class="fas fa-external-link-alt text-[10px]"></i>
+                                                                <i class="fas fa-external-link-alt text-[9px] text-slate-400"></i>
                                                             </a>
                                                         </div>
                                                     </div>
-                                                    <div v-if="!item.mangaRecords.length" class="text-slate-400 italic text-[11px]">No manga records</div>
+                                                    <div v-if="!item.mangaRecords.length" class="text-slate-400 italic text-[10px] py-1">No manga records</div>
                                                 </div>
-                                        
+                    
                                                 <!-- Anime List -->
-                                                <div v-if="getTab(item['Object ID']) === 'anime'" class="text-xs space-y-2 max-h-36 overflow-y-auto pr-1">
-                                                    <!-- HK Translation at Top -->
-                                                    <div v-if="item.animeAppearances.some(a => a['HK Translation'])" class="text-slate-600 text-[11px] pb-1 border-b border-slate-200/60">
-                                                        <span class="font-semibold">港譯:</span> 
+                                                <div v-if="getTab(item['Object ID']) === 'anime'" class="text-[11px] space-y-1.5 max-h-32 overflow-y-auto pr-0.5">
+                                                    <div v-if="item.animeAppearances.some(a => a['HK Translation'])" class="text-slate-500 pb-1 border-b border-slate-200/50">
+                                                        <span class="font-semibold text-slate-600">港譯:</span> 
                                                         <span v-html="highlight(item.animeAppearances.find(a => a['HK Translation'])['HK Translation'])"></span>
                                                     </div>
-                                        
-                                                    <!-- Anime Sub-records -->
-                                                    <div v-for="a in item.animeAppearances" :key="a['Anime ID']" class="p-1.5 bg-white rounded border border-slate-100 shadow-2xs">
+                                                    <div v-for="a in item.animeAppearances" :key="a['Anime ID']" class="p-1.5 bg-white rounded border border-slate-200/50">
                                                         <div class="flex items-center justify-between font-medium">
-                                                            <a :href="'anime.html?mediaid=' + encodeURIComponent(a['Anime ID'])" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">
+                                                            <a :href="'anime.html?mediaid=' + encodeURIComponent(a['Anime ID'])" target="_blank" class="text-slate-700 hover:text-blue-600 flex items-center gap-1 transition-colors">
                                                                 <span v-html="highlight(a.animeTitle)"></span>
-                                                                <i class="fas fa-external-link-alt text-[10px]"></i>
+                                                                <i class="fas fa-external-link-alt text-[9px] text-slate-400"></i>
                                                             </a>
                                                             <span class="text-slate-400 font-mono text-[10px]">{{ a.animeDate }}</span>
                                                         </div>
                                                     </div>
-                                                    <div v-if="!item.animeAppearances.length" class="text-slate-400 italic text-[11px]">No TV anime records</div>
+                                                    <div v-if="!item.animeAppearances.length" class="text-slate-400 italic text-[10px] py-1">No TV anime records</div>
                                                 </div>
                                             </div>
                                         </td>

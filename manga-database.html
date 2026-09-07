@@ -442,10 +442,10 @@
                                     <div class="w-2.5 h-2.5 rounded-full bg-amber-500 flex-shrink-0"></div>
                                     <div class="truncate">
                                         <div class="font-bold text-slate-800 group-hover:text-amber-800 transition-colors truncate text-sm">
-                                            {{ movie['電影名稱'] || movie['名稱'] || '未命名電影' }}
+                                            {{ movie['JP Title'] || movie['名稱'] || '未命名電影' }}
                                         </div>
-                                        <div class="text-[11px] text-slate-400 font-medium mt-0.5" v-if="movie['上映年份']">
-                                            {{ movie['上映年份'] }} 年上映
+                                        <div class="text-[11px] text-slate-400 font-medium mt-0.5" v-if="movie['JP Release Date']">
+                                            {{ movie['JP Release Date'] }} 日本上映
                                         </div>
                                     </div>
                                 </div>

@@ -481,6 +481,8 @@
                                         <th class="py-3 px-3">出版副題</th>
                                         <th class="py-3 px-3">港譯副題</th>
                                         <th class="py-3 px-3 rounded-r-lg">大全集對應</th>
+                                        <th class="py-3 px-3">初出掲載誌</th>
+                                        <th class="py-3 px-3">初出掲載號</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">
@@ -497,6 +499,8 @@
                                             </a>
                                             <span v-else class="text-slate-400">-</span>
                                         </td>
+                                        <td class="py-3 px-3 text-slate-600 font-medium">{{ story.firstPublicationMagazine }}</td>
+                                        <td class="py-3 px-3 text-slate-600 font-medium">{{ story.firstPublicationIssue }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -581,229 +585,247 @@
 
     </div>
 
-<script>
-const { createApp } = Vue;
-
-createApp({
-    data() {
-        return {
-            region: 'HK', 
-            view: 'series', 
-            loading: true, 
-            refreshing: false,
-            selectedSeries: null, 
-            selectedBook: null,
-            seriesSearchQuery: '', 
-            tableQuery: '', 
-            activeLightboxImage: null,
-            currentYear: new Date().getFullYear(),
-            db: { hk: [], jp: [], contents: [], master: [], movies: [] },
-            debugInfo: { urlRegion: '', urlIsbn: '', urlSeries: '' }
-        }
-    },
-    computed: {
-        activeHK() { return this.db.hk.filter(item => item.Active?.toString().toLowerCase().trim() === 'yes'); },
-        activeJP() { return this.db.jp.filter(item => item.Active?.toString().toLowerCase().trim() === 'yes'); },
-        filteredSeries() {
-            const data = this.region === 'HK' ? this.activeHK : this.activeJP;
-            const key = this.region === 'HK' ? 'Title' : '類';
-            
-            const counts = data.reduce((acc, item) => {
-                const name = item[key];
-                if (name) acc[name] = (acc[name] || 0) + 1;
-                return acc;
-            }, {});
-
-            return Object.keys(counts).sort().map(name => ({
-                name: name,
-                count: counts[name]
-            }));
+    <script>
+    const { createApp } = Vue;
+    
+    createApp({
+        data() {
+            return {
+                region: 'HK', 
+                view: 'series', 
+                loading: true, 
+                refreshing: false,
+                selectedSeries: null, 
+                selectedBook: null,
+                seriesSearchQuery: '', 
+                tableQuery: '', 
+                activeLightboxImage: null,
+                currentYear: new Date().getFullYear(),
+                db: { hk: [], jp: [], contents: [], master: [], movies: [] },
+                debugInfo: { urlRegion: '', urlIsbn: '', urlSeries: '' }
+            }
         },
-        searchedSeries() {
-            const q = this.seriesSearchQuery.toLowerCase();
-            return this.filteredSeries.filter(s => s.name.toLowerCase().includes(q));
-        },
-        filteredBooks() {
-            const data = this.region === 'HK' ? this.activeHK : this.activeJP;
-            const key = this.region === 'HK' ? 'Title' : '類';
-            return data.filter(b => (b[key] || '').toString().trim() === this.selectedSeries);
-        },
-        hkDetail() { 
-            if (!this.selectedBook) return null;
-            return this.region === 'HK' ? this.selectedBook : this.db.hk.find(h => h.ISBN_JP == this.selectedBook.ISBN); 
-        },
-        jpDetail() { 
-            if (!this.selectedBook) return null;
-            return this.region === 'JP' ? this.selectedBook : this.db.jp.find(j => j.ISBN == (this.selectedBook.ISBN_JP || this.selectedBook.ISBN)); 
-        },
-        currentStories() {
-            if (!this.selectedBook) return [];
-            const isbn = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
-            
-            return this.db.contents.filter(c => c.ISBN == isbn).map((c, index) => {
-                const collectionRecord = c.作品番 ? this.db.contents.find(item => 
-                    item.作品番 === c.作品番 && (item.類 === '大長編大全集' || item.類 === '大全集')
-                ) : null;
+        computed: {
+            activeHK() { return this.db.hk.filter(item => item.Active?.toString().toLowerCase().trim() === 'yes'); },
+            activeJP() { return this.db.jp.filter(item => item.Active?.toString().toLowerCase().trim() === 'yes'); },
+            filteredSeries() {
+                const data = this.region === 'HK' ? this.activeHK : this.activeJP;
+                const key = this.region === 'HK' ? 'Title' : '類';
                 
-                let collectionLink = null;
-                let collectionVol = '-';
-                let collectionCategory = '';
-
-                if (collectionRecord) {
-                    collectionVol = collectionRecord.巻;
-                    collectionCategory = collectionRecord.類;
-                    if (this.region === 'HK') {
-                        const hkMatch = this.db.hk.find(h => h.ISBN_JP === collectionRecord.ISBN);
-                        if (hkMatch) collectionLink = `?region=HK&isbn=${hkMatch.ISBN}`;
-                    } else {
-                        collectionLink = `?region=JP&isbn=${collectionRecord.ISBN}`;
+                const counts = data.reduce((acc, item) => {
+                    const name = item[key];
+                    if (name) acc[name] = (acc[name] || 0) + 1;
+                    return acc;
+                }, {});
+    
+                return Object.keys(counts).sort().map(name => ({
+                    name: name,
+                    count: counts[name]
+                }));
+            },
+            searchedSeries() {
+                const q = this.seriesSearchQuery.toLowerCase();
+                return this.filteredSeries.filter(s => s.name.toLowerCase().includes(q));
+            },
+            filteredBooks() {
+                const data = this.region === 'HK' ? this.activeHK : this.activeJP;
+                const key = this.region === 'HK' ? 'Title' : '類';
+                return data.filter(b => (b[key] || '').toString().trim() === this.selectedSeries);
+            },
+            hkDetail() { 
+                if (!this.selectedBook) return null;
+                return this.region === 'HK' ? this.selectedBook : this.db.hk.find(h => h.ISBN_JP == this.selectedBook.ISBN); 
+            },
+            jpDetail() { 
+                if (!this.selectedBook) return null;
+                return this.region === 'JP' ? this.selectedBook : this.db.jp.find(j => j.ISBN == (this.selectedBook.ISBN_JP || this.selectedBook.ISBN)); 
+            },
+            currentStories() {
+                if (!this.selectedBook) return [];
+                
+                // For JP: Take JP book's ISBN directly
+                // For HK: Take HK book's ISBN_JP (looked up via 出版目録HK)
+                const targetIsbn = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
+                
+                return this.db.contents
+                    .filter(c => c.ISBN == targetIsbn)
+                    .map((c, index) => {
+                        // Look up in 作品完整列表 (db.master) using 作品番
+                        const masterRecord = c.作品番 ? this.db.master.find(m => m.作品番?.toString().trim() === c.作品番?.toString().trim()) : null;
+                        
+                        const collectionRecord = c.作品番 ? this.db.contents.find(item => 
+                            item.作品番 === c.作品番 && (item.類 === '大長編大全集' || item.類 === '大全集')
+                        ) : null;
+                        
+                        let collectionLink = null;
+                        let collectionVol = '-';
+                        let collectionCategory = '';
+    
+                        if (collectionRecord) {
+                            collectionVol = collectionRecord.巻;
+                            collectionCategory = collectionRecord.類;
+                            if (this.region === 'HK') {
+                                const hkMatch = this.db.hk.find(h => h.ISBN_JP === collectionRecord.ISBN);
+                                if (hkMatch) collectionLink = `?region=HK&isbn=${hkMatch.ISBN}`;
+                            } else {
+                                collectionLink = `?region=JP&isbn=${collectionRecord.ISBN}`;
+                            }
+                        }
+    
+                        return {
+                            ...c, 
+                            UniqueKey: `${c.ISBN}-${index}`,
+                            master: masterRecord,
+                            // Retrieve 初出掲載誌 and 初出掲載号 from 作品完整列表
+                            firstPublicationMagazine: masterRecord ? (masterRecord['初出掲載誌'] || '-') : '-',
+                            firstPublicationIssue: masterRecord ? (masterRecord['初出掲載号'] || '-') : '-',
+                            collectionVol, 
+                            collectionCategory, 
+                            collectionLink
+                        };
+                    }).sort((a,b) => (parseInt(a.收錄話)||0) - (parseInt(b.收錄話)||0));
+            },
+            searchedTableStories() {
+                const q = this.tableQuery.toLowerCase();
+                return this.currentStories.filter(s => 
+                    (s.出版副題||'').toLowerCase().includes(q) || 
+                    (s.副題港譯||'').toLowerCase().includes(q) ||
+                    (s.firstPublicationMagazine||'').toLowerCase().includes(q) ||
+                    (s.firstPublicationIssue||'').toLowerCase().includes(q)
+                );
+            }
+        },
+        methods: {
+            async init() {
+                this.loading = true;
+                try {
+                    const [hk, jp, contents, master, movies] = await Promise.all([
+                        fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json()),
+                        fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP").then(r => r.json()),
+                        fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
+                        fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json()),
+                        fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/電影動畫").then(r => r.json())
+                    ]);
+            
+                    this.db = { hk, jp, contents, master, movies };
+                    
+                    setTimeout(() => {
+                        this.checkUrlParameters();
+                        this.loading = false;
+                    }, 500);
+            
+                } catch (e) {
+                    console.error("Database Sync Failed:", e);
+                    this.loading = false;
+                }
+            },
+            getYear(dateStr) {
+                if (!dateStr) return 'N/A';
+                const d = new Date(dateStr);
+                return isNaN(d.getTime()) ? dateStr : d.getFullYear();
+            },
+            getMovieUrl(isbn) {
+                if (!isbn || !this.db.movies) return null;
+                const match = this.db.movies.find(m => m["Manga ISBN"] == isbn);
+                if (match && match["Media ID"]) {
+                    return `movie.html?mediaid=${match["Media ID"]}`;
+                }
+                return null;
+            },
+            getMovies(isbn) {
+                if (!isbn || !this.db.movies) return [];
+                return this.db.movies.filter(m => 
+                    m["Manga ISBN"]?.toString().trim() === isbn.toString().trim()
+                );
+            },
+            checkUrlParameters() {
+                const rawUrl = window.location.href;
+                
+                const getParamByName = (name, url) => {
+                    name = name.replace(/[\[\]]/g, '\\$&');
+                    const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+                    const results = regex.exec(url);
+                    if (!results) return null;
+                    if (!results[2]) return '';
+                    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+                };
+            
+                const urlRegion = (getParamByName('region', rawUrl) || '').toUpperCase().trim();
+                const urlIsbn = (getParamByName('isbn', rawUrl) || '').toString().trim();
+                const urlSeries = (getParamByName('series', rawUrl) || '').trim();
+            
+                this.debugInfo.urlRegion = urlRegion || 'REGEX FAILED';
+                this.debugInfo.urlIsbn = urlIsbn || 'REGEX FAILED';
+                this.debugInfo.urlSeries = urlSeries || 'REGEX FAILED';
+            
+                if (urlRegion === 'HK' || urlRegion === 'JP') {
+                    this.region = urlRegion;
+                }
+            
+                const cleanIsbn = urlIsbn.replace(/\D/g, '');
+            
+                if (cleanIsbn && (this.db.hk.length > 0 || this.db.jp.length > 0)) {
+                    const book = this.db.hk.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanIsbn) || 
+                                 this.db.jp.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanIsbn);
+                    
+                    if (book) {
+                        this.selectedBook = book;
+                        this.selectedSeries = this.region === 'HK' ? (book.Title || book.類) : (book.類 || book.標題);
+                        this.view = 'detail';
+                        return;
                     }
                 }
-
-                return {
-                    ...c, 
-                    UniqueKey: `${c.ISBN}-${index}`,
-                    master: c.作品番 ? this.db.master.find(m => m.作品番?.toString().trim() === c.作品番?.toString().trim()) : null,
-                    collectionVol, collectionCategory, collectionLink
-                };
-            }).sort((a,b) => (parseInt(a.收錄話)||0) - (parseInt(b.收錄話)||0));
-        },
-        searchedTableStories() {
-            const q = this.tableQuery.toLowerCase();
-            return this.currentStories.filter(s => (s.出版副題||'').toLowerCase().includes(q) || (s.副題港譯||'').toLowerCase().includes(q));
-        }
-    },
-    methods: {
-        async init() {
-            this.loading = true;
-            try {
-                const [hk, jp, contents, master, movies] = await Promise.all([
-                    fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録HK").then(r => r.json()),
-                    fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/出版目録JP").then(r => r.json()),
-                    fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/書籍收錄作品").then(r => r.json()),
-                    fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/作品完整列表").then(r => r.json()),
-                    fetch("https://opensheet.elk.sh/1Ker7vSVvehFJw_D7271lONLKs3b0UGj7OIF2aHK3kG8/電影動畫").then(r => r.json())
-                ]);
-        
-                this.db = { hk, jp, contents, master, movies };
-                
-                setTimeout(() => {
-                    this.checkUrlParameters();
-                    this.loading = false;
-                }, 500);
-        
-            } catch (e) {
-                console.error("Database Sync Failed:", e);
-                this.loading = false;
-            }
-        },
-        getYear(dateStr) {
-            if (!dateStr) return 'N/A';
-            const d = new Date(dateStr);
-            return isNaN(d.getTime()) ? dateStr : d.getFullYear();
-        },
-        getMovieUrl(isbn) {
-            if (!isbn || !this.db.movies) return null;
-            const match = this.db.movies.find(m => m["Manga ISBN"] == isbn);
-            if (match && match["Media ID"]) {
-                return `movie.html?mediaid=${match["Media ID"]}`;
-            }
-            return null;
-        },
-        getMovies(isbn) {
-            if (!isbn || !this.db.movies) return [];
-            return this.db.movies.filter(m => 
-                m["Manga ISBN"]?.toString().trim() === isbn.toString().trim()
-            );
-        },
-        checkUrlParameters() {
-            const rawUrl = window.location.href;
             
-            const getParamByName = (name, url) => {
-                name = name.replace(/[\[\]]/g, '\\$&');
-                const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
-                const results = regex.exec(url);
-                if (!results) return null;
-                if (!results[2]) return '';
-                return decodeURIComponent(results[2].replace(/\+/g, ' '));
-            };
-        
-            const urlRegion = (getParamByName('region', rawUrl) || '').toUpperCase().trim();
-            const urlIsbn = (getParamByName('isbn', rawUrl) || '').toString().trim();
-            const urlSeries = (getParamByName('series', rawUrl) || '').trim();
-        
-            this.debugInfo.urlRegion = urlRegion || 'REGEX FAILED';
-            this.debugInfo.urlIsbn = urlIsbn || 'REGEX FAILED';
-            this.debugInfo.urlSeries = urlSeries || 'REGEX FAILED';
-        
-            if (urlRegion === 'HK' || urlRegion === 'JP') {
-                this.region = urlRegion;
-            }
-        
-            const cleanIsbn = urlIsbn.replace(/\D/g, '');
-        
-            if (cleanIsbn && (this.db.hk.length > 0 || this.db.jp.length > 0)) {
-                const book = this.db.hk.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanIsbn) || 
-                             this.db.jp.find(b => (b.ISBN || '').toString().replace(/\D/g, '') === cleanIsbn);
-                
-                if (book) {
-                    this.selectedBook = book;
-                    this.selectedSeries = this.region === 'HK' ? (book.Title || book.類) : (book.類 || book.標題);
-                    this.view = 'detail';
-                    return;
+                if (urlSeries) {
+                    this.selectedSeries = urlSeries;
+                    this.view = 'books';
+                } else {
+                    this.view = 'series';
                 }
+            },
+            updateView(newView, params = {}) {
+                const searchParams = new URLSearchParams();
+                searchParams.set('region', this.region);
+                if (params.isbn) searchParams.set('isbn', params.isbn);
+                if (params.series) searchParams.set('series', params.series);
+                window.history.pushState({}, '', '?' + searchParams.toString());
+                this.checkUrlParameters();
+                window.scrollTo(0,0);
+            },
+            handleCollectionClick(link) {
+                window.history.pushState({}, '', link);
+                this.checkUrlParameters();
+                window.scrollTo(0,0);
+            },
+            async forceRefresh() {
+                this.refreshing = true;
+                localStorage.removeItem('manga_db_v3');
+                await this.init();
+                this.refreshing = false;
+            },
+            toggleRegion(r) { 
+                this.region = r; 
+                this.updateView('series');
+            },
+            selectSeries(name) { 
+                this.updateView('books', { series: name }); 
+            },
+            selectBook(book) { 
+                this.selectedBook = book;
+                this.view = 'detail';
+                
+                const isbn = this.region === 'HK' ? book.ISBN : (book.ISBN || book.ISBN_JP);
+                const newUrl = `?region=${this.region}&isbn=${isbn}`;
+                window.history.pushState({ path: newUrl }, '', newUrl);
+                
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
-        
-            if (urlSeries) {
-                this.selectedSeries = urlSeries;
-                this.view = 'books';
-            } else {
-                this.view = 'series';
-            }
         },
-        updateView(newView, params = {}) {
-            const searchParams = new URLSearchParams();
-            searchParams.set('region', this.region);
-            if (params.isbn) searchParams.set('isbn', params.isbn);
-            if (params.series) searchParams.set('series', params.series);
-            window.history.pushState({}, '', '?' + searchParams.toString());
-            this.checkUrlParameters();
-            window.scrollTo(0,0);
-        },
-        handleCollectionClick(link) {
-            window.history.pushState({}, '', link);
-            this.checkUrlParameters();
-            window.scrollTo(0,0);
-        },
-        async forceRefresh() {
-            this.refreshing = true;
-            localStorage.removeItem('manga_db_v3');
-            await this.init();
-            this.refreshing = false;
-        },
-        toggleRegion(r) { 
-            this.region = r; 
-            this.updateView('series');
-        },
-        selectSeries(name) { 
-            this.updateView('books', { series: name }); 
-        },
-        selectBook(book) { 
-            this.selectedBook = book;
-            this.view = 'detail';
-            
-            const isbn = this.region === 'HK' ? book.ISBN : (book.ISBN || book.ISBN_JP);
-            const newUrl = `?region=${this.region}&isbn=${isbn}`;
-            window.history.pushState({ path: newUrl }, '', newUrl);
-            
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        mounted() { 
+            this.init();
+            window.addEventListener('popstate', () => this.checkUrlParameters());
         }
-    },
-    mounted() { 
-        this.init();
-        window.addEventListener('popstate', () => this.checkUrlParameters());
-    }
-}).mount('#app')
-</script>
-</body>
+    }).mount('#app')
+    </script>
+    </body>
 </html>

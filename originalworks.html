@@ -320,7 +320,8 @@
                                 <th class="py-3 px-3">初出副題</th>
                                 <th class="py-3 px-3">全集副題 (JP / HK)</th>
                                 <th class="py-3 px-3">大全集/大長編</th>
-                                <th class="py-3 px-3">45卷/PLUS/其他</th>
+                                <th class="py-3 px-3">45卷/PLUS/彩色作品集</th>
+                                <th class="py-3 px-3">其他出版</th>
                                 <th class="py-3 px-3">備考</th>
                             </tr>
                         </thead>
@@ -356,6 +357,17 @@
                                     </div>
                                 </td>
 
+                                <td class="py-2.5 px-3">
+                                    <div class="flex flex-wrap gap-1">
+                                        <template v-for="(link, i) in row.othersData" :key="i">
+                                            <a v-if="link.url" :href="link.url" target="_blank" class="bg-emerald-900/60 hover:bg-emerald-800 border border-emerald-700 text-emerald-200 text-[10px] px-1.5 py-0.5 rounded">
+                                                {{ link.label }}
+                                            </a>
+                                            <span v-else class="text-gray-500 text-[10px]">{{ link.label }}</span>
+                                        </template>
+                                    </div>
+                                </td>
+                                
                                 <td class="py-2.5 px-3 text-gray-400" v-html="highlight(row.備考)"></td>
                             </tr>
                             <tr v-if="filteredData.length === 0">
@@ -387,13 +399,21 @@
                                 </div>
                             </div>
                             <div v-if="row.vol45PlusData.length">
-                                <span class="text-gray-400 block mb-1 text-[10px]">單行本 / PLUS:</span>
+                                <span class="text-gray-400 block mb-1 text-[10px]">單行本 / PLUS / 彩色作品集:</span>
                                 <div class="flex flex-wrap gap-1">
                                     <a v-for="(link, i) in row.vol45PlusData" :key="i" :href="link.url" target="_blank" class="bg-emerald-900/60 text-emerald-200 border border-emerald-700 text-[10px] px-1.5 py-0.5 rounded">
                                         {{ link.label }}
                                     </a>
                                 </div>
                             </div>
+                            <div v-if="row.vol45PlusData.length">
+                                <span class="text-gray-400 block mb-1 text-[10px]">其他出版:</span>
+                                <div class="flex flex-wrap gap-1">
+                                    <a v-for="(link, i) in row.othersData" :key="i" :href="link.url" target="_blank" class="bg-emerald-900/60 text-emerald-200 border border-emerald-700 text-[10px] px-1.5 py-0.5 rounded">
+                                        {{ link.label }}
+                                    </a>
+                                </div>
+                            </div>                            
                             <div v-if="row.備考" class="text-gray-400 text-[11px] pt-1" v-html="highlight(row.備考)"></div>
                         </div>
                     </div>

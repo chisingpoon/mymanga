@@ -485,33 +485,61 @@
                                                         Anime ({{ item.animeAppearances.length }})
                                                     </button>
                                                 </div>
-                    
+                                        
                                                 <!-- Movie List -->
-                                                <div v-if="getTab(item['Object ID']) === 'movie'" class="text-xs space-y-1 max-h-28 overflow-y-auto pr-1">
-                                                    <div v-for="m in item.movieAppearances" :key="m['Movie ID']" class="text-slate-700 flex justify-between">
-                                                        <span class="truncate font-medium" v-html="highlight(m.movieTitle)"></span>
-                                                        <span class="text-slate-400 font-mono text-[10px] ml-2">{{ m.movieYear }}</span>
+                                                <div v-if="getTab(item['Object ID']) === 'movie'" class="text-xs space-y-2 max-h-36 overflow-y-auto pr-1">
+                                                    <div v-for="m in item.movieAppearances" :key="m['Movie ID']" class="p-1.5 bg-white rounded border border-slate-100 shadow-2xs">
+                                                        <div class="flex items-center justify-between font-medium">
+                                                            <a :href="`movie.html?movieid=${m['Movie ID']}`" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">
+                                                                <span v-html="highlight(m.movieTitle)"></span>
+                                                                <i class="fas fa-external-link-alt text-[10px]"></i>
+                                                            </a>
+                                                            <span class="text-slate-400 font-mono text-[10px]">{{ m.movieYear }}</span>
+                                                        </div>
+                                                        <div v-if="m['HK Translation']" class="text-slate-500 text-[11px] mt-0.5">
+                                                            <span class="font-semibold text-slate-600">港譯:</span> <span v-html="highlight(m['HK Translation'])"></span>
+                                                        </div>
                                                     </div>
                                                     <div v-if="!item.movieAppearances.length" class="text-slate-400 italic text-[11px]">No movie records</div>
                                                 </div>
-                    
+                                        
                                                 <!-- Manga List -->
-                                                <div v-if="getTab(item['Object ID']) === 'manga'" class="text-xs space-y-1 max-h-28 overflow-y-auto pr-1">
-                                                    <div v-if="item.mangaInfo && item.mangaInfo['CultureCom Trans']" class="text-[11px] text-slate-500 mb-1 border-b border-slate-100 pb-1">
-                                                        CC: <span v-html="highlight(item.mangaInfo['CultureCom Trans'])"></span>
-                                                    </div>
-                                                    <div v-for="rec in item.mangaRecords" :key="rec.isbn" class="text-slate-700">
-                                                        <span class="font-medium" v-html="highlight(rec.title)"></span>
-                                                        <span class="text-slate-400 text-[10px] ml-1">(Vol. {{ rec.vol }} / Ch. {{ rec.ch }})</span>
+                                                <div v-if="getTab(item['Object ID']) === 'manga'" class="text-xs space-y-2 max-h-36 overflow-y-auto pr-1">
+                                                    <div v-if="item.mangaInfo" class="space-y-1">
+                                                        <div v-for="rec in item.mangaRecords" :key="rec.isbn" class="p-1.5 bg-white rounded border border-slate-100 shadow-2xs">
+                                                            <div class="flex items-center justify-between font-medium">
+                                                                <a :href="`manga.html?isbn=${rec.isbn}`" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">
+                                                                    <span v-html="highlight(rec.title)"></span>
+                                                                    <i class="fas fa-external-link-alt text-[10px]"></i>
+                                                                </a>
+                                                                <span class="text-slate-400 text-[10px]">(Vol. {{ rec.vol }} / Ch. {{ rec.ch }})</span>
+                                                            </div>
+                                                            <!-- Cultural Communication Trans -->
+                                                            <div v-if="item.mangaInfo['CultureCom Trans']" class="text-slate-500 text-[11px] mt-0.5">
+                                                                <span class="font-semibold text-slate-600">文傳譯:</span> <span v-html="highlight(item.mangaInfo['CultureCom Trans'])"></span>
+                                                            </div>
+                                                            <!-- Ching Win Trans -->
+                                                            <div v-if="item.mangaInfo['ChingWin Trans']" class="text-slate-500 text-[11px] mt-0.5">
+                                                                <span class="font-semibold text-slate-600">青文譯:</span> <span v-html="highlight(item.mangaInfo['ChingWin Trans'])"></span>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                     <div v-if="!item.mangaRecords.length" class="text-slate-400 italic text-[11px]">No manga records</div>
                                                 </div>
-                    
+                                        
                                                 <!-- Anime List -->
-                                                <div v-if="getTab(item['Object ID']) === 'anime'" class="text-xs space-y-1 max-h-28 overflow-y-auto pr-1">
-                                                    <div v-for="a in item.animeAppearances" :key="a['Anime ID']" class="text-slate-700 flex justify-between">
-                                                        <span class="truncate font-medium" v-html="highlight(a.animeTitle)"></span>
-                                                        <span class="text-slate-400 font-mono text-[10px] ml-2">{{ a.animeDate }}</span>
+                                                <div v-if="getTab(item['Object ID']) === 'anime'" class="text-xs space-y-2 max-h-36 overflow-y-auto pr-1">
+                                                    <div v-for="a in item.animeAppearances" :key="a['Anime ID']" class="p-1.5 bg-white rounded border border-slate-100 shadow-2xs">
+                                                        <div class="flex items-center justify-between font-medium">
+                                                            <a :href="`tvanime.html?animeid=${a['Anime ID']}`" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">
+                                                                <span v-html="highlight(a.animeTitle)"></span>
+                                                                <i class="fas fa-external-link-alt text-[10px]"></i>
+                                                            </a>
+                                                            <span class="text-slate-400 font-mono text-[10px]">{{ a.animeDate }}</span>
+                                                        </div>
+                                                        <div v-if="a['HK Translation']" class="text-slate-500 text-[11px] mt-0.5">
+                                                            <span class="font-semibold text-slate-600">港譯:</span> <span v-html="highlight(a['HK Translation'])"></span>
+                                                        </div>
                                                     </div>
                                                     <div v-if="!item.animeAppearances.length" class="text-slate-400 italic text-[11px]">No TV anime records</div>
                                                 </div>

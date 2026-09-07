@@ -444,7 +444,7 @@
                                         <div class="font-bold text-slate-800 group-hover:text-amber-800 transition-colors truncate text-sm">
                                             {{ movie['JP Title'] || movie['名稱'] || '未命名電影' }}
                                         </div>
-                                        <div class="font-bold text-slate-800 group-hover:text-amber-800 transition-colors truncate text-sm v-if="movie['HK Title']">
+                                        <div class="font-bold text-slate-800 group-hover:text-amber-800 transition-colors truncate text-sm" v-if="movie['HK Title']">
                                             港譯: {{ movie['HK Title']}}
                                         </div>
                                         <div class="text-[11px] text-slate-400 font-medium mt-0.5" v-if="movie['JP Release Date']">
@@ -646,18 +646,20 @@
             currentStories() {
                 if (!this.selectedBook) return [];
                 
-                // For JP: Take JP book's ISBN directly
-                // For HK: Take HK book's ISBN_JP (looked up via 出版目録HK)
                 const targetIsbn = this.region === 'HK' ? this.selectedBook.ISBN_JP : this.selectedBook.ISBN;
+                
+                // Optimized O(1) lookup using Maps
+                const masterMap = new Map(this.db.master.map(m => [m.作品番?.toString().trim(), m]));
+                const hkMap = new Map(this.db.hk.map(h => [h.ISBN_JP, h]));
                 
                 return this.db.contents
                     .filter(c => c.ISBN == targetIsbn)
                     .map((c, index) => {
-                        // Look up in 作品完整列表 (db.master) using 作品番
-                        const masterRecord = c.作品番 ? this.db.master.find(m => m.作品番?.toString().trim() === c.作品番?.toString().trim()) : null;
+                        const workNum = c.作品番?.toString().trim();
+                        const masterRecord = workNum ? masterMap.get(workNum) : null;
                         
-                        const collectionRecord = c.作品番 ? this.db.contents.find(item => 
-                            item.作品番 === c.作品番 && (item.類 === '大長編大全集' || item.類 === '大全集')
+                        const collectionRecord = workNum ? this.db.contents.find(item => 
+                            item.作品番?.toString().trim() === workNum && (item.類 === '大長編大全集' || item.類 === '大全集')
                         ) : null;
                         
                         let collectionLink = null;
@@ -668,7 +670,7 @@
                             collectionVol = collectionRecord.巻;
                             collectionCategory = collectionRecord.類;
                             if (this.region === 'HK') {
-                                const hkMatch = this.db.hk.find(h => h.ISBN_JP === collectionRecord.ISBN);
+                                const hkMatch = hkMap.get(collectionRecord.ISBN);
                                 if (hkMatch) collectionLink = `?region=HK&isbn=${hkMatch.ISBN}`;
                             } else {
                                 collectionLink = `?region=JP&isbn=${collectionRecord.ISBN}`;
@@ -679,14 +681,13 @@
                             ...c, 
                             UniqueKey: `${c.ISBN}-${index}`,
                             master: masterRecord,
-                            // Retrieve 初出掲載誌 and 初出掲載号 from 作品完整列表
                             firstPublicationMagazine: masterRecord ? (masterRecord['初出掲載誌'] || '-') : '-',
                             firstPublicationIssue: masterRecord ? (masterRecord['初出掲載号'] || '-') : '-',
                             collectionVol, 
                             collectionCategory, 
                             collectionLink
                         };
-                    }).sort((a,b) => (parseInt(a.收錄話)||0) - (parseInt(b.收錄話)||0));
+                    }).sort((a, b) => (parseInt(a.收錄話) || 0) - (parseInt(b.收錄話) || 0));
             },
             searchedTableStories() {
                 const q = this.tableQuery.toLowerCase();
@@ -830,5 +831,5 @@
         }
     }).mount('#app')
     </script>
-    </body>
+</body>
 </html>

@@ -444,6 +444,9 @@
                                         <div class="font-bold text-slate-800 group-hover:text-amber-800 transition-colors truncate text-sm">
                                             {{ movie['JP Title'] || movie['名稱'] || '未命名電影' }}
                                         </div>
+                                        <div class="font-bold text-slate-800 group-hover:text-amber-800 transition-colors truncate text-sm v-if="movie['HK Title']">
+                                            港譯: {{ movie['HK Title']}}
+                                        </div>
                                         <div class="text-[11px] text-slate-400 font-medium mt-0.5" v-if="movie['JP Release Date']">
                                             {{ movie['JP Release Date'] }} 日本上映
                                         </div>

@@ -497,7 +497,7 @@
                                                     <!-- Movie Sub-records -->
                                                     <div v-for="m in item.movieAppearances" :key="m['Movie ID']" class="p-1.5 bg-white rounded border border-slate-100 shadow-2xs">
                                                         <div class="flex items-center justify-between font-medium">
-                                                            <a :href="`movie.html?movieid=${m['Movie ID']}`" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">
+                                                            <a :href="'movie.html?mediaid=' + encodeURIComponent(m['Movie ID'])" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">
                                                                 <span v-html="highlight(m.movieTitle)"></span>
                                                                 <i class="fas fa-external-link-alt text-[10px]"></i>
                                                             </a>
@@ -522,7 +522,7 @@
                                                     <!-- Manga Sub-records -->
                                                     <div v-for="rec in item.mangaRecords" :key="rec.isbn" class="p-1.5 bg-white rounded border border-slate-100 shadow-2xs">
                                                         <div class="flex items-center justify-between font-medium">
-                                                            <a :href="`manga.html?isbn=${rec.isbn}`" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">
+                                                            <a :href="'manga-database.html?region=JP&isbn=' + encodeURIComponent(r.isbn)" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">
                                                                 <span v-html="highlight(`[${rec.type}] ${rec.title} ${rec.vol} Ch.${rec.ch}`)"></span>
                                                                 <i class="fas fa-external-link-alt text-[10px]"></i>
                                                             </a>
@@ -542,7 +542,7 @@
                                                     <!-- Anime Sub-records -->
                                                     <div v-for="a in item.animeAppearances" :key="a['Anime ID']" class="p-1.5 bg-white rounded border border-slate-100 shadow-2xs">
                                                         <div class="flex items-center justify-between font-medium">
-                                                            <a :href="`tvanime.html?animeid=${a['Anime ID']}`" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">
+                                                            <a :href="'anime.html?mediaid=' + encodeURIComponent(a['Anime ID'])" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">
                                                                 <span v-html="highlight(a.animeTitle)"></span>
                                                                 <i class="fas fa-external-link-alt text-[10px]"></i>
                                                             </a>

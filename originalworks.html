@@ -357,13 +357,13 @@
                                     </div>
                                 </td>
 
-                                <td class="py-2.5 px-3">
-                                    <div class="flex flex-wrap gap-1">
+                                <td class="py-2.5 px-3 min-w-[160px] max-w-[240px]">
+                                    <div class="flex flex-wrap gap-1 whitespace-normal break-words">
                                         <template v-for="(link, i) in row.othersData" :key="i">
-                                            <a v-if="link.url" :href="link.url" target="_blank" class="bg-emerald-900/60 hover:bg-emerald-800 border border-emerald-700 text-emerald-200 text-[10px] px-1.5 py-0.5 rounded">
+                                            <a v-if="link.url" :href="link.url" target="_blank" class="bg-emerald-900/60 hover:bg-emerald-800 border border-emerald-700 text-emerald-200 text-[10px] px-1.5 py-0.5 rounded inline-block break-all max-w-full">
                                                 {{ link.label }}
                                             </a>
-                                            <span v-else class="text-gray-500 text-[10px]">{{ link.label }}</span>
+                                            <span v-else class="text-gray-500 text-[10px] inline-block break-all max-w-full">{{ link.label }}</span>
                                         </template>
                                     </div>
                                 </td>

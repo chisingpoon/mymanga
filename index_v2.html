@@ -257,91 +257,50 @@
                 </p>
 
                 <!-- Search Input Header -->
-                <div class="bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/20 shadow-2xl max-w-2xl">
-                    <form action="mediaobject.html" method="GET" class="flex flex-col sm:flex-row items-center gap-2">
-                        <div class="relative w-full">
-                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                            <input type="text" name="q" placeholder="請輸入法寶名稱、香港譯名或單行本卷數（如：隨意門, 竹蜻蜓）..." 
-                                class="w-full pl-11 pr-4 py-3 bg-white text-slate-900 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-dora-500 shadow-inner">
-                        </div>
-                        <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-dora-500 hover:bg-dora-600 text-white font-semibold text-sm rounded-xl transition-colors whitespace-nowrap shadow-md">
-                            立即檢索
-                        </button>
-                    </form>
-                    <div class="flex flex-wrap items-center gap-2 mt-3 px-2 text-xs text-slate-300">
-                        <span class="text-slate-400">熱門搜尋：</span>
-                        <a href="mediaobject.html?filterclass=法寶&q=隨意門" class="hover:text-white underline decoration-slate-500">隨意門</a>
-                        <a href="mediaobject.html?filterclass=法寶&q=竹蜻蜓" class="hover:text-white underline decoration-slate-500">竹蜻蜓</a>
-                        <a href="manga-database.html?region=HK" class="hover:text-white underline decoration-slate-500">文化傳信單行本</a>
-                        <a href="movie.html" class="hover:text-white underline decoration-slate-500">歷年大長篇</a>
-                    </div>
-                </div>
-                <!-- Global Search Box -->
-                <div class="relative max-w-2xl mx-auto">
+                <!-- Single Vue-Powered Search Widget -->
+                <div id="search-app" class="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/20 shadow-2xl max-w-2xl relative">
                     <div class="relative flex items-center">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 text-slate-400 z-10"></i>
                         <input 
                             type="text" 
                             v-model="searchQuery" 
                             @focus="isFocused = true"
-                            @keydown.escape="isFocused = false"
-                            placeholder="搜尋法寶、漫畫單行本、大長篇電影或章節名稱..." 
-                            class="w-full pl-12 pr-10 py-4 text-base bg-white border-2 border-slate-200 rounded-2xl shadow-lg focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400"
-                        />
-                        <!-- Search Icon -->
-                        <svg class="w-6 h-6 text-slate-400 absolute left-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                        <!-- Loading Indicator or Clear Button -->
-                        <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-4 text-slate-400 hover:text-slate-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
+                            @blur="setTimeout(() => isFocused = false, 200)"
+                            placeholder="請輸入法寶名稱、香港譯名或單行本卷數（如：隨意門, 竹蜻蜓）..." 
+                            class="w-full pl-11 pr-10 py-3.5 bg-white text-slate-900 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-dora-500 shadow-inner"
+                        >
+                        <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 text-slate-400 hover:text-slate-600 z-10">
+                            <i class="fa-solid fa-xmark text-lg"></i>
                         </button>
                     </div>
-        
-                    <!-- Loading Spinner -->
-                    <div v-if="loading" class="mt-2 text-center text-xs text-slate-400">
-                        正在同步資料庫數據...
+                
+                    <!-- Quick Tags -->
+                    <div class="flex flex-wrap items-center gap-2 mt-3 px-1 text-xs text-slate-300">
+                        <span class="text-slate-400">熱門搜尋：</span>
+                        <button @click="searchQuery = '隨意門'" class="hover:text-white underline decoration-slate-500">隨意門</button>
+                        <button @click="searchQuery = '竹蜻蜓'" class="hover:text-white underline decoration-slate-500">竹蜻蜓</button>
+                        <a href="manga-database.html?region=HK" class="hover:text-white underline decoration-slate-500">文化傳信單行本</a>
+                        <a href="movie.html" class="hover:text-white underline decoration-slate-500">歷年大長篇</a>
                     </div>
-        
-                    <!-- Search Results Dropdown -->
+                
+                    <!-- Live Search Results Dropdown -->
                     <div v-if="isFocused && searchQuery.trim().length > 0" 
-                         class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50 max-h-[480px] overflow-y-auto divide-y divide-slate-100">
-                        
-                        <!-- Results List -->
-                        <template v-if="searchResults.length > 0">
-                            <a v-for="item in searchResults" 
-                               :key="item.id" 
-                               :href="item.url"
-                               class="flex items-center justify-between p-4 hover:bg-blue-50/60 transition-colors group">
-                                
-                                <div class="flex items-center gap-3 min-w-0 pr-2">
-                                    <!-- Category Badge -->
-                                    <span :class="item.badgeClass" class="px-2.5 py-1 text-[11px] font-black rounded-lg flex-shrink-0">
+                         class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50 max-h-[380px] overflow-y-auto divide-y divide-slate-100 text-slate-800">
+                        <template v-if="filteredResults.length > 0">
+                            <a v-for="item in filteredResults" :key="item.id" :href="item.url" class="flex items-center justify-between p-3.5 hover:bg-dora-50 transition-colors group">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <span class="px-2 py-0.5 text-[11px] font-bold rounded bg-dora-100 text-dora-700 flex-shrink-0">
                                         {{ item.category }}
                                     </span>
-                                    
                                     <div class="truncate">
-                                        <div class="font-bold text-slate-800 text-sm group-hover:text-blue-600 transition-colors truncate">
-                                            {{ item.title }}
-                                        </div>
-                                        <div v-if="item.subtitle" class="text-xs text-slate-400 truncate">
-                                            {{ item.subtitle }}
-                                        </div>
+                                        <div class="font-bold text-sm group-hover:text-dora-600 truncate">{{ item.title }}</div>
+                                        <div v-if="item.subtitle" class="text-xs text-slate-400 truncate">{{ item.subtitle }}</div>
                                     </div>
                                 </div>
-        
-                                <span class="text-xs font-bold text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 flex items-center gap-1">
-                                    前往
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                    </svg>
-                                </span>
+                                <i class="fa-solid fa-chevron-right text-xs text-slate-300 group-hover:text-dora-600"></i>
                             </a>
                         </template>
-        
-                        <!-- No Results State -->
-                        <div v-else-if="!loading" class="p-8 text-center text-slate-400 text-sm">
+                        <div v-else class="p-6 text-center text-slate-400 text-sm">
                             找不到與 「<span class="font-bold text-slate-700">{{ searchQuery }}</span>」 相關的資料
                         </div>
                     </div>

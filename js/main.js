@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (quickSearchInput) {
         quickSearchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && quickSearchInput.value.trim() !== '') {
-                window.location.href = `mediaobject.html?q=${encodeURIComponent(quickSearchInput.value.trim())}`;
+                window.location.href = `mediaobject.html?searchkey=${encodeURIComponent(quickSearchInput.value.trim())}`;
             }
         });
     }

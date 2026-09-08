@@ -26,6 +26,8 @@
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>    
     <script>
         tailwind.config = {
             theme: {
@@ -274,7 +276,77 @@
                         <a href="movie.html" class="hover:text-white underline decoration-slate-500">歷年大長篇</a>
                     </div>
                 </div>
-
+                <!-- Global Search Box -->
+                <div class="relative max-w-2xl mx-auto">
+                    <div class="relative flex items-center">
+                        <input 
+                            type="text" 
+                            v-model="searchQuery" 
+                            @focus="isFocused = true"
+                            @keydown.escape="isFocused = false"
+                            placeholder="搜尋法寶、漫畫單行本、大長篇電影或章節名稱..." 
+                            class="w-full pl-12 pr-10 py-4 text-base bg-white border-2 border-slate-200 rounded-2xl shadow-lg focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400"
+                        />
+                        <!-- Search Icon -->
+                        <svg class="w-6 h-6 text-slate-400 absolute left-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <!-- Loading Indicator or Clear Button -->
+                        <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-4 text-slate-400 hover:text-slate-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+        
+                    <!-- Loading Spinner -->
+                    <div v-if="loading" class="mt-2 text-center text-xs text-slate-400">
+                        正在同步資料庫數據...
+                    </div>
+        
+                    <!-- Search Results Dropdown -->
+                    <div v-if="isFocused && searchQuery.trim().length > 0" 
+                         class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50 max-h-[480px] overflow-y-auto divide-y divide-slate-100">
+                        
+                        <!-- Results List -->
+                        <template v-if="searchResults.length > 0">
+                            <a v-for="item in searchResults" 
+                               :key="item.id" 
+                               :href="item.url"
+                               class="flex items-center justify-between p-4 hover:bg-blue-50/60 transition-colors group">
+                                
+                                <div class="flex items-center gap-3 min-w-0 pr-2">
+                                    <!-- Category Badge -->
+                                    <span :class="item.badgeClass" class="px-2.5 py-1 text-[11px] font-black rounded-lg flex-shrink-0">
+                                        {{ item.category }}
+                                    </span>
+                                    
+                                    <div class="truncate">
+                                        <div class="font-bold text-slate-800 text-sm group-hover:text-blue-600 transition-colors truncate">
+                                            {{ item.title }}
+                                        </div>
+                                        <div v-if="item.subtitle" class="text-xs text-slate-400 truncate">
+                                            {{ item.subtitle }}
+                                        </div>
+                                    </div>
+                                </div>
+        
+                                <span class="text-xs font-bold text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 flex items-center gap-1">
+                                    前往
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </span>
+                            </a>
+                        </template>
+        
+                        <!-- No Results State -->
+                        <div v-else-if="!loading" class="p-8 text-center text-slate-400 text-sm">
+                            找不到與 「<span class="font-bold text-slate-700">{{ searchQuery }}</span>」 相關的資料
+                        </div>
+                    </div>
+                </div>
+                
             </div>
 
             <!-- Quantitative Archive Counters -->
@@ -725,7 +797,7 @@
             <!-- Bottom Copyright & URL Information -->
             <div class="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
                 <div>
-                    ©2026 DoraDexHK. All rights reserved.
+                    ©{{ new Date().getFullYear() }} DoraDexHK. All rights reserved.
                 </div>
                 <div class="flex space-x-4 text-xs">
                     <a href="blog.html" class="hover:text-slate-300">網誌文章</a>

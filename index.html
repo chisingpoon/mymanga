@@ -259,7 +259,7 @@
                     <form action="mediaobject.html" method="GET" class="flex flex-col sm:flex-row items-center gap-2">
                         <div class="relative w-full">
                             <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                            <input type="text" name="q" placeholder="請輸入法寶名稱、香港譯名或單行本卷數（如：隨意門, 竹蜻蜓）..." 
+                            <input type="text" name="q" placeholder="請輸入法寶角色人物名稱（如：隨意門, 竹蜻蜓, 流行性ネコシャクシビールス）..." 
                                 class="w-full pl-11 pr-4 py-3 bg-white text-slate-900 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-dora-500 shadow-inner">
                         </div>
                         <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-dora-500 hover:bg-dora-600 text-white font-semibold text-sm rounded-xl transition-colors whitespace-nowrap shadow-md">
@@ -268,10 +268,12 @@
                     </form>
                     <div class="flex flex-wrap items-center gap-2 mt-3 px-2 text-xs text-slate-300">
                         <span class="text-slate-400">熱門搜尋：</span>
-                        <a href="mediaobject.html?filterclass=法寶&q=隨意門" class="hover:text-white underline decoration-slate-500">隨意門</a>
-                        <a href="mediaobject.html?filterclass=法寶&q=竹蜻蜓" class="hover:text-white underline decoration-slate-500">竹蜻蜓</a>
-                        <a href="manga-database.html?region=HK" class="hover:text-white underline decoration-slate-500">文化傳信單行本</a>
-                        <a href="movie.html" class="hover:text-white underline decoration-slate-500">歷年大長篇</a>
+                        <a href="mediaobject.html?filterclass=法寶&searchkey=隨意門" class="hover:text-white underline decoration-slate-500">隨意門</a>
+                        <a href="mediaobject.html?filterclass=法寶&searchkey=竹蜻蜓" class="hover:text-white underline decoration-slate-500">竹蜻蜓</a>
+                        <a href="mediaobject.html?filterclass=法寶&searchkey=時光機" class="hover:text-white underline decoration-slate-500">時光機</a>
+                        <a href="mediaobject.html?filterclass=人物&searchkey=鬼角彈" class="hover:text-white underline decoration-slate-500">鬼角彈</a>
+                        <!-- <a href="manga-database.html?region=HK" class="hover:text-white underline decoration-slate-500">文化傳信單行本</a>
+                        <a href="movie.html" class="hover:text-white underline decoration-slate-500">歷年大長篇</a> -->
                     </div>
                 </div>
 
@@ -531,27 +533,27 @@
                             <td class="py-3.5 px-4 font-jp font-medium">どこでもドア</td>
                             <td class="py-3.5 px-4 font-semibold text-dora-700">隨意門</td>
                             <td class="py-3.5 px-4 text-slate-500">任意門 / 隨意門</td>
-                            <td class="py-3.5 px-4 text-xs text-slate-500">單行本第6卷《萬能門》</td>
+                            <td class="py-3.5 px-4 text-xs text-slate-500">單行本第6卷《隨意門》</td>
                             <td class="py-3.5 px-4 text-right">
-                                <a href="mediaobject.html?filterclass=法寶&q=隨意門" class="text-xs bg-slate-100 hover:bg-dora-50 text-dora-600 px-2.5 py-1 rounded font-medium border border-slate-200">詳情</a>
+                                <a href="mediaobject.html?filterclass=法寶&searchkey=隨意門" class="text-xs bg-slate-100 hover:bg-dora-50 text-dora-600 px-2.5 py-1 rounded font-medium border border-slate-200">詳情</a>
                             </td>
                         </tr>
                         <tr class="hover:bg-slate-50/80 transition-colors">
                             <td class="py-3.5 px-4 font-jp font-medium">タケコプター</td>
                             <td class="py-3.5 px-4 font-semibold text-dora-700">竹蜻蜓</td>
                             <td class="py-3.5 px-4 text-slate-500">直升機 / 竹蜻蜓</td>
-                            <td class="py-3.5 px-4 text-xs text-slate-500">單行本第1卷《來自未來的客仔》</td>
+                            <td class="py-3.5 px-4 text-xs text-slate-500">單行本第1卷《從未來之國而來》</td>
                             <td class="py-3.5 px-4 text-right">
-                                <a href="mediaobject.html?filterclass=法寶&q=竹蜻蜓" class="text-xs bg-slate-100 hover:bg-dora-50 text-dora-600 px-2.5 py-1 rounded font-medium border border-slate-200">詳情</a>
+                                <a href="mediaobject.html?filterclass=法寶&searchkey=竹蜻蜓" class="text-xs bg-slate-100 hover:bg-dora-50 text-dora-600 px-2.5 py-1 rounded font-medium border border-slate-200">詳情</a>
                             </td>
                         </tr>
                         <tr class="hover:bg-slate-50/80 transition-colors">
                             <td class="py-3.5 px-4 font-jp font-medium">タイムマシン</td>
                             <td class="py-3.5 px-4 font-semibold text-dora-700">時光機</td>
                             <td class="py-3.5 px-4 text-slate-500">時光機 / 時間機</td>
-                            <td class="py-3.5 px-4 text-xs text-slate-500">單行本第1卷《來自未來的客仔》</td>
+                            <td class="py-3.5 px-4 text-xs text-slate-500">單行本第1卷《從未來之國而來》</td>
                             <td class="py-3.5 px-4 text-right">
-                                <a href="mediaobject.html?filterclass=法寶&q=時光機" class="text-xs bg-slate-100 hover:bg-dora-50 text-dora-600 px-2.5 py-1 rounded font-medium border border-slate-200">詳情</a>
+                                <a href="mediaobject.html?filterclass=法寶&searchkey=時光機" class="text-xs bg-slate-100 hover:bg-dora-50 text-dora-600 px-2.5 py-1 rounded font-medium border border-slate-200">詳情</a>
                             </td>
                         </tr>
                         <tr class="hover:bg-slate-50/80 transition-colors">
@@ -560,7 +562,7 @@
                             <td class="py-3.5 px-4 text-slate-500">時光布 / 返老還童布</td>
                             <td class="py-3.5 px-4 text-xs text-slate-500">單行本第2卷《時間布》</td>
                             <td class="py-3.5 px-4 text-right">
-                                <a href="mediaobject.html?filterclass=法寶&q=時間布" class="text-xs bg-slate-100 hover:bg-dora-50 text-dora-600 px-2.5 py-1 rounded font-medium border border-slate-200">詳情</a>
+                                <a href="mediaobject.html?filterclass=法寶&searchkey=時間布" class="text-xs bg-slate-100 hover:bg-dora-50 text-dora-600 px-2.5 py-1 rounded font-medium border border-slate-200">詳情</a>
                             </td>
                         </tr>
                     </tbody>
@@ -650,7 +652,7 @@
         <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl overflow-hidden transform scale-95 transition-transform duration-200" id="searchModalBox">
             <div class="p-4 border-b border-slate-100 flex items-center space-x-3">
                 <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
-                <input type="text" id="quickSearchInput" placeholder="輸入關鍵字 (如: 隨意門, 大雄的恐龍, 1980)..." class="w-full text-base border-none focus:outline-none focus:ring-0 text-slate-800 placeholder-slate-400">
+                <input type="text" id="quickSearchInput" placeholder="輸入關鍵字 (如: 隨意門, 大雄的恐龍, 鬼角彈)..." class="w-full text-base border-none focus:outline-none focus:ring-0 text-slate-800 placeholder-slate-400">
                 <button id="closeSearchBtn" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
@@ -669,7 +671,7 @@
 
             <div class="p-6 text-center text-slate-400 text-sm" id="searchQuickResults">
                 <i class="fa-solid fa-keyboard text-2xl mb-2 text-slate-300"></i>
-                <p>請輸入關鍵字，按 <kbd class="px-1.5 py-0.5 text-xs bg-slate-100 border rounded font-mono">Enter</kbd> 進行全庫比對檢索</p>
+                <p>請輸入法寶角色人物關鍵字，按 <kbd class="px-1.5 py-0.5 text-xs bg-slate-100 border rounded font-mono">Enter</kbd> 進行全庫比對檢索</p>
             </div>
         </div>
     </div>

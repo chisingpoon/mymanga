@@ -661,10 +661,7 @@
         </footer>
     </div>
 
-
-    
-
-    <script>
+<script>
         const { createApp, reactive, watch, nextTick } = Vue;
         createApp({
             data() {
@@ -766,6 +763,7 @@
             methods: {
                 applyUrlParams() {
                     const params = new URLSearchParams(window.location.search);
+                    const keyword = params.get('searchkey');
                     const movieID = params.get('movieid');
                     const isbn = params.get('isbn');
                     const animeID = params.get('animeid');
@@ -774,25 +772,25 @@
                     console.log("Applying URL Filters...");
 
                     // 1. Apply Class Filter (e.g., ?filterclass=法寶)
-                    // This happens regardless of whether there is a search ID
                     if (fClass) {
                         this.selectedClass = fClass;
-                        // If your HTML has a secondary dropdown for "Type", 
-                        // handleClassChange usually resets that to 'All'
                         if (typeof this.handleClassChange === 'function') {
                             this.handleClassChange();
                         }
                     }
 
                     // 2. Determine Search Keyword & Open Tabs
-                    // We check all three ID types. If multiple exist, the last one found wins the search text.
                     let targetSearch = '';
+
+                    // Direct keyword search via 'q' parameter
+                    if (keyword) {
+                        targetSearch = keyword.trim();
+                    }
 
                     if (movieID) {
                         const movie = this.movieMeta.find(m => String(m['Media ID']).trim() === String(movieID).trim());
                         if (movie) {
                             targetSearch = movie['JP Title'];
-                            // Auto-switch cards to 'movie' tab
                             this.processedData.forEach(p => {
                                 if (p.movieAppearances.some(ma => String(ma['Movie ID']).trim() === String(movieID).trim())) {
                                     this.tabStates[p['Object ID']] = 'movie';
@@ -852,7 +850,7 @@
                 handleClassChange() { this.selectedType = 'All'; this.currentPage = 1; },
                 handleSearchInput(e) {
                     this.searchQuery = e.target.value;
-                    this.currentPage = 1; // Reset to page 1 when typing
+                    this.currentPage = 1;
                 }
             },
             computed: {
@@ -866,7 +864,6 @@
                     return all;
                 },
                 displayData() {
-                    // Fallback to empty array if processedData failed
                     if (!this.processedData || this.processedData.length === 0) return [];
 
                     const q = (this.searchQuery || '').toLowerCase().trim();
@@ -891,9 +888,10 @@
                         if (inManga) return true;
 
                         const inMovie = p.movieAppearances.some(m => m.movieTitle.toLowerCase().includes(q));
-                        const inAnime = p.animeAppearances.some(a => a.animeTitle.toLowerCase().includes(q));
+                        if (inMovie) return true;
 
-                        return inMovie || inAnime;
+                        const inAnime = p.animeAppearances.some(a => a.animeTitle.toLowerCase().includes(q));
+                        return inAnime;
                     });
                 },
                 totalPages() { return Math.ceil(this.displayData.length / this.itemsPerPage); },

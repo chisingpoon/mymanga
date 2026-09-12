@@ -503,7 +503,16 @@
                                             <span v-else class="text-slate-400">-</span>
                                         </td>
                                         <td class="py-3 px-3 text-slate-600 font-medium">{{ story.firstPublicationMagazine }}</td>
-                                        <td class="py-3 px-3 text-slate-600 font-medium">{{ story.firstPublicationIssue }}</td>
+                                        <!-- <td class="py-3 px-3 text-slate-600 font-medium">{{ story.firstPublicationIssue }}</td> -->
+                                        <td class="py-3 px-3">
+                                            <a v-if="story.originalWorkLink" 
+                                               @click.prevent="handleOriginalWorkClick(story.originalWorkLink)"
+                                               href="#" class="text-blue-600 hover:text-blue-800 hover:underline font-bold inline-flex items-center gap-1">
+                                                <span>{{ story.firstPublicationIssue }}</span>
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                            </a>
+                                            <span v-else class="text-slate-400">-</span>
+                                        </td>                                        
                                     </tr>
                                 </tbody>
                             </table>
@@ -663,12 +672,14 @@
                         ) : null;
                         
                         let collectionLink = null;
+                        let originalWorkLink = null; 
                         let collectionVol = '-';
                         let collectionCategory = '';
     
                         if (collectionRecord) {
                             collectionVol = collectionRecord.巻;
                             collectionCategory = collectionRecord.類;
+                            originalWorkLink = `originalWorks.html?workid=${collectionRecord.作品番}`;
                             if (this.region === 'HK') {
                                 const hkMatch = hkMap.get(collectionRecord.ISBN);
                                 if (hkMatch) collectionLink = `?region=HK&isbn=${hkMatch.ISBN}`;
@@ -685,7 +696,8 @@
                             firstPublicationIssue: masterRecord ? (masterRecord['初出掲載号'] || '-') : '-',
                             collectionVol, 
                             collectionCategory, 
-                            collectionLink
+                            collectionLink,
+                            originalWorkLink
                         };
                     }).sort((a, b) => (parseInt(a.收錄話) || 0) - (parseInt(b.收錄話) || 0));
             },
@@ -801,6 +813,11 @@
                 this.checkUrlParameters();
                 window.scrollTo(0,0);
             },
+            handleOriginalWorkClick(link) {
+                window.history.pushState({}, '', link);
+                this.checkUrlParameters();
+                window.scrollTo(0,0);
+            },            
             async forceRefresh() {
                 this.refreshing = true;
                 localStorage.removeItem('manga_db_v3');

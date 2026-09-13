@@ -327,25 +327,29 @@
 
                         <div class="flex-1 space-y-4">
                             <div>
-                                <span class="text-xs font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase tracking-wider">
-                                    {{ region === 'HK' ? '香港授權版' : '日本原畫刊物' }}
-                                </span>
-
-                                <button 
-                                    v-if="hasRegionMapping"
-                                    @click="toggleBookRegion" 
-                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition-all duration-150 cursor-pointer shadow-sm hover:opacity-85"
-                                    :class="region === 'HK' 
-                                        ? 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100' 
-                                        : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'">
+                                <div class="flex flex-col items-start gap-2 mb-2">
+                                    <!-- Row 1: Edition Label -->
+                                    <span class="inline-block text-xs font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase tracking-wider">
+                                        {{ region === 'HK' ? '香港授權版' : '日本原畫刊物' }}
+                                    </span>
+                            
+                                    <!-- Row 2: Region Toggle Button -->
+                                    <button 
+                                        v-if="hasRegionMapping"
+                                        @click="toggleBookRegion" 
+                                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition-all duration-150 cursor-pointer shadow-sm hover:opacity-85"
+                                        :class="region === 'HK' 
+                                            ? 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100' 
+                                            : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'">
+                                        
+                                        <!-- Swap Icon -->
+                                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                        </svg>
                                     
-                                    <!-- Swap Icon -->
-                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-                                    </svg>
-                                
-                                    <span>切換至 {{ region === 'HK' ? '日本原畫刊物' : '香港授權版' }}</span>
-                                </button>                        
+                                        <span>切換至 {{ region === 'HK' ? '日本原畫刊物' : '香港授權版' }}</span>
+                                    </button>  
+                                </div>                      
                                 
                                 <!-- Main Title & Volume Display -->
                                 <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">

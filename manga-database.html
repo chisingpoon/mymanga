@@ -503,7 +503,17 @@
                                             <span v-else class="text-slate-400">-</span>
                                         </td>
                                         <td class="py-3 px-3 text-slate-600 font-medium">{{ story.firstPublicationMagazine }}</td>
-                                        <td class="py-3 px-3 text-slate-600 font-medium">{{ story.firstPublicationIssue }}</td>
+                                        <!-- <td class="py-3 px-3 text-slate-600 font-medium">{{ story.firstPublicationIssue }}</td> -->
+                                        <td class="px-4 py-3 text-xs text-slate-300">
+                                            <template v-if="story.originalWorksLink && story.firstPublicationIssue !== '-'">
+                                                <a :href="story.originalWorksLink" class="text-blue-400 hover:text-blue-300 hover:underline">
+                                                    {{ story.firstPublicationIssue }}
+                                                </a>
+                                            </template>
+                                            <template v-else>
+                                                {{ story.firstPublicationIssue }}
+                                            </template>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -676,6 +686,8 @@
                                 collectionLink = `?region=JP&isbn=${collectionRecord.ISBN}`;
                             }
                         }
+
+                        const originalWorksLink = workNum ? `originalworks.html?workid=${encodeURIComponent(workNum)}` : null;
     
                         return {
                             ...c, 
@@ -683,6 +695,7 @@
                             master: masterRecord,
                             firstPublicationMagazine: masterRecord ? (masterRecord['初出掲載誌'] || '-') : '-',
                             firstPublicationIssue: masterRecord ? (masterRecord['初出掲載号'] || '-') : '-',
+                            originalWorksLink,
                             collectionVol, 
                             collectionCategory, 
                             collectionLink

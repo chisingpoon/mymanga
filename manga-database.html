@@ -756,16 +756,17 @@
             searchedBooks() {
                 const q = this.bookSearchQuery.toLowerCase().trim();
                 if (!q) return [];
-        
+            
                 const dataset = this.region === 'HK' ? this.activeHK : this.activeJP;
-        
+            
                 return dataset.filter(book => {
                     if (this.region === 'HK') {
+                        // HK books only use Title and Subtitle
                         const title = (book.Title || '').toLowerCase();
                         const subtitle = (book.Subtitle || '').toLowerCase();
-                        //const series = (book.類 || '').toLowerCase();
-                        return title.includes(q) || subtitle.includes(q) || series.includes(q);
+                        return title.includes(q) || subtitle.includes(q);
                     } else {
+                        // JP books use 系列, 類, 標題, and 副標題
                         const seriesGroup = (book.系列 || '').toLowerCase();
                         const category = (book.類 || '').toLowerCase();
                         const title = (book.標題 || '').toLowerCase();
@@ -999,25 +1000,23 @@
                 this.updateView('books', { series: name }); 
             },
             selectBook(book) { 
-
                 if (!book) return;
-
+            
                 this.selectedBook = book;
                 
-                // Ensure selectedSeries is populated (handles navigation from standalone book search)
+                // Set selectedSeries strictly to 'Title' for HK, and '類' for JP
                 this.selectedSeries = this.region === 'HK' 
-                    ? (book.類 || book.Title || '') 
-                    : (book.系列 || book.類 || book.標題 || '');
-            
-                this.view = 'detail';
+                    ? (book.Title || '') 
+                    : (book.類 || book.系列 || book.標題 || '');
             
                 const isbn = this.region === 'HK' ? book.ISBN : (book.ISBN || book.ISBN_JP);
-                if (isbn) {
-                    const newUrl = `?region=${this.region}&isbn=${isbn}`;
-                    window.history.pushState({ path: newUrl }, '', newUrl);
-                }
             
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                if (isbn) {
+                    this.updateView('detail', { isbn: isbn });
+                } else {
+                    this.view = 'detail';
+                    window.scrollTo(0,0);
+                }
             }
         },
         mounted() { 

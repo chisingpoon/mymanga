@@ -223,98 +223,100 @@
             </div>
 
             <div v-else>
-                <!-- ================= VIEW 0: SEARCH SELECTION ================= -->
-                <!-- Book Search Bar -->
-                <div class="mb-6">
-                    <input 
-                        type="text" 
-                        v-model="bookSearchQuery" 
-                        placeholder="搜尋書名、副標題或系列..." 
-                        class="w-full px-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white"
-                    />
-                </div>
-                
-                <!-- Search Results Table (Displays only when there is active search output) -->
-                <div v-if="bookSearchQuery.trim() !== ''" class="mb-8">
-                    <div class="flex items-center justify-between mb-3">
-                        <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300">
-                            搜尋結果 ({{ searchedBooks.length }})
-                        </h3>
-                        <button 
-                            @click="bookSearchQuery = ''" 
-                            class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                            清除搜尋
-                        </button>
-                    </div>
-                
-                    <!-- Results Table -->
-                    <div class="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm">
-                        <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300">
-                            <thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-700">
-                                <tr>
-                                    <th class="py-2.5 px-3">封面</th>
-                                    <th class="py-2.5 px-3">系列 / 類別</th>
-                                    <th class="py-2.5 px-3">書名 / 副標題</th>
-                                    <th class="py-2.5 px-3">ISBN</th>
-                                    <th class="py-2.5 px-3 text-right">操作</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 bg-white dark:bg-slate-900">
-                                <tr v-for="book in searchedBooks" :key="book.ISBN" class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                    <!-- Cover Thumbnail -->
-                                    <td class="py-2 px-3 w-12">
-                                        <img 
-                                            :src="book.Image || book.Cover || book['封面']" 
-                                            class="w-8 h-10 object-contain rounded bg-slate-100 dark:bg-slate-800" 
-                                            alt=""
-                                        />
-                                    </td>
-                
-                                    <!-- Series / Category -->
-                                    <td class="py-2 px-3 font-medium text-slate-500 dark:text-slate-400">
-                                        {{ region === 'HK' ? (book.類 || '-') : (book.系列 || book.類 || '-') }}
-                                    </td>
-                
-                                    <!-- Title & Subtitle -->
-                                    <td class="py-2 px-3">
-                                        <div class="font-bold text-slate-800 dark:text-slate-100">
-                                            {{ region === 'HK' ? book.Title : (book.標題 || book.類) }}
-                                            <span v-if="book.Volumn || book['巻'] || book['卷']" class="text-blue-600 ml-0.5">
-                                                (Vol.{{ book.Volumn || book['巻'] || book['卷'] }})
-                                            </span>
-                                        </div>
-                                        <div v-if="book.Subtitle || book['副標題'] || book['副題']" class="text-[11px] text-slate-400">
-                                            {{ book.Subtitle || book['副標題'] || book['副題'] }}
-                                        </div>
-                                    </td>
-                
-                                    <!-- ISBN -->
-                                    <td class="py-2 px-3 font-mono text-slate-400">
-                                        {{ book.ISBN || '-' }}
-                                    </td>
-                
-                                    <!-- Action Link to Detail View -->
-                                    <td class="py-2 px-3 text-right">
-                                        <button 
-                                            @click="selectBook(book)" 
-                                            class="px-2.5 py-1 text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 rounded transition-colors cursor-pointer">
-                                            查看詳情
-                                        </button>
-                                    </td>
-                                </tr>
-                
-                                <!-- Empty Search Result State -->
-                                <tr v-if="searchedBooks.length === 0">
-                                    <td colspan="5" class="py-6 text-center text-slate-400">
-                                        未有找到符合關鍵字的書籍
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+
                 <!-- ================= VIEW 1: SERIES SELECTION ================= -->
                 <div v-if="view === 'series'" class="space-y-6">
+                    <!-- ================= SEARCH SELECTION ================= -->
+                    <!-- Book Search Bar -->
+                    <div class="mb-6">
+                        <input 
+                            type="text" 
+                            v-model="bookSearchQuery" 
+                            placeholder="搜尋書名、副標題或系列..." 
+                            class="w-full px-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                        />
+                    </div>
+                    
+                    <!-- Search Results Table (Displays only when there is active search output) -->
+                    <div v-if="bookSearchQuery.trim() !== ''" class="mb-8">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300">
+                                搜尋結果 ({{ searchedBooks.length }})
+                            </h3>
+                            <button 
+                                @click="bookSearchQuery = ''" 
+                                class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                                清除搜尋
+                            </button>
+                        </div>
+                    
+                        <!-- Results Table -->
+                        <div class="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm">
+                            <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300">
+                                <thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 uppercase border-b border-slate-200 dark:border-slate-700">
+                                    <tr>
+                                        <th class="py-2.5 px-3">封面</th>
+                                        <th class="py-2.5 px-3">系列 / 類別</th>
+                                        <th class="py-2.5 px-3">書名 / 副標題</th>
+                                        <th class="py-2.5 px-3">ISBN</th>
+                                        <th class="py-2.5 px-3 text-right">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 bg-white dark:bg-slate-900">
+                                    <tr v-for="book in searchedBooks" :key="book.ISBN" class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                        <!-- Cover Thumbnail -->
+                                        <td class="py-2 px-3 w-12">
+                                            <img 
+                                                :src="book.Image || book.Cover || book['封面']" 
+                                                class="w-8 h-10 object-contain rounded bg-slate-100 dark:bg-slate-800" 
+                                                alt=""
+                                            />
+                                        </td>
+                    
+                                        <!-- Series / Category -->
+                                        <td class="py-2 px-3 font-medium text-slate-500 dark:text-slate-400">
+                                            {{ region === 'HK' ? (book.類 || '-') : (book.系列 || book.類 || '-') }}
+                                        </td>
+                    
+                                        <!-- Title & Subtitle -->
+                                        <td class="py-2 px-3">
+                                            <div class="font-bold text-slate-800 dark:text-slate-100">
+                                                {{ region === 'HK' ? book.Title : (book.標題 || book.類) }}
+                                                <span v-if="book.Volumn || book['巻'] || book['卷']" class="text-blue-600 ml-0.5">
+                                                    (Vol.{{ book.Volumn || book['巻'] || book['卷'] }})
+                                                </span>
+                                            </div>
+                                            <div v-if="book.Subtitle || book['副標題'] || book['副題']" class="text-[11px] text-slate-400">
+                                                {{ book.Subtitle || book['副標題'] || book['副題'] }}
+                                            </div>
+                                        </td>
+                    
+                                        <!-- ISBN -->
+                                        <td class="py-2 px-3 font-mono text-slate-400">
+                                            {{ book.ISBN || '-' }}
+                                        </td>
+                    
+                                        <!-- Action Link to Detail View -->
+                                        <td class="py-2 px-3 text-right">
+                                            <button 
+                                                @click="selectBook(book)" 
+                                                class="px-2.5 py-1 text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 rounded transition-colors cursor-pointer">
+                                                查看詳情
+                                            </button>
+                                        </td>
+                                    </tr>
+                    
+                                    <!-- Empty Search Result State -->
+                                    <tr v-if="searchedBooks.length === 0">
+                                        <td colspan="5" class="py-6 text-center text-slate-400">
+                                            未有找到符合關鍵字的書籍
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+               
                     <div class="relative max-w-2xl">
                         <input type="text" v-model="seriesSearchQuery" placeholder="篩選漫畫系列名稱 (如: 單行本, 大長編, 文庫版)..." 
                                class="w-full px-5 py-3.5 pl-12 bg-white border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm">

@@ -316,7 +316,7 @@
                             </table>
                         </div>
                     </div>
-               
+                    <!-- ================= Filter Series SELECTION ================= -->
                     <div class="relative max-w-2xl">
                         <input type="text" v-model="seriesSearchQuery" placeholder="篩選漫畫系列名稱 (如: 單行本, 大長編, 文庫版)..." 
                                class="w-full px-5 py-3.5 pl-12 bg-white border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm">
@@ -999,13 +999,24 @@
                 this.updateView('books', { series: name }); 
             },
             selectBook(book) { 
+
+                if (!book) return;
+
                 this.selectedBook = book;
+                
+                // Ensure selectedSeries is populated (handles navigation from standalone book search)
+                this.selectedSeries = this.region === 'HK' 
+                    ? (book.類 || book.Title || '') 
+                    : (book.系列 || book.類 || book.標題 || '');
+            
                 this.view = 'detail';
-                
+            
                 const isbn = this.region === 'HK' ? book.ISBN : (book.ISBN || book.ISBN_JP);
-                const newUrl = `?region=${this.region}&isbn=${isbn}`;
-                window.history.pushState({ path: newUrl }, '', newUrl);
-                
+                if (isbn) {
+                    const newUrl = `?region=${this.region}&isbn=${isbn}`;
+                    window.history.pushState({ path: newUrl }, '', newUrl);
+                }
+            
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         },

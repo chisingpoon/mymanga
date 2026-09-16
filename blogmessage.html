@@ -320,6 +320,23 @@
                         }
                     }
                 },
+
+                navigateToPost(targetPost) {
+                    if (!targetPost) return;
+                
+                    // Update URL query parameter without full page reload
+                    const postIdentifier = targetPost._computedId || targetPost.Title;
+                    const newUrl = `${window.location.pathname}?post=${encodeURIComponent(postIdentifier)}`;
+                    window.history.pushState({ path: newUrl }, '', newUrl);
+                
+                    // Switch active post and update dynamic meta tags
+                    this.post = targetPost;
+                    this.updateSocialMetaTags();
+                
+                    // Smooth scroll to top for the new article
+                    this.scrollToTop();
+                },
+                
                 updateSocialMetaTags() {
                     if (!this.post) return;
 
@@ -386,6 +403,12 @@
             },
             mounted() {
                 this.fetchPosts();
+                
+                // Listen for browser back/forward navigation
+                window.addEventListener('popstate', () => {
+                    this.loadPostFromUrl();
+                });
+
             }
         }).mount('#app');
     </script>
